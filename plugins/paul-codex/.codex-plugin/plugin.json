@@ -1,0 +1,41 @@
+{
+  "name": "paul-codex",
+  "version": "1.2.0-codex.1",
+  "description": "Codex port of PAUL, the Plan-Apply-Unify Loop for structured AI-assisted development.",
+  "author": {
+    "name": "Chris Kahler; Codex port by local workspace",
+    "email": "",
+    "url": "https://github.com/ChristopherKahler/paul"
+  },
+  "homepage": "https://github.com/ChristopherKahler/paul",
+  "repository": "https://github.com/ChristopherKahler/paul",
+  "license": "MIT",
+  "keywords": [
+    "paul",
+    "planning",
+    "structured-development",
+    "codex",
+    "plan-apply-unify"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "PAUL for Codex",
+    "shortDescription": "Plan-Apply-Unify workflow ported from Claude Code to Codex.",
+    "longDescription": "A Codex-native adaptation of PAUL. It preserves PAUL commands, templates, workflows, references, rules, and CARL domain files as local plugin resources while replacing Claude slash-command assumptions with Codex skill instructions.",
+    "developerName": "Chris Kahler",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/ChristopherKahler/paul",
+    "privacyPolicyURL": "",
+    "termsOfServiceURL": "",
+    "defaultPrompt": [
+      "Use PAUL to initialize this project.",
+      "Use PAUL to plan the next phase.",
+      "Use PAUL progress to show one next action."
+    ],
+    "brandColor": "#2563EB"
+  }
+}
