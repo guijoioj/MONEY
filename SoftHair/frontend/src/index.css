@@ -1,0 +1,386 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #5e6ad2;
+  --color-primary-light: #7170ff;
+  --color-primary-dark: #4e5ac2;
+  --color-background: #f7f8f8;
+  --color-surface: #ffffff;
+  --color-border: #e6e6e6;
+  --color-text: #1a1a1f;
+  --color-text-secondary: #606670;
+  --color-success: #27a644;
+  --color-warning: #f59e0b;
+  --color-error: #dc2626;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 16px rgba(94,106,210,0.12);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+.animate-slide-in {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+.bg-primary-50 { background-color: color-mix(in srgb, var(--color-primary) 10%, white); }
+.bg-primary-100 { background-color: color-mix(in srgb, var(--color-primary) 20%, white); }
+.bg-primary-200 { background-color: color-mix(in srgb, var(--color-primary) 30%, white); }
+.bg-primary-300 { background-color: color-mix(in srgb, var(--color-primary) 40%, white); }
+.bg-primary-400 { background-color: color-mix(in srgb, var(--color-primary) 50%, white); }
+.bg-primary-500 { background-color: var(--color-primary); }
+.bg-primary-600 { background-color: color-mix(in srgb, var(--color-primary) 85%, black); }
+.bg-primary-700 { background-color: color-mix(in srgb, var(--color-primary) 75%, black); }
+.bg-primary-800 { background-color: color-mix(in srgb, var(--color-primary) 65%, black); }
+.bg-primary-900 { background-color: color-mix(in srgb, var(--color-primary) 55%, black); }
+
+.text-primary-50 { color: color-mix(in srgb, var(--color-primary) 10%, black); }
+.text-primary-100 { color: color-mix(in srgb, var(--color-primary) 20%, black); }
+.text-primary-200 { color: color-mix(in srgb, var(--color-primary) 30%, black); }
+.text-primary-300 { color: color-mix(in srgb, var(--color-primary) 40%, black); }
+.text-primary-400 { color: color-mix(in srgb, var(--color-primary) 50%, black); }
+.text-primary-500 { color: var(--color-primary); }
+.text-primary-600 { color: color-mix(in srgb, var(--color-primary) 85%, black); }
+.text-primary-700 { color: color-mix(in srgb, var(--color-primary) 75%, black); }
+.text-primary-800 { color: color-mix(in srgb, var(--color-primary) 65%, black); }
+.text-primary-900 { color: color-mix(in srgb, var(--color-primary) 55%, black); }
+
+.border-primary-50 { border-color: color-mix(in srgb, var(--color-primary) 10%, white); }
+.border-primary-100 { border-color: color-mix(in srgb, var(--color-primary) 20%, white); }
+.border-primary-200 { border-color: color-mix(in srgb, var(--color-primary) 30%, white); }
+.border-primary-300 { border-color: color-mix(in srgb, var(--color-primary) 40%, white); }
+.border-primary-400 { border-color: color-mix(in srgb, var(--color-primary) 50%, white); }
+.border-primary-500 { border-color: var(--color-primary); }
+.border-primary-600 { border-color: color-mix(in srgb, var(--color-primary) 85%, black); }
+.border-primary-700 { border-color: color-mix(in srgb, var(--color-primary) 75%, black); }
+.border-primary-800 { border-color: color-mix(in srgb, var(--color-primary) 65%, black); }
+.border-primary-900 { border-color: color-mix(in srgb, var(--color-primary) 55%, black); }
+
+.ring-primary-500 { --tw-ring-color: var(--color-primary); }
+.focus\:ring-primary-500:focus { --tw-ring-color: var(--color-primary); }
+
+.hover\:bg-primary-50:hover { background-color: color-mix(in srgb, var(--color-primary) 10%, white); }
+.hover\:bg-primary-100:hover { background-color: color-mix(in srgb, var(--color-primary) 20%, white); }
+.hover\:bg-primary-700:hover { background-color: color-mix(in srgb, var(--color-primary) 75%, black); }
+.hover\:bg-primary-900:hover { background-color: color-mix(in srgb, var(--color-primary) 55%, black); }
+.hover\:text-primary-600:hover { color: color-mix(in srgb, var(--color-primary) 85%, black); }
+.hover\:text-primary-700:hover { color: color-mix(in srgb, var(--color-primary) 75%, black); }
+
+.bg-blue-50 { background-color: #eff6ff; }
+.bg-blue-100 { background-color: #dbeafe; }
+.bg-blue-200 { background-color: #bfdbfe; }
+.bg-red-50 { background-color: #fef2f2; }
+.bg-red-100 { background-color: #fee2e2; }
+.bg-red-200 { background-color: #fecaca; }
+.bg-green-50 { background-color: #ecfdf5; }
+.bg-green-100 { background-color: #d1fae5; }
+.bg-green-200 { background-color: #a7f3d0; }
+.bg-yellow-50 { background-color: #fffbeb; }
+.bg-yellow-100 { background-color: #fef3c7; }
+.bg-yellow-200 { background-color: #fde68a; }
+.bg-purple-50 { background-color: #faf5ff; }
+.bg-purple-100 { background-color: #f3e8ff; }
+.bg-purple-200 { background-color: #e9d5ff; }
+.bg-rose-50 { background-color: #fff1f2; }
+.bg-rose-100 { background-color: #ffe4e6; }
+.bg-rose-200 { background-color: #fecdd3; }
+.bg-fuchsia-50 { background-color: #fdf4ff; }
+.bg-fuchsia-100 { background-color: #fae8ff; }
+.bg-fuchsia-200 { background-color: #f5d0fe; }
+.bg-violet-50 { background-color: #f5f3ff; }
+.bg-violet-100 { background-color: #ede9fe; }
+.bg-violet-200 { background-color: #ddd6fe; }
+
+.bg-pink-50 { background-color: #fdf2f8; }
+.bg-pink-100 { background-color: #fce7f3; }
+.bg-pink-200 { background-color: #fbcfe8; }
+.bg-pink-300 { background-color: #f9a8d4; }
+.bg-pink-400 { background-color: #f472b6; }
+.bg-pink-500 { background-color: #ec4899; }
+
+.text-blue-600 { color: #2563eb; }
+.text-blue-700 { color: #1d4ed8; }
+.text-red-500 { color: #ef4444; }
+.text-red-600 { color: #dc2626; }
+.text-red-700 { color: #b91c1c; }
+.text-green-600 { color: #059669; }
+.text-green-700 { color: #047857; }
+.text-yellow-600 { color: #d97706; }
+.text-yellow-700 { color: #b45309; }
+.text-purple-600 { color: #9333ea; }
+.text-purple-700 { color: #7e22ce; }
+.text-purple-800 { color: #581c87; }
+.text-rose-600 { color: #e11d48; }
+.text-rose-700 { color: #be123c; }
+.text-rose-800 { color: #9f1239; }
+.text-fuchsia-600 { color: #c026d3; }
+.text-fuchsia-700 { color: #a21caf; }
+.text-fuchsia-800 { color: #86198f; }
+.text-violet-600 { color: #7c3aed; }
+.text-violet-700 { color: #6d28d9; }
+.text-violet-800 { color: #5b21b6; }
+.text-pink-600 { color: #db2777; }
+.text-pink-700 { color: #be185d; }
+.text-pink-800 { color: #9d174d; }
+
+.text-gray-400 { color: #9ca3af; }
+.text-gray-500 { color: #6b7280; }
+.text-gray-600 { color: #4b5563; }
+.text-gray-700 { color: #374151; }
+.text-gray-800 { color: #1f2937; }
+.text-gray-900 { color: #111827; }
+
+.border-blue-200 { border-color: #93c5fd; }
+.border-red-200 { border-color: #fca5a5; }
+.border-red-300 { border-color: #f87171; }
+.border-green-200 { border-color: #6ee7b7; }
+.border-yellow-200 { border-color: #fcd34d; }
+.border-yellow-300 { border-color: #fcd34d; }
+.border-pink-300 { border-color: #f9a8d4; }
+.border-pink-400 { border-color: #f472b6; }
+.border-purple-300 { border-color: #d8b4fe; }
+.border-purple-400 { border-color: #c084fc; }
+.border-rose-300 { border-color: #fda4af; }
+.border-rose-400 { border-color: #fb7185; }
+.border-fuchsia-300 { border-color: #f0abfc; }
+.border-fuchsia-400 { border-color: #e879f9; }
+.border-violet-300 { border-color: #c4b5fd; }
+.border-violet-400 { border-color: #a78bfa; }
+.border-gray-200 { border-color: #e5e7eb; }
+.border-gray-300 { border-color: #d1d5db; }
+
+.focus\:ring-blue-500:focus { --tw-ring-color: #3b82f6; }
+
+.placeholder-gray-400::placeholder { color: #9ca3af; }
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--color-background);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-light);
+}
+
+/* =====================================================
+   ELECTRON DESKTOP – aplicado apenas via file://
+   ===================================================== */
+
+.electron-app {
+  height: 100vh;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  font-size: 13.5px;
+  letter-spacing: 0.01em;
+}
+
+.electron-app body {
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f0f0f2;
+}
+
+.electron-app input,
+.electron-app textarea,
+.electron-app [contenteditable="true"],
+.electron-app td,
+.electron-app th,
+.electron-app label {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.electron-app ::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.electron-app ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.electron-app ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 10px;
+}
+.electron-app ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+/* ── Fix: dropdowns com position absolute/fixed no Electron ──
+   Cria novo stacking context isolado para evitar flickering    */
+.electron-app select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+  cursor: pointer;
+  will-change: auto;
+  transform: translateZ(0);
+}
+
+.electron-app .fixed.inset-0,
+.electron-app [role="menu"],
+.electron-app [role="listbox"] {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.electron-app .fixed.inset-0 {
+  z-index: 9999;
+}
+
+.electron-app nav .hidden.md\:flex {
+  display: none !important;
+}
+
+.electron-app nav > div > div.h-16 {
+  height: 44px;
+}
+.electron-app nav > div > div.h-16 h1 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.electron-app aside {
+  display: block !important;
+  width: 220px;
+  min-height: calc(100vh - 44px);
+  border-right: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: none !important;
+}
+
+.electron-app aside nav {
+  padding-top: 8px;
+}
+
+.electron-app aside a {
+  padding: 7px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  margin-bottom: 1px;
+}
+
+.electron-app aside a svg {
+  width: 16px;
+  height: 16px;
+}
+
+.electron-app .flex-1.p-6 {
+  padding: 16px 20px;
+  height: calc(100vh - 44px);
+  overflow-y: auto;
+}
+
+.electron-app .rounded-xl {
+  border-radius: 8px;
+}
+.electron-app .rounded-lg {
+  border-radius: 6px;
+}
+
+.electron-app .shadow-lg {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+.electron-app .shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.electron-app button {
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.12s ease, background-color 0.12s ease;
+}
+.electron-app button:active {
+  opacity: 0.75;
+}
+
+.electron-app input[type="text"],
+.electron-app input[type="email"],
+.electron-app input[type="password"],
+.electron-app input[type="number"],
+.electron-app input[type="date"],
+.electron-app input[type="time"],
+.electron-app textarea,
+.electron-app select {
+  border-radius: 5px;
+  font-size: 13px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.electron-app table th,
+.electron-app table td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 13px;
+}
+.electron-app table th {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.electron-app .fixed.inset-0.bg-black {
+  backdrop-filter: blur(2px);
+  background-color: rgba(0, 0, 0, 0.45) !important;
+}
+.electron-app .fixed.inset-0 > div {
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.electron-app button.md\:hidden {
+  display: none !important;
+}

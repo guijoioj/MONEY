@@ -1,0 +1,86 @@
+# clientes
+
+**Type:** `operational-domain`
+
+## Uso Para IA
+
+Use este hub para localizar os arquivos e conceitos mais relevantes sem abrir o vault inteiro.
+
+## Conceitos Principais
+
+- [[concepts/query|query]]
+- [[concepts/softhair|SoftHair]]
+- [[concepts/server|Server]]
+- [[concepts/authmiddleware|authMiddleware]]
+- [[concepts/salaoid|salaoId]]
+- [[concepts/basemodel|BaseModel]]
+- [[concepts/express|express]]
+- [[concepts/agendamento|Agendamento]]
+- [[concepts/profissionais|profissionais]]
+- [[concepts/router|router]]
+- [[concepts/produto|Produto]]
+- [[concepts/salaopage|SalaoPage]]
+- [[concepts/cliente|Cliente]]
+- [[concepts/mobile|Mobile]]
+- [[concepts/produtopage|ProdutoPage]]
+- [[concepts/queryone|queryOne]]
+- [[concepts/atendimentos|atendimentos]]
+- [[concepts/loading|Loading]]
+- [[concepts/salao|Salao]]
+- [[concepts/api|api]]
+
+## Arquivos Principais
+
+- [[desktop/root/readmemd|README.md]]
+- [[desktop/root/securitymd|SECURITY.md]]
+- [[desktop/backend/backend-src-middleware-appauthjs|backend/src/middleware/appAuth.js]]
+- [[desktop/backend/backend-src-models-agendamentojs|backend/src/models/Agendamento.js]]
+- [[desktop/backend/backend-src-models-atendimentojs|backend/src/models/Atendimento.js]]
+- [[desktop/backend/backend-src-models-clientejs|backend/src/models/Cliente.js]]
+- [[desktop/backend/backend-src-models-clienteappjs|backend/src/models/ClienteApp.js]]
+- [[desktop/backend/backend-src-models-clientehistoricojs|backend/src/models/ClienteHistorico.js]]
+- [[desktop/backend/backend-src-models-creditoclientejs|backend/src/models/CreditoCliente.js]]
+- [[desktop/backend/backend-src-models-fechamentojs|backend/src/models/Fechamento.js]]
+- [[desktop/backend/backend-src-models-notificacaojs|backend/src/models/Notificacao.js]]
+- [[desktop/backend/backend-src-models-pedidoagendamentojs|backend/src/models/PedidoAgendamento.js]]
+- [[desktop/backend/backend-src-models-pedidolojajs|backend/src/models/PedidoLoja.js]]
+- [[desktop/backend/backend-src-models-profissionaljs|backend/src/models/Profissional.js]]
+- [[desktop/backend/backend-src-models-salaojs|backend/src/models/Salao.js]]
+- [[desktop/backend/backend-src-models-userjs|backend/src/models/User.js]]
+- [[desktop/backend/backend-src-models-vendajs|backend/src/models/Venda.js]]
+- [[desktop/backend/backend-src-routes-agendamentosjs|backend/src/routes/agendamentos.js]]
+- [[desktop/backend/backend-src-routes-app-authjs|backend/src/routes/app/auth.js]]
+- [[desktop/backend/backend-src-routes-app-clientejs|backend/src/routes/app/cliente.js]]
+
+## Entidades Relevantes
+
+- [[server/entities/query-6626406b|query]]
+- [[mobile/entities/softhair-dffdf835|SoftHair]]
+- [[server/entities/server-05c102bd|Server]]
+- [[server/entities/authmiddleware-362f3741|authMiddleware]]
+- [[server/entities/salaoid-fdc8ed5e|salaoId]]
+- [[server/entities/basemodel-dcbd4b45|BaseModel]]
+- [[server/entities/express-7a42f4f0|express]]
+- [[mobile/entities/agendamento-7b2b491b|Agendamento]]
+- [[server/entities/profissionais-8bce2d1d|profissionais]]
+- [[mobile/entities/router-8b412a3e|router]]
+- [[mobile/entities/produto-70ba4953|Produto]]
+- [[mobile/entities/salaopage-64f79eaa|SalaoPage]]
+- [[server/entities/cliente-a14d3c03|Cliente]]
+- [[mobile/entities/mobile-a3efbae8|Mobile]]
+- [[mobile/entities/produtopage-469e00ca|ProdutoPage]]
+- [[server/entities/queryone-eec38591|queryOne]]
+- [[server/entities/atendimentos-0354854e|atendimentos]]
+- [[mobile/entities/loading-3c156a7a|Loading]]
+- [[mobile/entities/salao-8c91c03f|Salao]]
+- [[mobile/entities/api-13155c51|api]]
+- [[server/entities/clientes-4486d153|clientes]]
+- [[mobile/entities/clientelayout-534bd93a|ClienteLayout]]
+- [[mobile/entities/ionicons-11991975|Ionicons]]
+- [[mobile/entities/produtos-cf699a76|produtos]]
+- [[server/entities/queryrun-912ecbeb|queryRun]]
+- [[mobile/entities/button-a08d57bb|Button]]
+- [[server/entities/clienteservice-88122a3c|ClienteService]]
+- [[server/entities/database-query-b9128bba|Database Query]]
+- [[server/entities/profissional-d484a6bc|Profissional]]
+- [[mobile/entities/saloes-1926761d|saloes]]

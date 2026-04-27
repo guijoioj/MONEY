@@ -1,0 +1,12 @@
+/* Wasp Theme - Linhas do Graph View em amarelo/âmbar */
+.graph-view.color-line {
+  color: rgba(222, 168, 47, 0.6) !important;
+}
+
+.graph-view.color-fill-highlight {
+  color: rgb(222, 168, 47) !important;
+}
+
+.graph-view.color-line-highlight {
+  color: rgba(222, 168, 47, 1) !important;
+}

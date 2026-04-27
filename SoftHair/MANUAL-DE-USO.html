@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Uso - SoftHair</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            font-size: 11pt;
+        }
+        
+        .cover {
+            text-align: center;
+            padding: 60px 0;
+            border-bottom: 3px solid #db2777;
+            margin-bottom: 40px;
+        }
+        
+        .cover h1 {
+            color: #db2777;
+            font-size: 28pt;
+            margin-bottom: 10px;
+        }
+        
+        .cover h2 {
+            color: #666;
+            font-size: 14pt;
+            font-weight: normal;
+            margin-top: 0;
+        }
+        
+        .cover .version {
+            margin-top: 30px;
+            color: #999;
+            font-size: 10pt;
+        }
+        
+        .cover .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #db2777;
+            font-size: 16pt;
+            border-bottom: 2px solid #db2777;
+            padding-bottom: 8px;
+            margin-top: 30px;
+            page-break-after: avoid;
+        }
+        
+        h2 {
+            color: #444;
+            font-size: 13pt;
+            margin-top: 20px;
+            page-break-after: avoid;
+        }
+        
+        h3 {
+            color: #555;
+            font-size: 11pt;
+            margin-top: 15px;
+            page-break-after: avoid;
+        }
+        
+        .toc {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            padding: 5px 0;
+        }
+        
+        .toc a {
+            color: #db2777;
+            text-decoration: none;
+        }
+        
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', monospace;
+            font-size: 10pt;
+        }
+        
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 9pt;
+            page-break-inside: avoid;
+        }
+        
+        pre code {
+            padding: 0;
+            background: none;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background: #db2777;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        
+        li {
+            margin: 5px 0;
+        }
+        
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .section-number {
+            color: #db2777;
+            font-weight: bold;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #666;
+            font-size: 10pt;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="cover">
+    <div class="icon">✂</div>
+    <h1>SoftHair</h1>
+    <h2>Sistema de Administração de Salão de Beleza</h2>
+    <h2>Manual de Uso Completo</h2>
+    <div class="version">Versão 2.2.0 • 2026</div>
+</div>
+
+<!-- SUMÁRIO -->
+<div class="toc">
+    <h2 style="margin-top: 0;">Sumário</h2>
+    <ul>
+        <li><a href="#instalacao">1. Instalação e Inicialização</a></li>
+        <li><a href="#primeiro-acesso">2. Primeiro Acesso</a></li>
+        <li><a href="#menu">3. Menu Principal</a></li>
+        <li><a href="#dashboard">4. Dashboard</a></li>
+        <li><a href="#clientes">5. Gestão de Clientes</a></li>
+        <li><a href="#servicos">6. Gestão de Serviços</a></li>
+        <li><a href="#produtos">7. Gestão de Produtos</a></li>
+        <li><a href="#profissionais">8. Gestão de Profissionais</a></li>
+        <li><a href="#agenda">9. Agenda</a></li>
+        <li><a href="#atendimentos">10. Atendimentos</a></li>
+        <li><a href="#vendas">11. Vendas</a></li>
+        <li><a href="#fechamento">12. Fechamento</a></li>
+        <li><a href="#administrativo">13. Administrativo</a></li>
+        <li><a href="#notificacoes">14. Notificações</a></li>
+        <li><a href="#backup">15. Backup e Restauração</a></li>
+        <li><a href="#customizacao">16. Customização</a></li>
+        <li><a href="#configuracoes">17. Configurações</a></li>
+        <li><a href="#fidelidade">18. Programa de Fidelidade</a></li>
+        <li><a href="#electron">19. Aplicativo Desktop (Electron)</a></li>
+        <li><a href="#problemas">20. Solução de Problemas</a></li>
+    </ul>
+</div>
+
+<!-- 1. INSTALAÇÃO -->
+<h1 id="instalacao"><span class="section-number">1.</span> Instalação e Inicialização</h1>
+
+<h2>1.1 Requisitos do Sistema</h2>
+<ul>
+    <li>Node.js 18 ou superior</li>
+    <li>Sistema Operacional: Windows 10+, Linux, macOS 10.15+</li>
+    <li>Memória RAM: 4GB ou mais</li>
+    <li>Espaço em disco: 500MB</li>
+</ul>
+
+<h2>1.2 Modos de Uso</h2>
+
+<p>O SoftHair pode ser usado de duas formas:</p>
+
+<table>
+    <tr>
+        <th>Modo</th>
+        <th>Descrição</th>
+        <th>Melhor para</th>
+    </tr>
+    <tr>
+        <td><strong>App Desktop</strong> (Electron)</td>
+        <td>Abre como aplicativo nativo, sem navegador</td>
+        <td>Uso diário no computador do salão</td>
+    </tr>
+    <tr>
+        <td><strong>Navegador</strong> (Web)</td>
+        <td>Abre no browser via localhost:3000</td>
+        <td>Desenvolvimento, acesso remoto</td>
+    </tr>
+</table>
+
+<h2>1.3 Inicialização — App Desktop (Electron)</h2>
+
+<table>
+    <tr>
+        <th>Plataforma</th>
+        <th>Comando / Arquivo</th>
+        <th>Como Usar</th>
+    </tr>
+    <tr>
+        <td>Linux (CachyOS, Ubuntu, etc.)</td>
+        <td><code>npm start</code></td>
+        <td>Execute no terminal dentro da pasta SoftHair</td>
+    </tr>
+    <tr>
+        <td>Windows</td>
+        <td><code>npm start</code></td>
+        <td>Execute no terminal dentro da pasta SoftHair</td>
+    </tr>
+</table>
+
+<div class="info-box">
+    <strong>Funcionamento do Electron:</strong> O sistema inicia o backend automaticamente em segundo plano. A janela só abre após confirmar que o backend está pronto (health check). Não é necessário abrir nenhum navegador.
+</div>
+
+<h2>1.4 Inicialização — Modo Navegador (Web)</h2>
+
+<table>
+    <tr>
+        <th>Plataforma</th>
+        <th>Arquivo</th>
+        <th>Como Usar</th>
+    </tr>
+    <tr>
+        <td>Linux</td>
+        <td><code>iniciar-sistema.sh</code></td>
+        <td>Execute no terminal: <code>./iniciar-sistema.sh</code></td>
+    </tr>
+    <tr>
+        <td>Windows</td>
+        <td><code>iniciar-sistema.bat</code></td>
+        <td>Clique 2x no arquivo</td>
+    </tr>
+</table>
+
+<div class="info-box">
+    <strong>Acesse em:</strong> <code>http://localhost:3000</code> após o script informar que o sistema está pronto.
+</div>
+
+<h2>1.5 Inicialização Manual (Terminal)</h2>
+<pre><code># Terminal 1 - Backend
+cd backend
+npm install
+npm run dev
+
+# Terminal 2 - Frontend  
+cd frontend
+npm install
+npm run dev
+
+# Acesse: http://localhost:3000</code></pre>
+
+<h2>1.6 URLs do Sistema (modo navegador)</h2>
+<table>
+    <tr><th>Serviço</th><th>URL</th><th>Porta</th></tr>
+    <tr><td>Frontend</td><td>http://localhost:3000</td><td>3000</td></tr>
+    <tr><td>Backend (API)</td><td>http://localhost:3001</td><td>3001</td></tr>
+</table>
+
+<h2>1.7 Variáveis de Ambiente (Configurações Avançadas)</h2>
+<p>Crie o arquivo <code>backend/.env</code> baseado em <code>backend/.env.example</code> para personalizar:</p>
+<table>
+    <tr><th>Variável</th><th>Padrão</th><th>Descrição</th></tr>
+    <tr><td><code>JWT_SECRET</code></td><td>chave interna</td><td>Chave de segurança dos tokens. Altere em produção.</td></tr>
+    <tr><td><code>JWT_EXPIRES_IN</code></td><td><code>7d</code></td><td>Tempo de expiração do login</td></tr>
+    <tr><td><code>SOFTHAIR_ROOT_DIR</code></td><td>pasta do usuário</td><td>Caminho onde o banco de dados é armazenado</td></tr>
+    <tr><td><code>SOFTHAIR_DEFAULT_ADMIN_EMAIL</code></td><td><code>admin@salao.com</code></td><td>E-mail do administrador criado automaticamente</td></tr>
+    <tr><td><code>SOFTHAIR_DEFAULT_ADMIN_PASSWORD</code></td><td><code>admin123</code></td><td>Senha inicial do administrador</td></tr>
+</table>
+
+<div class="warning-box">
+    <strong>Segurança:</strong> Em ambiente de produção, defina um <code>JWT_SECRET</code> forte e único no arquivo <code>backend/.env</code>. Altere também a senha padrão após o primeiro acesso.
+</div>
+
+<!-- 2. PRIMEIRO ACESSO -->
+<h1 id="primeiro-acesso"><span class="section-number">2.</span> Primeiro Acesso</h1>
+
+<h2>2.1 Credenciais Padrão</h2>
+<div class="info-box">
+    <strong>E-mail:</strong> admin@salao.com<br>
+    <strong>Senha:</strong> admin123
+</div>
+
+<h2>2.2 Recuperação de Senha</h2>
+<ol>
+    <li>Na tela de login, clique em "Esqueceu a senha?"</li>
+    <li>Digite seu e-mail cadastrado</li>
+    <li>Acesse sua caixa de e-mail e clique no link de recuperação</li>
+    <li>Digite sua nova senha (mínimo 6 caracteres)</li>
+    <li>Faça login com a nova senha</li>
+</ol>
+
+<h2>2.3 Alterar Senha</h2>
+<ol>
+    <li>Faça login no sistema</li>
+    <li>Clique em "Configurações" no menu lateral</li>
+    <li>Na seção "Alterar Senha", preencha os campos</li>
+    <li>Clique em "Alterar Senha"</li>
+</ol>
+
+<!-- 3. MENU -->
+<h1 id="menu"><span class="section-number">3.</span> Menu Principal</h1>
+
+<table>
+    <tr>
+        <th>Módulo</th>
+        <th>Descrição</th>
+    </tr>
+    <tr><td>Dashboard</td><td>Visão geral com métricas e gráficos</td></tr>
+    <tr><td>Clientes</td><td>Cadastro e gestão de clientes com histórico</td></tr>
+    <tr><td>Serviços</td><td>Cadastro de serviços oferecidos</td></tr>
+    <tr><td>Produtos</td><td>Controle de estoque de produtos</td></tr>
+    <tr><td>Profissionais</td><td>Cadastro de funcionários</td></tr>
+    <tr><td>Agenda</td><td>Sistema de agendamento visual com auxiliares</td></tr>
+    <tr><td>Atendimentos</td><td>Registro de atendimentos realizados</td></tr>
+    <tr><td>Vendas</td><td>Registro de vendas de produtos</td></tr>
+    <tr><td>Fechamento</td><td>Encerramento de contas a receber</td></tr>
+    <tr><td>Administrativo</td><td>Financeiro, comissões, créditos e relatórios</td></tr>
+    <tr><td>Notificações</td><td>Alertas do sistema</td></tr>
+    <tr><td>Backup</td><td>Backup e restauração</td></tr>
+    <tr><td>Personalizar</td><td>Customização visual</td></tr>
+    <tr><td>Configurações</td><td>Configurações da conta</td></tr>
+</table>
+
+<!-- 4. DASHBOARD -->
+<h1 id="dashboard"><span class="section-number">4.</span> Dashboard</h1>
+
+<h2>4.1 Visão Geral</h2>
+<p>O Dashboard apresenta uma visão consolidada do negócio com métricas em tempo real.</p>
+
+<h2>4.2 Métricas Disponíveis</h2>
+<ul>
+    <li><strong>Total de Clientes:</strong> Número de clientes cadastrados</li>
+    <li><strong>Serviços do Dia:</strong> Atendimentos realizados hoje</li>
+    <li><strong>Receita do Dia:</strong> Valor faturado no dia</li>
+    <li><strong>Agendamentos:</strong> Próximos agendamentos</li>
+</ul>
+
+<h2>4.3 Gráficos</h2>
+<ul>
+    <li><strong>Serviços por Período:</strong> Evolução dos serviços ao longo do tempo</li>
+    <li><strong>Receita por Período:</strong> Gráfico de barras com receitas</li>
+    <li><strong>Serviços Mais Realizados:</strong> Ranking dos serviços mais populares</li>
+    <li><strong>Produtos Mais Vendidos:</strong> Ranking dos produtos mais comercializados</li>
+</ul>
+
+<h2>4.4 Próximos Agendamentos</h2>
+<p>Lista dos próximos agendamentos com informações resumidas.</p>
+
+<!-- 5. CLIENTES -->
+<h1 id="clientes"><span class="section-number">5.</span> Gestão de Clientes</h1>
+
+<h2>5.1 Cadastrar Novo Cliente</h2>
+<ol>
+    <li>Clique em "Clientes" no menu</li>
+    <li>Clique no botão "+ Novo Cliente"</li>
+    <li>Preencha os campos obrigatórios (*): Nome, Telefone</li>
+    <li>Campos opcionais: E-mail, CPF, Data de Nascimento, Endereço, Observações</li>
+    <li>Clique em "Salvar"</li>
+</ol>
+
+<h2>5.2 Buscar Clientes</h2>
+<p>Use a caixa de busca para encontrar clientes por nome, telefone ou e-mail.</p>
+
+<h2>5.3 Editar/Excluir Cliente</h2>
+<p>Na lista de clientes, use os ícones de edição (lápis) ou lixeira.</p>
+
+<h2>5.4 Perfil do Cliente (Histórico)</h2>
+<p>Clique no ícone de usuário ao lado do nome para ver o perfil completo:</p>
+<ul>
+    <li><strong>Atendimentos:</strong> Total de atendimentos realizados</li>
+    <li><strong>Compras:</strong> Total de compras de produtos</li>
+    <li><strong>Gasto em Serviços:</strong> Valor total gasto em serviços</li>
+    <li><strong>Gasto em Produtos:</strong> Valor total gasto em produtos</li>
+    <li><strong>Serviços Mais Frequentes:</strong> Ranking de serviços preferidos (atualizado após fechamentos)</li>
+    <li><strong>Produtos Mais Comprados:</strong> Ranking de produtos preferidos (atualizado após fechamentos)</li>
+    <li><strong>Profissionais Preferidos:</strong> Profissionais mais atendidos</li>
+    <li><strong>Últimos Atendimentos:</strong> Histórico recente com possibilidade de estorno</li>
+</ul>
+
+<div class="info-box">
+    <strong>Serviços e Produtos Favoritos:</strong> São calculados automaticamente a partir dos fechamentos realizados. Quanto mais fechamentos, mais preciso o ranking.
+</div>
+
+<h2>5.5 Estorno de Fechamento no Perfil</h2>
+<p>No perfil do cliente, cada fechamento possui um botão para estornar (ícone de giro). O estorno:</p>
+<ul>
+    <li>Reabre os itens fechados</li>
+    <li>Registra o motivo do estorno</li>
+    <li>Atualiza o histórico do cliente</li>
+</ul>
+
+<!-- 6. SERVIÇOS -->
+<h1 id="servicos"><span class="section-number">6.</span> Gestão de Serviços</h1>
+
+<h2>6.1 Cadastrar Novo Serviço</h2>
+<ol>
+    <li>Clique em "Serviços" no menu</li>
+    <li>Clique no botão "+ Novo Serviço"</li>
+    <li>Preencha os campos obrigatórios: Nome, Duração (minutos), Preço</li>
+    <li>Campos opcionais: Descrição, Categoria</li>
+    <li>Marque "Serviço Ativo" se aplicável</li>
+    <li>Clique em "Salvar"</li>
+</ol>
+
+<h2>6.2 Categorias Sugeridas</h2>
+<ul>
+    <li>Cabelo</li>
+    <li>Unhas</li>
+    <li>Estética</li>
+    <li>Maquiagem</li>
+    <li>Barba</li>
+    <li>Spa</li>
+</ul>
+
+<h2>6.3 Filtrar Serviços</h2>
+<p>Use o filtro de categoria para ver serviços específicos ou a busca por nome.</p>
+
+<!-- 7. PRODUTOS -->
+<h1 id="produtos"><span class="section-number">7.</span> Gestão de Produtos</h1>
+
+<h2>7.1 Cadastrar Novo Produto</h2>
+<ol>
+    <li>Clique em "Produtos" no menu</li>
+    <li>Clique no botão "+ Novo Produto"</li>
+    <li>Preencha os campos (Preço Venda é obrigatório)</li>
+    <li>Campos: Nome, Descrição, Marca, Categoria, Preço Custo, Preço Venda, Estoque, Estoque Mínimo</li>
+    <li>Marque "Produto Ativo" se aplicável</li>
+    <li>Clique em "Salvar"</li>
+</ol>
+
+<h2>7.2 Alertas de Estoque</h2>
+<div class="warning-box">
+    Quando o estoque atual for menor ou igual ao estoque mínimo,
+    o sistema exibirá um alerta vermelho.
+</div>
+
+<h2>7.3 Filtrar Produtos</h2>
+<ul>
+    <li>Filtro por categoria</li>
+    <li>Busca por nome, marca ou descrição</li>
+    <li>Botão "Estoque Baixo" para ver apenas produtos críticos</li>
+</ul>
+
+<!-- 8. PROFISSIONAIS -->
+<h1 id="profissionais"><span class="section-number">8.</span> Gestão de Profissionais</h1>
+
+<h2>8.1 Cadastrar Novo Profissional</h2>
+<ol>
+    <li>Clique em "Profissionais" no menu</li>
+    <li>Clique no botão "+ Novo Profissional"</li>
+    <li>Preencha os campos: Nome, Telefone, E-mail</li>
+    <li>Campos opcionais: Especialidades (ex: "Auxiliar de Cabelo", "Assistente de Manicure")</li>
+    <li>Marque "Profissional Ativo" se aplicável</li>
+    <li>Clique em "Salvar"</li>
+</ol>
+
+<div class="info-box">
+    <strong>Especialidades:</strong> Se o profissional tem "auxiliar" ou "assistente" na especialidade,
+    ele aparecerá na lista de auxiliares na Agenda e nos Atendimentos.
+</div>
+
+<h2>8.2 Comissões</h2>
+<p>O percentual de comissão é configurado na aba Administrativo > Comissões > Editar Comissões.</p>
+
+<!-- 9. AGENDA -->
+<h1 id="agenda"><span class="section-number">9.</span> Agenda</h1>
+
+<h2>9.1 Visão Geral</h2>
+<p>A Agenda exibe visualmente os agendamentos em formato de grade, permitindo ver a ocupação de cada profissional ao longo do dia.</p>
+
+<h2>9.2 Células e Cores</h2>
+<table>
+    <tr><th>Tipo</th><th>Cor</th><th>Descrição</th></tr>
+    <tr><td>Agendamento</td><td style="background: #fef9c3; color: #854d0e;">Amarelo</td><td>Agendamento criado</td></tr>
+    <tr><td>Confirmado</td><td style="background: #dcfce7; color: #166534;">Verde</td><td>Cliente confirmou</td></tr>
+    <tr><td>Cancelado</td><td style="background: #fee2e2; color: #991b1b;">Vermelho</td><td>Agendamento cancelado</td></tr>
+    <tr><td>Atendimento</td><td style="background: #f3e8ff; color: #6b21a8;">Roxo</td><td>Agendamento convertido em atendimento</td></tr>
+    <tr><td>Auxiliar</td><td style="background: #ccfbf1; color: #115e59;">Teal</td><td>Quando um profissional é auxiliar no atendimento</td></tr>
+</table>
+
+<h2>9.3 Criar Novo Agendamento</h2>
+<ol>
+    <li>Clique em "Agenda" no menu</li>
+    <li>Selecione a data desejada usando o seletor de calendário</li>
+    <li>Clique no botão "+ Novo Agendamento" ou clique em uma célula vazia</li>
+    <li>Preencha os campos:
+        <ul>
+            <li>Cliente * (selecione na lista)</li>
+            <li>Serviço * (selecione na lista)</li>
+            <li>Profissional * (selecione na lista)</li>
+            <li>Auxiliar (opcional - apenas profissionais com "auxiliar/assistente" na especialidade)</li>
+            <li>Data e Hora *</li>
+            <li>Status (Agendado, Confirmado ou Cancelado)</li>
+            <li>Observações</li>
+        </ul>
+    </li>
+    <li>Clique em "Salvar"</li>
+</ol>
+
+<h2>9.4 Dropdown de Auxiliar</h2>
+<div class="info-box">
+    O dropdown de auxiliares mostra apenas profissionais que possuem "auxiliar" ou "assistente" na especialidade.
+    Se nenhum profissional tiver essa especialidade, a lista ficará vazia.
+</div>
+
+<h2>9.5 Editar Agendamento</h2>
+<p>Clique em qualquer célula de agendamento para abrir o modal de edição:</p>
+<ul>
+    <li><strong>Células amarelas, verdes ou vermelhas:</strong> Abrem modal de edição de agendamento</li>
+    <li><strong>Células roxas (atendimentos):</strong> Abrem modal de visualização do agendamento original</li>
+    <li><strong>Campos desabilitados:</strong> Quando visualizando um atendimento convertido, os campos são apenas leitura</li>
+</ul>
+
+<h2>9.6 Converter para Atendimento</h2>
+<ol>
+    <li>Edite o agendamento desejado</li>
+    <li>Clique no botão "Converter p/ Atendimento"</li>
+    <li>Confirme a ação</li>
+    <li>O agendamento vira roxo na agenda</li>
+    <li>Você é redirecionado para a aba de Atendimentos</li>
+    <li>O modal de edição de atendimento é aberto automaticamente</li>
+</ol>
+
+<h2>9.7 Célula do Auxiliar</h2>
+<p>Quando um agendamento tem auxiliar:</p>
+<ul>
+    <li>O profissional principal aparece na coluna correspondente</li>
+    <li>O auxiliar aparece na coluna dele com cor teal</li>
+    <li>Exibe: "Auxiliar: [nome do auxiliar]" e abaixo o nome do cliente</li>
+</ul>
+
+<h2>9.8 Filtros</h2>
+<ul>
+    <li><strong>Tipo:</strong> Todos, Profissionais ou Assistentes</li>
+    <li><strong>Profissionais:</strong> Selecione quais profissionais ver na grade</li>
+    <li><strong>Status:</strong> Todos, Agendado, Confirmado, Cancelado ou Convertido</li>
+</ul>
+
+<!-- 10. ATENDIMENTOS -->
+<h1 id="atendimentos"><span class="section-number">10.</span> Atendimentos</h1>
+
+<h2>10.1 Registrar Novo Atendimento</h2>
+<ol>
+    <li>Clique em "Atendimentos" no menu</li>
+    <li>Clique no botão "+ Novo Atendimento"</li>
+    <li>Preencha os campos:
+        <ul>
+            <li>Profissional</li>
+            <li>Auxiliar (opcional)</li>
+            <li>Cliente</li>
+            <li>Data</li>
+        </ul>
+    </li>
+    <li>Adicione produtos usados (se houver)</li>
+    <li>Adicione serviços realizados</li>
+    <li>O sistema calcula os totais automaticamente</li>
+    <li>Clique em "Salvar Atendimento"</li>
+</ol>
+
+<div class="info-box">
+    <strong>Dropdown de Auxiliar:</strong> Mostra apenas profissionais com "auxiliar" ou "assistente" na especialidade.
+</div>
+
+<h2>10.2 Controle de Estoque</h2>
+<div class="success-box">
+    Ao registrar atendimento com produtos, o estoque é atualizado automaticamente.
+</div>
+
+<h2>10.3 Fluxo de Trabalho</h2>
+<ol>
+    <li>Registre o atendimento com produtos e serviços</li>
+    <li>Após finalizado, vá para "Fechamento"</li>
+    <li>Selecione o cliente e finalize o pagamento</li>
+    <li>O histórico é salvo automaticamente no perfil do cliente</li>
+    <li>Os serviços e produtos favoritos são atualizados</li>
+</ol>
+
+<!-- 11. VENDAS -->
+<h1 id="vendas"><span class="section-number">11.</span> Vendas</h1>
+
+<h2>11.1 Registrar Nova Venda</h2>
+<ol>
+    <li>Clique em "Vendas" no menu</li>
+    <li>Clique em "+ Nova Venda"</li>
+    <li>Selecione cliente (opcional - ou "Consumidor Final")</li>
+    <li>Selecione vendedor (opcional)</li>
+    <li>Escolha a data</li>
+    <li>Adicione produtos/serviços clicando neles</li>
+    <li>Ajuste quantidades se necessário</li>
+    <li>Clique em "Finalizar Venda"</li>
+</ol>
+
+<div class="info-box">
+    <strong>Nota:</strong> A forma de pagamento é definida no Fechamento, não na Venda.
+</div>
+
+<h2>11.2 Atualização Automática de Estoque</h2>
+<div class="success-box">
+    Ao registrar venda de produtos, o estoque é atualizado automaticamente.
+</div>
+
+<h2>11.3 Filtrar Vendas</h2>
+<ul>
+    <li>Por data específica</li>
+    <li>Por período (data início e fim)</li>
+</ul>
+
+<!-- 12. FECHAMENTO -->
+<h1 id="fechamento"><span class="section-number">12.</span> Fechamento</h1>
+
+<h2>12.1 O que é o Fechamento?</h2>
+<p>O Fechamento é onde você encerra as contas a receber de clientes, tanto de atendimentos quanto de vendas realizadas.</p>
+
+<h2>12.2 Como Funciona</h2>
+<ol>
+    <li>Registre atendimentos e vendas normalmente</li>
+    <li>Vá para a aba "Fechamento"</li>
+    <li>Busque por cliente ou profissional</li>
+    <li>O sistema lista todos os itens em aberto do cliente</li>
+    <li>Selecione o que deseja fechar (atendimentos e/ou vendas)</li>
+    <li>Escolha a forma de pagamento:
+        <ul>
+            <li>Dinheiro</li>
+            <li>PIX</li>
+            <li>Cartão de Crédito</li>
+            <li>Cartão de Débito</li>
+        </ul>
+    </li>
+    <li>Aplique desconto se necessário</li>
+    <li>Clique em "Confirmar Fechamento"</li>
+</ol>
+
+<h2>12.3 Regras Importantes</h2>
+<ul>
+    <li>Pode fechar apenas vendas (sem atendimento)</li>
+    <li>Pode fechar apenas atendimentos (sem venda)</li>
+    <li>Pode fechar ambos juntos</li>
+    <li>O histórico é salvo no perfil do cliente automaticamente</li>
+    <li>Serviços e produtos favoritos são atualizados no perfil</li>
+</ul>
+
+<h2>12.4 Filtros</h2>
+<ul>
+    <li>Por cliente: digite o nome na busca</li>
+    <li>Por profissional: selecione na lista</li>
+</ul>
+
+<!-- 13. ADMINISTRATIVO -->
+<h1 id="administrativo"><span class="section-number">13.</span> Administrativo</h1>
+
+<p>A aba Administrativo oferece ferramentas completas para gestão financeira, controle de caixas, comissões de profissionais, créditos e relatórios gerais.</p>
+
+<h2>13.1 Check Out (Controle de Caixas)</h2>
+<p>Gerencie todos os fechamentos realizados:</p>
+<ul>
+    <li>Selecione a data desejada</li>
+    <li>Veja o resumo: Total do Dia, Fechamentos, Atendimentos, Vendas</li>
+    <li>Tabela com cliente, data, profissional, valores e total</li>
+    <li><strong>Estorno:</strong> Clique no botão X para estornar um fechamento</li>
+</ul>
+
+<h3>Estorno de Fechamento</h3>
+<ul>
+    <li>Informe o motivo do estorno (obrigatório)</li>
+    <li>Clique em "Confirmar Estorno"</li>
+    <li>O fechamento é movido para a aba "Estornos"</li>
+</ul>
+
+<h2>13.2 Aba Estornos</h2>
+<p>Visualize todos os fechamentos estornados:</p>
+<ul>
+    <li>Lista de fechamentos com marcação de estorno</li>
+    <li>Motivo do estorno registrado</li>
+    <li>Data do estorno</li>
+</ul>
+
+<h2>13.3 Faturamento</h2>
+<p>Relatórios de faturamento por período:</p>
+<ul>
+    <li><strong>Analítico:</strong> Lista detalhada de fechamentos</li>
+    <li><strong>Por Profissional:</strong> Total faturado por profissional</li>
+    <li><strong>Por Forma de Pagamento:</strong> Agrupado por PIX, dinheiro, cartão</li>
+    <li><strong>Créditos na Casa:</strong> Gerenciamento de créditos dados aos clientes</li>
+</ul>
+
+<h3>Créditos na Casa</h3>
+<ul>
+    <li>Clique em "+ Novo Crédito" para adicionar</li>
+    <li>Selecione o cliente</li>
+    <li>Escolha "Crédito (+)" ou "Débito (-)"</li>
+    <li>Informe o valor e descrição</li>
+    <li>O saldo é atualizado automaticamente</li>
+</ul>
+
+<h2>13.4 Comissões</h2>
+<p>Controle de comissões dos profissionais:</p>
+
+<h3>A Pagar</h3>
+<ul>
+    <li>Lista de profissionais com valores a receber</li>
+    <li>Clique em "Pagar" para registrar o pagamento</li>
+    <li>O valor é movido para a aba "Pagas"</li>
+</ul>
+
+<h3>Pagas</h3>
+<ul>
+    <li>Registro de pagamentos realizados</li>
+    <li>Clique em "Estornar" para devolver o valor</li>
+</ul>
+
+<h3>Estorno de Pagamento</h3>
+<ul>
+    <li>Informe o motivo do estorno</li>
+    <li>O valor retorna para "A Pagar"</li>
+</ul>
+
+<h3>Editar Comissões</h3>
+<ul>
+    <li>Clique no botão de edição na lista de profissionais</li>
+    <li>Altere o percentual de comissão</li>
+    <li>Clique em "Salvar"</li>
+</ul>
+
+<h2>13.5 Relatórios Gerais</h2>
+<ul>
+    <li><strong>Agenda/Serviços:</strong> Lista de agendamentos do dia</li>
+    <li><strong>Aniversariantes:</strong> Clientes que fazem aniversário no mês</li>
+    <li><strong>Profissionais:</strong> Lista com dados de contato e comissão</li>
+    <li><strong>Estoque:</strong> Produtos com alerta de estoque baixo</li>
+    <li><strong>Tabela de Preços:</strong> Consulta rápida de preços</li>
+</ul>
+
+<!-- 14. NOTIFICAÇÕES -->
+<h1 id="notificacoes"><span class="section-number">14.</span> Notificações</h1>
+
+<h2>14.1 Visão Geral</h2>
+<p>A aba de Notificações exibe alertas e lembretes importantes do sistema.</p>
+
+<h2>14.2 Tipos de Notificação</h2>
+<ul>
+    <li><strong>Estoque Baixo:</strong> Produtos com estoque crítico</li>
+    <li><strong>Agendamentos do Dia:</strong> Lembretes de agendamentos</li>
+    <li><strong>Clientes Inativos:</strong> Clientes sem visitas recentes</li>
+    <li><strong>Sistema:</strong> Mensagens gerais</li>
+</ul>
+
+<h2>14.3 Marcar como Lida</h2>
+<p>Clique em uma notificação para marcá-la como lida. O badge no menu mostra a quantidade de não lidas.</p>
+
+<!-- 15. BACKUP -->
+<h1 id="backup"><span class="section-number">15.</span> Backup e Restauração</h1>
+
+<h2>15.1 Criar Backup Local</h2>
+<ol>
+    <li>Clique em "Backup" no menu</li>
+    <li>Clique em "Criar Novo Backup"</li>
+    <li>O arquivo JSON será salvo na pasta "backups"</li>
+</ol>
+
+<h2>15.2 Restaurar Backup</h2>
+<div class="warning-box">
+    Atenção: Restaurar um backup substituirá todos os dados atuais!
+</div>
+<ol>
+    <li>Clique em "Backup"</li>
+    <li>Selecione o backup desejado</li>
+    <li>Clique em "Restaurar"</li>
+    <li>Confirme a ação</li>
+</ol>
+
+<h2>15.3 Google Drive</h2>
+<ol>
+    <li>Configure as credenciais no arquivo .env</li>
+    <li>Clique em "Autorizar Google Drive"</li>
+    <li>Faça login na conta Google</li>
+    <li>Após conectar, sincronize backups automaticamente</li>
+</ol>
+
+<h2>15.4 Migrar para Outro Computador</h2>
+<ol>
+    <li>Exporte o backup JSON</li>
+    <li>Copie para o outro computador</li>
+    <li>Restaure o backup</li>
+</ol>
+
+<!-- 16. CUSTOMIZAÇÃO -->
+<h1 id="customizacao"><span class="section-number">16.</span> Customização do Sistema</h1>
+
+<h2>16.1 Alterar Cores</h2>
+<ol>
+    <li>Clique em "Personalizar" no menu lateral</li>
+    <li>Use as predefinições ou seletores de cor</li>
+    <li>Visualize no preview</li>
+    <li>Clique em "Salvar"</li>
+</ol>
+
+<h2>16.2 Paleta de Cores Disponíveis</h2>
+<table>
+    <tr><th>Cor</th><th>Uso</th></tr>
+    <tr><td>Primária</td><td>Barra superior, botões principais</td></tr>
+    <tr><td>Primária Clara</td><td>Destaques suaves</td></tr>
+    <tr><td>Secundária</td><td>Elementos secundários</td></tr>
+    <tr><td>Fundo</td><td>Fundo da página</td></tr>
+    <tr><td>Superfície</td><td>Cards, menus</td></tr>
+    <tr><td>Texto</td><td>Texto principal</td></tr>
+    <tr><td>Texto Secundário</td><td>Texto auxiliar</td></tr>
+</table>
+
+<h2>16.3 CSS Personalizado</h2>
+<pre><code>/* Exemplo de CSS customizado */
+.btn-gradient {
+  background: linear-gradient(45deg, 
+    var(--color-primary), 
+    var(--color-secondary));
+  border-radius: 20px;
+}</code></pre>
+
+<h2>16.4 Upload de Logo</h2>
+<ol>
+    <li>Clique na aba "Logo"</li>
+    <li>Arraste ou selecione uma imagem (PNG, JPG, SVG)</li>
+    <li>Tamanho máximo: 2MB</li>
+    <li>Clique em "Salvar"</li>
+</ol>
+
+<!-- 17. CONFIGURAÇÕES -->
+<h1 id="configuracoes"><span class="section-number">17.</span> Configurações</h1>
+
+<h2>17.1 Perfil</h2>
+<p>Visualize suas informações: Nome e E-mail.</p>
+
+<h2>17.2 Alterar Senha</h2>
+<ol>
+    <li>Clique em "Configurações"</li>
+    <li>Preencha: Senha Atual, Nova Senha, Confirmar</li>
+    <li>Clique em "Alterar Senha"</li>
+</ol>
+
+<h2>17.3 Conversão Automática</h2>
+<p>Quando ativado, converte automaticamente agendamentos em atendimento 5 minutos antes do horário marcado.</p>
+
+<h2>17.4 PIX</h2>
+<ol>
+    <li>Na seção "PIX", insira a chave PIX da conta (CPF, telefone, e-mail ou chave aleatória)</li>
+    <li>Clique em "Salvar Chave PIX"</li>
+    <li>Essa chave será exibida no Fechamento quando o cliente escolher PIX como forma de pagamento</li>
+</ol>
+
+<!-- 18. FIDELIDADE -->
+<h1 id="fidelidade"><span class="section-number">18.</span> Programa de Fidelidade</h1>
+
+<h2>18.1 Regras do Programa</h2>
+<ul>
+    <li><strong>5% de crédito</strong> em compras acima de R$100</li>
+    <li>Crédito pode ser usado como desconto em futuros atendimentos</li>
+    <li>Saldo acumulado aparece no perfil da cliente</li>
+</ul>
+
+<h2>18.2 Como Funciona</h2>
+<ol>
+    <li>Cliente faz um fechamento acima de R$100</li>
+    <li>Sistema gera automaticamente 5% do valor como crédito</li>
+    <li>Crédito é registrado na conta da cliente</li>
+    <li>Em futuros fechamentos, a cliente pode usar o crédito como desconto</li>
+</ol>
+
+<h2>18.3 Visualizar Crédito</h2>
+<p>No perfil da cliente (ícone de usuário):</p>
+<ul>
+    <li>Card "Crédito" mostra o saldo disponível</li>
+    <li>Exibe informação: "5% acima de R$100"</li>
+</ul>
+
+<h2>18.4 Usar Crédito no Fechamento</h2>
+<ol>
+    <li>Abra o módulo Fechamento</li>
+    <li>Selecione a cliente</li>
+    <li>Se houver crédito disponível, aparecerá uma caixa amarela</li>
+    <li>Marque "Usar crédito como desconto"</li>
+    <li>O crédito será convertido em desconto no valor total</li>
+    <li>Clique em "Confirmar Fechamento"</li>
+</ol>
+
+<div class="info-box">
+    <strong>Importante:</strong> O crédito usado édebitado da conta da cliente automaticamente após o fechamento.
+</div>
+
+<!-- 19. ELECTRON -->
+<h1 id="electron"><span class="section-number">19.</span> Aplicativo Desktop (Electron)</h1>
+
+<p>O SoftHair pode ser executado como um aplicativo desktop nativo usando o Electron. Neste modo, não é necessário abrir um navegador — o sistema abre diretamente como um programa instalado.</p>
+
+<h2>19.1 Como Abrir</h2>
+<pre><code>cd SoftHair
+npm start</code></pre>
+
+<div class="success-box">
+    O sistema inicia o backend automaticamente e aguarda ele estar pronto antes de abrir a janela. Nenhuma configuração adicional é necessária.
+</div>
+
+<h2>19.2 Menu Nativo Integrado</h2>
+<p>No modo Electron, a barra de menu do sistema operacional exibe todas as seções do SoftHair diretamente, sem necessidade de usar a barra lateral:</p>
+
+<table>
+    <tr><th>Item do Menu</th><th>Ação</th></tr>
+    <tr><td>Dashboard</td><td>Abre o painel principal</td></tr>
+    <tr><td>Agenda</td><td>Abre o sistema de agendamentos</td></tr>
+    <tr><td>Clientes</td><td>Abre a gestão de clientes</td></tr>
+    <tr><td>Atendimentos</td><td>Abre o registro de atendimentos</td></tr>
+    <tr><td>Vendas</td><td>Abre o módulo de vendas</td></tr>
+    <tr><td>Fechamento</td><td>Abre o fechamento de contas</td></tr>
+    <tr><td>Gestão &rsaquo; Profissionais</td><td>Gestão de profissionais</td></tr>
+    <tr><td>Gestão &rsaquo; Serviços e Produtos</td><td>Gestão de serviços e produtos</td></tr>
+    <tr><td>Sistema &rsaquo; Notificações</td><td>Central de notificações</td></tr>
+    <tr><td>Sistema &rsaquo; Backup</td><td>Backup e restauração</td></tr>
+    <tr><td>Sistema &rsaquo; Configurações</td><td>Configurações da conta</td></tr>
+    <tr><td>Sistema &rsaquo; Customização</td><td>Personalização visual</td></tr>
+    <tr><td>Sistema &rsaquo; Administrativo</td><td>Financeiro e relatórios</td></tr>
+    <tr><td>Editar</td><td>Desfazer, refazer, copiar, colar</td></tr>
+    <tr><td>Visualizar</td><td>Recarregar, tela cheia, zoom</td></tr>
+    <tr><td>Janela</td><td>Minimizar, fechar</td></tr>
+    <tr><td>Ajuda &rsaquo; Manual de Uso</td><td>Abre este manual</td></tr>
+</table>
+
+<h2>19.3 Visual Adaptado para Desktop</h2>
+<p>Quando executado via Electron, o sistema aplica automaticamente um visual otimizado para uso no computador:</p>
+
+<table>
+    <tr><th>Elemento</th><th>No Navegador</th><th>No Electron (Desktop)</th></tr>
+    <tr><td>Barra de topo</td><td>64px de altura</td><td>44px (mais compacta)</td></tr>
+    <tr><td>Links de navegação no topo</td><td>Visíveis</td><td>Ocultos (estão no menu nativo)</td></tr>
+    <tr><td>Botão de menu (hambúrguer)</td><td>Visível em telas menores</td><td>Oculto (não necessário no desktop)</td></tr>
+    <tr><td>Sidebar</td><td>256px, com toggle mobile</td><td>220px, sempre visível</td></tr>
+    <tr><td>Scrollbar</td><td>Padrão do SO (8px)</td><td>Fina e discreta (5px)</td></tr>
+    <tr><td>Modais</td><td>Fundo escuro simples</td><td>Fundo com desfoque suave (blur)</td></tr>
+    <tr><td>Tabelas</td><td>Espaçamento padrão</td><td>Compacto, cabeçalhos em maiúsculas</td></tr>
+    <tr><td>Dropdowns (select)</td><td>Aparência nativa do SO</td><td>Estilizado internamente (evita bugs de renderização)</td></tr>
+    <tr><td>Seleção de texto</td><td>Padrão</td><td>Desativada em elementos de interface (ativada em campos de digitação)</td></tr>
+</table>
+
+<div class="info-box">
+    <strong>Importante:</strong> Todas essas mudanças são exclusivas do Electron. O visual no navegador permanece idêntico ao original.
+</div>
+
+<h2>19.4 Banco de Dados no Electron</h2>
+<p>Quando o app é aberto via Electron, o banco de dados é armazenado na pasta de configuração do usuário:</p>
+<table>
+    <tr><th>Sistema Operacional</th><th>Caminho do banco de dados</th></tr>
+    <tr><td>Linux</td><td><code>~/.config/softHair/SoftHair/data/salao.db</code></td></tr>
+    <tr><td>Windows</td><td><code>%APPDATA%\softHair\SoftHair\data\salao.db</code></td></tr>
+</table>
+
+<div class="warning-box">
+    <strong>Atenção:</strong> O banco de dados do Electron fica em um caminho diferente do banco usado quando o sistema é iniciado manualmente (modo terminal/navegador sem definir <code>SOFTHAIR_ROOT_DIR</code>). Certifique-se de usar sempre o mesmo modo de inicialização para garantir que os dados sejam os mesmos.
+</div>
+
+<h2>19.5 Criação Automática do Administrador</h2>
+<p>Na primeira execução, se não houver nenhum usuário cadastrado, o sistema cria automaticamente o administrador padrão:</p>
+<div class="info-box">
+    <strong>E-mail:</strong> admin@salao.com<br>
+    <strong>Senha:</strong> admin123<br><br>
+    Isso acontece tanto no Electron quanto no modo navegador.
+</div>
+
+<h2>19.6 Atalhos no Modo Desktop</h2>
+<table>
+    <tr><th>Ação</th><th>Como fazer</th></tr>
+    <tr><td>Navegar para uma seção</td><td>Use o menu nativo na barra superior</td></tr>
+    <tr><td>Tela cheia</td><td>Menu Visualizar &rsaquo; Tela Cheia</td></tr>
+    <tr><td>Recarregar a página</td><td>Menu Visualizar &rsaquo; Recarregar</td></tr>
+    <tr><td>Zoom +/-</td><td>Menu Visualizar &rsaquo; Zoom + / Zoom -</td></tr>
+    <tr><td>Minimizar</td><td>Menu Janela &rsaquo; Minimizar</td></tr>
+    <tr><td>Sair do sistema</td><td>Menu SoftHair &rsaquo; Sair</td></tr>
+</table>
+
+<!-- 20. PROBLEMAS -->
+<h1 id="problemas"><span class="section-number">20.</span> Solução de Problemas</h1>
+
+<table>
+    <tr>
+        <th>Problema</th>
+        <th>Solução</th>
+    </tr>
+    <tr>
+        <td>Sistema não inicia</td>
+        <td>Verifique Node.js instalado e portas livres (3000, 3001)</td>
+    </tr>
+    <tr>
+        <td>Erro de login</td>
+        <td>Verifique e-mail/senha, use recuperação se necessário</td>
+    </tr>
+    <tr>
+        <td>Backup não funciona</td>
+        <td>Verifique permissões da pasta backups</td>
+    </tr>
+    <tr>
+        <td>Dados não aparecem</td>
+        <td>Verifique se estão marcados como "Ativo"</td>
+    </tr>
+    <tr>
+        <td>Erro ao fechar conta</td>
+        <td>Selecione pelo menos um atendimento ou venda</td>
+    </tr>
+    <tr>
+        <td>Histórico do cliente vazio</td>
+        <td>Realize fechamentos para que o histórico seja registrado</td>
+    </tr>
+    <tr>
+        <td>Serviços/Produtos favoritos não atualizam</td>
+        <td>Os favoritos são calculados a partir dos fechamentos realizados</td>
+    </tr>
+    <tr>
+        <td>Dropdown de auxiliares vazio</td>
+        <td>Nenhum profissional tem "auxiliar" ou "assistente" na especialidade</td>
+    </tr>
+    <tr>
+        <td>Tela branca ao abrir o Electron</td>
+        <td>Rebuild do frontend necessário: execute <code>npm run build:frontend</code> na pasta SoftHair</td>
+    </tr>
+    <tr>
+        <td>Login não redireciona (fica na tela de login)</td>
+        <td>Certifique-se de abrir via <code>npm start</code> (Electron) ou <code>iniciar-sistema.sh</code>. Se o problema persistir, faça o rebuild do frontend.</td>
+    </tr>
+    <tr>
+        <td>Janela do Electron abre mas não carrega dados</td>
+        <td>O backend ainda não estava pronto. O sistema aguarda automaticamente, mas em computadores lentos pode ser necessário aguardar alguns segundos antes de fazer login.</td>
+    </tr>
+    <tr>
+        <td>Electron não encontra o Node.js</td>
+        <td>Verifique se o Node.js está instalado e acessível no PATH do sistema. Execute <code>node --version</code> no terminal para confirmar.</td>
+    </tr>
+    <tr>
+        <td>Dados do Electron não aparecem no navegador (ou vice-versa)</td>
+        <td>Electron e o modo navegador usam bancos de dados em caminhos diferentes se <code>SOFTHAIR_ROOT_DIR</code> não for definido. Use sempre o mesmo modo de inicialização ou defina <code>SOFTHAIR_ROOT_DIR</code> no <code>backend/.env</code>.</td>
+    </tr>
+    <tr>
+        <td>Admin padrão não existe / não consegue fazer login</td>
+        <td>O sistema cria o admin automaticamente na primeira execução. Se o banco foi criado sem o admin, reinicie o sistema — ele detectará a ausência e criará o usuário <code>admin@salao.com</code> / <code>admin123</code> automaticamente.</td>
+    </tr>
+</table>
+
+<!-- RODAPÉ -->
+<div class="footer">
+    <p><strong>SoftHair - Sistema de Administração de Salão de Beleza</strong></p>
+    <p>Versão 2.2.0 • Atualizado em Abril de 2026</p>
+</div>
+
+</body>
+</html>

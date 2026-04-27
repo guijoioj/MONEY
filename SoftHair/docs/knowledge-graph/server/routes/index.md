@@ -1,0 +1,18 @@
+# Server routes
+
+- [[server/routes/src-routes-agendamentosjs|src-routes-agendamentosjs]]
+- [[server/routes/src-routes-atendimentosjs|src-routes-atendimentosjs]]
+- [[server/routes/src-routes-authjs|src-routes-authjs]]
+- [[server/routes/src-routes-backupjs|src-routes-backupjs]]
+- [[server/routes/src-routes-clientesjs|src-routes-clientesjs]]
+- [[server/routes/src-routes-comissoesjs|src-routes-comissoesjs]]
+- [[server/routes/src-routes-creditosjs|src-routes-creditosjs]]
+- [[server/routes/src-routes-fechamentosjs|src-routes-fechamentosjs]]
+- [[server/routes/src-routes-healthjs|src-routes-healthjs]]
+- [[server/routes/src-routes-notificacoesjs|src-routes-notificacoesjs]]
+- [[server/routes/src-routes-produtosjs|src-routes-produtosjs]]
+- [[server/routes/src-routes-profissionaisjs|src-routes-profissionaisjs]]
+- [[server/routes/src-routes-saloesjs|src-routes-saloesjs]]
+- [[server/routes/src-routes-servicosjs|src-routes-servicosjs]]
+- [[server/routes/src-routes-syncjs|src-routes-syncjs]]
+- [[server/routes/src-routes-vendasjs|src-routes-vendasjs]]

@@ -1,0 +1,18 @@
+# Server services
+
+- [[server/services/src-services-agendamentoservicejs|src-services-agendamentoservicejs]]
+- [[server/services/src-services-atendimentoservicejs|src-services-atendimentoservicejs]]
+- [[server/services/src-services-authservicejs|src-services-authservicejs]]
+- [[server/services/src-services-backupservicejs|src-services-backupservicejs]]
+- [[server/services/src-services-clienteservicejs|src-services-clienteservicejs]]
+- [[server/services/src-services-comissaoservicejs|src-services-comissaoservicejs]]
+- [[server/services/src-services-creditoservicejs|src-services-creditoservicejs]]
+- [[server/services/src-services-fechamentoservicejs|src-services-fechamentoservicejs]]
+- [[server/services/src-services-indexjs|src-services-indexjs]]
+- [[server/services/src-services-notificacaoservicejs|src-services-notificacaoservicejs]]
+- [[server/services/src-services-produtoservicejs|src-services-produtoservicejs]]
+- [[server/services/src-services-profissionalservicejs|src-services-profissionalservicejs]]
+- [[server/services/src-services-securityinitservicejs|src-services-securityinitservicejs]]
+- [[server/services/src-services-servicoservicejs|src-services-servicoservicejs]]
+- [[server/services/src-services-vendaservicejs|src-services-vendaservicejs]]
+- [[server/services/src-services-websocketservicejs|src-services-websocketservicejs]]

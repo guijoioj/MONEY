@@ -1,0 +1,86 @@
+# database
+
+**Type:** `operational-domain`
+
+## Uso Para IA
+
+Use este hub para localizar os arquivos e conceitos mais relevantes sem abrir o vault inteiro.
+
+## Conceitos Principais
+
+- [[concepts/query|query]]
+- [[concepts/softhair|SoftHair]]
+- [[concepts/server|Server]]
+- [[concepts/authmiddleware|authMiddleware]]
+- [[concepts/salaoid|salaoId]]
+- [[concepts/basemodel|BaseModel]]
+- [[concepts/servicos|servicos]]
+- [[concepts/express|express]]
+- [[concepts/atendimento|Atendimento]]
+- [[concepts/soft-hair-server|SOFT HAIR SERVER]]
+- [[concepts/authservice|AuthService]]
+- [[concepts/database|Database]]
+- [[concepts/profissionais|profissionais]]
+- [[concepts/router|router]]
+- [[concepts/produto|Produto]]
+- [[concepts/cliente|Cliente]]
+- [[concepts/mobile|Mobile]]
+- [[concepts/queryone|queryOne]]
+- [[concepts/venda|Venda]]
+- [[concepts/agendamentos|agendamentos]]
+
+## Arquivos Principais
+
+- [[desktop/root/readmemd|README.md]]
+- [[desktop/root/securitymd|SECURITY.md]]
+- [[desktop/backend/backend-src-config-apppathsjs|backend/src/config/appPaths.js]]
+- [[desktop/backend/backend-src-config-databasejs|backend/src/config/database.js]]
+- [[desktop/backend/backend-src-config-initdbjs|backend/src/config/initDb.js]]
+- [[desktop/backend/backend-src-middleware-appauthjs|backend/src/middleware/appAuth.js]]
+- [[desktop/backend/backend-src-models-agendamentojs|backend/src/models/Agendamento.js]]
+- [[desktop/backend/backend-src-models-atendimentojs|backend/src/models/Atendimento.js]]
+- [[desktop/backend/backend-src-models-clientejs|backend/src/models/Cliente.js]]
+- [[desktop/backend/backend-src-models-clienteappjs|backend/src/models/ClienteApp.js]]
+- [[desktop/backend/backend-src-models-clientehistoricojs|backend/src/models/ClienteHistorico.js]]
+- [[desktop/backend/backend-src-models-comissaoestornojs|backend/src/models/ComissaoEstorno.js]]
+- [[desktop/backend/backend-src-models-comissaopagajs|backend/src/models/ComissaoPaga.js]]
+- [[desktop/backend/backend-src-models-creditoclientejs|backend/src/models/CreditoCliente.js]]
+- [[desktop/backend/backend-src-models-fechamentojs|backend/src/models/Fechamento.js]]
+- [[desktop/backend/backend-src-models-notificacaojs|backend/src/models/Notificacao.js]]
+- [[desktop/backend/backend-src-models-pedidoagendamentojs|backend/src/models/PedidoAgendamento.js]]
+- [[desktop/backend/backend-src-models-pedidolojajs|backend/src/models/PedidoLoja.js]]
+- [[desktop/backend/backend-src-models-pontoregistrojs|backend/src/models/PontoRegistro.js]]
+- [[desktop/backend/backend-src-models-produtojs|backend/src/models/Produto.js]]
+
+## Entidades Relevantes
+
+- [[server/entities/query-6626406b|query]]
+- [[mobile/entities/softhair-dffdf835|SoftHair]]
+- [[server/entities/server-05c102bd|Server]]
+- [[server/entities/authmiddleware-362f3741|authMiddleware]]
+- [[server/entities/salaoid-fdc8ed5e|salaoId]]
+- [[server/entities/basemodel-dcbd4b45|BaseModel]]
+- [[server/entities/express-7a42f4f0|express]]
+- [[server/entities/servicos-26bbffed|servicos]]
+- [[mobile/entities/atendimento-ca334518|Atendimento]]
+- [[server/entities/soft-hair-server-213a3f56|SOFT-HAIR-SERVER]]
+- [[server/entities/authservice-ad9c3659|AuthService]]
+- [[server/entities/database-da68fd18|Database]]
+- [[server/entities/profissionais-8bce2d1d|profissionais]]
+- [[mobile/entities/router-8b412a3e|router]]
+- [[mobile/entities/produto-70ba4953|Produto]]
+- [[server/entities/cliente-a14d3c03|Cliente]]
+- [[mobile/entities/mobile-a3efbae8|Mobile]]
+- [[server/entities/queryone-eec38591|queryOne]]
+- [[server/entities/venda-09d9107c|Venda]]
+- [[server/entities/agendamentos-514236d9|agendamentos]]
+- [[server/entities/atendimentos-0354854e|atendimentos]]
+- [[mobile/entities/salao-8c91c03f|Salao]]
+- [[mobile/entities/api-13155c51|api]]
+- [[server/entities/clientes-4486d153|clientes]]
+- [[server/entities/backupjs-f5dbd552|backup.js]]
+- [[server/entities/saloes-3362f0d7|Saloes]]
+- [[desktop/entities/database-pool-15fd9cac|Database Pool]]
+- [[mobile/entities/ionicons-11991975|Ionicons]]
+- [[mobile/entities/produtos-cf699a76|produtos]]
+- [[server/entities/queryrun-912ecbeb|queryRun]]

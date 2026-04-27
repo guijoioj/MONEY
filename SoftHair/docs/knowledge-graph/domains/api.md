@@ -1,0 +1,86 @@
+# api
+
+**Type:** `operational-domain`
+
+## Uso Para IA
+
+Use este hub para localizar os arquivos e conceitos mais relevantes sem abrir o vault inteiro.
+
+## Conceitos Principais
+
+- [[concepts/query|query]]
+- [[concepts/softhair|SoftHair]]
+- [[concepts/server|Server]]
+- [[concepts/authmiddleware|authMiddleware]]
+- [[concepts/salaoid|salaoId]]
+- [[concepts/agendamentoservice|AgendamentoService]]
+- [[concepts/basemodel|BaseModel]]
+- [[concepts/servicos|servicos]]
+- [[concepts/softhair-server|SoftHair Server]]
+- [[concepts/express|express]]
+- [[concepts/atendimento|Atendimento]]
+- [[concepts/soft-hair-server|SOFT HAIR SERVER]]
+- [[concepts/agendamento|Agendamento]]
+- [[concepts/nodejs-express|Node.js Express]]
+- [[concepts/authservice|AuthService]]
+- [[concepts/database|Database]]
+- [[concepts/profissionais|profissionais]]
+- [[concepts/router|router]]
+- [[concepts/produto|Produto]]
+- [[concepts/profissionalappmiddleware|profissionalAppMiddleware]]
+
+## Arquivos Principais
+
+- [[desktop/root/readmemd|README.md]]
+- [[desktop/root/securitymd|SECURITY.md]]
+- [[desktop/backend/backend-src-middleware-appauthjs|backend/src/middleware/appAuth.js]]
+- [[desktop/backend/backend-src-middleware-authjs|backend/src/middleware/auth.js]]
+- [[desktop/backend/backend-src-middleware-securityjs|backend/src/middleware/security.js]]
+- [[desktop/backend/backend-src-middleware-validatejs|backend/src/middleware/validate.js]]
+- [[desktop/backend/backend-src-routes-agendamentosjs|backend/src/routes/agendamentos.js]]
+- [[desktop/backend/backend-src-routes-app-authjs|backend/src/routes/app/auth.js]]
+- [[desktop/backend/backend-src-routes-app-clientejs|backend/src/routes/app/cliente.js]]
+- [[desktop/backend/backend-src-routes-app-lojajs|backend/src/routes/app/loja.js]]
+- [[desktop/backend/backend-src-routes-app-pedidosjs|backend/src/routes/app/pedidos.js]]
+- [[desktop/backend/backend-src-routes-app-profissionaljs|backend/src/routes/app/profissional.js]]
+- [[desktop/backend/backend-src-routes-app-securityjs|backend/src/routes/app/security.js]]
+- [[desktop/backend/backend-src-routes-atendimentosjs|backend/src/routes/atendimentos.js]]
+- [[desktop/backend/backend-src-routes-authjs|backend/src/routes/auth.js]]
+- [[desktop/backend/backend-src-routes-backupjs|backend/src/routes/backup.js]]
+- [[desktop/backend/backend-src-routes-clientesjs|backend/src/routes/clientes.js]]
+- [[desktop/backend/backend-src-routes-comissoesjs|backend/src/routes/comissoes.js]]
+- [[desktop/backend/backend-src-routes-configuracoesjs|backend/src/routes/configuracoes.js]]
+- [[desktop/backend/backend-src-routes-creditosjs|backend/src/routes/creditos.js]]
+
+## Entidades Relevantes
+
+- [[server/entities/query-6626406b|query]]
+- [[mobile/entities/softhair-dffdf835|SoftHair]]
+- [[server/entities/server-05c102bd|Server]]
+- [[server/entities/authmiddleware-362f3741|authMiddleware]]
+- [[server/entities/salaoid-fdc8ed5e|salaoId]]
+- [[server/entities/agendamentoservice-f8939e8e|AgendamentoService]]
+- [[server/entities/basemodel-dcbd4b45|BaseModel]]
+- [[server/entities/express-7a42f4f0|express]]
+- [[server/entities/servicos-26bbffed|servicos]]
+- [[server/entities/softhair-server-e8b7f717|SoftHair Server]]
+- [[mobile/entities/atendimento-ca334518|Atendimento]]
+- [[server/entities/soft-hair-server-213a3f56|SOFT-HAIR-SERVER]]
+- [[mobile/entities/agendamento-7b2b491b|Agendamento]]
+- [[desktop/entities/nodejs-express-eabb02d2|Node.js/Express]]
+- [[server/entities/authservice-ad9c3659|AuthService]]
+- [[server/entities/database-da68fd18|Database]]
+- [[server/entities/profissionais-8bce2d1d|profissionais]]
+- [[mobile/entities/router-8b412a3e|router]]
+- [[mobile/entities/produto-70ba4953|Produto]]
+- [[desktop/entities/profissionalappmiddleware-16d447b0|profissionalAppMiddleware]]
+- [[desktop/entities/appauthmiddleware-59f35c8e|appAuthMiddleware]]
+- [[server/entities/cliente-a14d3c03|Cliente]]
+- [[server/entities/src-routes-syncjs-2aefdada|src/routes/sync.js]]
+- [[server/entities/queryone-eec38591|queryOne]]
+- [[server/entities/venda-09d9107c|Venda]]
+- [[server/entities/agendamentos-514236d9|agendamentos]]
+- [[server/entities/atendimentos-0354854e|atendimentos]]
+- [[mobile/entities/salao-8c91c03f|Salao]]
+- [[server/entities/src-routes-comissoesjs-8df1af9a|src/routes/comissoes.js]]
+- [[server/entities/vendaservice-b56a50d5|VendaService]]

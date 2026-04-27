@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "SoftHair Mobile (Expo)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["expo", "start"],
+      "port": 8081
+    },
+    {
+      "name": "SoftHair Backend (dev)",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/home/ogejota/MONEY/SoftHair/backend/src/server.js"],
+      "port": 3001
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "SoftHair",
+    "slug": "softhair-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#db2777"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.softhair.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#db2777"
+      },
+      "package": "com.softhair.mobile"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "color": "#db2777"
+        }
+      ],
+      "expo-image-picker",
+      "expo-asset"
+    ],
+    "scheme": "softhair",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

@@ -1,0 +1,9 @@
+rag_storage/
+.venv/
+.index_manifest.json
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+dist/
+*.egg-info/

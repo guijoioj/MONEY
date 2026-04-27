@@ -1,0 +1,838 @@
+================================================================================
+               SOFTHAIR - SISTEMA DE ADMINISTRAÇÃO DE SALÃO DE BELEZA
+                          MANUAL DE USO COMPLETO
+================================================================================
+
+VERSÃO: 2.2.0
+DATA: 2026
+
+================================================================================
+                                ÍNDICE
+================================================================================
+
+1.  INSTALAÇÃO E INICIALIZAÇÃO
+2.  PRIMEIRO ACESSO
+3.  MENU PRINCIPAL
+4.  DASHBOARD
+5.  GESTÃO DE CLIENTES
+6.  GESTÃO DE SERVIÇOS
+7.  GESTÃO DE PRODUTOS
+8.  GESTÃO DE PROFISSIONAIS
+9.  AGENDA
+10. ATENDIMENTOS
+11. VENDAS
+12. FECHAMENTO
+13. ADMINISTRATIVO
+14. NOTIFICAÇÕES
+15. BACKUP E RESTAURAÇÃO
+16. CUSTOMIZAÇÃO DO SISTEMA
+17. CONFIGURAÇÕES
+18. PROGRAMA DE FIDELIDADE
+19. SOLUÇÃO DE PROBLEMAS
+
+================================================================================
+                    1. INSTALAÇÃO E INICIALIZAÇÃO
+================================================================================
+
+1.1 REQUISITOS DO SISTEMA
+--------------------------
+- Node.js 18 ou superior
+- Sistema Operacional: Windows 10+, Linux, macOS 10.15+
+- Memória RAM: 4GB ou mais
+- Espaço em disco: 500MB
+
+1.2 INICIALIZAÇÃO RÁPIDA (1 CLIQUE)
+-------------------------------------
+WINDOWS:
+  1. Clique duas vezes no arquivo "iniciar-sistema.bat"
+  2. O sistema aguardará o backend (6s) e frontend (6s)
+  3. O navegador será aberto automaticamente
+
+LINUX:
+  1. Dê permissão: chmod +x "Iniciar Sistema.sh"
+  2. Clique duas vezes no arquivo
+
+1.3 INICIALIZAÇÃO MANUAL (TERMINAL)
+-----------------------------------
+
+# Terminal 1 - Backend
+cd backend
+npm install (se primeira vez)
+npm run dev
+
+# Terminal 2 - Frontend
+cd frontend
+npm install (se primeira vez)
+npm run dev
+
+# Acesse: http://localhost:3000
+
+1.4 URLs DO SISTEMA
+--------------------
+Frontend (Navegador):  http://localhost:3000
+Backend (API):          http://localhost:3001
+
+================================================================================
+                         2. PRIMEIRO ACESSO
+================================================================================
+
+2.1 CREDENCIAIS PADRÃO
+-----------------------
+Após a primeira instalação, use:
+
+  E-mail:    admin@salao.com
+  Senha:     admin123
+
+2.2 RECUPERAÇÃO DE SENHA
+-------------------------
+1. Na tela de login, clique em "Esqueceu a senha?"
+2. Digite seu e-mail cadastrado
+3. Clique em "Enviar Email"
+4. Acesse sua caixa de e-mail e clique no link de recuperação
+5. Digite sua nova senha (mínimo 6 caracteres)
+6. Clique em "Alterar Senha"
+7. Faça login com a nova senha
+
+2.3 ALTERAR SENHA
+------------------
+1. Faça login no sistema
+2. Clique em "Configurações" no menu lateral
+3. Na seção "Alterar Senha", preencha:
+   - Senha Atual
+   - Nova Senha
+   - Confirmar Nova Senha
+4. Clique em "Alterar Senha"
+
+================================================================================
+                           3. MENU PRINCIPAL
+================================================================================
+
+O menu lateral contém:
+
+   [Dashboard]       - Visão geral com métricas e gráficos
+   [Clientes]       - Cadastro e gestão de clientes com histórico
+   [Serviços]       - Cadastro de serviços oferecidos
+   [Produtos]       - Controle de estoque de produtos
+   [Profissionais]  - Cadastro de funcionários
+   [Agenda]         - Sistema de agendamento visual com auxiliares
+   [Atendimentos]   - Registro de atendimentos realizados
+   [Vendas]         - Registro de vendas de produtos
+   [Fechamento]     - Encerramento de contas a receber
+   [Administrativo] - Financeiro, comissões, créditos e relatórios
+   [Notificações]   - Alertas do sistema
+   [Backup]         - Backup e restauração
+   [Personalizar]   - Customização visual
+   [Configurações]  - Configurações da conta
+
+================================================================================
+                              4. DASHBOARD
+================================================================================
+
+4.1 VISÃO GERAL
+----------------
+O Dashboard apresenta uma visão consolidada do negócio com métricas em 
+tempo real.
+
+4.2 MÉTRICAS DISPONÍVEIS
+-------------------------
+- Total de Clientes: Número de clientes cadastrados
+- Serviços do Dia: Atendimentos realizados hoje
+- Receita do Dia: Valor faturado no dia
+- Agendamentos: Próximos agendamentos
+
+4.3 GRÁFICOS
+-------------
+- Serviços por Período: Evolução dos serviços ao longo do tempo
+- Receita por Período: Gráfico de barras com receitas
+- Serviços Mais Realizados: Ranking dos serviços mais populares
+- Produtos Mais Vendidos: Ranking dos produtos mais comercializados
+
+4.4 PRÓXIMOS AGENDAMENTOS
+--------------------------
+Lista dos próximos agendamentos com informações resumidas.
+
+================================================================================
+                        5. GESTÃO DE CLIENTES
+================================================================================
+
+5.1 CADASTRAR NOVO CLIENTE
+-----------------------------
+1. Clique em "Clientes" no menu
+2. Clique no botão "+ Novo Cliente"
+3. Preencha os campos:
+   - Nome * (obrigatório)
+   - Telefone * (obrigatório)
+   - E-mail
+   - CPF
+   - Data de Nascimento
+   - Endereço
+   - Observações
+4. Clique em "Salvar"
+
+5.2 BUSCAR CLIENTES
+---------------------
+Use a caixa de busca para encontrar clientes por:
+- Nome
+- Telefone
+- E-mail
+
+5.3 EDITAR/EXCLUIR CLIENTE
+-----------------------------
+1. Na lista de clientes, clique no ícone de edição (lápis)
+2. Ou clique no ícone de lixeira para excluir
+
+5.4 PERFIL DO CLIENTE (HISTÓRICO)
+-----------------------------------
+Clique no ícone de usuário ao lado do nome para ver o perfil completo:
+
+- ATENDIMENTOS: Total de atendimentos realizados
+- COMPRAS: Total de compras de produtos
+- GASTO EM SERVIÇOS: Valor total gasto em serviços
+- GASTO EM PRODUTOS: Valor total gasto em produtos
+- SERVIÇOS MAIS FREQUENTES: Ranking de serviços preferidos
+  (atualizado automaticamente após fechamentos)
+- PRODUTOS MAIS COMPRADOS: Ranking de produtos preferidos
+  (atualizado automaticamente após fechamentos)
+- PROFISSIONAIS PREFERIDOS: Profissionais mais atendidos
+- ÚLTIMOS ATENDIMENTOS: Histórico recente com opção de estorno
+
+5.5 ESTORNO DE FECHAMENTO NO PERFIL
+-------------------------------------
+No perfil do cliente, cada fechamento possui um botão para estornar.
+O estorno:
+- Reabre os itens fechados
+- Registra o motivo do estorno
+- Atualiza o histórico do cliente
+
+================================================================================
+                        6. GESTÃO DE SERVIÇOS
+================================================================================
+
+6.1 CADASTRAR NOVO SERVIÇO
+-----------------------------
+1. Clique em "Serviços" no menu
+2. Clique no botão "+ Novo Serviço"
+3. Preencha os campos:
+   - Nome * (obrigatório)
+   - Descrição
+   - Duração (minutos) *
+   - Preço *
+   - Categoria
+4. Ative o toggle "Serviço ativo" se aplicável
+5. Clique em "Salvar"
+
+6.2 EXEMPLOS DE CATEGORIAS
+----------------------------
+- Cabelo
+- Unhas
+- Estética
+- Maquiagem
+- Barba
+- Spa
+
+6.3 FILTRAR SERVIÇOS
+----------------------
+- Use o filtro de categoria para ver serviços específicos
+- Use a busca para encontrar serviços pelo nome
+
+================================================================================
+                        7. GESTÃO DE PRODUTOS
+================================================================================
+
+7.1 CADASTRAR NOVO PRODUTO
+-----------------------------
+1. Clique em "Produtos" no menu
+2. Clique no botão "+ Novo Produto"
+3. Preencha os campos:
+   - Nome *
+   - Descrição
+   - Marca
+   - Categoria
+   - Preço Custo
+   - Preço Venda *
+   - Estoque (quantidade atual)
+   - Estoque Mínimo (para alertas)
+4. Ative o toggle "Produto ativo" se aplicável
+5. Clique em "Salvar"
+
+7.2 CONTROLE DE ESTOQUE
+------------------------
+O sistema alerta quando o estoque está baixo (estoque atual <= estoque mínimo).
+
+O indicador mostra:
+- VERMELHO: Estoque abaixo do mínimo
+- VERDE: Estoque normal
+
+7.3 FILTRAR PRODUTOS
+----------------------
+- Filtro de categoria
+- Busca por nome, marca ou descrição
+- Botão "Estoque Baixo" para ver apenas produtos com estoque crítico
+
+================================================================================
+                     8. GESTÃO DE PROFISSIONAIS
+================================================================================
+
+8.1 CADASTRAR NOVO PROFISSIONAL
+----------------------------------
+1. Clique em "Profissionais" no menu
+2. Clique no botão "+ Novo Profissional"
+3. Preencha os campos:
+   - Nome *
+   - Telefone *
+   - E-mail
+   - Especialidades (ex: "Auxiliar de Cabelo", "Assistente de Manicure")
+4. Ative o toggle "Profissional ativo" se aplicável
+5. Clique em "Salvar"
+
+8.2 ESPECIALIDADES
+--------------------
+Se o profissional tem "auxiliar" ou "assistente" na especialidade,
+ele aparecerá na lista de auxiliares na Agenda e nos Atendimentos.
+
+Exemplos:
+- "Auxiliar de Cabelo" - aparecerá como auxiliar
+- "Assistente de Manicure" - aparecerá como auxiliar
+- "Cabeleireiro Senior" - não aparecerá como auxiliar
+
+================================================================================
+                              9. AGENDA
+================================================================================
+
+9.1 VISÃO GERAL
+----------------
+A Agenda exibe visualmente os agendamentos em formato de grade, permitindo 
+ver a ocupação de cada profissional ao longo do dia.
+
+9.2 CÉLULAS E CORES
+---------------------
+| Tipo          | Cor    | Descrição                              |
+|---------------|--------|----------------------------------------|
+| Agendamento   | Amarelo| Agendamento criado                     |
+| Confirmado    | Verde  | Cliente confirmou                       |
+| Cancelado     | Vermelho| Agendamento cancelado                 |
+| Atendimento   | Roxo   | Agendamento convertido em atendimento  |
+| Auxiliar     | Teal   | Quando um profissional é auxiliar     |
+
+9.3 CRIAR NOVO AGENDAMENTO
+----------------------------
+1. Clique em "Agenda" no menu
+2. Selecione a data desejada usando o seletor de calendário
+3. Clique no botão "+ Novo Agendamento" ou clique em uma célula vazia
+4. Preencha os campos:
+   - Cliente * (selecione na lista)
+   - Serviço * (selecione na lista)
+   - Profissional * (selecione na lista)
+   - Auxiliar (opcional - apenas profissionais auxiliares)
+   - Data e Hora *
+   - Status (Agendado, Confirmado ou Cancelado)
+   - Observações
+5. Clique em "Salvar"
+
+9.4 DROPDOWN DE AUXILIAR
+-------------------------
+O dropdown de auxiliares mostra apenas profissionais que possuem 
+"auxiliar" ou "assistente" na especialidade.
+
+Se nenhum profissional tiver essa especialidade, a lista ficará vazia.
+
+9.5 EDITAR AGENDAMENTO
+-----------------------
+Clique em qualquer célula de agendamento para abrir o modal de edição:
+
+- Células amarelas, verdes ou vermelhas: Abrem modal de edição
+- Células roxas (atendimentos): Abrem modal de visualização
+- Campos desabilitados: Quando visualizando, os campos são apenas leitura
+
+9.6 CONVERTER PARA ATENDIMENTO
+--------------------------------
+1. Edite o agendamento desejado
+2. Clique no botão "Converter p/ Atendimento"
+3. Confirme a ação
+4. O agendamento vira roxo na agenda
+5. Você é redirecionado para a aba de Atendimentos
+6. O modal de edição de atendimento é aberto automaticamente
+
+9.7 CÉLULA DO AUXILIAR
+------------------------
+Quando um agendamento tem auxiliar:
+- O profissional principal aparece na coluna correspondente
+- O auxiliar aparece na coluna dele com cor teal
+- Exibe: "Auxiliar: [nome do auxiliar]" e abaixo o nome do cliente
+
+9.8 FILTROS
+-------------
+- Tipo: Todos, Profissionais ou Assistentes
+- Profissionais: Selecione quais profissionais ver na grade
+- Status: Todos, Agendado, Confirmado, Cancelado ou Convertido
+
+================================================================================
+                           10. ATENDIMENTOS
+================================================================================
+
+10.1 REGISTRAR NOVO ATENDIMENTO
+----------------------------------
+1. Clique em "Atendimentos" no menu
+2. Clique no botão "+ Novo Atendimento"
+3. Preencha os campos:
+   - Profissional
+   - Auxiliar (opcional - apenas profissionais auxiliares)
+   - Cliente
+   - Data
+4. Adicione produtos usados (se houver)
+5. Adicione serviços realizados
+6. O sistema calcula os totais automaticamente
+7. Clique em "Salvar Atendimento"
+
+10.2 DROPDOWN DE AUXILIAR
+---------------------------
+Mostra apenas profissionais com "auxiliar" ou "assistente" na especialidade.
+
+10.3 CONTROLE DE ESTOQUE
+---------------------------
+Ao registrar atendimento com produtos, o estoque é atualizado 
+automaticamente.
+
+10.4 FLUXO DE TRABALHO
+------------------------
+1. Registre o atendimento com produtos e serviços
+2. Após finalizado, vá para "Fechamento"
+3. Selecione o cliente e finalize o pagamento
+4. O histórico é salvo automaticamente no perfil do cliente
+5. Os serviços e produtos favoritos são atualizados
+
+================================================================================
+                             11. VENDAS
+================================================================================
+
+11.1 REGISTRAR NOVA VENDA
+---------------------------
+1. Clique em "Vendas" no menu
+2. Clique em "+ Nova Venda"
+3. Selecione cliente (opcional - ou "Consumidor Final")
+4. Selecione vendedor (opcional)
+5. Escolha a data
+6. Adicione produtos/serviços clicando neles
+7. Ajuste quantidades se necessário
+8. Clique em "Finalizar Venda"
+
+NOTA: A forma de pagamento é definida no Fechamento, não na Venda.
+
+11.2 ESTOQUE AUTOMÁTICO
+-------------------------
+Ao registrar venda de produtos, o estoque é atualizado automaticamente.
+
+11.3 FILTRAR VENDAS
+---------------------
+- Por data específica
+- Por período (data início e fim)
+
+================================================================================
+                            12. FECHAMENTO
+================================================================================
+
+12.1 O QUE É O FECHAMENTO?
+----------------------------
+O Fechamento é onde você encerra as contas a receber de clientes, tanto 
+de atendimentos quanto de vendas realizadas.
+
+12.2 COMO FUNCIONA
+--------------------
+1. Registre atendimentos e vendas normalmente
+2. Vá para a aba "Fechamento"
+3. Busque por cliente ou profissional
+4. O sistema lista todos os itens em aberto do cliente
+5. Selecione o que deseja fechar (atendimentos e/ou vendas)
+6. Escolha a forma de pagamento:
+   - Dinheiro
+   - PIX
+   - Cartão de Crédito
+   - Cartão de Débito
+7. Aplique desconto se necessário
+8. Clique em "Confirmar Fechamento"
+
+12.3 REGRAS IMPORTANTES
+------------------------
+- Pode fechar apenas vendas (sem atendimento)
+- Pode fechar apenas atendimentos (sem venda)
+- Pode fechar ambos juntos
+- O histórico é salvo no perfil do cliente automaticamente
+- Serviços e produtos favoritos são atualizados no perfil
+
+12.4 FILTROS
+--------------
+- Por cliente: digite o nome na busca
+- Por profissional: selecione na lista
+
+================================================================================
+                          13. ADMINISTRATIVO
+================================================================================
+
+13.1 VISÃO GERAL
+-----------------
+A aba Administrativo oferece ferramentas completas para gestão financeira,
+controle de caixas, comissões de profissionais, créditos e relatórios gerais.
+
+13.2 CHECK OUT (CONTROLE DE CAIXAS)
+-------------------------------------
+Visualize e gerencie todos os fechamentos realizados:
+
+1. Selecione a data desejada
+2. Veja o resumo:
+   - Total do Dia: Soma de todos os fechamentos
+   - Fechamentos: Quantidade de contas fechadas
+   - Em Atendimentos: Valor de serviços
+   - Em Vendas: Valor de produtos
+
+3. Tabela de fechamentos com:
+   - Cliente
+   - Data
+   - Profissional
+   - Valores de atendimentos e vendas
+   - Total geral
+
+4. ESTORNO DE FECHAMENTO:
+   - Clique no botão X para estornar um fechamento
+   - Informe o motivo do estorno (obrigatório)
+   - Clique em "Confirmar Estorno"
+   - O fechamento é movido para a aba "Estornos"
+
+13.3 ABA ESTORNOS
+-------------------
+Visualize todos os fechamentos estornados:
+- Lista de fechamentos com marcação de estorno
+- Motivo do estorno registrado
+- Data do estorno
+
+13.4 FATURAMENTO
+------------------
+Relatórios de faturamento por período:
+
+A) ANALÍTICO:
+   Lista detalhada de todos os fechamentos no período.
+
+B) POR PROFISSIONAL:
+   Mostra o total faturado por cada profissional.
+
+C) POR FORMA DE PAGAMENTO:
+   Agrupa os fechamentos por forma de pagamento
+   (dinheiro, PIX, cartão crédito, cartão débito).
+
+D) CRÉDITOS NA CASA:
+   Gerenciamento de créditos dados aos clientes.
+
+   - Adicionar crédito: Clique em "+ Novo Crédito"
+   - Selecione o cliente
+   - Escolha "Crédito (+)" ou "Débito (-)"
+   - Informe o valor e descrição
+   - O saldo é atualizado automaticamente
+
+13.5 COMISSÕES
+----------------
+Controle de comissões dos profissionais:
+
+A) A PAGAR:
+   - Lista de profissionais com valores a receber
+   - Clique em "Pagar" para registrar o pagamento
+   - O valor é movido para a aba "Pagas"
+
+B) PAGAS:
+   - Registro de pagamentos realizados
+   - Clique em "Estornar" para devolver o valor
+
+C) ESTORNO DE PAGAMENTO:
+   - Informe o motivo do estorno
+   - O valor retorna para "A Pagar"
+
+D) EDITAR COMISSÕES:
+   - Clique no botão de edição na lista de profissionais
+   - Altere o percentual de comissão
+   - Clique em "Salvar"
+
+13.6 RELATÓRIOS GERAIS
+------------------------
+
+A) AGENDA/SERVIÇOS:
+   Lista de agendamentos do dia com status.
+
+B) ANIVERSARIANTES:
+   Lista de clientes que fazem aniversário no mês atual.
+   Útil para preparar campanhas de aniversário.
+
+C) PROFISSIONAIS:
+   Lista de todos os profissionais ativos com dados de contato
+   e percentual de comissão.
+
+D) ESTOQUE:
+   Lista completa de produtos com:
+   - Estoque atual
+   - Estoque mínimo configurado
+   - Preço de venda
+   - Alerta visual para estoque baixo (vermelho)
+
+E) TABELA DE PREÇOS:
+   Lista de preços de serviços e produtos para consulta rápida.
+
+================================================================================
+                          14. NOTIFICAÇÕES
+================================================================================
+
+14.1 VISÃO GERAL
+------------------
+A aba de Notificações exibe alertas e lembretes importantes do sistema.
+
+14.2 TIPOS DE NOTIFICAÇÃO
+---------------------------
+- ESTOQUE BAIXO: Produtos com estoque crítico
+- AGENDAMENTOS DO DIA: Lembretes de agendamentos
+- CLIENTES INATIVOS: Clientes sem visitas recentes
+- SISTEMA: Mensagens gerais
+
+14.3 MARCAR COMO LIDA
+-----------------------
+Clique em uma notificação para marcá-la como lida. 
+O badge no menu mostra a quantidade de não lidas.
+
+================================================================================
+                       15. BACKUP E RESTAURAÇÃO
+================================================================================
+
+15.1 CRIAR BACKUP LOCAL
+-------------------------
+1. Clique em "Backup" no menu
+2. Clique em "Criar Novo Backup"
+3. O arquivo JSON será salvo na pasta "backups"
+4. O backup contém todos os dados do sistema
+
+15.2 RESTAURAR BACKUP
+------------------------
+ATENÇÃO: Dados atuais serão substituídos!
+
+1. Clique em "Backup" no menu
+2. Localize o backup desejado na lista
+3. Clique em "Restaurar"
+4. CONFIRME a ação
+
+15.3 SINCRONIZAR COM GOOGLE DRIVE
+-----------------------------------
+1. Clique em "Backup" no menu
+2. Na seção "Google Drive", clique em "Autorizar Google Drive"
+3. Faça login na sua conta Google
+4. Copie o código de verificação
+5. Cole no campo e clique em "Confirmar"
+6. Após conectado, sincronize backups clicando no ícone de nuvem
+
+15.4 EXPORTAR BACKUP PARA OUTRO COMPUTADOR
+--------------------------------------------
+1. Clique em "Backup"
+2. Clique em "Download" no backup desejado
+3. Copie o arquivo para o outro computador
+4. No outro computador, restaure o backup
+
+================================================================================
+                     16. CUSTOMIZAÇÃO DO SISTEMA
+================================================================================
+
+16.1 ACESSAR PERSONALIZAÇÃO
+------------------------------
+Clique em "Personalizar" no menu lateral
+
+16.2 ALTERAR CORES
+--------------------
+1. Na aba "Cores", você verá:
+   - Paleta de cores predefinidas (Rosa, Azul, Roxo, Verde, etc.)
+   - Seletores de cor customizáveis
+
+2. Clique em uma predefinição para aplicar rapidamente
+   OU
+3. Use os seletores de cor para personalizar cada aspecto
+
+4. Visualize as alterações no preview
+5. Clique em "Salvar"
+
+CORES DISPONÍVEIS:
+- Cor Primária (barra superior, botões principais)
+- Cor Primária Clara
+- Cor Secundária
+- Cor de Fundo
+- Superfície (cards, menus)
+- Texto Principal
+- Texto Secundário
+- Sucesso (verde)
+- Alerta (amarelo)
+- Erro (vermelho)
+- Bordas
+
+16.3 CSS PERSONALIZADO
+------------------------
+1. Clique na aba "CSS Custom"
+2. Digite seu código CSS personalizado
+3. Use variáveis CSS disponíveis:
+   --color-primary
+   --color-primary-light
+   --color-secondary
+   --color-background
+   --color-surface
+   --color-text
+   --color-text-light
+   --color-success
+   --color-warning
+   --color-error
+   --color-border
+
+4. Clique em "Salvar"
+
+EXEMPLO DE CSS CUSTOMIZADO:
+---------------------------
+.btn-gradient {
+  background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+  border-radius: 20px;
+}
+
+16.4 UPLOAD DE LOGO
+---------------------
+1. Clique na aba "Logo"
+2. Arraste uma imagem ou clique em "Selecionar Imagem"
+3. Formatos aceitos: PNG, JPG, SVG
+4. Tamanho máximo: 2MB
+5. Clique em "Salvar"
+
+Para remover o logo, clique em "Remover Logo"
+
+16.5 EXPORTAR/IMPORTAR TEMA
+------------------------------
+- Clique em "Exportar Tema" para salvar como JSON
+- Use "Importar Tema" para carregar um tema salvo
+
+================================================================================
+                          17. CONFIGURAÇÕES
+================================================================================
+
+17.1 PERFIL
+------------
+Visualize suas informações:
+- Nome
+- E-mail
+
+17.2 ALTERAR SENHA
+--------------------
+1. Clique em "Configurações"
+2. Preencha:
+   - Senha Atual
+   - Nova Senha
+   - Confirmar Nova Senha
+3. Clique em "Alterar Senha"
+
+17.3 CONVERSÃO AUTOMÁTICA
+------------------------
+Quando ativado, converte automaticamente agendamentos em atendimento
+5 minutos antes do horário marcado.
+
+17.4 PIX
+---------
+1. Na seção "PIX", insira a chave PIX da conta
+   (CPF, telefone, e-mail ou chave aleatória)
+2. Clique em "Salvar Chave PIX"
+3. Essa chave será exibida no Fechamento quando o cliente
+   escolher PIX como forma de pagamento
+
+=================================================================================
+                     18. PROGRAMA DE FIDELIDADE
+=================================================================================
+
+18.1 REGRAS DO PROGRAMA
+------------------------
+- 5% de crédito em compras acima de R$100
+- Crédito pode ser usado como desconto em futuros atendimentos
+- Saldo acumulado aparece no perfil da cliente
+
+18.2 COMO FUNCIONA
+--------------------
+1. Cliente faz um fechamento acima de R$100
+2. Sistema gera automaticamente 5% do valor como crédito
+3. Crédito é registrado na conta da cliente
+4. Em futuros fechamentos, a cliente pode usar o crédito
+
+18.3 VISUALIZAR CRÉDITO
+------------------------
+No perfil da cliente (ícone de usuário):
+- Card "Crédito" mostra o saldo disponível
+- Exibe informação: "5% acima de R$100"
+
+18.4 USAR CRÉDITO NO FECHAMENTO
+-------------------------------
+1. Abra o módulo Fechamento
+2. Selecione a cliente
+3. Se houver crédito disponível, aparecerá uma caixa amarela
+4. Marque "Usar crédito como desconto"
+5. O crédito será convertido em desconto no valor total
+6. Clique em "Confirmar Fechamento"
+
+IMPORTANTE: O crédito usado é debitado da conta da cliente
+automaticamente após o fechamento.
+
+=================================================================================
+                          19. SOLUÇÃO DE PROBLEMAS
+================================================================================
+
+18.1 SISTEMA NÃO INICIA
+-------------------------
+1. Verifique se o Node.js está instalado:
+   node --version
+
+2. Verifique se as portas 3000 e 3001 estão livres:
+   Linux: lsof -i :3000 -i :3001
+   Windows: netstat -ano | findstr "3000 3001"
+
+3. Tente reiniciar usando iniciar-sistema.bat
+
+18.2 ERRO DE LOGIN
+--------------------
+1. Verifique se está usando o e-mail correto
+2. Verifique se o CAPS LOCK está desligado
+3. Use a função "Esqueceu a senha?" se necessário
+
+18.3 BACKUP NÃO FUNCIONA
+--------------------------
+1. Verifique se a pasta "backups" existe
+2. Verifique permissões de escrita
+3. Verifique espaço em disco
+
+18.4 SERVIÇOS/PRODUTOS NÃO APARECEM
+--------------------------------------
+1. Verifique se estão marcados como "Ativo"
+2. Use os filtros para encontrar
+
+18.5 ERRO AO FECHAR CONTA
+---------------------------
+1. Selecione pelo menos um atendimento OU uma venda
+2. Não é necessário ter ambos
+
+18.6 HISTÓRICO DO CLIENTE VAZIO
+---------------------------------
+O histórico é preenchido automaticamente ao realizar fechamentos.
+Se estiver vazio, certifique-se de:
+1. Ter realizado atendimentos ou vendas
+2. Ter fechado a conta na aba Fechamento
+
+18.7 SERVIÇOS/PRODUTOS FAVORITOS NÃO ATUALIZAM
+-------------------------------------------------
+Os favoritos são calculados automaticamente a partir dos fechamentos 
+realizados. Quanto mais fechamentos, mais preciso o ranking.
+
+18.8 DROPDOWN DE AUXILIARES VAZIO
+-----------------------------------
+Verifique se algum profissional possui "auxiliar" ou "assistente" 
+na especialidade. Apenas esses profissionais aparecerão no dropdown.
+
+================================================================================
+                            INFORMAÇÕES
+================================================================================
+
+Sistema: SoftHair - Sistema de Administração de Salão de Beleza
+Versão: 2.2.0
+Ano: 2026
+
+================================================================================
+                       FIM DO MANUAL DE USO
+================================================================================

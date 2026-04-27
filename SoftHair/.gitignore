@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+frontend/dist/
+win-unpacked/
+*.exe
+
+# Data
+backend/data/
+*.db
+*.db-shm
+*.db-wal
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Backup files
+backups/
+*.bak
+
+# LightRAG knowledge graph (storage binary index — versiona só o markdown)
+tools/lightrag/rag_storage/
+tools/lightrag/.venv/
+tools/lightrag/.index_manifest.json
+tools/lightrag/__pycache__/

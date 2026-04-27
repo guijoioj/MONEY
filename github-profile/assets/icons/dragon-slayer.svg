@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="40" viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dragon Slayer Sword SVG -->
+  <defs>
+    <linearGradient id="bladeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#C0C0C0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#808080;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="handleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Blade -->
+  <path d="M180 20 L20 18 L15 20 L20 22 L180 20 Z" fill="url(#bladeGradient)" stroke="#404040" stroke-width="0.5"/>
+
+  <!-- Blade edge highlight -->
+  <path d="M20 18 L180 19.5 L180 20.5 L20 22 Z" fill="#FFFFFF" opacity="0.7"/>
+
+  <!-- Blood groove -->
+  <line x1="50" y1="19" x2="150" y2="19" stroke="#8B0000" stroke-width="1" opacity="0.5"/>
+
+  <!-- Handle -->
+  <rect x="5" y="18" width="15" height="4" fill="url(#handleGradient)" rx="1"/>
+
+  <!-- Handle wrap -->
+  <rect x="6" y="19" width="13" height="0.5" fill="#4B2F20" opacity="0.7"/>
+  <rect x="6" y="20.5" width="13" height="0.5" fill="#4B2F20" opacity="0.7"/>
+
+  <!-- Crossguard -->
+  <path d="M15 15 L25 15 L25 25 L15 25 Z" fill="#404040"/>
+
+  <!-- Glow effect -->
+  <circle cx="100" cy="20" r="30" fill="#FF0000" opacity="0.1"/>
+  <circle cx="100" cy="20" r="20" fill="#FF0000" opacity="0.2"/>
+</svg>

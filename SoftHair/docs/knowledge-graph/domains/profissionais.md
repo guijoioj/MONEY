@@ -1,0 +1,86 @@
+# profissionais
+
+**Type:** `operational-domain`
+
+## Uso Para IA
+
+Use este hub para localizar os arquivos e conceitos mais relevantes sem abrir o vault inteiro.
+
+## Conceitos Principais
+
+- [[concepts/query|query]]
+- [[concepts/salaoid|salaoId]]
+- [[concepts/basemodel|BaseModel]]
+- [[concepts/atendimento|Atendimento]]
+- [[concepts/agendamento|Agendamento]]
+- [[concepts/agendascreen|AgendaScreen]]
+- [[concepts/profissionais|profissionais]]
+- [[concepts/profissionalappmiddleware|profissionalAppMiddleware]]
+- [[concepts/mobile|Mobile]]
+- [[concepts/queryone|queryOne]]
+- [[concepts/agendamentos|agendamentos]]
+- [[concepts/atendimentos|atendimentos]]
+- [[concepts/loading|Loading]]
+- [[concepts/pontoscreen|PontoScreen]]
+- [[concepts/api|api]]
+- [[concepts/comissao|Comissao]]
+- [[concepts/comissaopaga|ComissaoPaga]]
+- [[concepts/perfilprofissionalscreen|PerfilProfissionalScreen]]
+- [[concepts/queryrun|queryRun]]
+- [[concepts/ionicons|Ionicons]]
+
+## Arquivos Principais
+
+- [[desktop/backend/backend-src-middleware-appauthjs|backend/src/middleware/appAuth.js]]
+- [[desktop/backend/backend-src-models-agendamentojs|backend/src/models/Agendamento.js]]
+- [[desktop/backend/backend-src-models-atendimentojs|backend/src/models/Atendimento.js]]
+- [[desktop/backend/backend-src-models-clientehistoricojs|backend/src/models/ClienteHistorico.js]]
+- [[desktop/backend/backend-src-models-comissaoestornojs|backend/src/models/ComissaoEstorno.js]]
+- [[desktop/backend/backend-src-models-comissaopagajs|backend/src/models/ComissaoPaga.js]]
+- [[desktop/backend/backend-src-models-fechamentojs|backend/src/models/Fechamento.js]]
+- [[desktop/backend/backend-src-models-pedidoagendamentojs|backend/src/models/PedidoAgendamento.js]]
+- [[desktop/backend/backend-src-models-pontoregistrojs|backend/src/models/PontoRegistro.js]]
+- [[desktop/backend/backend-src-models-produtojs|backend/src/models/Produto.js]]
+- [[desktop/backend/backend-src-models-profissionaljs|backend/src/models/Profissional.js]]
+- [[desktop/backend/backend-src-models-servicojs|backend/src/models/Servico.js]]
+- [[desktop/backend/backend-src-models-userjs|backend/src/models/User.js]]
+- [[desktop/backend/backend-src-routes-app-authjs|backend/src/routes/app/auth.js]]
+- [[desktop/backend/backend-src-routes-app-pedidosjs|backend/src/routes/app/pedidos.js]]
+- [[desktop/backend/backend-src-routes-app-profissionaljs|backend/src/routes/app/profissional.js]]
+- [[desktop/backend/backend-src-routes-atendimentosjs|backend/src/routes/atendimentos.js]]
+- [[desktop/backend/backend-src-routes-comissoesjs|backend/src/routes/comissoes.js]]
+- [[desktop/backend/backend-src-routes-fechamentosjs|backend/src/routes/fechamentos.js]]
+- [[desktop/backend/backend-src-routes-profissionaisjs|backend/src/routes/profissionais.js]]
+
+## Entidades Relevantes
+
+- [[server/entities/query-6626406b|query]]
+- [[server/entities/salaoid-fdc8ed5e|salaoId]]
+- [[server/entities/basemodel-dcbd4b45|BaseModel]]
+- [[mobile/entities/atendimento-ca334518|Atendimento]]
+- [[mobile/entities/agendamento-7b2b491b|Agendamento]]
+- [[mobile/entities/agendascreen-3463aac6|AgendaScreen]]
+- [[server/entities/profissionais-8bce2d1d|profissionais]]
+- [[desktop/entities/profissionalappmiddleware-16d447b0|profissionalAppMiddleware]]
+- [[mobile/entities/mobile-a3efbae8|Mobile]]
+- [[server/entities/queryone-eec38591|queryOne]]
+- [[server/entities/agendamentos-514236d9|agendamentos]]
+- [[server/entities/atendimentos-0354854e|atendimentos]]
+- [[mobile/entities/loading-3c156a7a|Loading]]
+- [[mobile/entities/pontoscreen-78333dc3|PontoScreen]]
+- [[mobile/entities/api-13155c51|api]]
+- [[mobile/entities/comissao-0a1a2ea1|Comissao]]
+- [[desktop/entities/comissaopaga-e45bbe8a|ComissaoPaga]]
+- [[mobile/entities/perfilprofissionalscreen-d7fc78d5|PerfilProfissionalScreen]]
+- [[mobile/entities/ionicons-11991975|Ionicons]]
+- [[server/entities/queryrun-912ecbeb|queryRun]]
+- [[mobile/entities/atendimentosscreen-63929280|AtendimentosScreen]]
+- [[mobile/entities/button-a08d57bb|Button]]
+- [[desktop/entities/comissaoestorno-d86fa6d0|ComissaoEstorno]]
+- [[mobile/entities/comissoesscreen-0b9ad326|ComissoesScreen]]
+- [[server/entities/profissional-d484a6bc|Profissional]]
+- [[mobile/entities/salonid-3719bdc7|salonId]]
+- [[mobile/entities/skeletoncard-69f841d9|SkeletonCard]]
+- [[desktop/entities/uuidv4-2c2003cd|uuidv4]]
+- [[mobile/entities/card-7a73ca8e|Card]]
+- [[server/entities/database-bddf0941|database]]

@@ -1,0 +1,86 @@
+# produtos
+
+**Type:** `operational-domain`
+
+## Uso Para IA
+
+Use este hub para localizar os arquivos e conceitos mais relevantes sem abrir o vault inteiro.
+
+## Conceitos Principais
+
+- [[concepts/query|query]]
+- [[concepts/softhair|SoftHair]]
+- [[concepts/server|Server]]
+- [[concepts/authmiddleware|authMiddleware]]
+- [[concepts/salaoid|salaoId]]
+- [[concepts/basemodel|BaseModel]]
+- [[concepts/express|express]]
+- [[concepts/produto|Produto]]
+- [[concepts/mobile|Mobile]]
+- [[concepts/produtopage|ProdutoPage]]
+- [[concepts/loading|Loading]]
+- [[concepts/api|api]]
+- [[concepts/produtos|produtos]]
+- [[concepts/produtoservice|ProdutoService]]
+- [[concepts/button|Button]]
+- [[concepts/profissional|Profissional]]
+- [[concepts/salonid|salonId]]
+- [[concepts/database|database]]
+- [[concepts/salao-id|salao id]]
+- [[concepts/data|data]]
+
+## Arquivos Principais
+
+- [[desktop/root/readmemd|README.md]]
+- [[desktop/backend/backend-src-models-agendamentojs|backend/src/models/Agendamento.js]]
+- [[desktop/backend/backend-src-models-atendimentojs|backend/src/models/Atendimento.js]]
+- [[desktop/backend/backend-src-models-clientehistoricojs|backend/src/models/ClienteHistorico.js]]
+- [[desktop/backend/backend-src-models-fechamentojs|backend/src/models/Fechamento.js]]
+- [[desktop/backend/backend-src-models-notificacaojs|backend/src/models/Notificacao.js]]
+- [[desktop/backend/backend-src-models-pedidolojajs|backend/src/models/PedidoLoja.js]]
+- [[desktop/backend/backend-src-models-produtojs|backend/src/models/Produto.js]]
+- [[desktop/backend/backend-src-models-vendajs|backend/src/models/Venda.js]]
+- [[desktop/backend/backend-src-routes-app-clientejs|backend/src/routes/app/cliente.js]]
+- [[desktop/backend/backend-src-routes-app-lojajs|backend/src/routes/app/loja.js]]
+- [[desktop/backend/backend-src-routes-app-profissionaljs|backend/src/routes/app/profissional.js]]
+- [[desktop/backend/backend-src-routes-atendimentosjs|backend/src/routes/atendimentos.js]]
+- [[desktop/backend/backend-src-routes-fechamentosjs|backend/src/routes/fechamentos.js]]
+- [[desktop/backend/backend-src-routes-notificacoesjs|backend/src/routes/notificacoes.js]]
+- [[desktop/backend/backend-src-routes-produtosjs|backend/src/routes/produtos.js]]
+- [[desktop/backend/backend-src-serverjs|backend/src/server.js]]
+- [[desktop/backend/backend-src-services-backupservicejs|backend/src/services/backupService.js]]
+- [[desktop/frontend/frontend-src-appjsx|frontend/src/App.jsx]]
+- [[desktop/frontend/frontend-src-components-layoutjsx|frontend/src/components/Layout.jsx]]
+
+## Entidades Relevantes
+
+- [[server/entities/query-6626406b|query]]
+- [[mobile/entities/softhair-dffdf835|SoftHair]]
+- [[server/entities/server-05c102bd|Server]]
+- [[server/entities/authmiddleware-362f3741|authMiddleware]]
+- [[server/entities/salaoid-fdc8ed5e|salaoId]]
+- [[server/entities/basemodel-dcbd4b45|BaseModel]]
+- [[server/entities/express-7a42f4f0|express]]
+- [[mobile/entities/produto-70ba4953|Produto]]
+- [[mobile/entities/mobile-a3efbae8|Mobile]]
+- [[mobile/entities/produtopage-469e00ca|ProdutoPage]]
+- [[mobile/entities/loading-3c156a7a|Loading]]
+- [[mobile/entities/api-13155c51|api]]
+- [[mobile/entities/produtos-cf699a76|produtos]]
+- [[server/entities/produtoservice-ade760aa|ProdutoService]]
+- [[mobile/entities/button-a08d57bb|Button]]
+- [[server/entities/profissional-d484a6bc|Profissional]]
+- [[mobile/entities/salonid-3719bdc7|salonId]]
+- [[server/entities/database-bddf0941|database]]
+- [[server/entities/salao_id-da4556fc|salao_id]]
+- [[server/entities/data-a46ab97e|data]]
+- [[server/entities/filtros-8c65d1ca|filtros]]
+- [[mobile/entities/quantidade-9b6a1e41|quantidade]]
+- [[server/entities/src-routes-produtosjs-820a3f60|src/routes/produtos.js]]
+- [[mobile/entities/categoria-50556d2e|categoria]]
+- [[server/entities/produtos-e9a22020|Produtos]]
+- [[server/entities/termo-9ec889f8|termo]]
+- [[desktop/entities/atendimentos_produtos-def16484|atendimentos_produtos]]
+- [[mobile/entities/codebase-18b1aadd|Codebase]]
+- [[server/entities/data_atualizacao-ddd68f53|data_atualizacao]]
+- [[server/entities/data_cadastro-908357c0|data_cadastro]]

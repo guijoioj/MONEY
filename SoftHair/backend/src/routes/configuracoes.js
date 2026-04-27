@@ -1,0 +1,54 @@
+const express = require('express');
+const fs = require('fs');
+const router = express.Router();
+const { query, queryOne, queryRun } = require('../config/database');
+const { v4: uuidv4 } = require('uuid');
+const { authMiddleware } = require('../middleware/auth');
+
+router.use(authMiddleware);
+
+router.get('/', async (req, res) => {
+  try {
+    const configs = await query('SELECT chave, valor FROM configuracoes');
+    const configObj = {};
+    configs.forEach(c => { configObj[c.chave] = c.valor; });
+    res.json(configObj);
+  } catch (err) { res.status(500).json({ error: 'Erro ao buscar configurações' }); }
+});
+
+router.put('/', async (req, res) => {
+  try {
+    const { chave, valor } = req.body;
+    if (!chave) return res.status(400).json({ error: 'Chave obrigatória' });
+
+    const existing = await queryOne('SELECT id FROM configuracoes WHERE chave = ?', [chave]);
+
+    if (existing) {
+      await queryRun('UPDATE configuracoes SET valor = ?, "updatedAt" = NOW() WHERE chave = ?', [valor, chave]);
+    } else {
+      await queryRun('INSERT INTO configuracoes (id, chave, valor) VALUES (?, ?, ?)', [uuidv4(), chave, valor]);
+    }
+
+    res.json({ success: true, chave, valor });
+  } catch (err) { res.status(500).json({ error: 'Erro ao salvar configuração' }); }
+});
+
+router.get('/navegadores', (req, res) => {
+  const browsers = [];
+  const candidates = [
+    { name: 'Firefox', command: 'firefox', paths: ['/usr/bin/firefox', '/snap/bin/firefox'] },
+    { name: 'Chromium', command: 'chromium', paths: ['/usr/bin/chromium', '/snap/bin/chromium', '/usr/bin/chromium-browser'] },
+    { name: 'Chrome', command: 'google-chrome', paths: ['/usr/bin/google-chrome', '/snap/bin/google-chrome'] },
+    { name: 'Brave', command: 'brave', paths: ['/opt/brave-bin/brave', '/usr/bin/brave-browser', '/snap/bin/brave'] },
+    { name: 'Opera', command: 'opera', paths: ['/usr/bin/opera'] },
+    { name: 'Vivaldi', command: 'vivaldi', paths: ['/usr/bin/vivaldi'] },
+    { name: 'Edge', command: 'microsoft-edge', paths: ['/usr/bin/microsoft-edge'] },
+  ];
+  candidates.forEach(browser => {
+    const found = browser.paths.find(p => { try { return fs.existsSync(p); } catch { return false; } });
+    if (found) browsers.push({ name: browser.name, command: browser.command, path: found });
+  });
+  res.json(browsers);
+});
+
+module.exports = router;

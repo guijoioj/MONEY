@@ -1,0 +1,86 @@
+# vendas
+
+**Type:** `operational-domain`
+
+## Uso Para IA
+
+Use este hub para localizar os arquivos e conceitos mais relevantes sem abrir o vault inteiro.
+
+## Conceitos Principais
+
+- [[concepts/query|query]]
+- [[concepts/server|Server]]
+- [[concepts/authmiddleware|authMiddleware]]
+- [[concepts/salaoid|salaoId]]
+- [[concepts/basemodel|BaseModel]]
+- [[concepts/express|express]]
+- [[concepts/router|router]]
+- [[concepts/produto|Produto]]
+- [[concepts/venda|Venda]]
+- [[concepts/vendaservice|VendaService]]
+- [[concepts/comissao|Comissao]]
+- [[concepts/pool|pool]]
+- [[concepts/salao-id|salao id]]
+- [[concepts/routes-creditos|routes creditos]]
+- [[concepts/routes-fechamentos|routes fechamentos]]
+- [[concepts/data|data]]
+- [[concepts/filtros|filtros]]
+- [[concepts/profissional-id|profissional id]]
+- [[concepts/quantidade|quantidade]]
+- [[concepts/vendas|Vendas]]
+
+## Arquivos Principais
+
+- [[desktop/root/readmemd|README.md]]
+- [[desktop/backend/backend-src-models-atendimentojs|backend/src/models/Atendimento.js]]
+- [[desktop/backend/backend-src-models-clientehistoricojs|backend/src/models/ClienteHistorico.js]]
+- [[desktop/backend/backend-src-models-comissaopagajs|backend/src/models/ComissaoPaga.js]]
+- [[desktop/backend/backend-src-models-creditoclientejs|backend/src/models/CreditoCliente.js]]
+- [[desktop/backend/backend-src-models-fechamentojs|backend/src/models/Fechamento.js]]
+- [[desktop/backend/backend-src-models-pedidolojajs|backend/src/models/PedidoLoja.js]]
+- [[desktop/backend/backend-src-models-produtojs|backend/src/models/Produto.js]]
+- [[desktop/backend/backend-src-models-vendajs|backend/src/models/Venda.js]]
+- [[desktop/backend/backend-src-routes-app-clientejs|backend/src/routes/app/cliente.js]]
+- [[desktop/backend/backend-src-routes-app-lojajs|backend/src/routes/app/loja.js]]
+- [[desktop/backend/backend-src-routes-app-profissionaljs|backend/src/routes/app/profissional.js]]
+- [[desktop/backend/backend-src-routes-atendimentosjs|backend/src/routes/atendimentos.js]]
+- [[desktop/backend/backend-src-routes-comissoesjs|backend/src/routes/comissoes.js]]
+- [[desktop/backend/backend-src-routes-creditosjs|backend/src/routes/creditos.js]]
+- [[desktop/backend/backend-src-routes-fechamentosjs|backend/src/routes/fechamentos.js]]
+- [[desktop/backend/backend-src-routes-produtosjs|backend/src/routes/produtos.js]]
+- [[desktop/backend/backend-src-routes-vendasjs|backend/src/routes/vendas.js]]
+- [[desktop/backend/backend-src-serverjs|backend/src/server.js]]
+- [[desktop/backend/backend-src-services-backupservicejs|backend/src/services/backupService.js]]
+
+## Entidades Relevantes
+
+- [[server/entities/query-6626406b|query]]
+- [[server/entities/server-05c102bd|Server]]
+- [[server/entities/authmiddleware-362f3741|authMiddleware]]
+- [[server/entities/salaoid-fdc8ed5e|salaoId]]
+- [[server/entities/basemodel-dcbd4b45|BaseModel]]
+- [[server/entities/express-7a42f4f0|express]]
+- [[mobile/entities/router-8b412a3e|router]]
+- [[mobile/entities/produto-70ba4953|Produto]]
+- [[server/entities/venda-09d9107c|Venda]]
+- [[server/entities/vendaservice-b56a50d5|VendaService]]
+- [[mobile/entities/comissao-0a1a2ea1|Comissao]]
+- [[server/entities/pool-d7a9cffd|pool]]
+- [[server/entities/salao_id-da4556fc|salao_id]]
+- [[server/entities/src-routes-creditosjs-af2d5a33|src/routes/creditos.js]]
+- [[server/entities/src-routes-fechamentosjs-abdf995d|src/routes/fechamentos.js]]
+- [[server/entities/data-a46ab97e|data]]
+- [[server/entities/filtros-8c65d1ca|filtros]]
+- [[server/entities/profissional_id-26b9156f|profissional_id]]
+- [[mobile/entities/quantidade-9b6a1e41|quantidade]]
+- [[server/entities/src-routes-vendasjs-ecf3bc84|src/routes/vendas.js]]
+- [[server/entities/vendas-f43d3e0c|Vendas]]
+- [[server/entities/cliente_id-2d36c6ef|cliente_id]]
+- [[server/entities/created_at-fde8ed03|created_at]]
+- [[server/entities/updated_at-83e6897b|updated_at]]
+- [[server/entities/venda-itens-a923925d|Venda Itens]]
+- [[server/entities/vendas-d8d2c49c|vendas]]
+- [[server/entities/enddate-dff75d01|endDate]]
+- [[server/entities/get-request-97fb5b07|GET request]]
+- [[server/entities/preco-097b974f|preco]]
+- [[server/entities/startdate-5e1774de|startDate]]

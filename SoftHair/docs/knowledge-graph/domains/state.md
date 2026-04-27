@@ -1,0 +1,86 @@
+# state
+
+**Type:** `operational-domain`
+
+## Uso Para IA
+
+Use este hub para localizar os arquivos e conceitos mais relevantes sem abrir o vault inteiro.
+
+## Conceitos Principais
+
+- [[concepts/query|query]]
+- [[concepts/softhair|SoftHair]]
+- [[concepts/servicos|servicos]]
+- [[concepts/database|Database]]
+- [[concepts/profissionais|profissionais]]
+- [[concepts/cliente|Cliente]]
+- [[concepts/mobile|Mobile]]
+- [[concepts/queryone|queryOne]]
+- [[concepts/agendamentos|agendamentos]]
+- [[concepts/atendimentos|atendimentos]]
+- [[concepts/loading|Loading]]
+- [[concepts/clientes|clientes]]
+- [[concepts/saloes|Saloes]]
+- [[concepts/produtos|produtos]]
+- [[concepts/queryrun|queryRun]]
+- [[concepts/button|Button]]
+- [[concepts/saloes|saloes]]
+- [[concepts/salonid|salonId]]
+- [[concepts/skeletoncard|SkeletonCard]]
+- [[concepts/uuidv4|uuidv4]]
+
+## Arquivos Principais
+
+- [[desktop/root/securitymd|SECURITY.md]]
+- [[desktop/backend/backend-src-config-databasejs|backend/src/config/database.js]]
+- [[desktop/backend/backend-src-routes-backupjs|backend/src/routes/backup.js]]
+- [[desktop/backend/backend-src-scripts-restorejs|backend/src/scripts/restore.js]]
+- [[desktop/backend/backend-src-services-backupservicejs|backend/src/services/backupService.js]]
+- [[desktop/backend/backend-src-services-securityinitservicejs|backend/src/services/securityInitService.js]]
+- [[desktop/backend/backend-src-services-websocketservicejs|backend/src/services/websocketService.js]]
+- [[desktop/frontend/frontend-src-appjsx|frontend/src/App.jsx]]
+- [[desktop/frontend/frontend-src-components-layoutjsx|frontend/src/components/Layout.jsx]]
+- [[desktop/frontend/frontend-src-context-authcontextjsx|frontend/src/context/AuthContext.jsx]]
+- [[desktop/frontend/frontend-src-hooks-usewebsocketjs|frontend/src/hooks/useWebSocket.js]]
+- [[desktop/frontend/frontend-src-mainjsx|frontend/src/main.jsx]]
+- [[desktop/frontend/frontend-src-pages-administrativojsx|frontend/src/pages/Administrativo.jsx]]
+- [[desktop/frontend/frontend-src-pages-agendajsx|frontend/src/pages/Agenda.jsx]]
+- [[desktop/frontend/frontend-src-pages-agendamentosjsx|frontend/src/pages/Agendamentos.jsx]]
+- [[desktop/frontend/frontend-src-pages-atendimentosjsx|frontend/src/pages/Atendimentos.jsx]]
+- [[desktop/frontend/frontend-src-pages-backupjsx|frontend/src/pages/Backup.jsx]]
+- [[desktop/frontend/frontend-src-pages-clientesjsx|frontend/src/pages/Clientes.jsx]]
+- [[desktop/frontend/frontend-src-pages-configuracoesjsx|frontend/src/pages/Configuracoes.jsx]]
+- [[desktop/frontend/frontend-src-pages-customizacaojsx|frontend/src/pages/Customizacao.jsx]]
+
+## Entidades Relevantes
+
+- [[server/entities/query-6626406b|query]]
+- [[mobile/entities/softhair-dffdf835|SoftHair]]
+- [[server/entities/servicos-26bbffed|servicos]]
+- [[server/entities/database-da68fd18|Database]]
+- [[server/entities/profissionais-8bce2d1d|profissionais]]
+- [[server/entities/cliente-a14d3c03|Cliente]]
+- [[mobile/entities/mobile-a3efbae8|Mobile]]
+- [[server/entities/queryone-eec38591|queryOne]]
+- [[server/entities/agendamentos-514236d9|agendamentos]]
+- [[server/entities/atendimentos-0354854e|atendimentos]]
+- [[mobile/entities/loading-3c156a7a|Loading]]
+- [[server/entities/clientes-4486d153|clientes]]
+- [[server/entities/saloes-3362f0d7|Saloes]]
+- [[mobile/entities/produtos-cf699a76|produtos]]
+- [[server/entities/queryrun-912ecbeb|queryRun]]
+- [[mobile/entities/button-a08d57bb|Button]]
+- [[mobile/entities/saloes-1926761d|saloes]]
+- [[mobile/entities/salonid-3719bdc7|salonId]]
+- [[mobile/entities/skeletoncard-69f841d9|SkeletonCard]]
+- [[desktop/entities/uuidv4-2c2003cd|uuidv4]]
+- [[mobile/entities/usequery-3abf076a|useQuery]]
+- [[mobile/entities/authstore-079daee5|authStore]]
+- [[server/entities/usuarios-594d6a78|usuarios]]
+- [[server/entities/vendas-f43d3e0c|Vendas]]
+- [[server/entities/comissoes-abfecc38|comissoes]]
+- [[server/entities/produtos-e9a22020|Produtos]]
+- [[server/entities/profissionais-07ef59c8|Profissionais]]
+- [[server/entities/servicos-a2ac9ab0|Servicos]]
+- [[server/entities/vendas-d8d2c49c|vendas]]
+- [[server/entities/agendamentos-21fbd3a9|Agendamentos]]

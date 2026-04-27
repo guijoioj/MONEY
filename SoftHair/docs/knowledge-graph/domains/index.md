@@ -1,0 +1,17 @@
+# Domains
+
+- [[domains/agendamentos|agendamentos]]
+- [[domains/api|api]]
+- [[domains/auth|auth]]
+- [[domains/clientes|clientes]]
+- [[domains/core|core]]
+- [[domains/database|database]]
+- [[domains/mobile-ui|mobile-ui]]
+- [[domains/produtos|produtos]]
+- [[domains/profissionais|profissionais]]
+- [[domains/saloes|saloes]]
+- [[domains/security|security]]
+- [[domains/servicos|servicos]]
+- [[domains/state|state]]
+- [[domains/sync|sync]]
+- [[domains/vendas|vendas]]

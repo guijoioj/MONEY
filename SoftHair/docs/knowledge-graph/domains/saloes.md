@@ -1,0 +1,86 @@
+# saloes
+
+**Type:** `operational-domain`
+
+## Uso Para IA
+
+Use este hub para localizar os arquivos e conceitos mais relevantes sem abrir o vault inteiro.
+
+## Conceitos Principais
+
+- [[concepts/query|query]]
+- [[concepts/salaoid|salaoId]]
+- [[concepts/basemodel|BaseModel]]
+- [[concepts/profissionais|profissionais]]
+- [[concepts/router|router]]
+- [[concepts/salaopage|SalaoPage]]
+- [[concepts/queryone|queryOne]]
+- [[concepts/agendamentos|agendamentos]]
+- [[concepts/loading|Loading]]
+- [[concepts/salao|Salao]]
+- [[concepts/api|api]]
+- [[concepts/clientes|clientes]]
+- [[concepts/ionicons|Ionicons]]
+- [[concepts/button|Button]]
+- [[concepts/profissional|Profissional]]
+- [[concepts/saloes|saloes]]
+- [[concepts/salao-id|salao id]]
+- [[concepts/usequery|useQuery]]
+- [[concepts/view|View]]
+- [[concepts/text|Text]]
+
+## Arquivos Principais
+
+- [[desktop/root/readmemd|README.md]]
+- [[desktop/backend/backend-src-config-apppathsjs|backend/src/config/appPaths.js]]
+- [[desktop/backend/backend-src-models-notificacaojs|backend/src/models/Notificacao.js]]
+- [[desktop/backend/backend-src-models-pedidoagendamentojs|backend/src/models/PedidoAgendamento.js]]
+- [[desktop/backend/backend-src-models-pedidolojajs|backend/src/models/PedidoLoja.js]]
+- [[desktop/backend/backend-src-models-salaojs|backend/src/models/Salao.js]]
+- [[desktop/backend/backend-src-routes-agendamentosjs|backend/src/routes/agendamentos.js]]
+- [[desktop/backend/backend-src-routes-app-clientejs|backend/src/routes/app/cliente.js]]
+- [[desktop/backend/backend-src-routes-app-lojajs|backend/src/routes/app/loja.js]]
+- [[desktop/backend/backend-src-routes-app-pedidosjs|backend/src/routes/app/pedidos.js]]
+- [[desktop/backend/backend-src-routes-app-profissionaljs|backend/src/routes/app/profissional.js]]
+- [[desktop/backend/backend-src-scripts-createadminjs|backend/src/scripts/createAdmin.js]]
+- [[desktop/backend/backend-src-serverjs|backend/src/server.js]]
+- [[desktop/backend/backend-src-services-bootstrapservicejs|backend/src/services/bootstrapService.js]]
+- [[desktop/backend/backend-src-services-emailservicejs|backend/src/services/emailService.js]]
+- [[desktop/backend/backend-src-services-websocketservicejs|backend/src/services/websocketService.js]]
+- [[desktop/frontend/frontend-src-components-layoutjsx|frontend/src/components/Layout.jsx]]
+- [[desktop/frontend/frontend-src-pages-backupjsx|frontend/src/pages/Backup.jsx]]
+- [[desktop/frontend/frontend-src-pages-customizacaojsx|frontend/src/pages/Customizacao.jsx]]
+- [[desktop/frontend/frontend-src-pages-loginjsx|frontend/src/pages/Login.jsx]]
+
+## Entidades Relevantes
+
+- [[server/entities/query-6626406b|query]]
+- [[server/entities/salaoid-fdc8ed5e|salaoId]]
+- [[server/entities/basemodel-dcbd4b45|BaseModel]]
+- [[server/entities/profissionais-8bce2d1d|profissionais]]
+- [[mobile/entities/router-8b412a3e|router]]
+- [[mobile/entities/salaopage-64f79eaa|SalaoPage]]
+- [[server/entities/queryone-eec38591|queryOne]]
+- [[server/entities/agendamentos-514236d9|agendamentos]]
+- [[mobile/entities/loading-3c156a7a|Loading]]
+- [[mobile/entities/salao-8c91c03f|Salao]]
+- [[mobile/entities/api-13155c51|api]]
+- [[server/entities/clientes-4486d153|clientes]]
+- [[mobile/entities/ionicons-11991975|Ionicons]]
+- [[mobile/entities/button-a08d57bb|Button]]
+- [[server/entities/profissional-d484a6bc|Profissional]]
+- [[mobile/entities/saloes-1926761d|saloes]]
+- [[server/entities/salao_id-da4556fc|salao_id]]
+- [[mobile/entities/usequery-3abf076a|useQuery]]
+- [[mobile/entities/view-30f17228|View]]
+- [[mobile/entities/text-5a6e258e|Text]]
+- [[server/entities/usuarios-594d6a78|usuarios]]
+- [[desktop/entities/sistema-de-administrao-de-salo-de-beleza-b8fe2e43|Sistema de Administração de Salão de Beleza]]
+- [[mobile/entities/touchableopacity-4e5835a4|TouchableOpacity]]
+- [[server/entities/vendas-d8d2c49c|vendas]]
+- [[server/entities/api_keys-28e441c9|api_keys]]
+- [[server/entities/salaoid-f8bb7114|SalaoId]]
+- [[mobile/entities/uselocalsearchparams-6bbf1c15|useLocalSearchParams]]
+- [[mobile/entities/userouter-1fd44ee5|useRouter]]
+- [[server/entities/validatedevice-29326698|validateDevice]]
+- [[server/entities/createapikey-e6ea694f|createApiKey]]
