@@ -2,6 +2,11 @@
 
 > Segundo Cérebro — SoftHair + LifeOS
 
+## 🤖 Para a IA (Claude)
+- [[CLAUDE|📖 CLAUDE.md — Manual de Consulta]] ← **leia primeiro**
+- [[AI-CONTEXT|🤖 AI-CONTEXT — Mapa Operacional]]
+- [[Templates/AI-Prompt|💬 Templates/AI-Prompt — Como me pedir]]
+
 ## 🚀 Quick Capture
 - [[Periodic/Daily/INDEX|📅 Daily Notes]]
 - [[01-Projects/INDEX|📋 Projetos]]
@@ -25,5 +30,6 @@
 - [[Templates/Project|Projeto]]
 
 ## 🧠 Knowledge Base (SoftHair)
-- [[AI-CONTEXT|🤖 AI-CONTEXT — Mapa Operacional]]
 - [[INDEX|📊 INDEX — Knowledge Graph]]
+- [[concepts/index|📖 Concepts (673)]]
+- [[02-Areas/SoftHair|💻 Área SoftHair]]

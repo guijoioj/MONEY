@@ -1,3 +1,9 @@
+---
+type: directive
+audit-ignore: true
+note: "Os wikilinks abaixo são EXEMPLOS dentro de blocos de template, não links reais. Auditorias devem ignorar este arquivo."
+---
+
 # Diretiva: Enriquecimento do Knowledge Graph
 
 ## Objetivo

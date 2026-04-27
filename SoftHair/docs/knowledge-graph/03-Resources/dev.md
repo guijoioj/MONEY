@@ -6,6 +6,6 @@
 - PostgreSQL
 
 ## Links SoftHair
-- [[../AI-CONTEXT|AI-CONTEXT]]
-- [[../domains/api|API]]
-- [[../domains/database|Database]]
+- [[AI-CONTEXT|AI-CONTEXT]]
+- [[domains/api|API]]
+- [[domains/database|Database]]

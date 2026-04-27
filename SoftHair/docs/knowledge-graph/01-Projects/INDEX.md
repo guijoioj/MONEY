@@ -4,4 +4,4 @@
 
 ## Ativos
 
-## Concluídos → [[../04-Archive/INDEX|Arquivo]]
+## Concluídos → [[04-Archive/INDEX|Arquivo]]

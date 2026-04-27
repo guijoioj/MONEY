@@ -1,4 +1,4 @@
-# CLAUDE.md — SoftHair Ecosystem
+# CLAUDE.md — SoftHair Ecosystem (umbrella)
 
 <agent_instructions>
 MANDATORY: You must call tools immediately for every task. DO NOT write text responses describing what you will do.
@@ -18,6 +18,26 @@ You are the **world's best full-stack engineer** working on the SoftHair project
 
 ---
 
+## 🧠 SECOND BRAIN — fonte de verdade obrigatória
+
+**ANTES de qualquer tarefa que toque o sistema SoftHair**, leia o vault Obsidian:
+
+`C:\Users\guise\Documents\MONEY\SoftHair\docs\knowledge-graph`
+
+Em particular, leia primeiro:
+
+1. `knowledge-graph\CLAUDE.md` — manual de consulta da IA (regras, gatilhos, ordem de leitura)
+2. `knowledge-graph\AI-CONTEXT.md` — mapa operacional (15 domínios + entradas-fonte)
+3. `knowledge-graph\domains\<domínio>.md` — abrir o domínio relevante ao pedido
+4. `knowledge-graph\concepts\<conceito>.md` — abrir os conceitos canônicos envolvidos
+5. Só então abrir o arquivo-fonte real em `SoftHair\`, `SOFT-HAIR-SERVER\` ou `softhair-mobile\`
+
+**Stats do vault:** 233 docs · 704 entidades · 1091 relações · 15 domínios · 673 conceitos canônicos.
+
+**Gatilhos automáticos de consulta** (ver `knowledge-graph\CLAUDE.md` §2): SoftHair, agendamento, atendimento, cliente, profissional, salão, produto, comissão, venda, serviço, fechamento, crédito, ponto, rota, route, endpoint, service, model, middleware, schema, store, screen, component, hook, Express, PostgreSQL, Expo, React Native, JWT, HMAC, CORS, "do sistema", "do app", "da api".
+
+---
+
 ## Core Behavior Rules
 
 - **ALWAYS use Bash tools to execute**. Never explain commands — run them.
@@ -31,49 +51,61 @@ You are the **world's best full-stack engineer** working on the SoftHair project
 
 ---
 
-## Project Structure
+## Project Structure (3 repos + 1 vault)
 
 ```
-/home/ogejota/MONEY/
-├── SoftHair/                          # Desktop app (Electron + Web)
-│   ├── backend/                       # Node.js + Express + PostgreSQL
-│   │   └── src/
-│   │       ├── routes/                # agendamentos, auth, clientes, comissoes, creditos,
-│   │       │                          # fechamentos, historico, notificacoes, produtos,
-│   │       │                          # profissionais, servicos, vendas, atendimentos
-│   │       ├── models/                # Agendamento, Atendimento, Cliente, Profissional,
-│   │       │                          # Produto, Servico, Venda, User, Salao, Notificacao...
-│   │       ├── middleware/
-│   │       ├── services/
-│   │       └── server.js
-│   ├── frontend/                      # React + Vite + TailwindCSS + React Query
-│   │   └── src/
-│   │       ├── pages/                 # Dashboard, Agenda, Agendamentos, Atendimentos,
-│   │       │                          # Clientes, Produtos, Servicos, Vendas, Comissoes,
-│   │       │                          # Fechamento, Profissionais, Configuracoes, Backup...
-│   │       ├── components/
-│   │       ├── hooks/
-│   │       ├── services/
-│   │       └── context/
-│   └── electron/
+C:\Users\guise\Documents\MONEY\
+├── CLAUDE.md                    ← ESTE ARQUIVO (umbrella)
 │
-└── softhair-mobile/                   # React Native + Expo + Expo Router
-    └── (worktree: determined-germain-ff83ae → branch: claude/determined-germain-ff83ae)
-        └── app/
-            ├── (auth)/
-            ├── (cliente)/
-            │   ├── (tabs)/            # agendar, carrinho, loja
-            │   ├── produto/[id].tsx
-            │   └── salao/
-            └── (profissional)/
-                └── (tabs)/            # ponto
+├── SoftHair\                    ← 🖥️ DESKTOP (Electron + Web admin)
+│   ├── backend\                 # Node.js + Express + PostgreSQL
+│   │   └── src\
+│   │       ├── routes\          # agendamentos, auth, clientes, comissoes, creditos,
+│   │       │                    # fechamentos, historico, notificacoes, produtos,
+│   │       │                    # profissionais, servicos, vendas, atendimentos
+│   │       ├── models\          # Agendamento, Atendimento, Cliente, Profissional,
+│   │       │                    # Produto, Servico, Venda, User, Salao, Notificacao...
+│   │       ├── middleware\
+│   │       ├── services\
+│   │       └── server.js
+│   ├── frontend\                # React 18 + Vite + TailwindCSS + React Query
+│   │   └── src\
+│   │       ├── pages\           # Dashboard, Agenda, Agendamentos, Atendimentos,
+│   │       │                    # Clientes, Produtos, Servicos, Vendas, Comissoes,
+│   │       │                    # Fechamento, Profissionais, Configuracoes, Backup...
+│   │       ├── components\
+│   │       ├── hooks\
+│   │       ├── services\
+│   │       └── context\
+│   ├── electron\
+│   ├── docs\knowledge-graph\    ← 🧠 VAULT (segundo cérebro)
+│   └── CLAUDE.md                ← regras específicas do desktop
+│
+├── SOFT-HAIR-SERVER\            ← 🖥️ SERVER (API standalone)
+│   ├── src\                     # Node.js + Express + PostgreSQL
+│   ├── docs\
+│   ├── tools\
+│   ├── migrate.js
+│   └── CLAUDE.md                ← regras específicas do server
+│
+└── softhair-mobile\             ← 📱 MOBILE (Expo + React Native)
+    ├── app\                     # Expo Router (file-based)
+    │   ├── (auth)\
+    │   ├── (cliente)\
+    │   │   ├── (tabs)\          # agendar, carrinho, loja
+    │   │   ├── produto\[id].tsx
+    │   │   └── salao\
+    │   └── (profissional)\
+    │       └── (tabs)\          # ponto
+    ├── components\
+    └── CLAUDE.md                ← regras específicas do mobile
 ```
 
 ---
 
-## Tech Stack
+## Tech Stack por repo
 
-### Backend (SoftHair/backend)
+### 🖥️ SoftHair (desktop) — backend
 - **Runtime**: Node.js
 - **Framework**: Express.js
 - **Database**: PostgreSQL (via `pg`)
@@ -85,7 +117,7 @@ You are the **world's best full-stack engineer** working on the SoftHair project
 - **WebSocket**: ws
 - **Other**: cors, dotenv, uuid
 
-### Frontend (SoftHair/frontend)
+### 🖥️ SoftHair (desktop) — frontend
 - **Framework**: React 18
 - **Build**: Vite
 - **Styling**: TailwindCSS + PostCSS
@@ -94,8 +126,17 @@ You are the **world's best full-stack engineer** working on the SoftHair project
 - **Routing**: react-router-dom
 - **Charts**: recharts
 - **Icons**: lucide-react
+- **Container**: Electron
 
-### Mobile (softhair-mobile)
+### 🖥️ SOFT-HAIR-SERVER (API)
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: PostgreSQL
+- **Auth**: JWT + HMAC signatures
+- **Migrations**: `migrate.js`
+- **Tools**: `tools/`
+
+### 📱 softhair-mobile
 - **Framework**: React Native + Expo SDK
 - **Routing**: Expo Router (file-based)
 - **Styling**: NativeWind (TailwindCSS for RN)
@@ -109,40 +150,36 @@ You are the **world's best full-stack engineer** working on the SoftHair project
 
 ## Git & GitHub
 
-### Repositories
-| Repo | Local Path | Remote |
-|------|-----------|--------|
-| SoftHair | `/home/ogejota/MONEY/SoftHair` | `https://github.com/guijoioj/SoftHair` |
-| softhair-mobile | `/home/ogejota/MONEY/softhair-mobile` | `https://github.com/guijoioj/softhair-mobile` |
-| softhair-mobile (worktree) | `/home/ogejota/MONEY/softhair-mobile/.claude/worktrees/determined-germain-ff83ae` | branch: `claude/determined-germain-ff83ae` |
+### Repositórios
+| Repo | Local Path (Windows) | Remote |
+|------|---------------------|--------|
+| SoftHair (desktop) | `C:\Users\guise\Documents\MONEY\SoftHair` | `https://github.com/guijoioj/SoftHair` |
+| SOFT-HAIR-SERVER | `C:\Users\guise\Documents\MONEY\SOFT-HAIR-SERVER` | (preencher) |
+| softhair-mobile | `C:\Users\guise\Documents\MONEY\softhair-mobile` | `https://github.com/guijoioj/softhair-mobile` |
 
 ### Git credentials
 - **Username**: guijoioj
-- **Token**: already configured in remotes
-- **GitHub CLI**: `gh` is authenticated — use it for all GitHub operations
+- **Token**: já configurado nos remotes
+- **GitHub CLI**: `gh` autenticado — usar pra todas as operações GitHub
 
 ### Commit & Push pattern
 ```bash
-# SoftHair backend/frontend
-git -C /home/ogejota/MONEY/SoftHair add . && git -C /home/ogejota/MONEY/SoftHair commit -m "feat: description" && git -C /home/ogejota/MONEY/SoftHair push origin master
-
-# softhair-mobile worktree
-WORKTREE="/home/ogejota/MONEY/softhair-mobile/.claude/worktrees/determined-germain-ff83ae"
-git -C "$WORKTREE" add . && git -C "$WORKTREE" commit -m "feat: description" && git -C "$WORKTREE" push origin claude/determined-germain-ff83ae
+# Em qualquer um dos 3 repos, padrão é:
+git add . && git commit -m "feat: descrição" && git push origin master
 ```
 
-### Creating a new GitHub repo
+### Criar novo repo GitHub
 ```bash
 gh repo create guijoioj/<REPO-NAME> --public
-git -C <local-path> remote add origin https://github.com/guijoioj/<REPO-NAME>.git
-git -C <local-path> add . && git -C <local-path> commit -m "Initial commit" && git -C <local-path> push -u origin master
+git remote add origin https://github.com/guijoioj/<REPO-NAME>.git
+git add . && git commit -m "Initial commit" && git push -u origin master
 ```
 
 ---
 
 ## Code Standards
 
-### Backend
+### Backend (SoftHair/backend e SOFT-HAIR-SERVER)
 - Use `async/await` — never callbacks
 - Always wrap route handlers in `try/catch` with proper error responses
 - Return consistent JSON: `{ success: true, data: ... }` or `{ success: false, error: "..." }`
@@ -151,7 +188,7 @@ git -C <local-path> add . && git -C <local-path> commit -m "Initial commit" && g
 - Never expose passwords or tokens in responses
 - Use transactions for multi-table operations
 
-### Frontend (React)
+### Frontend (SoftHair/frontend — React)
 - Functional components only — no class components
 - Use TanStack React Query for ALL server state (no useState for API data)
 - Custom hooks in `hooks/` for reusable logic
@@ -160,7 +197,7 @@ git -C <local-path> add . && git -C <local-path> commit -m "Initial commit" && g
 - Use `lucide-react` for icons
 - Error boundaries on page-level components
 
-### Mobile (React Native / Expo)
+### Mobile (softhair-mobile — React Native / Expo)
 - File-based routing with Expo Router
 - NativeWind for all styling
 - TanStack React Query for server state
@@ -174,45 +211,61 @@ git -C <local-path> add . && git -C <local-path> commit -m "Initial commit" && g
 ## Development Commands
 
 ```bash
-# Backend
-cd /home/ogejota/MONEY/SoftHair/backend && npm run dev
+# Desktop — backend
+cd C:\Users\guise\Documents\MONEY\SoftHair\backend && npm run dev
 
-# Frontend
-cd /home/ogejota/MONEY/SoftHair/frontend && npm run dev
+# Desktop — frontend
+cd C:\Users\guise\Documents\MONEY\SoftHair\frontend && npm run dev
+
+# Server (API standalone)
+cd C:\Users\guise\Documents\MONEY\SOFT-HAIR-SERVER && npm run dev
 
 # Mobile
-cd /home/ogejota/MONEY/softhair-mobile && npx expo start
-# or worktree:
-cd /home/ogejota/MONEY/softhair-mobile/.claude/worktrees/determined-germain-ff83ae && npx expo start
+cd C:\Users\guise\Documents\MONEY\softhair-mobile && npx expo start
 ```
 
 ---
 
 ## Domain Knowledge
 
-SoftHair is a **hair salon management system** with three layers:
+SoftHair é um **sistema de gestão para salões de beleza** com três camadas:
 
-1. **Desktop app** (SoftHair): Used by salon owners/admins to manage everything
-2. **Mobile app** (softhair-mobile): Used by clients and professionals
+1. **🖥️ Desktop app** (`SoftHair/`): usado por donos/administradores do salão pra gerenciar tudo (Electron empacotando frontend + backend embarcado).
+2. **🖥️ Server API** (`SOFT-HAIR-SERVER/`): API standalone (backend separado), serve mobile e integrações externas.
+3. **📱 Mobile app** (`softhair-mobile/`): usado por clientes (agendar, comprar produtos) e profissionais (bater ponto, ver agenda).
 
-### Core domain entities
-- **Salão**: The salon itself (settings, customization)
-- **Profissional**: Hairdressers/staff with schedules and commissions
-- **Cliente**: Customers with history and credits
-- **Agendamento**: Appointments (requested by clients, confirmed by salon)
-- **Atendimento**: Completed service sessions
-- **Serviço**: Services offered (haircut, color, etc.)
-- **Produto**: Products sold in the salon store
-- **Venda**: Sales (products + services)
-- **Comissão**: Professional commissions per service
-- **Fechamento**: Financial closing (daily/weekly/monthly)
-- **Ponto**: Professional time tracking (clock in/out)
-- **Crédito**: Client store credits
-- **Notificação**: Push/in-app notifications
+### Entidades de domínio principais
+- **Salão**: o salão em si (settings, customização)
+- **Profissional**: cabeleireiros/staff com agendas e comissões
+- **Cliente**: clientes com histórico e créditos
+- **Agendamento**: appointments (cliente solicita, salão confirma)
+- **Atendimento**: sessões concluídas de serviço
+- **Serviço**: serviços oferecidos (corte, coloração etc.)
+- **Produto**: produtos vendidos na loja do salão
+- **Venda**: vendas (produtos + serviços)
+- **Comissão**: comissões dos profissionais por serviço
+- **Fechamento**: fechamento financeiro (diário/semanal/mensal)
+- **Ponto**: registro de ponto dos profissionais (entrada/saída)
+- **Crédito**: créditos do cliente na loja
+- **Notificação**: push e in-app notifications
 
-### Business rules
-- Clients request appointments → salon confirms or rejects
-- Professionals have individual schedules and service lists
-- Commissions are calculated per professional per service
-- Financial closing aggregates all sales, services and commissions
-- Credits can be used as payment in the store
+### Regras de negócio
+- Clientes solicitam agendamento → salão confirma ou rejeita
+- Profissionais têm agendas individuais e listas de serviços
+- Comissões calculadas por profissional por serviço
+- Fechamento financeiro agrega todas as vendas, serviços e comissões
+- Créditos podem ser usados como pagamento na loja
+
+---
+
+## O que NUNCA fazer
+
+- Nunca propor mudança de código sem antes consultar `domains/` + `concepts/` no vault.
+- Nunca editar `knowledge-graph\INDEX.md` (auto-gerado pelo LightRAG).
+- Nunca quebrar wikilinks existentes ao renomear arquivos/símbolos no vault.
+- Nunca alterar arquivos `knowledge-graph\.obsidian\` (config do app, não conteúdo).
+- Nunca apagar nota do vault sem pedir confirmação.
+
+---
+
+*Última revisão: 2026-04-27 · Mantido por Claude + oGejota.*
