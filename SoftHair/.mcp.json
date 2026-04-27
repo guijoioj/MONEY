@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "lightrag": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "/home/ogejota/MONEY/SoftHair/tools/lightrag",
+        "kg-server"
+      ]
+    },
+    "obsidian": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "obsidian-mcp",
+        "/home/ogejota/MONEY/SoftHair/docs/knowledge-graph"
+      ]
+    }
+  }
+}

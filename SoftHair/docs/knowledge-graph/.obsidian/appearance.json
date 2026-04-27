@@ -1,0 +1,11 @@
+{
+  "theme": "system",
+  "cssTheme": "Wasp",
+  "enabledCssSnippets": [
+    "ITS-Encoded-Fonts",
+    "ITS-Encoded-Icons",
+    "wasp-graph-lines"
+  ],
+  "baseFontSize": 16,
+  "accentColor": "#ffae00"
+}

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Perfil de desenvolvedor - SoftHair Ecosystem">
+    <meta name="keywords" content="GitHub, Developer, SoftHair, React, Node.js, React Native">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="guijoioj | Black Swordsman Developer">
+    <meta property="og:description" content="Criador do SoftHair Ecosystem - Sistema de gestão para salões de beleza">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fira+Code:wght@400;500;600&family=Creepster&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+
+    <title>guijoioj | Black Swordsman Developer</title>
+</head>
+<body>
+    <!-- Particles Canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Dark Aura Overlay -->
+    <div class="dark-aura"></div>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Header / Banner -->
+        <header class="profile-header">
+            <div class="banner-container">
+                <div class="banner-overlay"></div>
+                <div class="guts-silhouette">
+                    <div class="dragon-slayer">
+                        <div class="blade"></div>
+                        <div class="handle"></div>
+                    </div>
+                </div>
+                <div class="berserk-brand"></div>
+            </div>
+
+            <div class="profile-info">
+                <div class="avatar-container">
+                    <div class="avatar-glow"></div>
+                    <img src="https://github.com/guijoioj.png" alt="Profile Avatar" class="avatar">
+                    <div class="berserk-symbol"></div>
+                </div>
+                <h1 class="profile-title">
+                    <span class="title-text">guijoioj</span>
+                    <span class="title-subtitle">Black Swordsman Developer</span>
+                </h1>
+                <p class="profile-bio" id="typing-bio"></p>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" data-target="0" id="repos-count">0</span>
+                        <span class="stat-label">Repositórios</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-target="0" id="followers-count">0</span>
+                        <span class="stat-label">Seguidores</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-target="0" id="following-count">0</span>
+                        <span class="stat-label">Seguindo</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Featured Projects - SoftHair Ecosystem -->
+                <section class="card featured-projects">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="icon">⚔️</span>
+                            Projetos Principais
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <!-- SoftHair -->
+                        <article class="project-card featured" data-repo="SoftHair">
+                            <div class="project-glow"></div>
+                            <div class="project-header">
+                                <h3 class="project-name">
+                                    <svg class="repo-icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                                    </svg>
+                                    SoftHair
+                                </h3>
+                                <a href="https://github.com/guijoioj/SoftHair" target="_blank" class="project-link">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                                        <path d="M14 3h7v7h-2V6.414l-8.293 8.293-1.414-1.414L17.586 5H14V3zm-4 6H3v7h7v-2H5V11h5V9z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                            <p class="project-description">
+                                Sistema completo de gestão para salões de beleza.
+                                Desktop app (Electron + React) com backend Node.js + PostgreSQL.
+                            </p>
+                            <div class="project-tags">
+                                <span class="tag">Node.js</span>
+                                <span class="tag">React</span>
+                                <span class="tag">Electron</span>
+                                <span class="tag">PostgreSQL</span>
+                                <span class="tag">Express</span>
+                            </div>
+                            <div class="project-stats">
+                                <span class="stat"><span class="stat-dot">●</span> <span id="softhair-stars">0</span> stars</span>
+                                <span class="stat"><span class="stat-dot">●</span> <span id="softhair-forks">0</span> forks</span>
+                            </div>
+                        </article>
+
+                        <!-- softhair-mobile -->
+                        <article class="project-card featured" data-repo="softhair-mobile">
+                            <div class="project-glow"></div>
+                            <div class="project-header">
+                                <h3 class="project-name">
+                                    <svg class="repo-icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
+                                    </svg>
+                                    softhair-mobile
+                                </h3>
+                                <a href="https://github.com/guijoioj/softhair-mobile" target="_blank" class="project-link">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                                        <path d="M14 3h7v7h-2V6.414l-8.293 8.293-1.414-1.414L17.586 5H14V3zm-4 6H3v7h7v-2H5V11h5V9z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                            <p class="project-description">
+                                Aplicativo móvel do SoftHair construído com React Native + Expo.
+                                Interface para clientes e profissionais agendarem serviços.
+                            </p>
+                            <div class="project-tags">
+                                <span class="tag">React Native</span>
+                                <span class="tag">Expo</span>
+                                <span class="tag">TypeScript</span>
+                                <span class="tag">Mobile</span>
+                            </div>
+                            <div class="project-stats">
+                                <span class="stat"><span class="stat-dot">●</span> <span id="mobile-stars">0</span> stars</span>
+                                <span class="stat"><span class="stat-dot">●</span> <span id="mobile-forks">0</span> forks</span>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <!-- Terminal -->
+                <section class="card terminal-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="icon">💀</span>
+                            Terminal do Cavaleiro Negro
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="terminal" id="terminal">
+                            <div class="terminal-header">
+                                <span class="terminal-title">bash@berserk:~</span>
+                                <div class="terminal-buttons">
+                                    <span class="btn-close"></span>
+                                    <span class="btn-minimize"></span>
+                                    <span class="btn-maximize"></span>
+                                </div>
+                            </div>
+                            <div class="terminal-body" id="terminal-body">
+                                <div class="terminal-line">
+                                    <span class="prompt">root@berserk:~$</span>
+                                    <span class="command">Digite <span class="cmd-highlight">help</span> para ver os comandos disponíveis</span>
+                                </div>
+                                <div class="terminal-line input-line">
+                                    <span class="prompt">root@berserk:~$</span>
+                                    <input type="text" id="terminal-input" class="terminal-input" autocomplete="off">
+                                    <span class="cursor"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Skills -->
+                <section class="card skills-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="icon">🗡️</span>
+                            Habilidades de Combate
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="skills-grid">
+                            <div class="skill-item">
+                                <div class="skill-header">
+                                    <span class="skill-name">JavaScript/TypeScript</span>
+                                    <span class="skill-percent">90%</span>
+                                </div>
+                                <div class="skill-bar">
+                                    <div class="skill-progress" data-progress="90"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-header">
+                                    <span class="skill-name">React/React Native</span>
+                                    <span class="skill-percent">85%</span>
+                                </div>
+                                <div class="skill-bar">
+                                    <div class="skill-progress" data-progress="85"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-header">
+                                    <span class="skill-name">Node.js</span>
+                                    <span class="skill-percent">88%</span>
+                                </div>
+                                <div class="skill-bar">
+                                    <div class="skill-progress" data-progress="88"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-header">
+                                    <span class="skill-name">PostgreSQL</span>
+                                    <span class="skill-percent">80%</span>
+                                </div>
+                                <div class="skill-bar">
+                                    <div class="skill-progress" data-progress="80"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-header">
+                                    <span class="skill-name">Electron</span>
+                                    <span class="skill-percent">75%</span>
+                                </div>
+                                <div class="skill-bar">
+                                    <div class="skill-progress" data-progress="75"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-header">
+                                    <span class="skill-name">DevOps/CI/CD</span>
+                                    <span class="skill-percent">70%</span>
+                                </div>
+                                <div class="skill-bar">
+                                    <div class="skill-progress" data-progress="70"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Snake Game -->
+                <section class="card snake-game-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="icon">🐍</span>
+                            Dragon Slayer Game
+                        </h2>
+                        <button class="game-btn" id="start-game">Iniciar Jogo</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="game-container" id="game-container">
+                            <canvas id="snake-canvas" width="300" height="300"></canvas>
+                            <div class="game-overlay" id="game-overlay">
+                                <p class="game-message">Derrote os Apóstolos!</p>
+                                <p class="game-score">Score: <span id="game-score">0</span></p>
+                                <button class="game-start-btn" id="game-start-btn">Começar Batalha</button>
+                            </div>
+                        </div>
+                        <div class="game-controls">
+                            <p>Use <kbd>WASD</kbd> ou <kbd>Setas</kbd> para mover</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Berserk Quotes -->
+                <section class="card quotes-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="icon">📜</span>
+                            Palavras do Cavaleiro
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="quotes-carousel" id="quotes-carousel">
+                            <div class="quote-item active">
+                                <blockquote class="quote">
+                                    "Lute. Até você morrer. Lute até vencer!"
+                                </blockquote>
+                                <cite class="quote-author">— Guts</cite>
+                            </div>
+                            <div class="quote-item">
+                                <blockquote class="quote">
+                                    "Se você está sempre pensando em desistir, você já desistiu."
+                                </blockquote>
+                                <cite class="quote-author">— Guts</cite>
+                            </div>
+                            <div class="quote-item">
+                                <blockquote class="quote">
+                                    "Eu não acredito em sonhos. Eu os faço realidade."
+                                </blockquote>
+                                <cite class="quote-author">— Guts</cite>
+                            </div>
+                            <div class="quote-item">
+                                <blockquote class="quote">
+                                    "A única maneira de realmente viver é lutar contra o destino."
+                                </blockquote>
+                                <cite class="quote-author">— Guts</cite>
+                            </div>
+                        </div>
+                        <div class="quote-dots">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                            <span class="dot" data-index="3"></span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Visit Counter -->
+                <section class="card visit-counter-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="icon">👁️</span>
+                            Visitantes do Abismo
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="counter-display">
+                            <div class="counter-digit" id="counter-1">0</div>
+                            <div class="counter-digit" id="counter-2">0</div>
+                            <div class="counter-digit" id="counter-3">0</div>
+                            <div class="counter-digit" id="counter-4">0</div>
+                            <div class="counter-digit" id="counter-5">0</div>
+                        </div>
+                        <p class="counter-label">almas já visitaram este reino</p>
+                    </div>
+                </section>
+
+                <!-- Languages -->
+                <section class="card languages-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="icon">📊</span>
+                            Linguagens Mais Usadas
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div id="languages-chart" class="languages-chart">
+                            <div class="loading">Carregando dados do GitHub...</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="profile-footer">
+            <div class="footer-content">
+                <p class="footer-text">
+                    Forjado no Abismo do Código © <span id="current-year"></span>
+                </p>
+                <div class="social-links">
+                    <a href="https://github.com/guijoioj" target="_blank" class="social-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="24">
+                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/particles.js"></script>
+    <script type="module" src="js/terminal.js"></script>
+    <script type="module" src="js/snake-game.js"></script>
+    <script type="module" src="js/github-stats.js"></script>
+    <script type="module" src="js/animations.js"></script>
+</body>
+</html>

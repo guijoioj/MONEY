@@ -1,0 +1,45 @@
+# Arquivos de ambiente
+.env
+.env.local
+.env.development
+.env.production
+
+# Node modules (quando presentes)
+**/node_modules/
+
+# Arquivos temporários
+dist*/
+*.log
+.DS_Store
+Thumbs.db
+
+# Banco de dados SQLite
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# Pasta de upload de imagens/pdfs
+uploads/
+
+# Arquivos de build
+build/
+dist/
+.electron/
+
+# Logs
+db.log
+*.log
+
+# Configurações do VS Code
+.vscode/
+
+# Diretórios temporários do sistema
+/tmp/
+/temp/
+
+# Git submodules originais (para evitar conflitos)
+**/.git/
+
+# Pastas de deploy e build específicas
+softhair-mobile/db/
+softhair-mobile/dist*/

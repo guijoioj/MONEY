@@ -1,0 +1,44 @@
+{
+  "name": "softHair",
+  "version": "2.2.0",
+  "description": "SoftHair - Sistema de Administracao de Salao de Beleza",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "npm run build:frontend && electron-builder",
+    "build:frontend": "cd frontend && npm run build",
+    "build:win": "npm run build:frontend && electron-builder --win",
+    "build:linux": "npm run build:frontend && electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.softHair.app",
+    "productName": "SoftHair",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "frontend/dist/**/*",
+      "backend/**/*",
+      "MANUAL-DE-USO.html"
+    ],
+    "extraResources": [
+      {
+        "from": "backend/data",
+        "to": "backend/data",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": "dir"
+    }
+  },
+  "keywords": ["beauty", "salon", "management", "desktop"],
+  "author": "SoftHair",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3"
+  }
+}

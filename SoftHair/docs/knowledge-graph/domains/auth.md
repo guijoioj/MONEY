@@ -1,0 +1,86 @@
+# auth
+
+**Type:** `operational-domain`
+
+## Uso Para IA
+
+Use este hub para localizar os arquivos e conceitos mais relevantes sem abrir o vault inteiro.
+
+## Conceitos Principais
+
+- [[concepts/server|Server]]
+- [[concepts/authmiddleware|authMiddleware]]
+- [[concepts/salaoid|salaoId]]
+- [[concepts/express|express]]
+- [[concepts/soft-hair-server|SOFT HAIR SERVER]]
+- [[concepts/authservice|AuthService]]
+- [[concepts/profissionalappmiddleware|profissionalAppMiddleware]]
+- [[concepts/appauthmiddleware|appAuthMiddleware]]
+- [[concepts/mobile|Mobile]]
+- [[concepts/clientes|clientes]]
+- [[concepts/api-key|API Key]]
+- [[concepts/pool|pool]]
+- [[concepts/rootlayoutnav|RootLayoutNav]]
+- [[concepts/saloes|saloes]]
+- [[concepts/salonid|salonId]]
+- [[concepts/user|User]]
+- [[concepts/routes-auth|routes auth]]
+- [[concepts/database|database]]
+- [[concepts/optionalauth|optionalAuth]]
+- [[concepts/token|Token]]
+
+## Arquivos Principais
+
+- [[desktop/root/readmemd|README.md]]
+- [[desktop/root/securitymd|SECURITY.md]]
+- [[desktop/backend/backend-src-config-apppathsjs|backend/src/config/appPaths.js]]
+- [[desktop/backend/backend-src-config-databasejs|backend/src/config/database.js]]
+- [[desktop/backend/backend-src-middleware-appauthjs|backend/src/middleware/appAuth.js]]
+- [[desktop/backend/backend-src-middleware-authjs|backend/src/middleware/auth.js]]
+- [[desktop/backend/backend-src-middleware-securityjs|backend/src/middleware/security.js]]
+- [[desktop/backend/backend-src-models-clienteappjs|backend/src/models/ClienteApp.js]]
+- [[desktop/backend/backend-src-models-userjs|backend/src/models/User.js]]
+- [[desktop/backend/backend-src-routes-agendamentosjs|backend/src/routes/agendamentos.js]]
+- [[desktop/backend/backend-src-routes-app-authjs|backend/src/routes/app/auth.js]]
+- [[desktop/backend/backend-src-routes-app-clientejs|backend/src/routes/app/cliente.js]]
+- [[desktop/backend/backend-src-routes-app-lojajs|backend/src/routes/app/loja.js]]
+- [[desktop/backend/backend-src-routes-app-pedidosjs|backend/src/routes/app/pedidos.js]]
+- [[desktop/backend/backend-src-routes-app-profissionaljs|backend/src/routes/app/profissional.js]]
+- [[desktop/backend/backend-src-routes-app-securityjs|backend/src/routes/app/security.js]]
+- [[desktop/backend/backend-src-routes-atendimentosjs|backend/src/routes/atendimentos.js]]
+- [[desktop/backend/backend-src-routes-authjs|backend/src/routes/auth.js]]
+- [[desktop/backend/backend-src-routes-backupjs|backend/src/routes/backup.js]]
+- [[desktop/backend/backend-src-routes-clientesjs|backend/src/routes/clientes.js]]
+
+## Entidades Relevantes
+
+- [[server/entities/server-05c102bd|Server]]
+- [[server/entities/authmiddleware-362f3741|authMiddleware]]
+- [[server/entities/salaoid-fdc8ed5e|salaoId]]
+- [[server/entities/express-7a42f4f0|express]]
+- [[server/entities/soft-hair-server-213a3f56|SOFT-HAIR-SERVER]]
+- [[server/entities/authservice-ad9c3659|AuthService]]
+- [[desktop/entities/profissionalappmiddleware-16d447b0|profissionalAppMiddleware]]
+- [[desktop/entities/appauthmiddleware-59f35c8e|appAuthMiddleware]]
+- [[mobile/entities/mobile-a3efbae8|Mobile]]
+- [[server/entities/clientes-4486d153|clientes]]
+- [[server/entities/api-key-f4531a1f|API Key]]
+- [[server/entities/pool-d7a9cffd|pool]]
+- [[mobile/entities/rootlayoutnav-ea88db7e|RootLayoutNav]]
+- [[mobile/entities/saloes-1926761d|saloes]]
+- [[mobile/entities/salonid-3719bdc7|salonId]]
+- [[server/entities/src-routes-authjs-e6bad066|src/routes/auth.js]]
+- [[server/entities/user-d4cdbe14|User]]
+- [[server/entities/database-bddf0941|database]]
+- [[server/entities/optionalauth-3e7378c0|optionalAuth]]
+- [[server/entities/token-7f7b1d43|Token]]
+- [[mobile/entities/authstore-079daee5|authStore]]
+- [[desktop/entities/device-id-00d099de|Device ID]]
+- [[server/entities/express-validator-9943c6b3|express-validator]]
+- [[desktop/entities/hmac-signature-13bd2023|HMAC Signature]]
+- [[server/entities/jwt-4c8fec89|jwt]]
+- [[server/entities/profissionalid-849cc286|profissionalId]]
+- [[server/entities/usuarios-594d6a78|usuarios]]
+- [[server/entities/admin-2402c450|Admin]]
+- [[server/entities/bearer-8c7058f9|Bearer]]
+- [[server/entities/crypto-dc904b96|crypto]]

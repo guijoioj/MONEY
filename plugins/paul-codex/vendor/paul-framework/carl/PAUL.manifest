@@ -1,0 +1,11 @@
+# ============================================================================
+# PAUL - Plan-Apply-Unify Loop (AI-assisted development workflow)
+# ============================================================================
+# Installation:
+#   1. Copy the PAUL domain file to ~/.carl/PAUL (or project .carl/PAUL)
+#   2. Append this block to your ~/.carl/manifest (or project .carl/manifest)
+# ============================================================================
+PAUL_STATE=active
+PAUL_ALWAYS_ON=false
+PAUL_RECALL=paul,plan phase,apply phase,unify phase,PLAN.md,STATE.md,development workflow,vibe coding,ai development,planning framework,.paul/
+# PAUL_EXCLUDE=
