@@ -3,7 +3,6 @@ import { authAPI } from '../services/api';
 
 const AuthContext = createContext(null);
 
-// Memory-only token storage para máxima segurança (não sobrevive a recarregar página)
 let authToken = null;
 let authUser = null;
 
@@ -47,16 +46,6 @@ export function AuthProvider({ children }) {
     return res.data.data;
   };
 
-  const handleRegister = async (data) => {
-    const res = await authAPI.register(data);
-    const { token, user } = res.data.data;
-    authToken = token;
-    authUser = user;
-    localStorage.setItem('token', token);
-    setUser(user);
-    return res.data.data;
-  };
-
   const handleLogout = () => {
     authToken = null;
     authUser = null;
@@ -64,28 +53,12 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const changePassword = async (currentPassword, newPassword) => {
-    await authAPI.changePassword({ currentPassword, newPassword });
-  };
-
-  const forgotPassword = async (email) => {
-    await authAPI.forgotPassword(email);
-  };
-
-  const resetPassword = async (token, password) => {
-    await authAPI.resetPassword(token, password);
-  };
-
   return (
     <AuthContext.Provider value={{
       user,
       loading,
       login: handleLogin,
-      register: handleRegister,
       logout: handleLogout,
-      changePassword,
-      forgotPassword,
-      resetPassword,
       isAuthenticated: !!authToken
     }}>
       {children}

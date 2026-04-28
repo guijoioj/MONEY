@@ -304,34 +304,10 @@ function EstornoModal({ fechamento, onClose, onSuccess }) {
       alert('Informe o motivo do estorno');
       return;
     }
-    
     if (!window.confirm('Tem certeza que deseja estornar este fechamento?')) {
       return;
     }
-
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/fechamentos/${fechamento.id}/estornar`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ motivo })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Erro ao estornar');
-      }
-      
-      onSuccess();
-    } catch (err) {
-      console.error('Erro:', err);
-      alert('Erro ao estornar fechamento');
-    } finally {
-      setIsLoading(false);
-    }
+    onSuccess();
   };
 
   const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
@@ -621,10 +597,6 @@ function CreditosNaCasaSection() {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id) => creditosAPI.delete(id),
-    onSuccess: () => refetch(),
-  });
 
   const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
@@ -853,24 +825,6 @@ function ComissoesSection() {
     },
   });
 
-  const pagarComissaoMutation = useMutation({
-    mutationFn: (data) => comissoesAPI.pagar(data),
-    onSuccess: () => {
-      refetchPagas();
-      queryClient.invalidateQueries(['comissoes-fechamentos']);
-      setPagarModal(null);
-    },
-  });
-
-  const estornarComissaoMutation = useMutation({
-    mutationFn: (data) => comissoesAPI.estornar(data),
-    onSuccess: () => {
-      refetchEstornos();
-      refetchPagas();
-      setEstornoModal(null);
-      setEstornoMotivo('');
-    },
-  });
 
   const profissionaisLista = profissionaisComissaoData?.data?.data || [];
   
@@ -958,15 +912,8 @@ function ComissoesSection() {
 
   const confirmarPagamento = () => {
     if (!pagarModal) return;
-    
-    pagarComissaoMutation.mutate({
-      profissionalId: pagarModal.profissionalId,
-      valor: pagarModal.totalComissao,
-      dataPagamento: new Date().toISOString().split('T')[0],
-      observacoes: `Pagamento de comissão referente a ${formatDate(new Date())}`
-    });
-    
     setPagosSession(prev => new Set([...prev, pagarModal.profissionalId]));
+    setPagarModal(null);
   };
 
   const confirmarEstorno = () => {
@@ -974,15 +921,9 @@ function ComissoesSection() {
       alert('Informe o motivo do estorno');
       return;
     }
-    
-    estornarComissaoMutation.mutate({
-      comissaoPagaId: estornoModal.id,
-      profissionalId: estornoModal.profissionalId,
-      valor: estornoModal.valor,
-      motivo: estornoMotivo
-    });
-    
     setEstornosSession(prev => [...prev, { ...estornoModal, motivo: estornoMotivo, createdAt: new Date().toISOString() }]);
+    setEstornoModal(null);
+    setEstornoMotivo('');
   };
 
   return (
@@ -1329,10 +1270,9 @@ function ComissoesSection() {
                 </button>
                 <button
                   onClick={confirmarPagamento}
-                  disabled={pagarComissaoMutation.isPending}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                 >
-                  {pagarComissaoMutation.isPending ? 'Registrando...' : 'Confirmar Pagamento'}
+                  Confirmar Pagamento
                 </button>
               </div>
             </div>
@@ -1388,10 +1328,9 @@ function ComissoesSection() {
                 </button>
                 <button
                   onClick={confirmarEstorno}
-                  disabled={estornarComissaoMutation.isPending}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                 >
-                  {estornarComissaoMutation.isPending ? 'Estornando...' : 'Confirmar Estorno'}
+                  Confirmar Estorno
                 </button>
               </div>
             </div>

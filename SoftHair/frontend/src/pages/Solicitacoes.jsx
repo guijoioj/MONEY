@@ -1,15 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Calendar, Clock, User, Phone, Scissors, CheckCircle, XCircle,
-  AlertCircle, ChevronRight, RefreshCw, Inbox
-} from 'lucide-react';
-import api from '../services/api';
+import { Calendar, User, Phone, Scissors, CheckCircle, XCircle, RefreshCw, Inbox } from 'lucide-react';
+import { agendamentosAPI } from '../services/api';
 
 const TABS = [
-  { key: 'pendente',  label: 'Pendentes' },
-  { key: 'aprovado',  label: 'Aprovadas' },
-  { key: 'rejeitado', label: 'Rejeitadas' },
-  { key: '',          label: 'Todas' },
+  { key: 'pendente',   label: 'Pendentes' },
+  { key: 'confirmado', label: 'Aprovadas' },
+  { key: 'cancelado',  label: 'Rejeitadas' },
+  { key: '',           label: 'Todas' },
 ];
 
 function formatDateTime(dataHora) {
@@ -18,17 +15,11 @@ function formatDateTime(dataHora) {
   return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-function formatDate(date) {
-  if (!date) return '—';
-  const [y, m, d] = date.split('-');
-  return `${d}/${m}/${y}`;
-}
-
 function StatusBadge({ status }) {
   const cfg = {
-    pendente:  { label: 'Pendente',  bg: 'bg-yellow-100', text: 'text-yellow-800' },
-    aprovado:  { label: 'Aprovado',  bg: 'bg-green-100',  text: 'text-green-800'  },
-    rejeitado: { label: 'Rejeitado', bg: 'bg-red-100',    text: 'text-red-800'    },
+    pendente:   { label: 'Pendente',  bg: 'bg-yellow-100', text: 'text-yellow-800' },
+    confirmado: { label: 'Aprovado',  bg: 'bg-green-100',  text: 'text-green-800'  },
+    cancelado:  { label: 'Rejeitado', bg: 'bg-red-100',    text: 'text-red-800'    },
   }[status] || { label: status, bg: 'bg-gray-100', text: 'text-gray-700' };
   return (
     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
@@ -38,59 +29,33 @@ function StatusBadge({ status }) {
 }
 
 function PedidoCard({ pedido, onAtualizado }) {
-  const [state, setState] = useState({
-    verificando: false,
-    disponibilidade: null,
-    buscandoProximo: false,
-    proximoHorario: null,
-    aceitando: false,
-    rejeitando: false,
-    motivo: '',
-    confirmandoRejeicao: false,
-    erro: '',
-  });
+  const [aceitando, setAceitando] = useState(false);
+  const [rejeitando, setRejeitando] = useState(false);
+  const [motivo, setMotivo] = useState('');
+  const [confirmandoRejeicao, setConfirmandoRejeicao] = useState(false);
+  const [erro, setErro] = useState('');
 
-  const set = (patch) => setState((prev) => ({ ...prev, ...patch }));
-
-  const verificarDisponibilidade = async () => {
-    set({ verificando: true, disponibilidade: null, proximoHorario: null, erro: '' });
+  const aceitar = async () => {
+    setAceitando(true);
+    setErro('');
     try {
-      const res = await api.get(`/app/pedidos/${pedido.id}/verificar-disponibilidade`);
-      set({ disponibilidade: res.data, verificando: false });
-    } catch (e) {
-      set({ verificando: false, erro: e.response?.data?.error || 'Erro ao verificar' });
-    }
-  };
-
-  const buscarProximoHorario = async () => {
-    set({ buscandoProximo: true, erro: '' });
-    try {
-      const res = await api.get(`/app/pedidos/${pedido.id}/proximo-horario`);
-      set({ proximoHorario: res.data.dataHora, buscandoProximo: false });
-    } catch (e) {
-      set({ buscandoProximo: false, erro: e.response?.data?.error || 'Nenhum horário disponível' });
-    }
-  };
-
-  const aceitar = async (dataHoraOverride) => {
-    set({ aceitando: true, erro: '' });
-    try {
-      const body = {};
-      if (dataHoraOverride) body.dataHora = dataHoraOverride;
-      await api.put(`/app/pedidos/${pedido.id}/aprovar`, body);
+      await agendamentosAPI.update(pedido.id, { status: 'confirmado' });
       onAtualizado();
     } catch (e) {
-      set({ aceitando: false, erro: e.response?.data?.error || 'Erro ao aceitar' });
+      setErro(e.response?.data?.error || 'Erro ao aceitar');
+      setAceitando(false);
     }
   };
 
   const rejeitar = async () => {
-    set({ confirmandoRejeicao: true, erro: '' });
+    setConfirmandoRejeicao(true);
+    setErro('');
     try {
-      await api.put(`/app/pedidos/${pedido.id}/rejeitar`, { motivo: state.motivo });
+      await agendamentosAPI.update(pedido.id, { status: 'cancelado', observacoes: motivo });
       onAtualizado();
     } catch (e) {
-      set({ confirmandoRejeicao: false, erro: e.response?.data?.error || 'Erro ao rejeitar' });
+      setErro(e.response?.data?.error || 'Erro ao rejeitar');
+      setConfirmandoRejeicao(false);
     }
   };
 
@@ -101,20 +66,21 @@ function PedidoCard({ pedido, onAtualizado }) {
       className="rounded-xl shadow-sm border p-5"
       style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
     >
-      {/* Header do card */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
             style={{ backgroundColor: 'var(--color-primary)' }}
           >
-            {(pedido.clienteNome || '?')[0].toUpperCase()}
+            {(pedido.clienteNome || pedido.cliente_nome || '?')[0].toUpperCase()}
           </div>
           <div>
-            <p className="font-semibold" style={{ color: 'var(--color-text)' }}>{pedido.clienteNome || 'Cliente desconhecido'}</p>
-            {pedido.clienteTelefone && (
+            <p className="font-semibold" style={{ color: 'var(--color-text)' }}>
+              {pedido.clienteNome || pedido.cliente_nome || 'Cliente desconhecido'}
+            </p>
+            {(pedido.clienteTelefone || pedido.cliente_telefone) && (
               <p className="text-xs flex items-center gap-1" style={{ color: 'var(--color-text-light)' }}>
-                <Phone size={11} /> {pedido.clienteTelefone}
+                <Phone size={11} /> {pedido.clienteTelefone || pedido.cliente_telefone}
               </p>
             )}
           </div>
@@ -122,26 +88,19 @@ function PedidoCard({ pedido, onAtualizado }) {
         <StatusBadge status={pedido.status} />
       </div>
 
-      {/* Detalhes */}
       <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
         <div className="flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
           <Scissors size={14} style={{ color: 'var(--color-primary)' }} />
-          <span className="truncate">{pedido.servicoNome || '—'}</span>
+          <span className="truncate">{pedido.servicoNome || pedido.servico_nome || '—'}</span>
         </div>
         <div className="flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
           <Calendar size={14} style={{ color: 'var(--color-primary)' }} />
-          <span>{formatDate(pedido.dataDesejada)} às {pedido.horarioDesejado?.slice(0,5) || '—'}</span>
+          <span>{formatDateTime(pedido.dataHora || pedido.data_hora)}</span>
         </div>
-        {pedido.profissionalNome && (
+        {(pedido.profissionalNome || pedido.profissional_nome) && (
           <div className="flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
             <User size={14} style={{ color: 'var(--color-primary)' }} />
-            <span className="truncate">{pedido.profissionalNome}</span>
-          </div>
-        )}
-        {pedido.horarioAlternativo && (
-          <div className="flex items-center gap-2" style={{ color: 'var(--color-text-light)' }}>
-            <Clock size={14} />
-            <span>Alt: {pedido.horarioAlternativo?.slice(0,5)}</span>
+            <span className="truncate">{pedido.profissionalNome || pedido.profissional_nome}</span>
           </div>
         )}
       </div>
@@ -152,104 +111,24 @@ function PedidoCard({ pedido, onAtualizado }) {
         </p>
       )}
 
-      {/* Área de ações (apenas pendentes) */}
       {isPendente && (
         <div className="border-t pt-4 space-y-3" style={{ borderColor: 'var(--color-border)' }}>
-          {state.erro && (
-            <p className="text-xs text-red-600 flex items-center gap-1">
-              <AlertCircle size={13} /> {state.erro}
-            </p>
-          )}
+          {erro && <p className="text-xs text-red-600">{erro}</p>}
 
-          {/* Botão verificar disponibilidade */}
-          {!state.disponibilidade && (
+          <button
+            onClick={aceitar}
+            disabled={aceitando}
+            className="w-full text-sm font-medium py-2 px-4 rounded-lg text-white flex items-center justify-center gap-2"
+            style={{ backgroundColor: 'var(--color-success)' }}
+          >
+            {aceitando
+              ? <><RefreshCw size={14} className="animate-spin" /> Agendando...</>
+              : <><CheckCircle size={14} /> Aceitar</>}
+          </button>
+
+          {!rejeitando ? (
             <button
-              onClick={verificarDisponibilidade}
-              disabled={state.verificando}
-              className="w-full text-sm font-medium py-2 px-4 rounded-lg border transition-colors flex items-center justify-center gap-2"
-              style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
-            >
-              {state.verificando
-                ? <><RefreshCw size={14} className="animate-spin" /> Verificando...</>
-                : <><CheckCircle size={14} /> Verificar Disponibilidade</>}
-            </button>
-          )}
-
-          {/* Resultado da verificação */}
-          {state.disponibilidade && (
-            <div>
-              {state.disponibilidade.disponivel ? (
-                <div className="rounded-lg p-3 bg-green-50 border border-green-200 mb-3">
-                  <p className="text-sm text-green-700 font-medium flex items-center gap-1">
-                    <CheckCircle size={15} /> Horário disponível
-                    {state.disponibilidade.semProfissional && ' (sem preferência de profissional)'}
-                  </p>
-                </div>
-              ) : (
-                <div className="rounded-lg p-3 bg-red-50 border border-red-200 mb-3">
-                  <p className="text-sm text-red-700 font-medium flex items-center gap-1">
-                    <XCircle size={15} /> Horário ocupado
-                  </p>
-                  {state.disponibilidade.conflito && (
-                    <p className="text-xs text-red-600 mt-1">
-                      Conflito: {state.disponibilidade.conflito.servicoNome} às {formatDateTime(state.disponibilidade.conflito.dataHora)}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Próximo horário */}
-              {!state.disponibilidade.disponivel && !state.proximoHorario && (
-                <button
-                  onClick={buscarProximoHorario}
-                  disabled={state.buscandoProximo}
-                  className="w-full text-sm font-medium py-2 px-4 rounded-lg border mb-2 transition-colors flex items-center justify-center gap-2"
-                  style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
-                >
-                  {state.buscandoProximo
-                    ? <><RefreshCw size={14} className="animate-spin" /> Buscando...</>
-                    : <><ChevronRight size={14} /> Ver Próximo Horário Vago</>}
-                </button>
-              )}
-
-              {state.proximoHorario && (
-                <div className="rounded-lg p-3 bg-blue-50 border border-blue-200 mb-3">
-                  <p className="text-sm text-blue-700 font-medium">
-                    Próximo disponível: {formatDateTime(state.proximoHorario)}
-                  </p>
-                  <button
-                    onClick={() => aceitar(state.proximoHorario)}
-                    disabled={state.aceitando}
-                    className="mt-2 w-full text-sm font-medium py-1.5 px-4 rounded-lg text-white flex items-center justify-center gap-2"
-                    style={{ backgroundColor: '#3b82f6' }}
-                  >
-                    {state.aceitando
-                      ? <><RefreshCw size={13} className="animate-spin" /> Agendando...</>
-                      : <><CheckCircle size={13} /> Aceitar com este horário</>}
-                  </button>
-                </div>
-              )}
-
-              {/* Aceitar com horário original (se disponível) */}
-              {state.disponibilidade.disponivel && (
-                <button
-                  onClick={() => aceitar(null)}
-                  disabled={state.aceitando}
-                  className="w-full text-sm font-medium py-2 px-4 rounded-lg text-white mb-2 flex items-center justify-center gap-2"
-                  style={{ backgroundColor: 'var(--color-success)' }}
-                >
-                  {state.aceitando
-                    ? <><RefreshCw size={14} className="animate-spin" /> Agendando...</>
-                    : <><CheckCircle size={14} /> Aceitar</>}
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Rejeitar */}
-          {!state.rejeitando ? (
-            <button
-              onClick={() => set({ rejeitando: true })}
+              onClick={() => setRejeitando(true)}
               className="w-full text-sm font-medium py-2 px-4 rounded-lg border transition-colors flex items-center justify-center gap-2"
               style={{ borderColor: '#ef4444', color: '#ef4444' }}
             >
@@ -258,8 +137,8 @@ function PedidoCard({ pedido, onAtualizado }) {
           ) : (
             <div className="space-y-2">
               <textarea
-                value={state.motivo}
-                onChange={(e) => set({ motivo: e.target.value })}
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
                 placeholder="Motivo da rejeição (opcional)"
                 className="w-full text-sm border rounded-lg p-2 resize-none"
                 rows={2}
@@ -268,15 +147,15 @@ function PedidoCard({ pedido, onAtualizado }) {
               <div className="flex gap-2">
                 <button
                   onClick={rejeitar}
-                  disabled={state.confirmandoRejeicao}
+                  disabled={confirmandoRejeicao}
                   className="flex-1 text-sm font-medium py-1.5 rounded-lg text-white flex items-center justify-center gap-1"
                   style={{ backgroundColor: '#ef4444' }}
                 >
-                  {state.confirmandoRejeicao ? <RefreshCw size={13} className="animate-spin" /> : <XCircle size={13} />}
+                  {confirmandoRejeicao ? <RefreshCw size={13} className="animate-spin" /> : <XCircle size={13} />}
                   Confirmar
                 </button>
                 <button
-                  onClick={() => set({ rejeitando: false, motivo: '' })}
+                  onClick={() => { setRejeitando(false); setMotivo(''); }}
                   className="flex-1 text-sm py-1.5 rounded-lg border"
                   style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-light)' }}
                 >
@@ -288,17 +167,16 @@ function PedidoCard({ pedido, onAtualizado }) {
         </div>
       )}
 
-      {/* Info aprovação/rejeição */}
-      {pedido.status === 'aprovado' && pedido.agendamentoId && (
+      {pedido.status === 'confirmado' && (
         <div className="border-t pt-3 mt-3" style={{ borderColor: 'var(--color-border)' }}>
           <p className="text-xs text-green-600 flex items-center gap-1">
-            <CheckCircle size={13} /> Convertido em agendamento
+            <CheckCircle size={13} /> Agendamento confirmado
           </p>
         </div>
       )}
-      {pedido.status === 'rejeitado' && pedido.motivoRejeicao && (
+      {pedido.status === 'cancelado' && pedido.observacoes && (
         <div className="border-t pt-3 mt-3" style={{ borderColor: 'var(--color-border)' }}>
-          <p className="text-xs text-red-600">Motivo: {pedido.motivoRejeicao}</p>
+          <p className="text-xs text-red-600">Motivo: {pedido.observacoes}</p>
         </div>
       )}
     </div>
@@ -314,8 +192,8 @@ export default function Solicitacoes() {
     setCarregando(true);
     try {
       const params = tabAtiva ? { status: tabAtiva } : {};
-      const res = await api.get('/app/pedidos/salao', { params });
-      setPedidos(res.data.data || []);
+      const res = await agendamentosAPI.getAll(params);
+      setPedidos(res.data?.data || []);
     } catch {}
     setCarregando(false);
   }, [tabAtiva]);
@@ -344,7 +222,6 @@ export default function Solicitacoes() {
         </button>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b" style={{ borderColor: 'var(--color-border)' }}>
         {TABS.map((tab) => {
           const isActive = tabAtiva === tab.key;
@@ -370,7 +247,6 @@ export default function Solicitacoes() {
         })}
       </div>
 
-      {/* Conteúdo */}
       {carregando ? (
         <div className="flex justify-center py-16">
           <RefreshCw size={28} className="animate-spin" style={{ color: 'var(--color-primary)' }} />

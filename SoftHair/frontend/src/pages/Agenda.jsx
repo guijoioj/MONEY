@@ -201,54 +201,16 @@ export default function Agenda() {
   };
 
   const converterMutation = useMutation({
-    mutationFn: () => agendamentosAPI.converterTodos(),
-    onSuccess: (res) => {
-      if (res.data?.resultados?.length > 0) {
-        setNotificacao({
-          tipo: 'success',
-          mensagem: `${res.data.resultados.length} atendimento(s) criado(s) automaticamente!`
-        });
-        setAgendamentosConvertidos(res.data.resultados.map(r => r.atendimento?.id));
-      }
-      setTimeout(() => {
-        queryClient.removeQueries(['agendamentos-calendario']);
-        queryClient.removeQueries(['agendamentos-pendentes']);
-        queryClient.removeQueries(['atendimentos']);
-        queryClient.removeQueries(['atendimentos-agenda']);
-        queryClient.invalidateQueries(['agendamentos-calendario']);
-        queryClient.invalidateQueries(['agendamentos-pendentes']);
-        queryClient.invalidateQueries(['atendimentos']);
-        queryClient.invalidateQueries(['atendimentos-agenda']);
-      }, 100);
-    },
-    onError: () => {
-      console.error('Erro ao converter agendamentos');
+    mutationFn: () => Promise.resolve({ data: { resultados: [] } }),
+    onSuccess: () => {
+      setNotificacao({ tipo: 'info', mensagem: 'Conversão automática não disponível neste servidor.' });
     },
   });
 
   const converterUmMutation = useMutation({
-    mutationFn: ({ id, navigateAfter = false }) => agendamentosAPI.converter(id).then(res => ({ ...res, _navigateAfter: navigateAfter })),
-    onSuccess: (res) => {
-      setTimeout(() => {
-        queryClient.removeQueries(['agendamentos-calendario']);
-        queryClient.removeQueries(['agendamentos-pendentes']);
-        queryClient.removeQueries(['atendimentos']);
-        queryClient.removeQueries(['atendimentos-agenda']);
-        queryClient.invalidateQueries(['agendamentos-calendario']);
-        queryClient.invalidateQueries(['agendamentos-pendentes']);
-        queryClient.invalidateQueries(['atendimentos']);
-        queryClient.invalidateQueries(['atendimentos-agenda']);
-      }, 100);
-
-      if (res._navigateAfter) {
-        const atendimentoId = res.data?.atendimento?.id;
-        if (atendimentoId) {
-          navigate(`/atendimentos?edit=${atendimentoId}`);
-        }
-      }
-    },
-    onError: () => {
-      console.error('Erro ao converter um agendamento');
+    mutationFn: () => Promise.resolve({}),
+    onSuccess: () => {
+      setNotificacao({ tipo: 'info', mensagem: 'Conversão para atendimento não disponível neste servidor.' });
     },
   });
 

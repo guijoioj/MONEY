@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fechamentosAPI, clientesAPI, profissionaisAPI, configuracoesAPI, creditosAPI } from '../services/api';
+import { fechamentosAPI, clientesAPI, profissionaisAPI, saloesAPI, creditosAPI } from '../services/api';
 import { 
   Search, User, Package, Scissors, CreditCard, QrCode, Building, CheckCircle, 
   X, ChevronDown, ChevronUp, Clock, Phone, ShoppingBag, Receipt, DollarSign,
@@ -35,30 +35,31 @@ export default function Fechamento() {
       return creditosAPI.getSaldo(pagamentoModal.clienteId);
     },
     enabled: !!pagamentoModal?.clienteId,
-    onSuccess: (res) => {
-      setCreditoDisponivel(res.data?.data?.saldo || 0);
-    },
   });
 
   useEffect(() => {
-    if (creditoData?.data?.data?.saldo !== undefined) {
-      setCreditoDisponivel(creditoData.data.data.saldo);
+    const registros = creditoData?.data?.data;
+    if (Array.isArray(registros)) {
+      const saldo = registros.reduce((sum, r) => {
+        return r.tipo === 'debito' ? sum - (r.valor || 0) : sum + (r.valor || 0);
+      }, 0);
+      setCreditoDisponivel(Math.max(0, saldo));
     }
   }, [creditoData]);
 
   const { data: configData } = useQuery({
-    queryKey: ['configuracoes'],
-    queryFn: () => configuracoesAPI.getAll(),
+    queryKey: ['salao-me'],
+    queryFn: () => saloesAPI.getMe(),
     onSuccess: (res) => {
-      if (res.data?.chavePix) {
-        setChavePix(res.data.chavePix);
+      if (res.data?.data?.chavePix) {
+        setChavePix(res.data.data.chavePix);
       }
     },
   });
 
   useEffect(() => {
-    if (configData?.data?.chavePix) {
-      setChavePix(configData.data.chavePix);
+    if (configData?.data?.data?.chavePix) {
+      setChavePix(configData.data.data.chavePix);
     }
   }, [configData]);
 

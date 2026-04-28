@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { clientesAPI, historicoAPI, vendasAPI, fechamentosAPI, creditosAPI } from '../services/api';
-import { Search, Plus, Edit2, Trash2, X, Phone, Mail, Calendar, AlertCircle, User, Clock, Package, Scissors, DollarSign, Star, TrendingUp, ShoppingCart, ShoppingBag, RotateCcw, Gift } from 'lucide-react';
+import { clientesAPI, vendasAPI, fechamentosAPI } from '../services/api';
+import { Search, Plus, Edit2, Trash2, X, Phone, Mail, Calendar, AlertCircle, User, Clock, Package, Scissors, DollarSign, Star, TrendingUp, ShoppingCart, ShoppingBag, Gift } from 'lucide-react';
 
 export default function Clientes() {
   const [search, setSearch] = useState('');
@@ -10,30 +10,14 @@ export default function Clientes() {
   const [deleteModal, setDeleteModal] = useState({ open: false, cliente: null });
   const [profileModal, setProfileModal] = useState({ open: false, cliente: null });
   const [comprasModal, setComprasModal] = useState({ open: false, cliente: null });
-  const [formData, setFormData] = useState({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', endereco: '', observacoes: '' });
+  const [formData, setFormData] = useState({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', observacoes: '' });
 
-  const { data: historicoData, isLoading: loadingHistorico, refetch: refetchHistorico } = useQuery({
-    queryKey: ['historico-cliente', profileModal.cliente?.id],
-    queryFn: async () => {
-      if (!profileModal.cliente?.id) return null;
-      try {
-        const res = await historicoAPI.getResumo(profileModal.cliente.id);
-        console.log('Historico API response:', res.data);
-        return res.data.data;
-      } catch (err) {
-        console.error('Erro ao buscar historico:', err);
-        return null;
-      }
-    },
-    enabled: !!profileModal.cliente?.id,
-  });
-
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['clientes', search],
     queryFn: () => clientesAPI.getAll({ search }),
   });
 
-  const { data: vendasClienteData, refetch: refetchVendas } = useQuery({
+  const { data: vendasClienteData } = useQuery({
     queryKey: ['vendas-cliente', comprasModal.cliente?.id],
     queryFn: () => {
       if (!comprasModal.cliente?.id) return [];
@@ -42,8 +26,7 @@ export default function Clientes() {
     enabled: !!comprasModal.cliente?.id,
   });
 
-  // Buscar fechamentos do cliente para o histórico
-  const { data: fechamentosClienteData, refetch: refetchFechamentos } = useQuery({
+  const { data: fechamentosClienteData } = useQuery({
     queryKey: ['fechamentos-cliente', profileModal.cliente?.id],
     queryFn: () => {
       if (!profileModal.cliente?.id) return [];
@@ -52,21 +35,7 @@ export default function Clientes() {
     enabled: !!profileModal.cliente?.id,
   });
 
-  // Buscar saldo de crédito da cliente (fidelidade)
-  const { data: creditoData, refetch: refetchCredito } = useQuery({
-    queryKey: ['credito-saldo', profileModal.cliente?.id],
-    queryFn: () => {
-      if (!profileModal.cliente?.id) return 0;
-      return creditosAPI.getSaldo(profileModal.cliente.id);
-    },
-    enabled: !!profileModal.cliente?.id,
-  });
-
-  const [estornoModal, setEstornoModal] = useState({ open: false, fechamento: null });
-  const [estornoMotivo, setEstornoMotivo] = useState('');
-
   const queryClient = useQueryClient();
-
   const [error, setError] = useState('');
 
   const createMutation = useMutation({
@@ -104,38 +73,20 @@ export default function Clientes() {
     },
   });
 
-  const estornoMutation = useMutation({
-    mutationFn: async ({ id, motivo }) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/fechamentos/${id}/estornar`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ motivo })
-      });
-      if (!response.ok) throw new Error('Erro ao estornar');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['historico-cliente']);
-      queryClient.invalidateQueries(['fechamentos-cliente']);
-      setEstornoModal({ open: false, fechamento: null });
-      setEstornoMotivo('');
-    },
-    onError: (err) => {
-      alert('Erro ao estornar fechamento');
-    },
-  });
-
   const openModal = (cliente = null) => {
     if (cliente) {
       setEditingCliente(cliente);
-      setFormData(cliente);
+      setFormData({
+        nome: cliente.nome || '',
+        email: cliente.email || '',
+        telefone: cliente.telefone || '',
+        cpf: cliente.cpf || '',
+        dataNascimento: cliente.dataNascimento || cliente.data_nascimento || '',
+        observacoes: cliente.observacoes || '',
+      });
     } else {
       setEditingCliente(null);
-      setFormData({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', endereco: '', observacoes: '' });
+      setFormData({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', observacoes: '' });
     }
     setIsModalOpen(true);
   };
@@ -143,7 +94,7 @@ export default function Clientes() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingCliente(null);
-    setFormData({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', endereco: '', observacoes: '' });
+    setFormData({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', observacoes: '' });
   };
 
   const handleSubmit = (e) => {
@@ -152,16 +103,6 @@ export default function Clientes() {
       updateMutation.mutate({ id: editingCliente.id, data: formData });
     } else {
       createMutation.mutate(formData);
-    }
-  };
-
-  const handleDeleteClick = (cliente) => {
-    setDeleteModal({ open: true, cliente });
-  };
-
-  const confirmDelete = () => {
-    if (deleteModal.cliente) {
-      deleteMutation.mutate(deleteModal.cliente.id);
     }
   };
 
@@ -177,6 +118,8 @@ export default function Clientes() {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('pt-BR');
   };
+
+  const fechamentos = fechamentosClienteData?.data?.data || [];
 
   return (
     <div>
@@ -238,7 +181,7 @@ export default function Clientes() {
                         <button onClick={() => openModal(cliente)} className="p-2 text-blue-600 hover:bg-blue-50 rounded">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => handleDeleteClick(cliente)} className="p-2 text-red-600 hover:bg-red-50 rounded">
+                        <button onClick={() => setDeleteModal({ open: true, cliente })} className="p-2 text-red-600 hover:bg-red-50 rounded">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -251,6 +194,7 @@ export default function Clientes() {
         </div>
       )}
 
+      {/* Modal Criar/Editar */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -311,15 +255,6 @@ export default function Clientes() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-                <input
-                  type="text"
-                  value={formData.endereco}
-                  onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
                 <textarea
                   value={formData.observacoes}
@@ -346,6 +281,7 @@ export default function Clientes() {
         </div>
       )}
 
+      {/* Modal Confirmação Exclusão */}
       {deleteModal.open && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl w-full max-w-md">
@@ -366,7 +302,7 @@ export default function Clientes() {
                   Cancelar
                 </button>
                 <button
-                  onClick={confirmDelete}
+                  onClick={() => deleteMutation.mutate(deleteModal.cliente.id)}
                   disabled={deleteMutation.isPending}
                   className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50"
                 >
@@ -378,9 +314,10 @@ export default function Clientes() {
         </div>
       )}
 
+      {/* Modal Perfil */}
       {profileModal.open && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -395,161 +332,63 @@ export default function Clientes() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-6">
-              {loadingHistorico ? (
-                <div className="text-center py-8 text-gray-500">Carregando histórico...</div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-                    <div className="bg-pink-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-pink-600 mb-1">
-                        <Scissors size={16} />
-                        <span className="text-sm font-medium">Atendimentos</span>
-                      </div>
-                      <p className="text-2xl font-bold text-gray-800">{historicoData?.resumo?.totalAtendimentos || 0}</p>
-                    </div>
-                    <div className="bg-purple-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-purple-600 mb-1">
-                        <ShoppingCart size={16} />
-                        <span className="text-sm font-medium">Compras</span>
-                      </div>
-                      <p className="text-2xl font-bold text-gray-800">{historicoData?.resumo?.totalVendas || 0}</p>
-                    </div>
-                    <div className="bg-green-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-green-600 mb-1">
-                        <DollarSign size={16} />
-                        <span className="text-sm font-medium">Gasto em Serviços</span>
-                      </div>
-                      <p className="text-lg font-bold text-gray-800">{formatCurrency(historicoData?.resumo?.totalGastoServicos)}</p>
-                    </div>
-                    <div className="bg-orange-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-orange-600 mb-1">
-                        <Package size={16} />
-                        <span className="text-sm font-medium">Gasto em Produtos</span>
-                      </div>
-                      <p className="text-lg font-bold text-gray-800">{formatCurrency(historicoData?.resumo?.totalGastoProdutos)}</p>
-                    </div>
-                    <div className="bg-yellow-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-yellow-600 mb-1">
-                        <Gift size={16} />
-                        <span className="text-sm font-medium">Crédito</span>
-                      </div>
-                      <p className="text-lg font-bold text-gray-800">{formatCurrency(creditoData?.data?.data?.saldo || 0)}</p>
-                      <p className="text-xs text-yellow-600">5% acima de R$100</p>
-                    </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-yellow-50 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-yellow-600 mb-1">
+                    <Gift size={16} />
+                    <span className="text-sm font-medium">Crédito</span>
                   </div>
+                  <p className="text-lg font-bold text-gray-800">{formatCurrency(profileModal.cliente?.credito || 0)}</p>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-blue-600 mb-1">
+                    <Clock size={16} />
+                    <span className="text-sm font-medium">Fechamentos</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-800">{fechamentos.length}</p>
+                </div>
+                <div className="bg-green-50 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-green-600 mb-1">
+                    <DollarSign size={16} />
+                    <span className="text-sm font-medium">Total Gasto</span>
+                  </div>
+                  <p className="text-lg font-bold text-gray-800">
+                    {formatCurrency(fechamentos.reduce((sum, f) => sum + (f.totalGeral || f.total || 0), 0))}
+                  </p>
+                </div>
+              </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <Star className="text-yellow-500" size={18} />
-                        Serviços Mais Frequentes
-                      </h3>
-                      {historicoData?.resumo?.servicosFavoritos?.length > 0 ? (
-                        <div className="space-y-2">
-                          {historicoData.resumo.servicosFavoritos.map((serv, idx) => (
-                            <div key={idx} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
-                              <div>
-                                <p className="font-medium text-gray-800">{serv.nome}</p>
-                                <p className="text-xs text-gray-500">{serv.categoria || '-'}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-medium text-indigo-600">{serv.count}x</p>
-                                <p className="text-xs text-gray-500">{formatCurrency(serv.totalGasto || 0)}</p>
-                              </div>
-                            </div>
-                          ))}
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <Clock className="text-blue-500" size={18} />
+                  Últimos Fechamentos
+                </h3>
+                {fechamentos.length > 0 ? (
+                  <div className="space-y-2">
+                    {fechamentos.slice(0, 10).map((fech) => (
+                      <div key={fech.id} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-800">{formatDate(fech.data)}</p>
+                          <p className="text-xs text-gray-500">
+                            {fech.profissionalNome || 'Profissional não informado'}
+                          </p>
                         </div>
-                      ) : (
-                        <p className="text-gray-400 text-sm">Nenhum serviço registrado</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <Package className="text-purple-500" size={18} />
-                        Produtos Mais Comprados
-                      </h3>
-                      {historicoData?.resumo?.produtosFavoritos?.length > 0 ? (
-                        <div className="space-y-2">
-                          {historicoData.resumo.produtosFavoritos.map((prod, idx) => (
-                            <div key={idx} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
-                              <div>
-                                <p className="font-medium text-gray-800">{prod.nome}</p>
-                                <p className="text-xs text-gray-500">{prod.categoria || '-'}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-medium text-purple-600">{prod.quantidade}x</p>
-                                <p className="text-xs text-gray-500">{formatCurrency(prod.totalGasto || 0)}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-400 text-sm">Nenhuma compra registrada</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                      <TrendingUp className="text-green-500" size={18} />
-                      Profissionais Preferidos
-                    </h3>
-                    {historicoData?.resumo?.profissionaisFavoritos?.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {historicoData.resumo.profissionaisFavoritos.map((prof, idx) => (
-                          <span key={idx} className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm">
-                            {prof.nome} ({prof.count}x)
-                          </span>
-                        ))}
+                        <p className="font-bold text-green-600">{formatCurrency(fech.totalGeral || fech.total || 0)}</p>
                       </div>
-                    ) : (
-                      <p className="text-gray-400 text-sm">Nenhum profissional registrado</p>
-                    )}
+                    ))}
                   </div>
-
-                  <div className="mt-6">
-                    <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                      <Clock className="text-blue-500" size={18} />
-                      Últimos Fechamentos
-                    </h3>
-                    {historicoData?.resumo?.atendimentos?.length > 0 ? (
-                      <div className="space-y-2">
-                        {historicoData.resumo.atendimentos.slice(0, 10).map((fech) => (
-                          <div key={fech.id} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
-                            <div>
-                              <p className="font-medium text-gray-800">{formatDate(fech.data)}</p>
-                              <p className="text-xs text-gray-500">
-                                {fech.profissionalNome || 'Profissional não informado'} | 
-                                Serviços: {formatCurrency(fech.totalAtendimentos)} | Produtos: {formatCurrency(fech.totalVendas)}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <p className="font-bold text-green-600">{formatCurrency(fech.totalGeral)}</p>
-                              <button
-                                onClick={() => setEstornoModal({ open: true, fechamento: fech })}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded"
-                                title="Estornar"
-                              >
-                                <RotateCcw size={16} />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-400 text-sm">Nenhum fechamento registrado</p>
-                    )}
-                  </div>
-                </>
-              )}
+                ) : (
+                  <p className="text-gray-400 text-sm">Nenhum fechamento registrado</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
+      {/* Modal Compras */}
       {comprasModal.open && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
@@ -567,7 +406,7 @@ export default function Clientes() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-6">
               {!vendasClienteData?.data?.data || vendasClienteData.data.data.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
@@ -580,7 +419,7 @@ export default function Clientes() {
                     <div key={venda.id} className="bg-gray-50 rounded-lg p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <p className="font-semibold text-gray-800">Venda #{venda.id.slice(0, 8)}</p>
+                          <p className="font-semibold text-gray-800">Venda #{venda.id?.slice(0, 8) || venda.id}</p>
                           <p className="text-sm text-gray-500">{formatDate(venda.data)}</p>
                         </div>
                         <div className="text-right">
@@ -592,19 +431,15 @@ export default function Clientes() {
                           </span>
                         </div>
                       </div>
-                      
+
                       {venda.itens && venda.itens.length > 0 && (
                         <div className="border-t pt-3">
                           <p className="text-sm font-medium text-gray-600 mb-2">Produtos:</p>
                           <div className="space-y-1">
                             {venda.itens.filter(i => i.tipo === 'produto').map((item, idx) => (
                               <div key={idx} className="flex justify-between text-sm">
-                                <span className="text-gray-700">
-                                  {item.produtoNome || item.itemNome || 'Produto'}
-                                </span>
-                                <span className="text-gray-600">
-                                  {item.quantidade}x {formatCurrency(item.precoUnitario)}
-                                </span>
+                                <span className="text-gray-700">{item.produtoNome || item.itemNome || 'Produto'}</span>
+                                <span className="text-gray-600">{item.quantidade}x {formatCurrency(item.precoUnitario)}</span>
                               </div>
                             ))}
                           </div>
@@ -612,7 +447,7 @@ export default function Clientes() {
                       )}
                     </div>
                   ))}
-                  
+
                   <div className="bg-green-50 rounded-lg p-4 mt-4">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-gray-800">Total Gasto em Produtos:</span>
@@ -623,72 +458,6 @@ export default function Clientes() {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {estornoModal.open && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-md">
-            <div className="p-6 border-b flex items-center justify-between">
-              <h3 className="text-lg font-bold text-gray-800">Estornar Fechamento</h3>
-              <button onClick={() => setEstornoModal({ open: false, fechamento: null })} className="text-gray-400 hover:text-gray-600">
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className="p-6 space-y-4">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-700 font-medium">Atenção! Esta ação não pode ser desfeita.</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Data</p>
-                  <p className="font-medium">{formatDate(estornoModal.fechamento?.data)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Total</p>
-                  <p className="font-bold text-red-600">{formatCurrency(estornoModal.fechamento?.totalGeral)}</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Motivo do Estorno *</label>
-                <textarea
-                  value={estornoMotivo}
-                  onChange={(e) => setEstornoMotivo(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                  rows={3}
-                  placeholder="Informe o motivo do estorno..."
-                />
-              </div>
-            </div>
-
-            <div className="p-6 border-t flex gap-3">
-              <button
-                onClick={() => setEstornoModal({ open: false, fechamento: null })}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => {
-                  if (!estornoMotivo.trim()) {
-                    alert('Informe o motivo do estorno');
-                    return;
-                  }
-                  estornoMutation.mutate({ 
-                    id: estornoModal.fechamento.id, 
-                    motivo: estornoMotivo 
-                  });
-                }}
-                disabled={estornoMutation.isPending}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-              >
-                {estornoMutation.isPending ? 'Estornando...' : 'Confirmar Estorno'}
-              </button>
             </div>
           </div>
         </div>
