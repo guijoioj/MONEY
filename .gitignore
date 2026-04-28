@@ -31,3 +31,8 @@ build/
 # Misc
 coverage/
 .nyc_output/
+
+# Claude Code worktrees e settings locais
+**/.claude/worktrees/
+**/.claude/settings.local.json
+.claude/settings.local.json
