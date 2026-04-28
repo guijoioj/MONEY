@@ -62,7 +62,7 @@ export default function SaloesScreen() {
       const res = await api.get('/saloes/publico', {
         params: search ? { search } : undefined,
       });
-      return res.data.data as Salao[];
+      return (res.data.data ?? []) as Salao[];
     },
   });
 

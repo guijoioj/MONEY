@@ -17,7 +17,7 @@ export function useAuth() {
   };
 
   const loginProfissional = async (email, password) => {
-    const response = await api.post('/app/auth/login', {
+    const response = await api.post('/app/profissional/auth/login', {
       email,
       password,
     });
