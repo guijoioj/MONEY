@@ -9,14 +9,15 @@ const clienteService = new ClienteService();
 // Listar clientes
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { search, ativo, page = 1, limit = 50 } = req.query;
+    const { search, ativo, page = 1, limit = 500 } = req.query;
     const salaoId = req.salaoId;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
     let filtros = {};
     if (ativo !== undefined) filtros.ativo = ativo === 'true';
     if (search) filtros.termo = search;
 
-    const result = await clienteService.listar(salaoId, filtros);
+    const result = await clienteService.listar(salaoId, filtros, { limit: parseInt(limit), offset, orderBy: 'nome', order: 'ASC' });
     
     if (result.success) {
       res.json({ success: true, data: result.data });

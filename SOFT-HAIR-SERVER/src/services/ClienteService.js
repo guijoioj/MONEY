@@ -1,10 +1,10 @@
 const Cliente = require('../models/Cliente');
 
 class ClienteService {
-  async listar(salaoId, filtros = {}) {
+  async listar(salaoId, filtros = {}, options = {}) {
     try {
       const clienteModel = new Cliente();
-      const clientes = await clienteModel.findAll(filtros, salaoId);
+      const clientes = await clienteModel.findAll(filtros, salaoId, options);
       return {
         success: true,
         data: clientes
