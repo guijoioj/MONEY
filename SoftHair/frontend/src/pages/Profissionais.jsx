@@ -12,7 +12,6 @@ export default function Profissionais() {
     nome: '',
     telefone: '',
     email: '',
-    endereco: '',
     especialidade: '',
     comissao: 0,
     ativo: true,
@@ -69,8 +68,7 @@ export default function Profissionais() {
         nome: '',
         telefone: '',
         email: '',
-        endereco: '',
-        especialidade: '',
+            especialidade: '',
         comissao: 0,
         ativo: true
       });
@@ -177,12 +175,6 @@ export default function Profissionais() {
                       <span className="truncate">{profissional.email}</span>
                     </div>
                   )}
-                  {profissional.endereco && (
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-gray-400" />
-                      <span className="truncate">{profissional.endereco}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             ))
@@ -233,16 +225,6 @@ export default function Profissionais() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-                <input
-                  type="text"
-                  value={formData.endereco}
-                  onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                />
               </div>
               
               <div>
