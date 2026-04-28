@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('scripts:', d.get\\('scripts',{}\\)\\); print\\('node version req:', d.get\\('engines',{}\\)\\)\")",
+      "Bash(npm --version)",
+      "Bash(pg_isready)",
+      "PowerShell($env:PGPASSWORD = \"AnaBPizzi\"; & \"C:\\\\Program Files\\\\PostgreSQL\\\\17\\\\bin\\\\psql.exe\" -U postgres -c \"CREATE USER softhair WITH PASSWORD 'softhair'; CREATE DATABASE softhair OWNER softhair;\")",
+      "Bash(PGPASSWORD=\"AnaBPizzi\" \"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -c \"CREATE USER softhair WITH PASSWORD 'softhair'; CREATE DATABASE softhair OWNER softhair;\")",
+      "Bash(PGPASSWORD=\"AnaBPizzi\" \"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -c \"CREATE USER softhair WITH PASSWORD 'softhair';\")",
+      "Bash(PGPASSWORD=\"AnaBPizzi\" \"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -c \"CREATE DATABASE softhair OWNER softhair;\")"
+    ]
+  }
+}
