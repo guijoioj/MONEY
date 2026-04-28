@@ -109,11 +109,11 @@ router.post('/produtos-utilizados', [
     if (!errors.isEmpty())
       return res.status(400).json({ success: false, errors: errors.array() });
 
-    const { marca, coloracao, quantidade, cliente_id, cliente_nome, observacoes } = req.body;
+    const { marca, coloracao, quantidade, cliente_id, cliente_nome, observacoes, agendamento_id } = req.body;
     const result = await pool.query(
-      `INSERT INTO produtos_utilizados (profissional_id, salao_id, cliente_id, cliente_nome, marca, coloracao, quantidade, observacoes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [req.profissionalId, req.salaoId, cliente_id || null, cliente_nome || null, marca, coloracao || null, quantidade || 1, observacoes || null]
+      `INSERT INTO produtos_utilizados (profissional_id, salao_id, cliente_id, cliente_nome, marca, coloracao, quantidade, observacoes, agendamento_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [req.profissionalId, req.salaoId, cliente_id || null, cliente_nome || null, marca, coloracao || null, quantidade || 1, observacoes || null, agendamento_id || null]
     );
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
@@ -132,6 +132,92 @@ router.get('/produtos-utilizados', async (req, res) => {
     res.json({ success: true, data: result.rows });
   } catch (error) {
     console.error('Erro ao listar produtos utilizados:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /atendimentos-hoje
+router.get('/atendimentos-hoje', async (req, res) => {
+  try {
+    const hoje = new Date().toISOString().split('T')[0];
+    const result = await pool.query(`
+      SELECT a.*, c.nome as cliente_nome, c.telefone as cliente_telefone, s.nome as servico_nome
+      FROM agendamentos a
+      LEFT JOIN clientes c ON c.id = a.cliente_id
+      LEFT JOIN servicos s ON s.id = a.servico_id
+      WHERE a.profissional_id = $1 AND a.data_agendamento = $2
+        AND a.status IN ('agendado', 'confirmado', 'em_andamento')
+      ORDER BY a.hora_agendamento
+    `, [req.profissionalId, hoje]);
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Erro ao buscar atendimentos de hoje:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /atendimentos/:id/iniciar
+router.post('/atendimentos/:id/iniciar', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `UPDATE agendamentos SET status = 'em_andamento', updated_at = NOW()
+       WHERE id = $1 AND profissional_id = $2
+       RETURNING *, (SELECT nome FROM clientes WHERE id = agendamentos.cliente_id) as cliente_nome`,
+      [req.params.id, req.profissionalId]
+    );
+    if (!rows.length)
+      return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
+
+    await pool.query(
+      `INSERT INTO registros_ponto (profissional_id, salao_id, tipo) VALUES ($1, $2, 'inicio_atendimento')`,
+      [req.profissionalId, req.salaoId]
+    );
+    res.json({ success: true, data: rows[0] });
+  } catch (error) {
+    console.error('Erro ao iniciar atendimento:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /atendimentos/:id/finalizar
+router.post('/atendimentos/:id/finalizar', async (req, res) => {
+  try {
+    const agend = await pool.query(
+      'SELECT * FROM agendamentos WHERE id = $1 AND profissional_id = $2',
+      [req.params.id, req.profissionalId]
+    );
+    if (!agend.rows.length)
+      return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
+
+    const ag = agend.rows[0];
+
+    const atend = await pool.query(`
+      INSERT INTO atendimentos (agendamento_id, cliente_id, profissional_id, salao_id, servico_id, data_atendimento, status, observacoes)
+      VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, 'finalizado', $6)
+      ON CONFLICT (agendamento_id) DO UPDATE SET status = 'finalizado', updated_at = NOW()
+      RETURNING *
+    `, [ag.id, ag.cliente_id, req.profissionalId, req.salaoId, ag.servico_id, req.body.observacoes || null]);
+
+    await pool.query(
+      `UPDATE agendamentos SET status = 'finalizado', updated_at = NOW() WHERE id = $1`,
+      [req.params.id]
+    );
+
+    await pool.query(
+      `INSERT INTO registros_ponto (profissional_id, salao_id, tipo) VALUES ($1, $2, 'fim_atendimento')`,
+      [req.profissionalId, req.salaoId]
+    );
+
+    if (ag.cliente_id) {
+      await pool.query(`
+        INSERT INTO historico_clientes (cliente_id, salao_id, tipo, descricao, referencia_id, created_at)
+        VALUES ($1, $2, 'atendimento', 'Atendimento finalizado', $3, NOW())
+      `, [ag.cliente_id, req.salaoId, atend.rows[0]?.id]);
+    }
+
+    res.json({ success: true, data: atend.rows[0] });
+  } catch (error) {
+    console.error('Erro ao finalizar atendimento:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
