@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(node migrate.js)",
+      "Bash(DATABASE_URL=\"postgresql://db_softhair_user:HIRdZdaglLmErrqqvQP86LQjLcMzFThv@dpg-d7o0fcdckfvc73fabqlg-a/db_softhair\" node migrate.js)",
+      "Bash(DATABASE_URL=\"postgresql://db_softhair_user:HIRdZdaglLmErrqqvQP86LQjLcMzFThv@dpg-d7o0fcdckfvc73fabqlg-a.ohio-postgres.render.com/db_softhair\" node migrate.js)",
+      "Bash(DATABASE_URL=\"postgresql://db_softhair_user:HIRdZdaglLmErrqqvQP86LQjLcMzFThv@dpg-d7o0fcdckfvc73fabqlg-a.ohio-postgres.render.com/db_softhair?sslmode=require\" node migrate.js)",
+      "Bash(git commit -m 'feat: add mobile client authentication \\(/api/app/auth\\) *)",
+      "Bash(git fetch *)",
+      "Bash(git rebase *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)"
+    ]
+  }
+}

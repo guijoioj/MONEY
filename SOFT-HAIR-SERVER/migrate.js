@@ -63,6 +63,29 @@ async function migrate() {
       console.log('ℹ️ Coluna app_ativo já existe na tabela clientes');
     }
 
+    // Colunas de auth mobile na tabela profissionais
+    const profSenha = await client.query(`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_name='profissionais' AND column_name='senha_hash';
+    `);
+    if (profSenha.rows.length === 0) {
+      await client.query(`ALTER TABLE profissionais ADD COLUMN senha_hash VARCHAR(255);`);
+      console.log('✅ Coluna senha_hash adicionada à tabela profissionais');
+    } else {
+      console.log('ℹ️ Coluna senha_hash já existe na tabela profissionais');
+    }
+
+    const profAtivo = await client.query(`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_name='profissionais' AND column_name='app_ativo';
+    `);
+    if (profAtivo.rows.length === 0) {
+      await client.query(`ALTER TABLE profissionais ADD COLUMN app_ativo BOOLEAN DEFAULT false;`);
+      console.log('✅ Coluna app_ativo adicionada à tabela profissionais');
+    } else {
+      console.log('ℹ️ Coluna app_ativo já existe na tabela profissionais');
+    }
+
     await client.query('COMMIT');
     console.log('🎉 Migração concluída com sucesso!');
   } catch (error) {
