@@ -86,6 +86,7 @@ app.use('/api/health', require('./routes/health'));
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/app/auth', authLimiter, require('./routes/appAuth'));
 app.use('/api/app/profissional/auth', authLimiter, require('./routes/appProfissionalAuth'));
+app.use('/api/app/profissional', require('./middleware/profissionalAuth').profissionalAuthMiddleware, require('./routes/appProfissional'));
 app.use('/api/saloes', require('./routes/saloes'));
 app.use('/api/clientes', require('./routes/clientes'));
 app.use('/api/profissionais', require('./routes/profissionais'));
