@@ -55,7 +55,7 @@ export default function Layout() {
 
   const fetchSolicitacoesCount = useCallback(async () => {
     try {
-      const res = await api.get('/agendamentos/solicitacoes', { params: { status: 'pendente' } });
+      const res = await api.get('/agendamentos', { params: { status: 'pendente' } });
       setSolicitacoesCount((res.data.data || []).length);
     } catch {}
   }, []);
