@@ -137,7 +137,7 @@ export default function Profissionais() {
               Nenhum profissional encontrado
             </div>
           ) : (
-            data?.data?.data?.map((profissional) => (
+            [...(data?.data?.data || [])].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map((profissional) => (
               <div key={profissional.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">

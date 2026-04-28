@@ -125,7 +125,7 @@ function AbaServicos() {
           {data?.data?.data?.length === 0 ? (
             <div className="col-span-full text-center py-8 text-gray-500">Nenhum serviço encontrado</div>
           ) : (
-            data?.data?.data?.map((servico) => (
+            [...(data?.data?.data || [])].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map((servico) => (
               <div key={servico.id} className={`bg-white rounded-lg shadow p-5 ${!servico.ativo ? 'opacity-60' : ''}`}>
                 <div className="flex justify-between items-start mb-3">
                   <div>
@@ -403,7 +403,7 @@ function AbaProdutos() {
               {data?.data?.data?.length === 0 ? (
                 <tr><td colSpan="8" className="px-6 py-8 text-center text-gray-500">Nenhum produto encontrado</td></tr>
               ) : (
-                data?.data?.data?.map((produto) => {
+                [...(data?.data?.data || [])].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map((produto) => {
                   const comissaoValor = (parseFloat(produto.baseComissao) || 0) * (parseFloat(produto.comissaoPorcentagem) || 0) / 100;
                   return (
                     <tr key={produto.id} className={`hover:bg-gray-50 ${!produto.ativo ? 'opacity-60' : ''}`}>

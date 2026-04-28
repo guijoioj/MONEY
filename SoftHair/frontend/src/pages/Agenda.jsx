@@ -56,8 +56,8 @@ const normalizeRole = (role) => {
     { patterns: [/esteticist[ae]/i, /estetic[ae]/i], normalized: 'Esteticista' },
     // Depilador(a)
     { patterns: [/depil[ae]/i], normalized: 'Depilador' },
-    // Maquiador(a)
-    { patterns: [/maqui[ae]/i], normalized: 'Maquiador' },
+    // Maquiador(a) / Designer de Sobrancelha
+    { patterns: [/maqui[ae]/i, /designer/i, /sobrancelh/i], normalized: 'Maquiador' },
     // Auxiliar
     { patterns: [/auxiliar/i, /assistente/i], normalized: 'Auxiliar' },
   ];
@@ -267,18 +267,14 @@ export default function Agenda() {
     : filteredProfissionais;
 
   const groupedProfissionais = useMemo(() => {
-    const groups = [];
     const seen = {};
-    visibleProfissionais.forEach(p => {
+    [...visibleProfissionais].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(p => {
       const rawRole = p.especialidade || 'Outros';
       const role = normalizeRole(rawRole);
-      if (!seen[role]) {
-        seen[role] = { role, profissionais: [] };
-        groups.push(seen[role]);
-      }
+      if (!seen[role]) seen[role] = { role, profissionais: [] };
       seen[role].profissionais.push(p);
     });
-    return groups;
+    return Object.values(seen).sort((a, b) => a.role.localeCompare(b.role, 'pt-BR'));
   }, [visibleProfissionais]);
 
   const getAgendamentosDoDia = (date, profissionalId) => {
