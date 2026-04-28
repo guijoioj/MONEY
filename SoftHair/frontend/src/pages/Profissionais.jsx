@@ -13,7 +13,7 @@ export default function Profissionais() {
     telefone: '',
     email: '',
     especialidade: '',
-    comissao: 0,
+    comissao_percentual: 0,
     ativo: true,
     senha_app: ''
   });
@@ -56,9 +56,8 @@ export default function Profissionais() {
         nome: profissional.nome || '',
         telefone: profissional.telefone || '',
         email: profissional.email || '',
-        endereco: profissional.endereco || '',
         especialidade: profissional.especialidade || '',
-        comissao: profissional.comissao || 0,
+        comissao_percentual: profissional.comissao_percentual || 0,
         ativo: profissional.ativo !== 0,
         senha_app: ''
       });
@@ -69,7 +68,7 @@ export default function Profissionais() {
         telefone: '',
         email: '',
             especialidade: '',
-        comissao: 0,
+        comissao_percentual: 0,
         ativo: true
       });
     }
