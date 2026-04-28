@@ -20,7 +20,10 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#db2777"
       },
-      "package": "com.softhair.mobile"
+      "package": "com.softhair.mobile",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -40,6 +43,12 @@
     "scheme": "softhair",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3139b02f-79e2-48d8-b2a3-de92b3ebc243"
+      }
     }
   }
 }
