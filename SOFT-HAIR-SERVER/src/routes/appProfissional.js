@@ -100,4 +100,40 @@ router.get('/comissoes', async (req, res) => {
   }
 });
 
+// POST /produtos-utilizados
+router.post('/produtos-utilizados', [
+  body('marca').notEmpty().withMessage('Marca é obrigatória'),
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ success: false, errors: errors.array() });
+
+    const { marca, coloracao, quantidade, cliente_id, cliente_nome, observacoes } = req.body;
+    const result = await pool.query(
+      `INSERT INTO produtos_utilizados (profissional_id, salao_id, cliente_id, cliente_nome, marca, coloracao, quantidade, observacoes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [req.profissionalId, req.salaoId, cliente_id || null, cliente_nome || null, marca, coloracao || null, quantidade || 1, observacoes || null]
+    );
+    res.status(201).json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Erro ao registrar produto utilizado:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /produtos-utilizados
+router.get('/produtos-utilizados', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM produtos_utilizados WHERE profissional_id = $1 ORDER BY created_at DESC LIMIT 100`,
+      [req.profissionalId]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Erro ao listar produtos utilizados:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
