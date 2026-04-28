@@ -1,4 +1,6 @@
 const { Pool } = require('pg');
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -8,7 +10,6 @@ const pool = new Pool({
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
-  family: 4,
 });
 
 // Connection events
