@@ -8,8 +8,7 @@ const { query, queryOne } = require('../config/database');
 router.get('/publico', async (req, res) => {
   try {
     const { search } = req.query;
-    let sql = `SELECT id, nome, endereco, telefone, email, logo_url,
-      endereco->>'cidade' as cidade, endereco->>'estado' as estado
+    let sql = `SELECT id, nome, endereco, telefone, email, logo_url
       FROM saloes WHERE ativo = true`;
     const params = [];
     if (search) {
