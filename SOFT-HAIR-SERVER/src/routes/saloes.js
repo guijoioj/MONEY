@@ -4,6 +4,26 @@ const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { query, queryOne } = require('../config/database');
 
+// Listar salões publicamente (para app mobile de clientes)
+router.get('/publico', async (req, res) => {
+  try {
+    const { search } = req.query;
+    let sql = `SELECT id, nome, endereco, telefone, email, logo_url,
+      endereco->>'cidade' as cidade, endereco->>'estado' as estado
+      FROM saloes WHERE ativo = true`;
+    const params = [];
+    if (search) {
+      params.push(`%${search}%`);
+      sql += ` AND nome ILIKE $1`;
+    }
+    sql += ' ORDER BY nome';
+    const { rows } = await query(sql, params);
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Buscar dados do salão atual
 router.get('/me', authMiddleware, async (req, res) => {
   try {
