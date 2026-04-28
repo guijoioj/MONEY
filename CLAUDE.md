@@ -38,6 +38,45 @@ Em particular, leia primeiro:
 
 ---
 
+## Infrastructure & Deploy
+
+### Backend (SOFT-HAIR-SERVER)
+- **Hosted on**: Render — https://money-f5rz.onrender.com
+- **Service name**: MONEY (deploys from branch `main`, root dir `SOFT-HAIR-SERVER`)
+- **Health check**: GET https://money-f5rz.onrender.com/api/health
+- **All API routes**: prefixed with `/api` (ex: `/api/auth/login`, `/api/clientes`)
+- `GET /` returns 404 — this is normal, there is no root route
+
+### Environment Variables (set on Render dashboard)
+```
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:19006,app://softhair.com
+NODE_ENV=production
+DATABASE_URL=<set on Render>
+JWT_SECRET=<set on Render>
+```
+
+### Frontend local .env (SoftHair/frontend/.env — NOT committed to git)
+```
+VITE_API_URL=https://money-f5rz.onrender.com/api
+```
+This file must be created manually on each machine after cloning.
+
+### Running frontend locally
+```bash
+cd SoftHair/frontend
+# create .env with VITE_API_URL=https://money-f5rz.onrender.com/api
+npm install
+npm run dev
+# opens at http://localhost:3000
+```
+
+### Default admin credentials (first deploy)
+- Email: admin@softhair.com
+- Password: admin123
+- ⚠️ Change immediately after first login
+
+---
+
 ## Core Behavior Rules
 
 - **ALWAYS use Bash tools to execute**. Never explain commands — run them.
