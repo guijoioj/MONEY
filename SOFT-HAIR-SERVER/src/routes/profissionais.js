@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
 const { authMiddleware } = require('../middleware/auth');
 const { ProfissionalService } = require('../services');
 
@@ -65,7 +66,12 @@ router.put('/:id', authMiddleware, [
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
-    const result = await service.atualizar(req.params.id, req.body, req.salaoId);
+    const { senha_app, ...body } = req.body;
+    if (senha_app && senha_app.length >= 6) {
+      body.senha_hash = await bcrypt.hash(senha_app, 10);
+      body.app_ativo = true;
+    }
+    const result = await service.atualizar(req.params.id, body, req.salaoId);
     if (result.success) {
       res.json({ success: true, data: result.data });
     } else {
