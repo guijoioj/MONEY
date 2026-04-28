@@ -1,4 +1,7 @@
-import { encryptedStorage } from '../utils/security';
+import { useRouter } from 'expo-router';
+import { api } from '../services/api';
+import { useAuthStore } from '../store/authStore';
+import { wsManager } from '../services/websocket';
 
 export function useAuth() {
   const store = useAuthStore();
