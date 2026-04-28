@@ -59,7 +59,7 @@ export default function SaloesScreen() {
   const { data, isLoading, refetch, isRefetching, error } = useQuery({
     queryKey: ['saloes', search],
     queryFn: async () => {
-      const res = await api.get('/app/pedidos/saloes', {
+      const res = await api.get('/saloes/publico', {
         params: search ? { search } : undefined,
       });
       return res.data.data as Salao[];

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { api } from '../services/api';
+import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { wsManager } from '../services/websocket';
 
@@ -9,7 +9,7 @@ export function useAuth() {
 
   const loginCliente = async (email, password) => {
     const response = await api.post('/app/auth/login', { email, password });
-    const { user, token } = response.data;
+    const { user, token } = response.data.data;
     const userWithId = { ...user, clienteAppId: user.id };
     await store.setAuth(userWithId, token, 'cliente');
     wsManager.connect(user.id, 'cliente');
@@ -17,11 +17,11 @@ export function useAuth() {
   };
 
   const loginProfissional = async (email, password) => {
-    const response = await api.post('/app/auth/profissional/login', {
+    const response = await api.post('/app/auth/login', {
       email,
       password,
     });
-    const { user, token } = response.data;
+    const { user, token } = response.data.data;
     await store.setAuth(user, token, 'profissional');
     wsManager.connect(user.profissionalId, 'profissional');
     router.replace('/(profissional)/(tabs)');
@@ -33,13 +33,14 @@ export function useAuth() {
     password,
     telefone,
   ) => {
-    const response = await api.post('/app/auth/register', {
-      nome,
-      email,
-      password,
-      telefone,
-    });
-    const { user, token } = response.data;
+    let response;
+    try {
+      response = await api.post('/app/auth/register', { nome, email, password, telefone });
+    } catch (err: any) {
+      console.error('REGISTER ERROR:', JSON.stringify(err?.response?.data ?? err?.message));
+      throw err;
+    }
+    const { user, token } = response.data.data;
     const userWithId = { ...user, clienteAppId: user.id };
     await store.setAuth(userWithId, token, 'cliente');
     wsManager.connect(user.id, 'cliente');

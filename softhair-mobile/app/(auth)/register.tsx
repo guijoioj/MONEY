@@ -36,7 +36,8 @@ export default function RegisterScreen() {
     try {
       await registerCliente(nome.trim(), email.trim(), password, telefone.trim());
     } catch (err: any) {
-      Alert.alert('Erro ao criar conta', err.userMessage ?? 'Tente novamente.');
+      console.error('REGISTER FULL ERROR:', JSON.stringify(err?.response?.data ?? err?.message ?? err));
+      Alert.alert('Erro ao criar conta', err.userMessage ?? err?.response?.data?.error ?? 'Tente novamente.');
     } finally {
       setLoading(false);
     }
