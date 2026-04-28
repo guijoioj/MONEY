@@ -15,9 +15,9 @@ router.get('/', authMiddleware, async (req, res) => {
 
     let filtros = {};
     if (ativo !== undefined) filtros.ativo = ativo === 'true';
-    if (search) filtros.termo = search;
+    if (search) filtros._search = search;
 
-    const result = await clienteService.listar(salaoId, filtros, { limit: parseInt(limit), offset, orderBy: 'nome', order: 'ASC' });
+    const result = await clienteService.listar(salaoId, filtros, { limit: parseInt(limit), offset });
     
     if (result.success) {
       res.json({ success: true, data: result.data });
