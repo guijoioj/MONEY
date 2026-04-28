@@ -15,7 +15,8 @@ export default function Profissionais() {
     endereco: '',
     especialidade: '',
     comissao: 0,
-    ativo: true
+    ativo: true,
+    senha_app: ''
   });
 
   const { data, isLoading } = useQuery({
@@ -59,7 +60,8 @@ export default function Profissionais() {
         endereco: profissional.endereco || '',
         especialidade: profissional.especialidade || '',
         comissao: profissional.comissao || 0,
-        ativo: profissional.ativo !== 0
+        ativo: profissional.ativo !== 0,
+        senha_app: ''
       });
     } else {
       setEditingProfissional(null);
@@ -251,6 +253,18 @@ export default function Profissionais() {
                   onChange={(e) => setFormData({ ...formData, especialidade: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="Ex: Cabeleireira, Esteticista..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Senha App Mobile</label>
+                <input
+                  type="password"
+                  value={formData.senha_app}
+                  onChange={(e) => setFormData({ ...formData, senha_app: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder={editingProfissional ? 'Deixe em branco para não alterar' : 'Senha para login no app'}
+                  minLength={6}
                 />
               </div>
 
