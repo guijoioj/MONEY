@@ -449,7 +449,20 @@ export default function Agenda() {
     }
   }, [notificacao]);
 
-  const allAgendamentos = Array.isArray(agendamentosData?.data?.data) ? agendamentosData.data.data : [];
+  const mapAgendamento = (a) => ({
+    ...a,
+    dataHora: a.dataHora || a.data_hora,
+    clienteId: a.clienteId || a.cliente_id,
+    profissionalId: a.profissionalId || a.profissional_id,
+    auxiliarId: a.auxiliarId || a.auxiliar_id,
+    servicoId: a.servicoId || a.servico_id,
+    clienteNome: a.clienteNome || a.cliente_nome,
+    profissionalNome: a.profissionalNome || a.profissional_nome,
+    servicoNome: a.servicoNome || a.servico_nome,
+    servicoDuracao: a.servicoDuracao || a.duracao_minutos,
+  });
+
+  const allAgendamentos = (Array.isArray(agendamentosData?.data?.data) ? agendamentosData.data.data : []).map(mapAgendamento);
 
   // Mantém refs atualizados para uso no intervalo sem re-criar o efeito
   autoConvertRef.current = configData?.data?.conversao_automatica === 'true';
