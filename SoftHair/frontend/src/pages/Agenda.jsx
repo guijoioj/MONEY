@@ -266,7 +266,12 @@ function ServicoSearchSelect({ value, onChange, selectedServico, disabled }) {
     }, 300);
   }, []);
 
-  const displayLabel = (s) => `${s.nome}${s.preco ? ` — R$ ${parseFloat(s.preco).toFixed(2)}` : ''}`;
+  const displayLabel = (s) => {
+    const preco = s.preco ? ` — R$ ${parseFloat(s.preco).toFixed(2)}` : '';
+    const dur = s.duracao_minutos || s.duracao;
+    const durStr = dur ? ` (${dur}min)` : '';
+    return `${s.nome}${preco}${durStr}`;
+  };
   const displayValue = focused ? search : (selectedServico ? displayLabel(selectedServico) : '');
 
   return (
@@ -803,9 +808,13 @@ export default function Agenda() {
     }
 
     const payload = {
-      ...formData,
-      auxiliarId: formData.auxiliarId || null,
-      dataHora: formData.dataHora ? new Date(formData.dataHora).toISOString() : formData.dataHora,
+      cliente_id: formData.clienteId,
+      servico_id: formData.servicoId,
+      profissional_id: formData.profissionalId,
+      auxiliar_id: formData.auxiliarId || null,
+      data_hora: formData.dataHora ? new Date(formData.dataHora).toISOString() : formData.dataHora,
+      observacoes: formData.observacoes,
+      status: formData.status,
     };
 
     if (editingAgendamento) {
