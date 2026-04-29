@@ -35,7 +35,12 @@ class AgendamentoService {
         params.push(filtros.profissional_id);
       }
 
-      sql += ` ORDER BY a.data_hora LIMIT 200`;
+      // Se nenhum filtro de data foi passado, limita ao período relevante (60 dias atrás até 365 dias à frente)
+      if (!filtros.data_inicio && !filtros.data_fim) {
+        sql += ` AND DATE(a.data_hora) BETWEEN (CURRENT_DATE - INTERVAL '60 days') AND (CURRENT_DATE + INTERVAL '365 days')`;
+      }
+
+      sql += ` ORDER BY a.data_hora ASC`;
 
       const agendamentos = await query(sql, params);
       
