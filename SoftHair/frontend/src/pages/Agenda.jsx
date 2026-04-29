@@ -286,7 +286,7 @@ export default function Agenda() {
 
   const { data: servicosData } = useQuery({
     queryKey: ['servicos-dropdown'],
-    queryFn: () => servicosAPI.getAll({ ativo: true }),
+    queryFn: () => servicosAPI.getAll({}),
   });
 
   const { data: profissionaisData } = useQuery({
@@ -314,7 +314,8 @@ export default function Agenda() {
       closeModal();
     },
     onError: (err) => {
-      setAviso({ tipo: 'erro', mensagem: err.response?.data?.error || err.message || 'Erro ao criar agendamento' });
+      const msg = err.response?.data?.error || err.response?.data?.message || (typeof err.response?.data === 'string' ? err.response.data : null) || err.message || 'Erro ao criar agendamento';
+      setAviso({ tipo: 'erro', mensagem: msg });
     },
   });
 
@@ -608,7 +609,7 @@ export default function Agenda() {
         clienteId: '',
         servicoId: '',
         profissionalId: defaultProfissional,
-        auxiliarId: '',
+        auxiliarId: null,
         dataHora: `${defaultDate.toISOString().split('T')[0]}T${defaultTime}`,
         observacoes: '',
         status: 'agendado'
@@ -1355,7 +1356,7 @@ export default function Agenda() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Auxiliar</label>
                 <select
                   value={formData.auxiliarId}
-                  onChange={(e) => setFormData({ ...formData, auxiliarId: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, auxiliarId: e.target.value || null })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   disabled={editingAgendamento?.isAtendimento}
                 >
