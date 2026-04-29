@@ -135,6 +135,22 @@ async function createTables() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- Atendimentos
+    CREATE TABLE IF NOT EXISTS atendimentos (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      agendamento_id INTEGER,
+      cliente_id INTEGER REFERENCES clientes(id) ON DELETE SET NULL,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL,
+      servico_id INTEGER REFERENCES servicos(id) ON DELETE SET NULL,
+      data_atendimento DATE,
+      status VARCHAR(50) DEFAULT 'finalizado',
+      observacoes TEXT,
+      valor DECIMAL(10,2),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Vendas
     CREATE TABLE IF NOT EXISTS vendas (
       id SERIAL PRIMARY KEY,

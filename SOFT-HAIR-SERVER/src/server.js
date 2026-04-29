@@ -10,6 +10,9 @@ const path = require('path');
 
 const app = express();
 
+// ─── Trust Proxy (Render/load balancer) ───
+app.set('trust proxy', 1);
+
 // ─── Security Middleware ───
 app.use(helmet({
   contentSecurityPolicy: {
