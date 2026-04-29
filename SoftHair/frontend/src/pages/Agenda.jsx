@@ -84,6 +84,72 @@ const getRoleColor = (role) => {
 const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
+function SearchSelect({ value, onChange, options, placeholder, disabled, renderLabel }) {
+  const [search, setSearch] = React.useState('');
+  const [open, setOpen] = React.useState(false);
+  const [focused, setFocused] = React.useState(false);
+  const ref = React.useRef(null);
+
+  const selected = options.find(o => o.id === value);
+
+  React.useEffect(() => {
+    const handle = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+        setFocused(false);
+        setSearch('');
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, []);
+
+  const filtered = options.filter(o =>
+    renderLabel(o).toLowerCase().includes(search.toLowerCase())
+  );
+
+  const displayValue = focused ? search : (selected ? renderLabel(selected) : '');
+
+  return (
+    <div ref={ref} className="relative">
+      <input
+        type="text"
+        value={displayValue}
+        onChange={(e) => { setSearch(e.target.value); setOpen(true); }}
+        onFocus={() => { setFocused(true); setOpen(true); setSearch(''); }}
+        placeholder={selected ? renderLabel(selected) : placeholder}
+        disabled={disabled}
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+        autoComplete="off"
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
+          {filtered.map(o => (
+            <div
+              key={o.id}
+              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 text-sm ${o.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800'}`}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onChange(o.id);
+                setOpen(false);
+                setFocused(false);
+                setSearch('');
+              }}
+            >
+              {renderLabel(o)}
+            </div>
+          ))}
+        </div>
+      )}
+      {open && search.length > 0 && filtered.length === 0 && (
+        <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 px-3 py-2 text-sm text-gray-400">
+          Nenhum resultado
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Agenda() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -1172,38 +1238,26 @@ export default function Agenda() {
             <form onSubmit={handleSubmit} className="p-4 space-y-3 overflow-y-auto flex-1">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-                <select
+                <SearchSelect
                   value={formData.clienteId}
-                  onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  onChange={(id) => setFormData({ ...formData, clienteId: id })}
+                  options={[...clientes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))}
+                  placeholder="Buscar cliente por nome..."
                   disabled={editingAgendamento?.isAtendimento}
-                  required
-                >
-                  <option value="">Selecione um cliente</option>
-                  {clientes.map((cliente) => (
-                    <option key={cliente.id} value={cliente.id}>
-                      {cliente.nome} - {cliente.telefone}
-                    </option>
-                  ))}
-                </select>
+                  renderLabel={(c) => `${c.nome}${c.telefone ? ' — ' + c.telefone : ''}`}
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Serviço *</label>
-                <select
+                <SearchSelect
                   value={formData.servicoId}
-                  onChange={(e) => setFormData({ ...formData, servicoId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  onChange={(id) => setFormData({ ...formData, servicoId: id })}
+                  options={[...servicos].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))}
+                  placeholder="Buscar serviço por nome..."
                   disabled={editingAgendamento?.isAtendimento}
-                  required
-                >
-                  <option value="">Selecione um serviço</option>
-                  {servicos.map((servico) => (
-                    <option key={servico.id} value={servico.id}>
-                      {servico.nome} - R$ {parseFloat(servico.preco || 0).toFixed(2)} ({servico.duracao}min)
-                    </option>
-                  ))}
-                </select>
+                  renderLabel={(s) => `${s.nome} — R$ ${parseFloat(s.preco || 0).toFixed(2)} (${s.duracao}min)`}
+                />
               </div>
 
               <div>
