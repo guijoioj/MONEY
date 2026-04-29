@@ -525,11 +525,13 @@ export default function Agenda() {
     [groupedProfissionais]
   );
 
+  const localDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
   const getAgendamentosDoDia = (date, profissionalId) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = localDateStr(date);
     return allAgendamentos.filter(a => {
       if (!a.dataHora) return false;
-      const agendDate = a.dataHora.split('T')[0];
+      const agendDate = a.dataHora.substring(0, 10);
       if (agendDate !== dateStr) return false;
       if (profissionalId && a.profissionalId !== profissionalId) return false;
       if (a.status === 'convertido') return false;
@@ -702,7 +704,7 @@ export default function Agenda() {
         servicoId: '',
         profissionalId: defaultProfissional,
         auxiliarId: '',
-        dataHora: `${defaultDate.toISOString().split('T')[0]}T${defaultTime}`,
+        dataHora: `${localDateStr(defaultDate)}T${defaultTime}`,
         observacoes: '',
         status: 'agendado'
       });
@@ -826,7 +828,7 @@ export default function Agenda() {
       servico_id: formData.servicoId,
       profissional_id: formData.profissionalId,
       auxiliar_id: formData.auxiliarId || null,
-      data_hora: formData.dataHora ? new Date(formData.dataHora).toISOString() : formData.dataHora,
+      data_hora: formData.dataHora,
       observacoes: formData.observacoes,
       status: formData.status,
     };
@@ -843,8 +845,8 @@ export default function Agenda() {
   };
 
   const getCountAgendamentosNoDia = (date) => {
-    const dateStr = date.toISOString().split('T')[0];
-    return allAgendamentos.filter(a => a.dataHora?.startsWith(dateStr)).length;
+    const dateStr = localDateStr(date);
+    return allAgendamentos.filter(a => a.dataHora?.substring(0,10) === dateStr).length;
   };
 
   return (
@@ -1146,9 +1148,9 @@ export default function Agenda() {
 
                   // Coletar horários de agendamentos convertidos com auxiliar neste profissional
                   const convertedAuxTimes = new Set();
-                  const dateStr = selectedDate.toISOString().split('T')[0];
+                  const dateStr = localDateStr(selectedDate);
                   allAgendamentos.forEach(a => {
-                    if (a.status === 'convertido' && a.auxiliarId === profissional.id && a.dataHora && a.dataHora.startsWith(dateStr)) {
+                    if (a.status === 'convertido' && a.auxiliarId === profissional.id && a.dataHora && a.dataHora.substring(0,10) === dateStr) {
                       const hora = a.dataHora.split('T')[1]?.substring(0, 5);
                       if (hora) convertedAuxTimes.add(hora);
                     }
@@ -1244,10 +1246,10 @@ export default function Agenda() {
                     {allAgendamentos.filter(a => {
                       if (!a.auxiliarId || a.auxiliarId !== profissional.id) return false;
                       if (!a.dataHora) return false;
-                      const dateStr = selectedDate.toISOString().split('T')[0];
+                      const dateStr = localDateStr(selectedDate);
                       if (a.status === 'cancelado') return false;
                       if (a.status === 'convertido') return false;
-                      return a.dataHora.startsWith(dateStr);
+                      return a.dataHora.substring(0,10) === dateStr;
                     }).map(agend => {
                       const horaAgend = agend.dataHora.split('T')[1]?.substring(0, 5);
                       if (!horaAgend) return null;
