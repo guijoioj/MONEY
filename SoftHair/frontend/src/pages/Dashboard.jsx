@@ -69,41 +69,67 @@ export default function Dashboard() {
         api.get('/profissionais', { params: { ativo: true } })
       ]);
 
-      const clientesData = Array.isArray(clientesRes.data?.data) ? clientesRes.data.data : [];
-      const servicosRaw = Array.isArray(servicosRes.data?.data) ? servicosRes.data.data : [];
+      // helper: extrai array de respostas simples ou paginadas
+      const toArr = (d) => Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : [];
+
+      const clientesData = toArr(clientesRes.data?.data);
+      const servicosRaw = toArr(servicosRes.data?.data);
       const servicosData = servicosRaw.filter(s => s.ativo);
-      const produtos = Array.isArray(produtosRes.data?.data) ? produtosRes.data.data : [];
+      const produtos = toArr(produtosRes.data?.data);
       const produtosAtivos = produtos.filter(p => p.ativo);
-      const agendamentos = Array.isArray(agendamentosRes.data?.data) ? agendamentosRes.data.data : [];
-      const atendimentos = Array.isArray(atendimentosRes.data?.data) ? atendimentosRes.data.data : [];
-      const profissionaisLista = Array.isArray(profissionaisRes.data?.data) ? profissionaisRes.data.data : [];
+      const agendamentos = toArr(agendamentosRes.data?.data);
+      const atendimentos = toArr(atendimentosRes.data?.data);
+      const profissionaisLista = toArr(profissionaisRes.data?.data);
 
-      const produtosBaixoEstoque = produtos.filter(p => p.ativo && p.estoque <= p.estoqueMinimo && p.estoqueMinimo > 0);
-      
+      // normalizar campos snake_case → camelCase
+      const norm = (a) => ({
+        ...a,
+        dataHora: a.dataHora || a.data_hora,
+        data: a.data || a.data_inicio || a.data_hora,
+        totalGeral: a.totalGeral ?? a.total_geral ?? a.valor_total ?? 0,
+        estoque: a.estoque ?? a.quantidade_estoque ?? 0,
+        estoqueMinimo: a.estoqueMinimo ?? a.quantidade_minima ?? 0,
+        precoVenda: a.precoVenda ?? a.preco_venda ?? 0,
+        clienteId: a.clienteId || a.cliente_id,
+        profissionalId: a.profissionalId || a.profissional_id,
+        servicoId: a.servicoId || a.servico_id,
+        clienteNome: a.clienteNome || a.cliente_nome,
+        profissionalNome: a.profissionalNome || a.profissional_nome,
+        servicoNome: a.servicoNome || a.servico_nome,
+        duracao_minutos: a.duracao_minutos || a.duracao,
+      });
+
+      const agendamentosNorm = agendamentos.map(norm);
+      const atendimentosNorm = atendimentos.map(norm);
+      const produtosNorm = produtos.map(norm);
+      const produtosAtivosNorm = produtosNorm.filter(p => p.ativo);
+
+      const produtosBaixoEstoque = produtosAtivosNorm.filter(p => p.estoque <= p.estoqueMinimo && p.estoqueMinimo > 0);
+
       const hoje = new Date().toISOString().split('T')[0];
-      const agendamentosHojeData = agendamentos.filter(a => a.dataHora && a.dataHora.startsWith(hoje));
+      const agendamentosHojeData = agendamentosNorm.filter(a => a.dataHora && a.dataHora.startsWith(hoje));
 
-      const totalAtendimentosMes = atendimentos.filter(a => {
-        const dataAtendimento = new Date(a.data);
-        const agora = new Date();
-        return dataAtendimento.getMonth() === agora.getMonth() && dataAtendimento.getFullYear() === agora.getFullYear();
+      const agora = new Date();
+      const totalAtendimentosMes = atendimentosNorm.filter(a => {
+        const d = new Date(a.data);
+        return d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear();
       });
 
       const receitaTotalMes = totalAtendimentosMes.reduce((sum, a) => sum + (a.totalGeral || 0), 0);
 
       const categoriaCount = {};
-      produtosAtivos.forEach(p => {
+      produtosAtivosNorm.forEach(p => {
         const cat = p.categoria || 'Sem Categoria';
         categoriaCount[cat] = (categoriaCount[cat] || 0) + 1;
       });
       const produtosPorCat = Object.entries(categoriaCount).map(([name, value]) => ({ name, value }));
 
-      const valorTotalEstoque = produtosAtivos.reduce((sum, p) => sum + ((p.estoque || 0) * (p.precoVenda || 0)), 0);
+      const valorTotalEstoque = produtosAtivosNorm.reduce((sum, p) => sum + (p.estoque * p.precoVenda), 0);
 
       setStats({
         totalClientes: clientesData.length,
         totalServicos: servicosData.length,
-        totalProdutos: produtosAtivos.length,
+        totalProdutos: produtosAtivosNorm.length,
         produtosEstoqueBaixo: produtosBaixoEstoque.length,
         agendamentosHoje: agendamentosHojeData.length,
         atendimentosMes: totalAtendimentosMes.length,
@@ -113,7 +139,7 @@ export default function Dashboard() {
 
       setProdutosEstoqueBaixo(produtosBaixoEstoque);
       setProdutosPorCategoria(produtosPorCat);
-      setTodosProdutos(produtos);
+      setTodosProdutos(produtosNorm);
       setProfissionais(profissionaisLista);
       setClientes(clientesData);
       setServicos(servicosData);
@@ -389,7 +415,7 @@ export default function Dashboard() {
                     
                     const cliente = clientes.find(c => c.id === agend.clienteId);
                     const servico = servicos.find(s => s.id === agend.servicoId);
-                    const duracao = servico?.duracao || 30;
+                    const duracao = servico?.duracao_minutos || servico?.duracao || 30;
                     const slots = Math.ceil(duracao / 30);
                     const top = horaIdx * 44;
                     const height = slots * 44;
