@@ -277,6 +277,12 @@ export default function Agenda() {
     return Object.values(seen).sort((a, b) => a.role.localeCompare(b.role, 'pt-BR'));
   }, [visibleProfissionais]);
 
+  // Profissionais na ordem correta: grupo alfabético → nome alfabético dentro do grupo
+  const sortedProfissionais = useMemo(
+    () => groupedProfissionais.flatMap(g => g.profissionais),
+    [groupedProfissionais]
+  );
+
   const getAgendamentosDoDia = (date, profissionalId) => {
     const dateStr = date.toISOString().split('T')[0];
     return allAgendamentos.filter(a => {
@@ -441,7 +447,7 @@ export default function Agenda() {
       setEditingAgendamento(null);
       const defaultDate = date || selectedDate;
       const defaultTime = hora ? `${hora}:00` : '09:00';
-      const defaultProfissional = profissional?.id || selectedProfissionalCelula?.id || visibleProfissionais[0]?.id || '';
+      const defaultProfissional = profissional?.id || selectedProfissionalCelula?.id || sortedProfissionais[0]?.id || '';
       
       if (hora && profissional) {
         setSelectedProfissionalCelula(profissional);
@@ -795,7 +801,7 @@ export default function Agenda() {
 
         <div className="flex-1 bg-white rounded-xl shadow overflow-hidden flex flex-col min-h-0">
           <div className="overflow-auto flex-1" ref={gridRef}>
-            <div style={{ minWidth: TIME_COL_WIDTH + (visibleProfissionais.length * COL_WIDTH), minHeight: '100%' }}>
+            <div style={{ minWidth: TIME_COL_WIDTH + (sortedProfissionais.length * COL_WIDTH), minHeight: '100%' }}>
               <div className="sticky top-0 z-30 bg-gray-50 border-b border-r">
                 {/* Linha 1: Barras de cargo agrupadas */}
                 <div className="flex">
@@ -824,7 +830,7 @@ export default function Agenda() {
                   <div className="w-20 flex-shrink-0 p-2 text-center border-r">
                     <span className="text-xs font-semibold text-gray-600">Horário</span>
                   </div>
-                  {visibleProfissionais.map((profissional, idx) => {
+                  {sortedProfissionais.map((profissional, idx) => {
                     const color = PROFISSIONAL_COLORS[idx % PROFISSIONAL_COLORS.length];
                     return (
                       <div
@@ -865,7 +871,7 @@ export default function Agenda() {
                           <span className="text-[9px] text-gray-300">{hora}</span>
                         )}
                       </div>
-                      {visibleProfissionais.map((profissional) => (
+                      {sortedProfissionais.map((profissional) => (
                         <div
                           key={profissional.id}
                           className={`min-w-[140px] w-[140px] border-r relative ${Math.floor(horaIdx / 4) % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
@@ -876,7 +882,7 @@ export default function Agenda() {
                   );
                 })}
                 
-                {visibleProfissionais.map((profissional, profIdx) => {
+                {sortedProfissionais.map((profissional, profIdx) => {
                   const color = PROFISSIONAL_COLORS[profIdx % PROFISSIONAL_COLORS.length];
                   const agendamentosDoProf = getAgendamentosDoDia(selectedDate, profissional.id);
                   const atendimentosDoProf = getAtendimentosDoProfissional(profissional.id);
