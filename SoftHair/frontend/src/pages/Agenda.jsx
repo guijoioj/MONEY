@@ -312,7 +312,8 @@ export default function Agenda() {
   }, []);
   const profissionaisRaw = Array.isArray(profissionaisData?.data?.data) ? profissionaisData.data.data : [];
   const profissionais = profissionaisRaw.filter(p => p && p.ativo);
-  const clientes = Array.isArray(clientesData?.data?.data) ? clientesData.data.data : [];
+  const clientesRaw = clientesData?.data?.data;
+  const clientes = Array.isArray(clientesRaw) ? clientesRaw : Array.isArray(clientesRaw?.data) ? clientesRaw.data : [];
   const servicos = Array.isArray(servicosData?.data?.data) ? servicosData.data.data : [];
   const atendimentosDoDia = Array.isArray(atendimentosData?.data?.data) ? atendimentosData.data.data : [];
 
