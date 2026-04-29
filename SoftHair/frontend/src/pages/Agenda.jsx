@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { agendamentosAPI, clientesAPI, servicosAPI, profissionaisAPI, atendimentosAPI } from '../services/api';
@@ -147,7 +147,7 @@ export default function Agenda() {
 
   const { data: configData } = useQuery({
     queryKey: ['configuracoes'],
-    queryFn: () => import('../services/api').then(m => m.default.get('/configuracoes')),
+    queryFn: () => import('../services/api').then(m => m.saloesAPI.getMe()),
     refetchInterval: 60000,
   });
 
@@ -908,7 +908,7 @@ export default function Agenda() {
                   });
 
                   return (
-                    <>
+                    <React.Fragment key={profissional.id}>
                       {agendamentosDoProf.map((agend) => {
                         if (!agend.dataHora) return null;
                         if (agend.status === 'convertido') return null;
@@ -1148,7 +1148,7 @@ export default function Agenda() {
                         </div>
                       );
                     })}
-                  </>
+                  </React.Fragment>
                 );
               })}
               </div>

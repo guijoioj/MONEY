@@ -44,8 +44,9 @@ export default function Layout() {
   useEffect(() => {
     const fetchNotifCount = async () => {
       try {
-        const res = await api.get('/notificacoes/count');
-        setNotifCount(res.data.naoLidas || 0);
+        const res = await api.get('/notificacoes');
+        const lista = res.data?.data || [];
+        setNotifCount(lista.filter(n => !n.lida).length);
       } catch {}
     };
     fetchNotifCount();
