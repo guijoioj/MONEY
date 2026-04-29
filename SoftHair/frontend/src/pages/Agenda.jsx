@@ -121,7 +121,7 @@ export default function Agenda() {
   const { data: agendamentosData, isLoading: loadingAgendamentos, refetch: refetchAgendamentos } = useQuery({
     queryKey: ['agendamentos-calendario'],
     queryFn: () => agendamentosAPI.getAll({}),
-    refetchInterval: 30000,
+    refetchInterval: 120000,
   });
 
   const { data: pendentesData } = useQuery({

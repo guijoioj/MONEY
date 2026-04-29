@@ -63,7 +63,7 @@ export default function Layout() {
 
   useEffect(() => {
     fetchSolicitacoesCount();
-    const interval = setInterval(fetchSolicitacoesCount, 30000);
+    const interval = setInterval(fetchSolicitacoesCount, 120000);
     return () => clearInterval(interval);
   }, [fetchSolicitacoesCount]);
 
