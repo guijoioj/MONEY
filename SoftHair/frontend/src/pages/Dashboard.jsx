@@ -72,7 +72,9 @@ export default function Dashboard() {
       // helper: extrai array de respostas simples ou paginadas
       const toArr = (d) => Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : [];
 
-      const clientesData = toArr(clientesRes.data?.data);
+      const clientesPaginado = clientesRes.data?.data;
+      const clientesData = toArr(clientesPaginado);
+      const totalClientesReal = clientesPaginado?.total ?? clientesData.length;
       const servicosRaw = toArr(servicosRes.data?.data);
       const servicosData = servicosRaw.filter(s => s.ativo);
       const produtos = toArr(produtosRes.data?.data);
@@ -127,7 +129,7 @@ export default function Dashboard() {
       const valorTotalEstoque = produtosAtivosNorm.reduce((sum, p) => sum + (p.estoque * p.precoVenda), 0);
 
       setStats({
-        totalClientes: clientesData.length,
+        totalClientes: totalClientesReal,
         totalServicos: servicosData.length,
         totalProdutos: produtosAtivosNorm.length,
         produtosEstoqueBaixo: produtosBaixoEstoque.length,
