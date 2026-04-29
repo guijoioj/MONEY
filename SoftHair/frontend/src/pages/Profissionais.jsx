@@ -25,28 +25,24 @@ export default function Profissionais() {
 
   const queryClient = useQueryClient();
 
+  const [formError, setFormError] = useState('');
+
   const createMutation = useMutation({
     mutationFn: (data) => profissionaisAPI.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['profissionais']);
-      closeModal();
-    },
+    onSuccess: () => { queryClient.invalidateQueries(['profissionais']); closeModal(); },
+    onError: (err) => setFormError(err.response?.data?.error || err.message || 'Erro ao criar profissional'),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => profissionaisAPI.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['profissionais']);
-      closeModal();
-    },
+    onSuccess: () => { queryClient.invalidateQueries(['profissionais']); closeModal(); },
+    onError: (err) => setFormError(err.response?.data?.error || err.message || 'Erro ao atualizar profissional'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => profissionaisAPI.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['profissionais']);
-      setDeleteModal({ open: false, profissional: null });
-    },
+    onSuccess: () => { queryClient.invalidateQueries(['profissionais']); setDeleteModal({ open: false, profissional: null }); },
+    onError: (err) => alert(err.response?.data?.error || 'Erro ao excluir profissional'),
   });
 
   const openModal = (profissional = null) => {

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+// v2
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clientesAPI, vendasAPI, fechamentosAPI } from '../services/api';
 import { Search, Plus, Edit2, Trash2, X, Phone, Mail, Calendar, AlertCircle, User, Clock, Package, Scissors, DollarSign, Star, TrendingUp, ShoppingCart, ShoppingBag, Gift } from 'lucide-react';
@@ -6,8 +7,6 @@ import { Search, Plus, Edit2, Trash2, X, Phone, Mail, Calendar, AlertCircle, Use
 export default function Clientes() {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [page, setPage] = useState(1);
-  const [allClientes, setAllClientes] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, cliente: null });
@@ -15,52 +14,24 @@ export default function Clientes() {
   const [comprasModal, setComprasModal] = useState({ open: false, cliente: null });
   const [formData, setFormData] = useState({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', observacoes: '' });
 
-  const PAGE_SIZE = 100;
-
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['clientes', search, page],
-    queryFn: () => clientesAPI.getAll({ search: search || undefined, page, limit: PAGE_SIZE }),
-    keepPreviousData: true,
+  const { data: queryData, isLoading, isFetching } = useQuery({
+    queryKey: ['clientes', search],
+    queryFn: () => clientesAPI.getAll({ search: search || undefined, limit: 500 }),
   });
 
-  // Acumular clientes ao paginar (reset quando busca muda)
-  const currentPage = data?.data?.data?.page ?? page;
-  const serverData = data?.data?.data?.data ?? [];
-  const total = data?.data?.data?.total ?? 0;
-  const totalPages = data?.data?.data?.totalPages ?? 1;
-
-  useEffect(() => {
-    if (page === 1) {
-      setAllClientes(serverData);
-    } else {
-      setAllClientes(prev => {
-        const ids = new Set(prev.map(c => c.id));
-        const newItems = serverData.filter(c => !ids.has(c.id));
-        return [...prev, ...newItems];
-      });
-    }
-  }, [data]);
+  // Extrair lista independente do formato da resposta
+  const raw = queryData?.data?.data;
+  const allClientes = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
+  const total = raw?.total ?? allClientes.length;
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setSearch(searchInput);
-    setPage(1);
-    setAllClientes([]);
   };
 
   const handleSearchChange = (e) => {
     setSearchInput(e.target.value);
-    if (e.target.value === '') {
-      setSearch('');
-      setPage(1);
-      setAllClientes([]);
-    }
-  };
-
-  const loadMore = () => {
-    if (page < totalPages && !isFetching) {
-      setPage(p => p + 1);
-    }
+    if (e.target.value === '') setSearch('');
   };
 
   const { data: vendasClienteData } = useQuery({
@@ -249,16 +220,10 @@ export default function Clientes() {
             </tbody>
           </table>
         </div>
-        {page < totalPages && (
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={loadMore}
-              disabled={isFetching}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-            >
-              {isFetching ? 'Carregando...' : `Carregar mais (${allClientes.length} de ${total})`}
-            </button>
-          </div>
+        {total > allClientes.length && (
+          <p className="text-center text-sm text-gray-400 mt-4">
+            Mostrando {allClientes.length} de {total}. Use a busca para filtrar.
+          </p>
         )}
         </>
       )}
@@ -477,14 +442,17 @@ export default function Clientes() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
-              {!vendasClienteData?.data?.data || vendasClienteData.data.data.length === 0 ? (
+              {(() => {
+                const vraw = vendasClienteData?.data?.data;
+                const vendas = Array.isArray(vraw) ? vraw : (Array.isArray(vraw?.data) ? vraw.data : []);
+                return !vendas.length ? (
                 <div className="text-center py-8 text-gray-500">
                   <ShoppingBag size={48} className="mx-auto mb-4 opacity-50" />
                   <p>Nenhuma compra registrada para este cliente</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {vendasClienteData.data.data.map((venda) => (
+                  {vendas.map((venda) => (
                     <div key={venda.id} className="bg-gray-50 rounded-lg p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
@@ -521,12 +489,12 @@ export default function Clientes() {
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-gray-800">Total Gasto em Produtos:</span>
                       <span className="font-bold text-green-600 text-lg">
-                        {formatCurrency(vendasClienteData.data.data.reduce((sum, v) => sum + (v.total || 0), 0))}
+                        {formatCurrency(vendas.reduce((sum, v) => sum + (v.total || 0), 0))}
                       </span>
                     </div>
                   </div>
                 </div>
-              )}
+              );})()}
             </div>
           </div>
         </div>

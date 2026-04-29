@@ -313,8 +313,8 @@ export default function Agenda() {
       queryClient.invalidateQueries(['agendamentos-dashboard']);
       closeModal();
     },
-    onError: () => {
-      console.error('Erro ao criar agendamento');
+    onError: (err) => {
+      setAviso({ tipo: 'erro', mensagem: err.response?.data?.error || err.message || 'Erro ao criar agendamento' });
     },
   });
 
@@ -325,8 +325,8 @@ export default function Agenda() {
       queryClient.invalidateQueries(['agendamentos-dashboard']);
       closeModal();
     },
-    onError: () => {
-      console.error('Erro ao atualizar agendamento');
+    onError: (err) => {
+      setAviso({ tipo: 'erro', mensagem: err.response?.data?.error || err.message || 'Erro ao atualizar agendamento' });
     },
   });
 
@@ -336,8 +336,8 @@ export default function Agenda() {
       queryClient.invalidateQueries(['agendamentos-calendario']);
       queryClient.invalidateQueries(['agendamentos-dashboard']);
     },
-    onError: () => {
-      console.error('Erro ao deletar agendamento');
+    onError: (err) => {
+      alert(err.response?.data?.error || 'Erro ao deletar agendamento');
     },
   });
 
@@ -646,14 +646,6 @@ export default function Agenda() {
 
     if (!formData.servicoId) {
       setAviso({ tipo: 'erro', mensagem: 'Selecione um serviço' });
-      return;
-    }
-
-    const agora = new Date();
-    const horarioSelecionado = new Date(formData.dataHora);
-    
-    if (horarioSelecionado <= agora) {
-      setAviso({ tipo: 'erro', mensagem: 'Não é possível agendar em horário já passado' });
       return;
     }
 
@@ -1339,7 +1331,7 @@ export default function Agenda() {
                   options={[...servicos].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))}
                   placeholder="Buscar serviço por nome..."
                   disabled={editingAgendamento?.isAtendimento}
-                  renderLabel={(s) => `${s.nome} — R$ ${parseFloat(s.preco || 0).toFixed(2)} (${s.duracao}min)`}
+                  renderLabel={(s) => `${s.nome} — R$ ${parseFloat(s.preco || 0).toFixed(2)}${s.duracao ? ` (${s.duracao}min)` : ''}`}
                 />
               </div>
 
