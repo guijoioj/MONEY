@@ -6,10 +6,13 @@ class AgendamentoService {
       const { query } = require('../config/database');
       
       let sql = `
-        SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome
+        SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome,
+               aux.nome as auxiliar_nome, s.nome as servico_nome
         FROM agendamentos a
         LEFT JOIN clientes c ON c.id = a.cliente_id
         LEFT JOIN profissionais p ON p.id = a.profissional_id
+        LEFT JOIN profissionais aux ON aux.id = a.auxiliar_id
+        LEFT JOIN servicos s ON s.id = a.servico_id
         WHERE a.salao_id = $1
       `;
       let params = [salaoId];
@@ -96,13 +99,14 @@ class AgendamentoService {
       const { queryOne } = require('../config/database');
       
       const result = await queryOne(`
-        INSERT INTO agendamentos (cliente_id, profissional_id, servico_id, data_hora, 
+        INSERT INTO agendamentos (cliente_id, profissional_id, auxiliar_id, servico_id, data_hora,
                                   observacoes, valor, status, salao_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING *
       `, [
         data.cliente_id,
         data.profissional_id,
+        data.auxiliar_id || null,
         data.servico_id,
         data.data_hora,
         data.observacoes || null,
@@ -129,20 +133,22 @@ class AgendamentoService {
       const { queryOne } = require('../config/database');
       
       const result = await queryOne(`
-        UPDATE agendamentos 
+        UPDATE agendamentos
         SET cliente_id = COALESCE($1, cliente_id),
             profissional_id = COALESCE($2, profissional_id),
-            servico_id = COALESCE($3, servico_id),
-            data_hora = COALESCE($4, data_hora),
-            observacoes = COALESCE($5, observacoes),
-            valor = COALESCE($6, valor),
-            status = COALESCE($7, status),
+            auxiliar_id = $3,
+            servico_id = COALESCE($4, servico_id),
+            data_hora = COALESCE($5, data_hora),
+            observacoes = COALESCE($6, observacoes),
+            valor = COALESCE($7, valor),
+            status = COALESCE($8, status),
             updated_at = CURRENT_TIMESTAMP
-        WHERE id = $8 AND salao_id = $9
+        WHERE id = $9 AND salao_id = $10
         RETURNING *
       `, [
         data.cliente_id,
         data.profissional_id,
+        data.auxiliar_id !== undefined ? data.auxiliar_id : null,
         data.servico_id,
         data.data_hora,
         data.observacoes,
@@ -231,6 +237,19 @@ class AgendamentoService {
         success: false,
         error: error.message
       };
+    }
+  }
+  async deletar(id, salaoId) {
+    try {
+      const { queryOne } = require('../config/database');
+      const result = await queryOne(
+        `DELETE FROM agendamentos WHERE id = $1 AND salao_id = $2 RETURNING id`,
+        [id, salaoId]
+      );
+      if (!result) return { success: false, error: 'Agendamento não encontrado' };
+      return { success: true, message: 'Agendamento excluído' };
+    } catch (error) {
+      return { success: false, error: error.message };
     }
   }
 }

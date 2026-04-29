@@ -75,7 +75,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 // Cancelar agendamento
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    const result = await service.cancelar(req.params.id, req.body.motivo || 'Cancelado pelo usuário', req.salaoId);
+    const result = await service.deletar(req.params.id, req.salaoId);
     if (result.success) {
       res.json({ success: true, message: result.message });
     } else {

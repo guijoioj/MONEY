@@ -356,4 +356,11 @@ async function createFunctions() {
   console.log('✅ Funções criadas');
 }
 
-module.exports = { initDb };
+async function runMigrations() {
+  await query(`
+    ALTER TABLE agendamentos ADD COLUMN IF NOT EXISTS auxiliar_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL;
+  `);
+  console.log('✅ Migrations aplicadas');
+}
+
+module.exports = { initDb, runMigrations };

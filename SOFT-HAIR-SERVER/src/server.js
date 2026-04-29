@@ -132,8 +132,9 @@ const PORT = process.env.PORT || 3000;
 (async () => {
   try {
     // Initialize Database
-    const { initDb } = require('./config/initDb');
+    const { initDb, runMigrations } = require('./config/initDb');
     await initDb();
+    await runMigrations();
 
     // Initialize Security
     const SecurityInitService = require('./services/securityInitService');
