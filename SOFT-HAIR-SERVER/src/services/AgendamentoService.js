@@ -35,7 +35,7 @@ class AgendamentoService {
         params.push(filtros.profissional_id);
       }
 
-      sql += ` ORDER BY a.data_hora`;
+      sql += ` ORDER BY a.data_hora LIMIT 200`;
 
       const agendamentos = await query(sql, params);
       

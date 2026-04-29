@@ -26,7 +26,7 @@ class ComissaoService {
         params.push(filtros.data_inicio, filtros.data_fim);
       }
 
-      sql += ' ORDER BY co.created_at DESC';
+      sql += ' ORDER BY co.created_at DESC LIMIT 200';
       const data = await query(sql, params);
       return { success: true, data };
     } catch (error) {

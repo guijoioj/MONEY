@@ -26,7 +26,7 @@ class VendaService {
         params.push(filtros.data_inicio, filtros.data_fim);
       }
 
-      sql += ' ORDER BY v.created_at DESC';
+      sql += ' ORDER BY v.created_at DESC LIMIT 200';
       const data = await query(sql, params);
       return { success: true, data };
     } catch (error) {
