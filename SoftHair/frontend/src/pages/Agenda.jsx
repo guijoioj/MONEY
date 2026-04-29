@@ -446,7 +446,7 @@ export default function Agenda() {
     } else {
       setEditingAgendamento(null);
       const defaultDate = date || selectedDate;
-      const defaultTime = hora ? `${hora}:00` : '09:00';
+      const defaultTime = hora || '09:00';
       const defaultProfissional = profissional?.id || selectedProfissionalCelula?.id || sortedProfissionais[0]?.id || '';
       
       if (hora && profissional) {
@@ -799,8 +799,8 @@ export default function Agenda() {
           </div>
         </div>
 
-        <div className="flex-1 bg-white rounded-xl shadow overflow-hidden flex flex-col min-h-0">
-          <div className="overflow-auto flex-1" ref={gridRef}>
+        <div className="flex-1 bg-white rounded-xl shadow flex flex-col min-h-0" style={{ minWidth: 0 }}>
+          <div className="overflow-auto flex-1" ref={gridRef} style={{ overflowX: 'auto', overflowY: 'auto' }}>
             <div style={{ minWidth: TIME_COL_WIDTH + (sortedProfissionais.length * COL_WIDTH), minHeight: '100%' }}>
               <div className="sticky top-0 z-30 bg-gray-50 border-b border-r">
                 {/* Linha 1: Barras de cargo agrupadas */}
