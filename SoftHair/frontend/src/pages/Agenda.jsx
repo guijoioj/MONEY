@@ -609,7 +609,7 @@ export default function Agenda() {
         clienteId: '',
         servicoId: '',
         profissionalId: defaultProfissional,
-        auxiliarId: null,
+        auxiliarId: '',
         dataHora: `${defaultDate.toISOString().split('T')[0]}T${defaultTime}`,
         observacoes: '',
         status: 'agendado'
@@ -728,10 +728,16 @@ export default function Agenda() {
       return;
     }
 
+    const payload = {
+      ...formData,
+      auxiliarId: formData.auxiliarId || null,
+      dataHora: formData.dataHora ? new Date(formData.dataHora).toISOString() : formData.dataHora,
+    };
+
     if (editingAgendamento) {
-      updateMutation.mutate({ id: editingAgendamento.id, data: formData });
+      updateMutation.mutate({ id: editingAgendamento.id, data: payload });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(payload);
     }
   };
 
@@ -1356,7 +1362,7 @@ export default function Agenda() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Auxiliar</label>
                 <select
                   value={formData.auxiliarId}
-                  onChange={(e) => setFormData({ ...formData, auxiliarId: e.target.value || null })}
+                  onChange={(e) => setFormData({ ...formData, auxiliarId: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   disabled={editingAgendamento?.isAtendimento}
                 >
