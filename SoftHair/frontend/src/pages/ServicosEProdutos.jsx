@@ -28,6 +28,7 @@ function AbaServicos() {
     nome: '', descricao: '', duracao: 30, preco: '',
     categoria: '', baseComissao: '', comissaoPorcentagem: '', ativo: true,
   });
+  const [formError, setFormError] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['servicos', search, categoria],
@@ -39,14 +40,17 @@ function AbaServicos() {
   const createMutation = useMutation({
     mutationFn: (d) => servicosAPI.create(d),
     onSuccess: () => { queryClient.invalidateQueries(['servicos']); closeModal(); },
+    onError: (err) => setFormError(err.response?.data?.error || err.message || 'Erro ao criar serviço'),
   });
   const updateMutation = useMutation({
     mutationFn: ({ id, data: d }) => servicosAPI.update(id, d),
     onSuccess: () => { queryClient.invalidateQueries(['servicos']); closeModal(); },
+    onError: (err) => setFormError(err.response?.data?.error || err.message || 'Erro ao atualizar serviço'),
   });
   const deleteMutation = useMutation({
     mutationFn: (id) => servicosAPI.delete(id),
     onSuccess: () => { queryClient.invalidateQueries(['servicos']); setDeleteModal({ open: false, servico: null }); },
+    onError: (err) => alert(err.response?.data?.error || 'Erro ao excluir serviço'),
   });
 
   const openModal = (servico = null) => {
@@ -69,7 +73,7 @@ function AbaServicos() {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => { setIsModalOpen(false); setEditingServico(null); };
+  const closeModal = () => { setIsModalOpen(false); setEditingServico(null); setFormError(''); };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -237,6 +241,7 @@ function AbaServicos() {
                   className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
                 <label htmlFor="ativo-s" className="text-sm text-gray-700">Serviço ativo</label>
               </div>
+              {formError && <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{formError}</div>}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
                 <button type="submit" disabled={createMutation.isPending || updateMutation.isPending}
@@ -291,6 +296,7 @@ function AbaProdutos() {
     precoVenda: '', baseComissao: '', comissaoPorcentagem: '',
     estoque: 0, estoqueMinimo: 0, unidade: 'un', ativo: true,
   });
+  const [formError, setFormError] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['produtos', search, categoria, estoqueBaixo],
@@ -302,14 +308,17 @@ function AbaProdutos() {
   const createMutation = useMutation({
     mutationFn: (d) => produtosAPI.create(d),
     onSuccess: () => { queryClient.invalidateQueries(['produtos']); closeModal(); },
+    onError: (err) => setFormError(err.response?.data?.error || err.message || 'Erro ao criar produto'),
   });
   const updateMutation = useMutation({
     mutationFn: ({ id, data: d }) => produtosAPI.update(id, d),
     onSuccess: () => { queryClient.invalidateQueries(['produtos']); closeModal(); },
+    onError: (err) => setFormError(err.response?.data?.error || err.message || 'Erro ao atualizar produto'),
   });
   const deleteMutation = useMutation({
     mutationFn: (id) => produtosAPI.delete(id),
     onSuccess: () => { queryClient.invalidateQueries(['produtos']); setDeleteModal({ open: false, produto: null }); },
+    onError: (err) => alert(err.response?.data?.error || 'Erro ao excluir produto'),
   });
 
   const openModal = (produto = null) => {
@@ -335,7 +344,7 @@ function AbaProdutos() {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => { setIsModalOpen(false); setEditingProduto(null); };
+  const closeModal = () => { setIsModalOpen(false); setEditingProduto(null); setFormError(''); };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -547,6 +556,7 @@ function AbaProdutos() {
                   className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
                 <label htmlFor="ativo-p" className="text-sm text-gray-700">Produto ativo</label>
               </div>
+              {formError && <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{formError}</div>}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
                 <button type="submit" disabled={createMutation.isPending || updateMutation.isPending}

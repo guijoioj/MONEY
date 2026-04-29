@@ -74,6 +74,7 @@ export default function Profissionais() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingProfissional(null);
+    setFormError('');
   };
 
   const handleSubmit = (e) => {
@@ -256,6 +257,11 @@ export default function Profissionais() {
                 <label htmlFor="ativo" className="text-sm text-gray-700">Profissional ativo</label>
               </div>
 
+              {formError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  {formError}
+                </div>
+              )}
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                   Cancelar
