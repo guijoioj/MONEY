@@ -9,14 +9,26 @@ const service = new ProdutoService();
 // Listar produtos
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { ativo, search, categoria } = req.query;
-    const filtros = {};
-    if (ativo !== undefined) filtros.ativo = ativo === 'true';
-    if (search) filtros.termo = search;
-    if (categoria) filtros.categoria = categoria;
+    const { ativo, search, categoria, limit = 200 } = req.query;
+    const { query } = require('../config/database');
+    const salaoId = req.salaoId;
 
-    const result = await service.listar(req.salaoId, filtros);
-    res.json({ success: result.success, data: result.data || [], error: result.error });
+    let conditions = ['salao_id = $1'];
+    let params = [salaoId];
+    let idx = 2;
+
+    if (ativo !== undefined) { conditions.push(`ativo = $${idx++}`); params.push(ativo === 'true'); }
+    if (categoria) { conditions.push(`categoria = $${idx++}`); params.push(categoria); }
+    if (search) { conditions.push(`(nome ILIKE $${idx} OR descricao ILIKE $${idx} OR marca ILIKE $${idx})`); params.push(`%${search}%`); idx++; }
+
+    const lim = Math.min(parseInt(limit) || 200, 2000);
+    const rows = await query(
+      `SELECT * FROM produtos WHERE ${conditions.join(' AND ')} ORDER BY nome ASC LIMIT $${idx}`,
+      [...params, lim]
+    );
+    const total = await query(`SELECT COUNT(*) FROM produtos WHERE ${conditions.join(' AND ')}`, params);
+    const data = rows.rows || rows;
+    res.json({ success: true, data, total: parseInt((total.rows || total)[0].count) });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

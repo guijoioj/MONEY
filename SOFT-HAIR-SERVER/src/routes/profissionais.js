@@ -11,12 +11,22 @@ const service = new ProfissionalService();
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const { ativo, search } = req.query;
-    const filtros = {};
-    if (ativo !== undefined) filtros.ativo = ativo === 'true';
-    if (search) filtros.termo = search;
+    const { query } = require('../config/database');
+    const salaoId = req.salaoId;
 
-    const result = await service.listar(req.salaoId, filtros);
-    res.json({ success: result.success, data: result.data || [], error: result.error });
+    let conditions = ['salao_id = $1'];
+    let params = [salaoId];
+    let idx = 2;
+
+    if (ativo !== undefined) { conditions.push(`ativo = $${idx++}`); params.push(ativo === 'true'); }
+    if (search) { conditions.push(`(nome ILIKE $${idx} OR especialidade ILIKE $${idx})`); params.push(`%${search}%`); idx++; }
+
+    const rows = await query(
+      `SELECT * FROM profissionais WHERE ${conditions.join(' AND ')} ORDER BY nome ASC`,
+      params
+    );
+    const data = rows.rows || rows;
+    res.json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
