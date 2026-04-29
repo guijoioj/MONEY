@@ -1200,7 +1200,7 @@ export default function Agenda() {
                   <option value="">Selecione um serviço</option>
                   {servicos.map((servico) => (
                     <option key={servico.id} value={servico.id}>
-                      {servico.nome} - R$ {servico.preco?.toFixed(2)} ({servico.duracao}min)
+                      {servico.nome} - R$ {parseFloat(servico.preco || 0).toFixed(2)} ({servico.duracao}min)
                     </option>
                   ))}
                 </select>
