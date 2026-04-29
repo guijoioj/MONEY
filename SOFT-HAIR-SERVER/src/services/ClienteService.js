@@ -4,7 +4,7 @@ class ClienteService {
   async listar(salaoId, filtros = {}, options = {}) {
     try {
       const { query } = require('../config/database');
-      const limit = Math.min(parseInt(options.limit) || 100, 500);
+      const limit = Math.min(parseInt(options.limit) || 100, 100);
       const offset = Math.max(parseInt(options.offset) || 0, 0);
 
       // Extrair termo de busca especial antes de montar filtros SQL

@@ -7,7 +7,7 @@ const pool = new Pool({
   ssl: process.env.DATABASE_SSL === 'true' ? {
     rejectUnauthorized: false
   } : false,
-  max: 5,
+  max: 3,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
 });
