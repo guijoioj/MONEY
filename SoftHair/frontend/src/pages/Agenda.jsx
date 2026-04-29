@@ -540,7 +540,8 @@ export default function Agenda() {
 
   const getDuracaoSlots = (agendamento) => {
     const servico = servicos.find(s => s.id === agendamento.servicoId);
-    const duracaoMin = servico?.duracao || agendamento.servicoDuracao || 30;
+    const duracaoMin = servico?.duracao_minutos || servico?.duracao
+      || agendamento.servicoDuracao || agendamento.duracao_minutos || 30;
     return Math.ceil(duracaoMin / 15);
   };
 
@@ -1199,10 +1200,10 @@ export default function Agenda() {
                             <div className="flex justify-between items-start">
                               <div className="flex-1 min-w-0">
                                 <div className={`font-semibold ${statusStyle.text} truncate text-[11px]`}>
-                                  {getClienteNome(agend.clienteId)}
+                                  {agend.clienteNome || getClienteNome(agend.clienteId)}
                                 </div>
                                 <div className={`${statusStyle.text} opacity-75 truncate text-[10px]`}>
-                                  {getServicoNome(agend.servicoId)}
+                                  {agend.servicoNome || getServicoNome(agend.servicoId)}
                                 </div>
                                 {slots > 1 && (
                                   <div className={`${statusStyle.text} opacity-60 text-[9px] mt-0.5`}>
@@ -1261,16 +1262,19 @@ export default function Agenda() {
                       return (
                         <div
                           key={`aux-agend-${agend.id}`}
-                          className="absolute bg-teal-100 border-teal-500 border-l-4 p-1.5 rounded-r-lg text-xs cursor-pointer transition-all overflow-hidden z-20 hover:brightness-95"
+                          className="absolute bg-yellow-50 border-yellow-400 border-l-4 p-1.5 rounded-r-lg text-xs cursor-pointer transition-all overflow-hidden z-20 hover:brightness-95"
                           style={{ top: `${top}px`, left: `${left}px`, width: `${COL_WIDTH}px`, height: `${height}px` }}
                           onClick={(e) => { e.stopPropagation(); openModal(agend); }}
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-teal-800 truncate text-[11px]">
-                              Auxiliar: {getProfissionalNome(agend.auxiliarId)}
+                            <div className="font-semibold text-yellow-800 truncate text-[11px]">
+                              {agend.clienteNome || getClienteNome(agend.clienteId)}
                             </div>
-                            <div className="text-teal-800 opacity-75 truncate text-[10px]">
-                              {getClienteNome(agend.clienteId)}
+                            <div className="text-yellow-700 opacity-75 truncate text-[10px]">
+                              {agend.servicoNome || getServicoNome(agend.servicoId)}
+                            </div>
+                            <div className="text-yellow-600 text-[9px] mt-0.5">
+                              aux: {getProfissionalNome(agend.profissionalId)}
                             </div>
                           </div>
                         </div>

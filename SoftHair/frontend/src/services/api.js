@@ -5,6 +5,7 @@ const apiBaseURL = import.meta.env.VITE_API_URL || (isFileProtocol ? 'http://loc
 
 const api = axios.create({
   baseURL: apiBaseURL,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
