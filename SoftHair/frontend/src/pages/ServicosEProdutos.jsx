@@ -59,7 +59,7 @@ function AbaServicos() {
       setFormData({
         nome: servico.nome || '',
         descricao: servico.descricao || '',
-        duracao: servico.duracao || 30,
+        duracao: servico.duracao || servico.duracao_minutos || 30,
         preco: servico.preco || '',
         categoria: servico.categoria || '',
         baseComissao: servico.baseComissao || '',
@@ -78,10 +78,12 @@ function AbaServicos() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const payload = {
-      ...formData,
+      nome: formData.nome,
+      descricao: formData.descricao,
+      categoria: formData.categoria,
       preco: parseFloat(formData.preco) || 0,
-      baseComissao: parseFloat(formData.baseComissao) || 0,
-      comissaoPorcentagem: parseFloat(formData.comissaoPorcentagem) || 0,
+      duracao_minutos: parseInt(formData.duracao) || null,
+      ativo: formData.ativo,
     };
     if (editingServico) {
       updateMutation.mutate({ id: editingServico.id, data: payload });
@@ -329,11 +331,11 @@ function AbaProdutos() {
         descricao: produto.descricao || '',
         marca: produto.marca || '',
         categoria: produto.categoria || '',
-        precoVenda: produto.precoVenda || '',
-        baseComissao: produto.baseComissao || '',
-        comissaoPorcentagem: produto.comissaoPorcentagem || '',
-        estoque: produto.estoque || 0,
-        estoqueMinimo: produto.estoqueMinimo || 0,
+        precoVenda: produto.precoVenda ?? produto.preco_venda ?? '',
+        baseComissao: produto.baseComissao ?? produto.base_comissao ?? '',
+        comissaoPorcentagem: produto.comissaoPorcentagem ?? produto.comissao_porcentagem ?? '',
+        estoque: produto.estoque ?? produto.quantidade_estoque ?? 0,
+        estoqueMinimo: produto.estoqueMinimo ?? produto.quantidade_minima ?? 0,
         unidade: produto.unidade || 'un',
         ativo: produto.ativo !== undefined ? produto.ativo : true,
       });
@@ -349,12 +351,15 @@ function AbaProdutos() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const payload = {
-      ...formData,
-      precoVenda: parseFloat(formData.precoVenda) || 0,
-      baseComissao: parseFloat(formData.baseComissao) || 0,
-      comissaoPorcentagem: parseFloat(formData.comissaoPorcentagem) || 0,
-      estoque: parseFloat(formData.estoque) || 0,
-      estoqueMinimo: parseFloat(formData.estoqueMinimo) || 0,
+      nome: formData.nome,
+      descricao: formData.descricao,
+      marca: formData.marca,
+      categoria: formData.categoria,
+      preco_venda: parseFloat(formData.precoVenda) || 0,
+      quantidade_estoque: parseFloat(formData.estoque) || 0,
+      quantidade_minima: parseFloat(formData.estoqueMinimo) || 0,
+      unidade: formData.unidade,
+      ativo: formData.ativo,
     };
     if (editingProduto) {
       updateMutation.mutate({ id: editingProduto.id, data: payload });
@@ -427,20 +432,16 @@ function AbaProdutos() {
                       </td>
                       <td className="px-6 py-4 text-gray-600">{produto.marca || '-'}</td>
                       <td className="px-6 py-4 text-gray-600">{produto.categoria || '-'}</td>
-                      <td className="px-6 py-4 font-medium text-indigo-600">{formatCurrency(produto.precoVenda)}</td>
-                      <td className="px-6 py-4 text-gray-600">{produto.baseComissao > 0 ? formatCurrency(produto.baseComissao) : '-'}</td>
-                      <td className="px-6 py-4 text-sm">
-                        {produto.comissaoPorcentagem > 0 ? (
-                          <span className="text-green-700 font-medium">
-                            {produto.comissaoPorcentagem}% = {formatCurrency(comissaoValor)}
-                          </span>
-                        ) : '-'}
-                      </td>
+                      <td className="px-6 py-4 font-medium text-indigo-600">{formatCurrency(produto.preco_venda ?? produto.precoVenda)}</td>
+                      <td className="px-6 py-4 text-gray-600">-</td>
+                      <td className="px-6 py-4 text-sm">-</td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded ${produto.estoque <= produto.estoqueMinimo ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                          {produto.estoque <= produto.estoqueMinimo && <AlertTriangle size={14} />}
-                          {produto.estoque} / {produto.estoqueMinimo}
+                        {(() => { const est = produto.quantidade_estoque ?? produto.estoque ?? 0; const min = produto.quantidade_minima ?? produto.estoqueMinimo ?? 0; return (
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded ${est <= min ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                          {est <= min && <AlertTriangle size={14} />}
+                          {est} / {min}
                         </span>
+                        ); })()}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
