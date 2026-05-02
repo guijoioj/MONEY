@@ -508,7 +508,7 @@ export default function Agenda() {
     ? profissionais.filter(p => selectedProfissionais.includes(p.id))
     : filteredProfissionais;
 
-  const groupedProfissionais = useMemo(() => {
+  const { groupedProfissionais, sortedProfissionais } = useMemo(() => {
     const seen = {};
     [...visibleProfissionais].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(p => {
       const rawRole = p.especialidade || 'Outros';
@@ -516,14 +516,12 @@ export default function Agenda() {
       if (!seen[role]) seen[role] = { role, profissionais: [] };
       seen[role].profissionais.push(p);
     });
-    return Object.values(seen).sort((a, b) => a.role.localeCompare(b.role, 'pt-BR'));
+    const grouped = Object.values(seen).sort((a, b) => a.role.localeCompare(b.role, 'pt-BR'));
+    return {
+      groupedProfissionais: grouped,
+      sortedProfissionais: grouped.flatMap(g => g.profissionais),
+    };
   }, [visibleProfissionais]);
-
-  // Profissionais na ordem correta: grupo alfabético → nome alfabético dentro do grupo
-  const sortedProfissionais = useMemo(
-    () => groupedProfissionais.flatMap(g => g.profissionais),
-    [groupedProfissionais]
-  );
 
   const localDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
