@@ -173,6 +173,18 @@ class WebSocketService {
     return this.broadcast(salaoId, 'notifications', { event, data });
   }
 
+  notificarSalao(salaoId, data) {
+    return this.broadcast(salaoId, 'notifications', data);
+  }
+
+  notificarCliente(clienteId, data) {
+    return this.broadcast(undefined, `cliente:${clienteId}`, data);
+  }
+
+  notificarProfissional(profissionalId, data) {
+    return this.broadcast(undefined, `profissional:${profissionalId}`, data);
+  }
+
   /**
    * Obter estatísticas de conexão
    */

@@ -10,7 +10,7 @@ async function healthCheck() {
     database: 'UNKNOWN',
     diskSpace: 'UNKNOWN',
     memoryUsage: 'UNKNOWN',
-    api/ping: 'UNKNOWN'
+    apiPing: 'UNKNOWN'
   };
 
   // Check database connection
@@ -51,7 +51,7 @@ async function healthCheck() {
 
   // Check main API endpoint  
   try {
-    const http = require('https');
+    const http = require('http');
     const https = require('https');
     const url = `${process.env.FORCE_HTTPS === 'true' ? 'https' : 'http'}://localhost:${process.env.PORT || 3000}/api/health`;
     
@@ -66,9 +66,9 @@ async function healthCheck() {
     });
     
     const result = await promise;
-    health.api/ping = result === 200 ? 'OK' : `Response: ${result}`;
+    health.apiPing = result === 200 ? 'OK' : `Response: ${result}`;
   } catch (error) {
-    health.api/ping = `ERROR: ${error.message}`;
+    health.apiPing = `ERROR: ${error.message}`;
   }
 
   console.log('📊 Estado do sistema:');

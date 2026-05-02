@@ -60,8 +60,8 @@ router.post('/login', [
   }
 });
 
-// Registrar dispositivo (para clientes mobile/desktop)
-router.post('/device/register', async (req, res) => {
+// Registrar dispositivo (apenas administradores do salão)
+router.post('/device/register', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { salaoId, tipo, nome, fingerprint, info } = req.body;
 

@@ -39,9 +39,12 @@ router.post('/pedido', appAuthMiddleware, async (req, res) => {
     // Compute total server-side from DB prices to prevent client-side manipulation
     let total = 0;
     for (const item of itens) {
-      const produto = await queryOne('SELECT preco FROM produtos WHERE id = ?', [item.produtoId]);
+      const produto = await queryOne('SELECT preco_venda FROM produtos WHERE id = $1', [item.produtoId]);
       if (!produto) return res.status(400).json({ error: `Produto ${item.produtoId} não encontrado` });
-      total += produto.preco * item.quantidade;
+      const precoUnitario = Number(produto.preco_venda);
+      item.precoUnitario = precoUnitario;
+      item.subtotal = precoUnitario * item.quantidade;
+      total += item.subtotal;
     }
     const pedido = await PedidoLoja.create(
       { salonId, clienteAppId: req.clienteApp.clienteAppId, total, enderecoEntrega, formaPagamento, observacoes },
@@ -87,7 +90,7 @@ router.get('/meus-pedidos', appAuthMiddleware, async (req, res) => {
 });
 
 router.get('/pedidos', authMiddleware, async (req, res) => {
-  try { res.json({ data: await PedidoLoja.getBySalao(req.salonId, req.query) }); }
+  try { res.json({ data: await PedidoLoja.getBySalao(req.salaoId, req.query) }); }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -96,7 +99,7 @@ router.put('/pedidos/:id/status', authMiddleware, async (req, res) => {
     const { status } = req.body;
     const statusValidos = ['pendente', 'confirmado', 'preparando', 'enviado', 'entregue', 'cancelado'];
     if (!statusValidos.includes(status)) return res.status(400).json({ error: `Status inválido. Use: ${statusValidos.join(', ')}` });
-    const pedido = await PedidoLoja.atualizarStatus(req.params.id, req.salonId, status);
+    const pedido = await PedidoLoja.atualizarStatus(req.params.id, req.salaoId, status);
     if (!pedido) return res.status(404).json({ error: 'Pedido não encontrado' });
 
     ws.notificarCliente(pedido.clienteAppId, {

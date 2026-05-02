@@ -1,56 +1,83 @@
-const { v4: uuidv4 } = require('uuid');
-const { query, queryOne, queryRun } = require('../config/database');
+const { query, queryOne } = require('../config/database');
 
 class CreditoCliente {
-  static async create(data, salonId) {
-    const id = uuidv4();
-    await queryRun(
-      'INSERT INTO creditos_cliente (id, "clienteId", tipo, valor, descricao, "salonId") VALUES (?, ?, ?, ?, ?, ?)',
-      [id, data.clienteId, data.tipo, data.valor, data.descricao||null, salonId]
-    );
-    return this.findById(id);
+  static async create(data, salaoId) {
+    const clienteId = data.cliente_id || data.clienteId;
+    const saldoAnterior = await this.getSaldo(clienteId, salaoId);
+    const valor = Number(data.valor || 0);
+    const tipo = data.tipo || 'credito';
+    const saldoNovo = tipo === 'debito' ? saldoAnterior - valor : saldoAnterior + valor;
+
+    return queryOne(`
+      INSERT INTO creditos_cliente (cliente_id, salao_id, tipo, valor, saldo_anterior, saldo_novo, observacoes)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *
+    `, [clienteId, salaoId, tipo, valor, saldoAnterior, saldoNovo, data.descricao || data.observacoes || null]);
   }
 
   static async findById(id) {
-    return queryOne(`SELECT c.*, cl.nome as "clienteNome" FROM creditos_cliente c LEFT JOIN clientes cl ON c."clienteId" = cl.id WHERE c.id = ?`, [id]);
+    return queryOne(`
+      SELECT c.*, cl.nome as cliente_nome
+      FROM creditos_cliente c
+      LEFT JOIN clientes cl ON c.cliente_id = cl.id
+      WHERE c.id = $1
+    `, [id]);
   }
 
-  static async getByCliente(clienteId, salonId) {
-    return query('SELECT * FROM creditos_cliente WHERE "clienteId" = ? AND "salonId" = ? ORDER BY "createdAt" DESC', [clienteId, salonId]);
+  static async getByCliente(clienteId, salaoId) {
+    return query(`
+      SELECT * FROM creditos_cliente
+      WHERE cliente_id = $1 AND ($2::int IS NULL OR salao_id = $2)
+      ORDER BY created_at DESC
+    `, [clienteId, salaoId || null]);
   }
 
-  static async getSaldo(clienteId, salonId) {
+  static async getSaldo(clienteId, salaoId) {
     const row = await queryOne(`
-      SELECT COALESCE(SUM(CASE WHEN tipo IN ('credito','fidelidade') THEN valor ELSE 0 END),0) as "totalCreditos",
-             COALESCE(SUM(CASE WHEN tipo='debito' THEN valor ELSE 0 END),0) as "totalDebitos"
-      FROM creditos_cliente WHERE "clienteId" = ? AND "salonId" = ?
-    `, [clienteId, salonId]);
-    return (parseFloat(row?.totalCreditos)||0) - (parseFloat(row?.totalDebitos)||0);
+      SELECT COALESCE(
+        SUM(CASE WHEN tipo = 'debito' THEN -valor ELSE valor END), 0
+      ) as saldo
+      FROM creditos_cliente
+      WHERE cliente_id = $1 AND ($2::int IS NULL OR salao_id = $2)
+    `, [clienteId, salaoId || null]);
+    return parseFloat(row?.saldo || 0);
   }
 
-  static async getAll(filters = {}, salonId) {
-    let sql = `SELECT c.*, cl.nome as "clienteNome" FROM creditos_cliente c LEFT JOIN clientes cl ON c."clienteId" = cl.id WHERE c."salonId" = ?`;
-    const params = [salonId];
-    if (filters.clienteId) { sql += ' AND c."clienteId" = ?'; params.push(filters.clienteId); }
-    if (filters.tipo) { sql += ' AND c.tipo = ?'; params.push(filters.tipo); }
-    sql += ' ORDER BY c."createdAt" DESC';
-    if (filters.limit) { sql += ' LIMIT ?'; params.push(parseInt(filters.limit)); }
+  static async getAll(filters = {}, salaoId) {
+    const params = [salaoId || null];
+    let idx = 2;
+    let sql = `
+      SELECT c.*, cl.nome as cliente_nome
+      FROM creditos_cliente c
+      LEFT JOIN clientes cl ON c.cliente_id = cl.id
+      WHERE ($1::int IS NULL OR c.salao_id = $1)
+    `;
+    if (filters.clienteId) {
+      sql += ` AND c.cliente_id = $${idx++}`;
+      params.push(filters.clienteId);
+    }
+    if (filters.tipo) {
+      sql += ` AND c.tipo = $${idx++}`;
+      params.push(filters.tipo);
+    }
+    sql += ' ORDER BY c.created_at DESC';
+    if (filters.limit) {
+      sql += ` LIMIT $${idx++}`;
+      params.push(Math.min(parseInt(filters.limit, 10) || 50, 500));
+    }
     return query(sql, params);
   }
 
-  static async getAllWithSaldo(salonId) {
-    const clientes = await query('SELECT id, nome, telefone FROM clientes WHERE "salonId" = ? ORDER BY nome', [salonId]);
-    const result = [];
-    for (const c of clientes) {
-      const saldo = await this.getSaldo(c.id, salonId);
-      if (saldo !== 0) result.push({ ...c, saldo });
+  static async getAllWithSaldo(salaoId) {
+    const clientes = await query('SELECT id, nome, telefone FROM clientes WHERE salao_id = $1 ORDER BY nome', [salaoId]);
+    for (const cliente of clientes) {
+      cliente.saldo = await this.getSaldo(cliente.id, salaoId);
     }
-    return result;
+    return clientes;
   }
 
-  static async delete(id, salonId) {
-    await queryRun('DELETE FROM creditos_cliente WHERE id = ? AND "salonId" = ?', [id, salonId]);
-    return true;
+  static async delete(id, salaoId) {
+    return query('DELETE FROM creditos_cliente WHERE id = $1 AND salao_id = $2 RETURNING *', [id, salaoId]);
   }
 }
 

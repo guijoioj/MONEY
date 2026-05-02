@@ -14,6 +14,7 @@ const authMiddleware = async (req, res, next) => {
         const decoded = AuthService.verifyToken(token);
         req.user = decoded;
         req.salaoId = decoded.salaoId;
+        req.salonId = decoded.salaoId;
         return next();
       }
     }
@@ -23,6 +24,7 @@ const authMiddleware = async (req, res, next) => {
       const keyData = await AuthService.validateApiKey(apiKey);
       req.apiKey = keyData;
       req.salaoId = keyData.salao_id;
+      req.salonId = keyData.salao_id;
       return next();
     }
 
@@ -31,6 +33,7 @@ const authMiddleware = async (req, res, next) => {
       const device = await AuthService.validateDevice(deviceFingerprint);
       req.device = device;
       req.salaoId = device.salao_id;
+      req.salonId = device.salao_id;
       return next();
     }
 
@@ -58,15 +61,18 @@ const optionalAuth = async (req, res, next) => {
         const decoded = AuthService.verifyToken(token);
         req.user = decoded;
         req.salaoId = decoded.salaoId;
+        req.salonId = decoded.salaoId;
       }
     } else if (apiKey) {
       const keyData = await AuthService.validateApiKey(apiKey);
       req.apiKey = keyData;
       req.salaoId = keyData.salao_id;
+      req.salonId = keyData.salao_id;
     } else if (deviceFingerprint) {
       const device = await AuthService.validateDevice(deviceFingerprint);
       req.device = device;
       req.salaoId = device.salao_id;
+      req.salonId = device.salao_id;
     }
 
     next();

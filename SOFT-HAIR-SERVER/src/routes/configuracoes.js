@@ -1,15 +1,14 @@
 const express = require('express');
 const fs = require('fs');
 const router = express.Router();
-const { query, queryOne, queryRun } = require('../config/database');
-const { v4: uuidv4 } = require('uuid');
+const { query, queryOne } = require('../config/database');
 const { authMiddleware } = require('../middleware/auth');
 
 router.use(authMiddleware);
 
 router.get('/', async (req, res) => {
   try {
-    const configs = await query('SELECT chave, valor FROM configuracoes');
+    const configs = await query('SELECT chave, valor FROM configuracoes WHERE salao_id = $1', [req.salaoId]);
     const configObj = {};
     configs.forEach(c => { configObj[c.chave] = c.valor; });
     res.json(configObj);
@@ -21,12 +20,12 @@ router.put('/', async (req, res) => {
     const { chave, valor } = req.body;
     if (!chave) return res.status(400).json({ error: 'Chave obrigatória' });
 
-    const existing = await queryOne('SELECT id FROM configuracoes WHERE chave = ?', [chave]);
+    const existing = await queryOne('SELECT id FROM configuracoes WHERE salao_id = $1 AND chave = $2', [req.salaoId, chave]);
 
     if (existing) {
-      await queryRun('UPDATE configuracoes SET valor = ?, "updatedAt" = NOW() WHERE chave = ?', [valor, chave]);
+      await query('UPDATE configuracoes SET valor = $1, updated_at = NOW() WHERE salao_id = $2 AND chave = $3', [valor, req.salaoId, chave]);
     } else {
-      await queryRun('INSERT INTO configuracoes (id, chave, valor) VALUES (?, ?, ?)', [uuidv4(), chave, valor]);
+      await query('INSERT INTO configuracoes (salao_id, chave, valor) VALUES ($1, $2, $3)', [req.salaoId, chave, valor]);
     }
 
     res.json({ success: true, chave, valor });

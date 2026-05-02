@@ -57,7 +57,7 @@ class Servico extends BaseModel {
       FROM servicos s
       LEFT JOIN agendamentos a ON a.servico_id = s.id 
         AND a.status = 'concluido'
-        AND a.data_agendamento >= CURRENT_DATE - INTERVAL '30 days'
+        AND a.data_hora >= CURRENT_DATE - INTERVAL '30 days'
       WHERE s.salao_id = $1 AND s.ativo = true
       GROUP BY s.id
       ORDER BY total_agenda DESC, s.nome
@@ -73,8 +73,8 @@ class Servico extends BaseModel {
   async findByDuracaoMax(duracaoMaxima) {
     const sql = `
       SELECT * FROM servicos 
-      WHERE duracao <= $1 AND ativo = true
-      ORDER BY duracao
+      WHERE duracao_minutos <= $1 AND ativo = true
+      ORDER BY duracao_minutos
     `;
     const { query } = require('../config/database');
     return query(sql, [duracaoMaxima]);
@@ -87,7 +87,7 @@ class Servico extends BaseModel {
     const sql = `
       SELECT * FROM servicos 
       WHERE ativo = true 
-      AND (nome ILIKE $1 OR descricao ILIKE $1 OR categoria ILIKE $1)
+      AND (nome ILIKE $1 OR descricao ILIKE $1)
       ORDER BY nome
     `;
     const { query } = require('../config/database');

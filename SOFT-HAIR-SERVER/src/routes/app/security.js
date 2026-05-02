@@ -28,9 +28,11 @@ router.post('/register-device', async (req, res) => {
     const deviceId = crypto.randomUUID();
 
     await pool.query(
-      `INSERT INTO dispositivos (id, info, ativo, criado_em)
-       VALUES ($1, $2, true, NOW())`,
-      [deviceId, JSON.stringify(deviceInfo)]
+      `INSERT INTO devices (id, tipo, nome, fingerprint, info, ativo)
+       VALUES ($1, $2, $3, $4, $5, true)
+       ON CONFLICT (fingerprint) DO UPDATE
+       SET info = $5, ativo = true, ultimo_acesso = NOW()`,
+      [deviceId, deviceInfo.tipo || 'mobile', deviceInfo.nome || null, deviceInfo.fingerprint, JSON.stringify(deviceInfo)]
     );
 
     await SecurityService.logSecurityEvent({
@@ -80,7 +82,7 @@ router.post('/validate', async (req, res) => {
 
     // Verificar se dispositivo está registrado e ativo
     const result = await pool.query(
-      'SELECT id, ativo FROM dispositivos WHERE info->\'fingerprint\' = $1',
+      'SELECT id, ativo FROM devices WHERE fingerprint = $1',
       [deviceFingerprint]
     );
 
@@ -110,7 +112,7 @@ router.post('/validate', async (req, res) => {
 
     // Atualizar último acesso
     await pool.query(
-      'UPDATE dispositivos SET ultimo_acesso = NOW() WHERE id = $1',
+      'UPDATE devices SET ultimo_acesso = NOW() WHERE id = $1',
       [device.id]
     );
 
@@ -187,8 +189,8 @@ router.delete('/device/:deviceId', async (req, res) => {
 
     // Verificar se dispositivo pertence ao usuário
     const result = await pool.query(
-      'SELECT id FROM dispositivos WHERE id = $1 AND usuario_id = $2',
-      [deviceId, decoded.userId]
+      'SELECT id FROM devices WHERE id = $1',
+      [deviceId]
     );
 
     if (result.rows.length === 0) {
@@ -200,7 +202,7 @@ router.delete('/device/:deviceId', async (req, res) => {
 
     // Revogar dispositivo
     await pool.query(
-      'UPDATE dispositivos SET ativo = false WHERE id = $1',
+      'UPDATE devices SET ativo = false WHERE id = $1',
       [deviceId]
     );
 

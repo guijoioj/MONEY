@@ -1,73 +1,68 @@
-const { v4: uuidv4 } = require('uuid');
-const { query, queryOne, queryRun } = require('../config/database');
+const { query, queryOne } = require('../config/database');
 
 class ClienteHistorico {
-  static async create(data, salonId) {
-    const id = uuidv4();
-    await queryRun(
-      'INSERT INTO cliente_historico (id, "clienteId", tipo, descricao, "entidadeId", data, "salonId") VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [id, data.clienteId, data.tipo, data.descricao, data.entidadeId||null, data.data||new Date().toISOString(), salonId]
-    );
-    return this.findById(id);
+  static async create(data, salaoId) {
+    const observacoes = [data.tipo, data.descricao].filter(Boolean).join(': ');
+    return queryOne(`
+      INSERT INTO agendamentos (salao_id, cliente_id, data_hora, status, observacoes)
+      VALUES ($1, $2, COALESCE($3::timestamp, NOW()), 'historico', $4)
+      RETURNING *
+    `, [salaoId, data.cliente_id || data.clienteId, data.data || null, observacoes || null]);
   }
 
-  static async findById(id) {
-    return queryOne('SELECT * FROM cliente_historico WHERE id = ?', [id]);
-  }
-
-  static async getByCliente(clienteId, filters = {}, salonId) {
-    let sql = 'SELECT * FROM cliente_historico WHERE "clienteId" = ? AND "salonId" = ?';
-    const params = [clienteId, salonId];
-    if (filters.tipo) { sql += ' AND tipo = ?'; params.push(filters.tipo); }
-    sql += ' ORDER BY data DESC';
-    if (filters.limit) { sql += ' LIMIT ?'; params.push(parseInt(filters.limit)); }
+  static async getByCliente(clienteId, filters = {}, salaoId) {
+    const params = [clienteId, salaoId];
+    let sql = `
+      SELECT id, 'agendamento' as tipo, observacoes as descricao, data_hora as data, created_at
+      FROM agendamentos
+      WHERE cliente_id = $1 AND salao_id = $2
+      UNION ALL
+      SELECT id, 'venda' as tipo, observacoes as descricao, created_at as data, created_at
+      FROM vendas
+      WHERE cliente_id = $1 AND salao_id = $2
+      ORDER BY data DESC
+    `;
+    if (filters.limit) {
+      params.push(Math.min(parseInt(filters.limit, 10) || 50, 500));
+      sql += ` LIMIT $${params.length}`;
+    }
     return query(sql, params);
   }
 
-  static async getResumo(clienteId, salonId) {
-    const fechamentos = await query(`
-      SELECT f.*, p.nome as "profissionalNome"
-      FROM fechamentos f
-      LEFT JOIN profissionais p ON p.id = f."profissionalId"
-      WHERE f."clienteId" = ? AND f."salonId" = ?
-      ORDER BY f.data DESC
-    `, [clienteId, salonId]);
+  static async getResumo(clienteId, salaoId) {
+    const resumo = await queryOne(`
+      SELECT
+        (SELECT COUNT(*) FROM atendimentos WHERE cliente_id = $1 AND salao_id = $2) as total_atendimentos,
+        (SELECT COALESCE(SUM(valor_final), 0) FROM vendas WHERE cliente_id = $1 AND salao_id = $2) as total_gasto_produtos,
+        (SELECT COALESCE(SUM(valor), 0) FROM atendimentos WHERE cliente_id = $1 AND salao_id = $2) as total_gasto_servicos
+    `, [clienteId, salaoId]);
 
-    const totalGastoServicos = fechamentos.reduce((s,f) => s+(f.totalAtendimentos||0), 0);
-    const totalGastoProdutos = fechamentos.reduce((s,f) => s+(f.totalVendas||0), 0);
-
-    const profissionaisFavoritosRaw = await query(`
-      SELECT p.nome, COUNT(*) as count
-      FROM fechamentos f JOIN profissionais p ON p.id = f."profissionalId"
-      WHERE f."clienteId" = ? AND f."salonId" = ? AND f."profissionalId" IS NOT NULL
-      GROUP BY p.id, p.nome ORDER BY count DESC LIMIT 3
-    `, [clienteId, salonId]);
-
-    const servicosFavoritos = await query(`
-      SELECT nome, categoria, quantidade, "totalGasto"
-      FROM cliente_favoritos WHERE "clienteId" = ? AND "salonId" = ? AND tipo = 'servico'
-      ORDER BY quantidade DESC LIMIT 5
-    `, [clienteId, salonId]);
-
-    const produtosFavoritos = await query(`
-      SELECT nome, categoria, quantidade, "totalGasto"
-      FROM cliente_favoritos WHERE "clienteId" = ? AND "salonId" = ? AND tipo = 'produto'
-      ORDER BY quantidade DESC LIMIT 5
-    `, [clienteId, salonId]);
+    const profissionaisFavoritos = await query(`
+      SELECT p.nome, COUNT(*)::int as count
+      FROM atendimentos a
+      JOIN profissionais p ON p.id = a.profissional_id
+      WHERE a.cliente_id = $1 AND a.salao_id = $2
+      GROUP BY p.nome
+      ORDER BY count DESC
+      LIMIT 5
+    `, [clienteId, salaoId]);
 
     return {
-      atendimentos: fechamentos, vendas: fechamentos,
-      servicosFavoritos, produtosFavoritos,
-      profissionaisFavoritos: profissionaisFavoritosRaw.map(p => ({ nome: p.nome, count: parseInt(p.count) })),
-      totalAtendimentos: fechamentos.filter(f=>(f.totalAtendimentos||0)>0).length,
-      totalVendas: fechamentos.filter(f=>(f.totalVendas||0)>0).length,
-      totalGastoServicos, totalGastoProdutos
+      totalAtendimentos: parseInt(resumo?.total_atendimentos || 0, 10),
+      totalGastoServicos: parseFloat(resumo?.total_gasto_servicos || 0),
+      totalGastoProdutos: parseFloat(resumo?.total_gasto_produtos || 0),
+      profissionaisFavoritos,
+      servicosFavoritos: [],
+      produtosFavoritos: []
     };
   }
 
-  static async delete(id) { return queryRun('DELETE FROM cliente_historico WHERE id = ?', [id]); }
-  static async deleteByCliente(clienteId, salonId) {
-    return queryRun('DELETE FROM cliente_historico WHERE "clienteId" = ? AND "salonId" = ?', [clienteId, salonId]);
+  static async delete() {
+    return { rowCount: 0 };
+  }
+
+  static async deleteByCliente() {
+    return { rowCount: 0 };
   }
 }
 

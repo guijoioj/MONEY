@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-require('@oo/env').config({path: require('path').resolve(__dirname, '../../.env')});
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const fs = require('fs');

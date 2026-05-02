@@ -1,9 +1,17 @@
-const nodemailer = require('nodemailer');
+let nodemailer = null;
+try {
+  nodemailer = require('nodemailer');
+} catch {
+  nodemailer = null;
+}
 
 class EmailService {
   static transporter;
 
   static getTransporter() {
+    if (!nodemailer) {
+      throw new Error('Dependencia opcional nodemailer nao instalada');
+    }
     if (!this.transporter) {
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,

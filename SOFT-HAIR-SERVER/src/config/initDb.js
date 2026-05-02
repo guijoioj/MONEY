@@ -71,6 +71,20 @@ async function createTables() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- Clientes app (compatibilidade; dados reais ficam em clientes)
+    CREATE TABLE IF NOT EXISTS clientes_app (
+      id SERIAL PRIMARY KEY,
+      nome VARCHAR(255) NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password VARCHAR(255),
+      telefone VARCHAR(50),
+      foto TEXT,
+      push_token TEXT,
+      ativo BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Profissionais
     CREATE TABLE IF NOT EXISTS profissionais (
       id SERIAL PRIMARY KEY,
@@ -135,6 +149,25 @@ async function createTables() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- Pedidos de agendamento do app
+    CREATE TABLE IF NOT EXISTS pedidos_agendamento (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      cliente_app_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+      servico_id INTEGER REFERENCES servicos(id) ON DELETE SET NULL,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL,
+      data_desejada DATE NOT NULL,
+      horario_desejado TIME NOT NULL,
+      horario_alternativo TIME,
+      observacoes TEXT,
+      status VARCHAR(50) DEFAULT 'pendente',
+      agendamento_id INTEGER REFERENCES agendamentos(id) ON DELETE SET NULL,
+      atendido_por INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+      motivo_rejeicao TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Atendimentos
     CREATE TABLE IF NOT EXISTS atendimentos (
       id SERIAL PRIMARY KEY,
@@ -178,6 +211,29 @@ async function createTables() {
       valor_total DECIMAL(10,2) NOT NULL
     );
 
+    -- Pedidos de loja do app
+    CREATE TABLE IF NOT EXISTS pedidos_loja (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      cliente_app_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+      status VARCHAR(50) DEFAULT 'pendente',
+      total DECIMAL(10,2) DEFAULT 0,
+      endereco_entrega TEXT,
+      forma_pagamento VARCHAR(50),
+      observacoes TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS pedido_loja_itens (
+      id SERIAL PRIMARY KEY,
+      pedido_id INTEGER REFERENCES pedidos_loja(id) ON DELETE CASCADE,
+      produto_id INTEGER REFERENCES produtos(id) ON DELETE SET NULL,
+      quantidade INTEGER NOT NULL,
+      preco_unitario DECIMAL(10,2) NOT NULL,
+      subtotal DECIMAL(10,2) NOT NULL
+    );
+
     -- Comissões
     CREATE TABLE IF NOT EXISTS comissoes (
       id SERIAL PRIMARY KEY,
@@ -189,6 +245,18 @@ async function createTables() {
       valor_comissao DECIMAL(10,2) NOT NULL,
       pago BOOLEAN DEFAULT false,
       data_pagamento DATE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS comissoes_pagamentos (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE CASCADE,
+      valor DECIMAL(10,2) NOT NULL,
+      data_pagamento DATE DEFAULT CURRENT_DATE,
+      observacoes TEXT,
+      motivo_estorno TEXT,
+      status VARCHAR(50) DEFAULT 'pago',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -214,6 +282,7 @@ async function createTables() {
     CREATE TABLE IF NOT EXISTS creditos_cliente (
       id SERIAL PRIMARY KEY,
       cliente_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
       tipo VARCHAR(50) NOT NULL,
       valor DECIMAL(10,2) NOT NULL,
       saldo_anterior DECIMAL(10,2) NOT NULL,
@@ -272,6 +341,24 @@ async function createTables() {
       ultimo_uso TIMESTAMP,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       expires_at TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS registros_ponto (
+      id SERIAL PRIMARY KEY,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE CASCADE,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      tipo VARCHAR(50) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS configuracoes (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      chave VARCHAR(255) NOT NULL,
+      valor TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (salao_id, chave)
     );
   `;
 
@@ -359,6 +446,13 @@ async function createFunctions() {
 async function runMigrations() {
   await query(`
     ALTER TABLE agendamentos ADD COLUMN IF NOT EXISTS auxiliar_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL;
+    ALTER TABLE agendamentos ADD COLUMN IF NOT EXISTS cancelado_em TIMESTAMP;
+    ALTER TABLE agendamentos ADD COLUMN IF NOT EXISTS motivo_cancelamento TEXT;
+    ALTER TABLE creditos_cliente ADD COLUMN IF NOT EXISTS salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE;
+    ALTER TABLE clientes ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(255);
+    ALTER TABLE clientes ADD COLUMN IF NOT EXISTS app_ativo BOOLEAN DEFAULT false;
+    ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(255);
+    ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS app_ativo BOOLEAN DEFAULT false;
   `);
   console.log('✅ Migrations aplicadas');
 }

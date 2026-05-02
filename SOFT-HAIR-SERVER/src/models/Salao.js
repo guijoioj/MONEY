@@ -41,6 +41,11 @@ class Salao extends BaseModel {
       [salaoId]
     );
   }
+
+  static async findFirst() {
+    const { queryOne } = require('../config/database');
+    return queryOne('SELECT * FROM saloes WHERE ativo = true ORDER BY id LIMIT 1');
+  }
 }
 
 module.exports = Salao;

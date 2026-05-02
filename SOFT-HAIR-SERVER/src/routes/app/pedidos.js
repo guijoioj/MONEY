@@ -45,7 +45,7 @@ router.get('/saloes/:salonId/profissionais', async (req, res) => {
     let duracao = 30;
     if (servicoId) {
       const servico = await Servico.findById(servicoId, req.params.salonId);
-      if (servico) duracao = servico.duracao || 30;
+    if (servico) duracao = servico.duracao_minutos || 30;
     }
     const dataHora = `${data}T${horario}`;
     const resultado = await Promise.all(
@@ -86,7 +86,7 @@ router.get('/meus', appAuthMiddleware, async (req, res) => {
 });
 
 router.get('/salao', authMiddleware, async (req, res) => {
-  try { res.json({ data: await PedidoAgendamento.getBySalao(req.salonId, req.query) }); }
+  try { res.json({ data: await PedidoAgendamento.getBySalao(req.salaoId, req.query) }); }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -94,9 +94,9 @@ router.put('/:id/aprovar', authMiddleware, async (req, res) => {
   try {
     const { profissionalId, dataHora } = req.body;
     const pedido = await PedidoAgendamento.findById(req.params.id);
-    if (!pedido || pedido.salonId !== req.salonId) return res.status(404).json({ error: 'Pedido não encontrado' });
+    if (!pedido || Number(pedido.salonId) !== Number(req.salaoId)) return res.status(404).json({ error: 'Pedido não encontrado' });
 
-    const clienteId = await resolverOuCriarCliente(pedido.clienteAppId, req.salonId);
+    const clienteId = await resolverOuCriarCliente(pedido.clienteAppId, req.salaoId);
     const agendamento = await Agendamento.create({
       clienteId,
       servicoId: pedido.servicoId,
@@ -104,9 +104,9 @@ router.put('/:id/aprovar', authMiddleware, async (req, res) => {
       dataHora: dataHora || `${pedido.dataDesejada}T${pedido.horarioDesejado}`,
       status: 'agendado',
       observacoes: pedido.observacoes
-    }, req.salonId);
+    }, req.salaoId);
 
-    const pedidoAtualizado = await PedidoAgendamento.aprovar(req.params.id, req.salonId, agendamento.id, req.user.id);
+    const pedidoAtualizado = await PedidoAgendamento.aprovar(req.params.id, req.salaoId, agendamento.id, req.user.id);
 
     ws.notificarCliente(pedido.clienteAppId, {
       tipo: 'pedido_aprovado',
@@ -117,16 +117,12 @@ router.put('/:id/aprovar', authMiddleware, async (req, res) => {
 
     if (profissionalId || pedido.profissionalId) {
       const profId = profissionalId || pedido.profissionalId;
-      const { queryOne } = require('../../config/database');
-      const user = await queryOne('SELECT id FROM users WHERE "profissionalId"=? AND "salonId"=?', [profId, req.salonId]);
-      if (user) {
-        ws.notificarProfissional(profId, {
-          tipo: 'novo_agendamento',
-          titulo: 'Novo agendamento',
-          mensagem: `${pedido.clienteNome} agendou ${pedido.servicoNome} para ${pedido.dataDesejada} às ${pedido.horarioDesejado}`,
-          agendamento
-        });
-      }
+      ws.notificarProfissional(profId, {
+        tipo: 'novo_agendamento',
+        titulo: 'Novo agendamento',
+        mensagem: `${pedido.clienteNome} agendou ${pedido.servicoNome} para ${pedido.dataDesejada} às ${pedido.horarioDesejado}`,
+        agendamento
+      });
     }
 
     res.json(pedidoAtualizado);
@@ -136,11 +132,11 @@ router.put('/:id/aprovar', authMiddleware, async (req, res) => {
 router.get('/:id/verificar-disponibilidade', authMiddleware, async (req, res) => {
   try {
     const pedido = await PedidoAgendamento.findById(req.params.id);
-    if (!pedido || pedido.salonId !== req.salonId) return res.status(404).json({ error: 'Pedido não encontrado' });
+    if (!pedido || Number(pedido.salonId) !== Number(req.salaoId)) return res.status(404).json({ error: 'Pedido não encontrado' });
     if (!pedido.profissionalId) return res.json({ disponivel: true, semProfissional: true });
     const dataHora = `${pedido.dataDesejada}T${pedido.horarioDesejado}`;
     const duracao = pedido.servicoDuracao || 30;
-    const resultado = await Agendamento.verificarDisponibilidade(pedido.profissionalId, dataHora, duracao, req.salonId);
+    const resultado = await Agendamento.verificarDisponibilidade(pedido.profissionalId, dataHora, duracao, req.salaoId);
     res.json(resultado);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -148,11 +144,11 @@ router.get('/:id/verificar-disponibilidade', authMiddleware, async (req, res) =>
 router.get('/:id/proximo-horario', authMiddleware, async (req, res) => {
   try {
     const pedido = await PedidoAgendamento.findById(req.params.id);
-    if (!pedido || pedido.salonId !== req.salonId) return res.status(404).json({ error: 'Pedido não encontrado' });
+    if (!pedido || Number(pedido.salonId) !== Number(req.salaoId)) return res.status(404).json({ error: 'Pedido não encontrado' });
     if (!pedido.profissionalId) return res.status(400).json({ error: 'Nenhum profissional específico solicitado' });
     const dataHora = `${pedido.dataDesejada}T${pedido.horarioDesejado}`;
     const duracao = pedido.servicoDuracao || 30;
-    const proximo = await Agendamento.proximoHorarioVago(pedido.profissionalId, dataHora, duracao, req.salonId);
+    const proximo = await Agendamento.proximoHorarioVago(pedido.profissionalId, dataHora, duracao, req.salaoId);
     if (!proximo) return res.status(404).json({ error: 'Nenhum horário disponível encontrado' });
     res.json({ dataHora: proximo });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -162,8 +158,8 @@ router.put('/:id/rejeitar', authMiddleware, async (req, res) => {
   try {
     const { motivo } = req.body;
     const pedido = await PedidoAgendamento.findById(req.params.id);
-    if (!pedido || pedido.salonId !== req.salonId) return res.status(404).json({ error: 'Pedido não encontrado' });
-    const pedidoAtualizado = await PedidoAgendamento.rejeitar(req.params.id, req.salonId, motivo);
+    if (!pedido || Number(pedido.salonId) !== Number(req.salaoId)) return res.status(404).json({ error: 'Pedido não encontrado' });
+    const pedidoAtualizado = await PedidoAgendamento.rejeitar(req.params.id, req.salaoId, motivo);
     ws.notificarCliente(pedido.clienteAppId, {
       tipo: 'pedido_rejeitado',
       titulo: 'Agendamento não disponível',

@@ -95,8 +95,25 @@ router.get('/favoritos/:salonId', async (req, res) => {
     const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
     if (!cliente) return res.json({ data: { servicos: [], produtos: [] } });
     const [servicos, produtos] = await Promise.all([
-      query(`SELECT nome, categoria, quantidade, "totalGasto" FROM cliente_favoritos WHERE "clienteId"=? AND "salonId"=? AND tipo='servico' ORDER BY quantidade DESC LIMIT 5`, [cliente.id, req.params.salonId]),
-      query(`SELECT nome, categoria, quantidade, "totalGasto" FROM cliente_favoritos WHERE "clienteId"=? AND "salonId"=? AND tipo='produto' ORDER BY quantidade DESC LIMIT 5`, [cliente.id, req.params.salonId])
+      query(`
+        SELECT s.nome, NULL::text as categoria, COUNT(*)::int as quantidade, COALESCE(SUM(a.valor), 0) as total_gasto
+        FROM atendimentos a
+        JOIN servicos s ON s.id = a.servico_id
+        WHERE a.cliente_id = $1 AND a.salao_id = $2
+        GROUP BY s.nome
+        ORDER BY quantidade DESC
+        LIMIT 5
+      `, [cliente.id, req.params.salonId]),
+      query(`
+        SELECT p.nome, p.categoria, COALESCE(SUM(vi.quantidade), 0)::int as quantidade, COALESCE(SUM(vi.valor_total), 0) as total_gasto
+        FROM vendas v
+        JOIN venda_itens vi ON vi.venda_id = v.id
+        JOIN produtos p ON p.id = vi.produto_id
+        WHERE v.cliente_id = $1 AND v.salao_id = $2
+        GROUP BY p.nome, p.categoria
+        ORDER BY quantidade DESC
+        LIMIT 5
+      `, [cliente.id, req.params.salonId])
     ]);
     res.json({ data: { servicos, produtos } });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -123,8 +140,8 @@ router.get('/dashboard/:salonId', async (req, res) => {
     ]);
 
     const proximoAgendamento = proximosAgendamentos
-      .filter(a => new Date(a.dataHora) >= new Date())
-      .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))[0] || null;
+      .filter(a => new Date(a.data_hora) >= new Date())
+      .sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora))[0] || null;
 
     res.json({
       data: {

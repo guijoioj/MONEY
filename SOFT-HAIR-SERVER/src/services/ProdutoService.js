@@ -52,15 +52,17 @@ class ProdutoService {
         throw new Error('Nome é obrigatório');
       }
       
-      if (!data.preco) {
+      const precoVenda = data.preco_venda ?? data.preco;
+      if (!precoVenda) {
         throw new Error('Preço é obrigatório');
       }
 
       const produto = await produtoModel.create({
         ...data,
+        preco_venda: precoVenda,
         salao_id: salaoId,
         ativo: data.ativo !== undefined ? data.ativo : true,
-        quantidade: data.quantidade || 0,
+        quantidade_estoque: data.quantidade_estoque ?? data.quantidade ?? 0,
         quantidade_minima: data.quantidade_minima || 0
       });
 
@@ -116,12 +118,12 @@ class ProdutoService {
         };
       }
 
-      const qtdAnterior = parseInt(produto.quantidade);
+      const qtdAnterior = parseInt(produto.quantidade_estoque || 0, 10);
       const qtdNueva = tipo === 'entrada' ? 
         qtdAnterior + quantidade : 
         qtdAnterior - quantidade;
 
-      await produtoModel.update(id, { quantidade: qtdNueva }, salaoId);
+      await produtoModel.update(id, { quantidade_estoque: qtdNueva }, salaoId);
 
       return {
         success: true,
@@ -144,7 +146,7 @@ class ProdutoService {
         SELECT * FROM produtos 
         WHERE salao_id = $1 
         AND ativo = true 
-        AND quantidade <= quantidade_minima
+        AND quantidade_estoque <= quantidade_minima
         ORDER BY nome
       `, [salaoId]);
 
@@ -159,6 +161,10 @@ class ProdutoService {
         error: error.message
       };
     }
+  }
+
+  async estoqueBaixo(salaoId) {
+    return this.produtosEmFalta(salaoId);
   }
 
   async buscarPorTermo(termo, salaoId) {

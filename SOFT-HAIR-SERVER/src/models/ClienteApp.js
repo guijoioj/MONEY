@@ -1,40 +1,77 @@
-const { v4: uuidv4 } = require('uuid');
-const { query, queryOne, queryRun } = require('../config/database');
+const bcrypt = require('bcryptjs');
+const { query, queryOne } = require('../config/database');
 
 class ClienteApp {
   static async create(data) {
-    const id = uuidv4();
-    await queryRun(
-      'INSERT INTO clientes_app (id, nome, email, password, telefone) VALUES (?, ?, ?, ?, ?)',
-      [id, data.nome, data.email, data.password, data.telefone||null]
-    );
-    return this.findById(id);
+    const senhaHash = data.senha_hash || data.password;
+    const row = await queryOne(`
+      INSERT INTO clientes (nome, email, telefone, senha_hash, app_ativo, ativo)
+      VALUES ($1, $2, $3, $4, true, true)
+      RETURNING *
+    `, [data.nome, data.email, data.telefone || null, senhaHash || null]);
+    return this.toAppShape(row);
   }
 
   static async findById(id) {
-    return queryOne('SELECT * FROM clientes_app WHERE id = ?', [id]);
+    return this.toAppShape(await queryOne('SELECT * FROM clientes WHERE id = $1', [id]));
   }
 
   static async findByEmail(email) {
-    return queryOne('SELECT * FROM clientes_app WHERE email = ?', [email]);
+    return this.toAppShape(await queryOne('SELECT * FROM clientes WHERE email = $1', [email]));
   }
 
   static async update(id, data) {
-    const fields = [], values = [];
-    const allowed = ['nome', 'telefone', 'foto', 'pushToken'];
-    for (const [k, v] of Object.entries(data)) {
-      if (allowed.includes(k)) { fields.push(`"${k}" = ?`); values.push(v); }
+    const allowed = {
+      nome: 'nome',
+      telefone: 'telefone',
+      foto: 'foto_url',
+      foto_url: 'foto_url',
+      pushToken: 'push_token',
+      push_token: 'push_token',
+      password: 'senha_hash',
+      senha_hash: 'senha_hash'
+    };
+    const sets = [];
+    const values = [];
+    let idx = 1;
+
+    for (const [key, value] of Object.entries(data)) {
+      const column = allowed[key];
+      if (!column) continue;
+      sets.push(`${column} = $${idx++}`);
+      values.push(value);
     }
-    if (!fields.length) return this.findById(id);
-    fields.push('"updatedAt" = NOW()');
+
+    if (!sets.length) return this.findById(id);
+
     values.push(id);
-    await queryRun(`UPDATE clientes_app SET ${fields.join(', ')} WHERE id = ?`, values);
-    return this.findById(id);
+    const row = await queryOne(`
+      UPDATE clientes SET ${sets.join(', ')}, updated_at = NOW()
+      WHERE id = $${idx}
+      RETURNING *
+    `, values);
+    return this.toAppShape(row);
+  }
+
+  static async setPassword(id, password) {
+    const senhaHash = await bcrypt.hash(password, 12);
+    return this.update(id, { senha_hash: senhaHash });
+  }
+
+  static toAppShape(row) {
+    if (!row) return null;
+    return {
+      ...row,
+      password: row.senha_hash,
+      pushToken: row.push_token,
+      updatedAt: row.updated_at,
+      createdAt: row.created_at
+    };
   }
 
   static sanitize(user) {
     if (!user) return null;
-    const { password, ...sanitized } = user;
+    const { password, senha_hash, ...sanitized } = user;
     return sanitized;
   }
 }

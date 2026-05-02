@@ -131,10 +131,11 @@ class ProfissionalService {
       const { query } = require('../config/database');
       
       const servicos = await query(`
-        SELECT s.* FROM servicos s
-        JOIN profissional_servicos ps ON ps.servico_id = s.id
-        WHERE ps.profissional_id = $1 AND s.salao_id = $2 AND s.ativo = true
-      `, [profissionalId, salaoId]);
+        SELECT s.*
+        FROM servicos s
+        WHERE s.salao_id = $1 AND s.ativo = true
+        ORDER BY s.nome
+      `, [salaoId]);
 
       return {
         success: true,

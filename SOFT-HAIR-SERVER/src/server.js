@@ -68,7 +68,7 @@ app.use((req, res, next) => {
 // ─── Rate Limiting (geral) ───
 const generalLimiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 500,
   message: { success: false, error: 'Muitas requisições. Tente novamente em alguns minutos.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -88,6 +88,10 @@ const authLimiter = rateLimit({
 app.use('/api/health', require('./routes/health'));
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/app/auth', authLimiter, require('./routes/appAuth'));
+app.use('/api/app/legacy/auth', authLimiter, require('./routes/app/auth'));
+app.use('/api/app/cliente', require('./routes/app/cliente'));
+app.use('/api/app/pedidos', require('./routes/app/pedidos'));
+app.use('/api/app/loja', require('./routes/app/loja'));
 app.use('/api/app/profissional/auth', authLimiter, require('./routes/appProfissionalAuth'));
 app.use('/api/app/profissional', require('./middleware/profissionalAuth').profissionalAuthMiddleware, require('./routes/appProfissional'));
 app.use('/api/saloes', require('./routes/saloes'));
@@ -102,6 +106,8 @@ app.use('/api/comissoes', require('./routes/comissoes'));
 app.use('/api/fechamentos', require('./routes/fechamentos'));
 app.use('/api/creditos', require('./routes/creditos'));
 app.use('/api/notificacoes', require('./routes/notificacoes'));
+app.use('/api/configuracoes', require('./routes/configuracoes'));
+app.use('/api/historico', require('./routes/historico'));
 app.use('/api/backup', require('./routes/backup'));
 app.use('/api/sync', require('./routes/sync'));
 

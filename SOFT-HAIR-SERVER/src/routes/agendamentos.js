@@ -22,6 +22,18 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// Horários disponíveis
+router.get('/disponiveis/:profissionalId', authMiddleware, async (req, res) => {
+  try {
+    const { data } = req.query;
+    if (!data) return res.status(400).json({ success: false, error: 'Parâmetro "data" é obrigatório' });
+    const result = await service.getHorariosDisponiveis(req.params.profissionalId, data, req.salaoId);
+    res.json({ success: true, data: result.data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Buscar por ID
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
@@ -81,18 +93,6 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     } else {
       res.status(404).json({ success: false, error: result.error });
     }
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Horários disponíveis
-router.get('/disponiveis/:profissionalId', authMiddleware, async (req, res) => {
-  try {
-    const { data } = req.query;
-    if (!data) return res.status(400).json({ success: false, error: 'Parâmetro "data" é obrigatório' });
-    const result = await service.getHorariosDisponiveis(req.params.profissionalId, data, req.salaoId);
-    res.json({ success: true, data: result.data });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

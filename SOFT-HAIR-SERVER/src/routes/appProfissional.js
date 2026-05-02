@@ -48,8 +48,8 @@ router.get('/agenda', async (req, res) => {
        FROM agendamentos a
        LEFT JOIN clientes c ON c.id = a.cliente_id
        LEFT JOIN servicos s ON s.id = a.servico_id
-       WHERE a.profissional_id = $1 AND a.data_agendamento = $2
-       ORDER BY a.hora_agendamento`,
+       WHERE a.profissional_id = $1 AND DATE(a.data_hora) = $2::date
+       ORDER BY a.data_hora`,
       [req.profissionalId, data]
     );
     res.json({ success: true, data: result.rows });
@@ -90,7 +90,9 @@ router.get('/comissoes', async (req, res) => {
     const data_fim = req.query.data_fim || defaultFim;
 
     const result = await pool.query(
-      `SELECT * FROM comissoes WHERE profissional_id = $1 AND data BETWEEN $2 AND $3 ORDER BY data DESC`,
+      `SELECT * FROM comissoes
+       WHERE profissional_id = $1 AND DATE(created_at) BETWEEN $2::date AND $3::date
+       ORDER BY created_at DESC`,
       [req.profissionalId, data_inicio, data_fim]
     );
     res.json({ success: true, data: result.rows });
@@ -145,9 +147,9 @@ router.get('/atendimentos-hoje', async (req, res) => {
       FROM agendamentos a
       LEFT JOIN clientes c ON c.id = a.cliente_id
       LEFT JOIN servicos s ON s.id = a.servico_id
-      WHERE a.profissional_id = $1 AND a.data_agendamento = $2
+      WHERE a.profissional_id = $1 AND DATE(a.data_hora) = $2::date
         AND a.status IN ('agendado', 'confirmado', 'em_andamento')
-      ORDER BY a.hora_agendamento
+      ORDER BY a.data_hora
     `, [req.profissionalId, hoje]);
     res.json({ success: true, data: result.rows });
   } catch (error) {
@@ -191,12 +193,25 @@ router.post('/atendimentos/:id/finalizar', async (req, res) => {
 
     const ag = agend.rows[0];
 
-    const atend = await pool.query(`
-      INSERT INTO atendimentos (agendamento_id, cliente_id, profissional_id, salao_id, servico_id, data_atendimento, status, observacoes)
-      VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, 'finalizado', $6)
-      ON CONFLICT (agendamento_id) DO UPDATE SET status = 'finalizado', updated_at = NOW()
-      RETURNING *
-    `, [ag.id, ag.cliente_id, req.profissionalId, req.salaoId, ag.servico_id, req.body.observacoes || null]);
+    let atend = await pool.query(
+      `SELECT * FROM atendimentos WHERE agendamento_id = $1 AND profissional_id = $2`,
+      [ag.id, req.profissionalId]
+    );
+
+    if (atend.rows.length) {
+      atend = await pool.query(`
+        UPDATE atendimentos
+        SET status = 'finalizado', observacoes = COALESCE($3, observacoes), updated_at = NOW()
+        WHERE agendamento_id = $1 AND profissional_id = $2
+        RETURNING *
+      `, [ag.id, req.profissionalId, req.body.observacoes || null]);
+    } else {
+      atend = await pool.query(`
+        INSERT INTO atendimentos (agendamento_id, cliente_id, profissional_id, salao_id, servico_id, data_atendimento, status, observacoes, valor)
+        VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, 'finalizado', $6, $7)
+        RETURNING *
+      `, [ag.id, ag.cliente_id, req.profissionalId, req.salaoId, ag.servico_id, req.body.observacoes || null, ag.valor || null]);
+    }
 
     await pool.query(
       `UPDATE agendamentos SET status = 'finalizado', updated_at = NOW() WHERE id = $1`,
@@ -207,13 +222,6 @@ router.post('/atendimentos/:id/finalizar', async (req, res) => {
       `INSERT INTO registros_ponto (profissional_id, salao_id, tipo) VALUES ($1, $2, 'fim_atendimento')`,
       [req.profissionalId, req.salaoId]
     );
-
-    if (ag.cliente_id) {
-      await pool.query(`
-        INSERT INTO historico_clientes (cliente_id, salao_id, tipo, descricao, referencia_id, created_at)
-        VALUES ($1, $2, 'atendimento', 'Atendimento finalizado', $3, NOW())
-      `, [ag.cliente_id, req.salaoId, atend.rows[0]?.id]);
-    }
 
     res.json({ success: true, data: atend.rows[0] });
   } catch (error) {

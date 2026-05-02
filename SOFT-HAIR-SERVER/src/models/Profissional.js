@@ -54,9 +54,9 @@ class Profissional extends BaseModel {
       AND NOT EXISTS (
         SELECT 1 FROM agendamentos a
         WHERE a.profissional_id = p.id
-        AND a.data_agendamento = $1
-        AND a.hora_agendamento < $3
-        AND (a.hora_agendamento + INTERVAL '1 minute' * a.duracao) > $2
+        AND DATE(a.data_hora) = $1::date
+        AND a.data_hora < ($1::date + $3::time)
+        AND (a.data_hora + INTERVAL '1 minute' * COALESCE(a.duracao_minutos, 30)) > ($1::date + $2::time)
         AND a.status NOT IN ('cancelado', 'nao_compareceu')
       )
       ORDER BY p.nome
@@ -71,13 +71,13 @@ class Profissional extends BaseModel {
   async comissoesPeriodo(profissionalId, dataInicio, dataFim) {
     const sql = `
       SELECT 
-        COALESCE(SUM(CASE WHEN tipo = 'servico' THEN valor ELSE 0 END), 0) as total_servicos,
-        COALESCE(SUM(CASE WHEN tipo = 'produto' THEN valor ELSE 0 END), 0) as total_produtos,
-        COALESCE(SUM(valor), 0) as total_comissoes
+        COALESCE(SUM(valor_total), 0) as total_servicos,
+        0 as total_produtos,
+        COALESCE(SUM(valor_comissao), 0) as total_comissoes
       FROM comissoes
       WHERE profissional_id = $1
-      AND data BETWEEN $2 AND $3
-      AND status = 'pendente'
+      AND DATE(created_at) BETWEEN $2::date AND $3::date
+      AND pago = false
     `;
     const { queryOne } = require('../config/database');
     return queryOne(sql, [profissionalId, dataInicio, dataFim]);

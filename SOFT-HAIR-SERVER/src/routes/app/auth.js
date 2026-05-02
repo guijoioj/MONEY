@@ -4,7 +4,16 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const ClienteApp = require('../../models/ClienteApp');
 const Cliente = require('../../models/Cliente');
-const BootstrapService = require('../../services/bootstrapService');
+const { appAuthMiddleware } = require('../../middleware/appAuth');
+const { query } = require('../../config/database');
+
+function signClienteToken(cliente) {
+  return jwt.sign(
+    { clienteAppId: cliente.id, clienteId: cliente.id, email: cliente.email, nome: cliente.nome, type: 'cliente' },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+  );
+}
 
 router.post('/register', async (req, res) => {
   try {
@@ -24,8 +33,7 @@ router.post('/register', async (req, res) => {
     if (existing) return res.status(400).json({ error: 'Email já cadastrado' });
     const hashedPassword = await bcrypt.hash(password, 12);
     const cliente = await ClienteApp.create({ nome, email, password: hashedPassword, telefone });
-    const { secret, expiresIn } = BootstrapService.getJwtConfig();
-    const token = jwt.sign({ clienteAppId: cliente.id, email: cliente.email, nome: cliente.nome }, secret, { expiresIn });
+    const token = signClienteToken(cliente);
     res.status(201).json({ user: ClienteApp.sanitize(cliente), token });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
@@ -37,8 +45,7 @@ router.post('/login', async (req, res) => {
     if (!cliente) return res.status(401).json({ error: 'Credenciais inválidas' });
     const valid = await bcrypt.compare(password, cliente.password);
     if (!valid) return res.status(401).json({ error: 'Credenciais inválidas' });
-    const { secret, expiresIn } = BootstrapService.getJwtConfig();
-    const token = jwt.sign({ clienteAppId: cliente.id, email: cliente.email, nome: cliente.nome }, secret, { expiresIn });
+    const token = signClienteToken(cliente);
     res.json({ user: ClienteApp.sanitize(cliente), token });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
@@ -46,18 +53,11 @@ router.post('/login', async (req, res) => {
 router.post('/profissional/login', async (req, res) => {
   try {
     const AuthService = require('../../services/authService');
-    const { queryOne } = require('../../config/database');
     const { email, password } = req.body;
-    const result = await AuthService.login({ email, password });
-    const profissional = result.user.profissionalId
-      ? await queryOne('SELECT * FROM profissionais WHERE id=?', [result.user.profissionalId])
-      : null;
-    res.json({ ...result, profissional });
+    const result = await AuthService.login(email, password);
+    res.json(result);
   } catch (e) { res.status(401).json({ error: e.message }); }
 });
-
-const { appAuthMiddleware } = require('../../middleware/appAuth');
-const { query } = require('../../config/database');
 
 router.get('/me', appAuthMiddleware, async (req, res) => {
   try {
@@ -78,16 +78,16 @@ router.put('/me', appAuthMiddleware, async (req, res) => {
     const cliente = await ClienteApp.update(req.clienteApp.clienteAppId, updates);
 
     const saloesVinculados = await query(
-      'SELECT DISTINCT "salonId" FROM clientes WHERE email = ?',
+      'SELECT DISTINCT salao_id FROM clientes WHERE email = $1',
       [cliente.email]
     );
-    for (const { salonId } of saloesVinculados) {
-      const lista = await Cliente.getAll({ search: cliente.email }, salonId);
+    for (const { salao_id: salaoId } of saloesVinculados) {
+      const lista = await Cliente.getAll({ search: cliente.email }, salaoId);
       if (lista.length) {
         const campos = {};
         if (nome) campos.nome = nome;
         if (telefone) campos.telefone = telefone;
-        await Cliente.update(lista[0].id, campos, salonId);
+        await Cliente.update(lista[0].id, campos, salaoId);
       }
     }
 

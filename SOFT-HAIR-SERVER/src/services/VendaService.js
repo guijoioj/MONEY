@@ -85,7 +85,7 @@ class VendaService {
             
             // Subtrair do estoque
             await client.query(`
-              UPDATE produtos SET quantidade = quantidade - $1 WHERE id = $2
+              UPDATE produtos SET quantidade_estoque = quantidade_estoque - $1 WHERE id = $2
             `, [item.quantidade, item.produto_id]);
           }
         }
@@ -129,7 +129,7 @@ class VendaService {
         // Restore stock
         const itens = await client.query('SELECT produto_id, quantidade FROM venda_itens WHERE venda_id = $1', [id]);
         for (const item of itens.rows) {
-          await client.query('UPDATE produtos SET quantidade = quantidade + $1 WHERE id = $2', [item.quantidade, item.produto_id]);
+          await client.query('UPDATE produtos SET quantidade_estoque = quantidade_estoque + $1 WHERE id = $2', [item.quantidade, item.produto_id]);
         }
 
         return { success: true, data: venda, message: 'Venda cancelada' };
