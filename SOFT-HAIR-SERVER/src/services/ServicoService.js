@@ -115,8 +115,8 @@ class ServicoService {
         };
       }
 
-      // Soft delete
-      await servicoModel.update(id, { ativo: false }, salaoId);
+      const { query } = require('../config/database');
+      await query(`DELETE FROM servicos WHERE id = $1 AND salao_id = $2`, [id, salaoId]);
 
       return {
         success: true,
