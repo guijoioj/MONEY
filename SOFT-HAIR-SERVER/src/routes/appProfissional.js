@@ -181,6 +181,59 @@ router.post('/atendimentos/:id/iniciar', async (req, res) => {
   }
 });
 
+// GET /perfil
+router.get('/perfil', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, nome, email, telefone, especialidade, comissao, ativo
+       FROM profissionais WHERE id = $1`,
+      [req.profissionalId]
+    );
+    if (!result.rows.length)
+      return res.status(404).json({ success: false, error: 'Profissional não encontrado' });
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Erro ao buscar perfil do profissional:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /aviso-atraso
+router.post('/aviso-atraso', [
+  body('agendamento_id').notEmpty().withMessage('agendamento_id é obrigatório'),
+  body('minutos').isInt({ min: 1 }).withMessage('minutos deve ser inteiro positivo'),
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ success: false, errors: errors.array() });
+
+    const { agendamento_id, minutos, mensagem } = req.body;
+
+    const agend = await pool.query(
+      'SELECT * FROM agendamentos WHERE id = $1 AND profissional_id = $2',
+      [agendamento_id, req.profissionalId]
+    );
+    if (!agend.rows.length)
+      return res.status(404).json({ success: false, error: 'Agendamento não encontrado' });
+
+    // Registrar notificação de atraso para o cliente
+    const ag = agend.rows[0];
+    const textoNotif = mensagem || `Seu profissional chegará com aproximadamente ${minutos} minutos de atraso.`;
+
+    await pool.query(
+      `INSERT INTO notificacoes (salao_id, cliente_id, tipo, titulo, mensagem, lida)
+       VALUES ($1, $2, 'aviso_atraso', 'Aviso de Atraso', $3, false)`,
+      [req.salaoId, ag.cliente_id, textoNotif]
+    );
+
+    res.json({ success: true, data: { agendamento_id, minutos, mensagem: textoNotif } });
+  } catch (error) {
+    console.error('Erro ao enviar aviso de atraso:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // POST /atendimentos/:id/finalizar
 router.post('/atendimentos/:id/finalizar', async (req, res) => {
   try {

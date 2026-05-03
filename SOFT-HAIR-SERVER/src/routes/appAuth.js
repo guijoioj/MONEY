@@ -106,4 +106,40 @@ router.get('/me', clienteAuthMiddleware, async (req, res) => {
   }
 });
 
+// PUT /perfil
+router.put('/perfil', clienteAuthMiddleware, [
+  body('nome').optional().notEmpty().withMessage('Nome não pode ser vazio'),
+  body('telefone').optional(),
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ success: false, errors: errors.array() });
+
+    const { nome, telefone } = req.body;
+    const updates = [];
+    const values = [];
+    let idx = 1;
+
+    if (nome !== undefined) { updates.push(`nome = $${idx++}`); values.push(nome); }
+    if (telefone !== undefined) { updates.push(`telefone = $${idx++}`); values.push(telefone); }
+
+    if (updates.length === 0)
+      return res.status(400).json({ success: false, error: 'Nenhum campo para atualizar' });
+
+    values.push(req.clienteId);
+    const result = await pool.query(
+      `UPDATE clientes SET ${updates.join(', ')}, updated_at = NOW()
+       WHERE id = $${idx}
+       RETURNING id, nome, email, telefone`,
+      values
+    );
+
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Erro ao atualizar perfil do cliente:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

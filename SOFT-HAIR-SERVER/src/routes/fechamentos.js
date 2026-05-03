@@ -53,4 +53,21 @@ router.put('/:id/reabrir', authMiddleware, async (req, res) => {
   }
 });
 
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { pool } = require('../config/database');
+    const { rows } = await pool.query(
+      'SELECT id FROM fechamentos WHERE id = $1 AND salao_id = $2',
+      [req.params.id, req.salaoId]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Fechamento não encontrado' });
+    }
+    await pool.query('DELETE FROM fechamentos WHERE id = $1 AND salao_id = $2', [req.params.id, req.salaoId]);
+    res.json({ success: true, data: { id: req.params.id } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
