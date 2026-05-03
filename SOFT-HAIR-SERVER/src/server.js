@@ -84,6 +84,10 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// ─── Camelize: snake_case → camelCase em todas as respostas JSON ───
+const { camelizeResponse } = require('./middleware/camelize');
+app.use(camelizeResponse);
+
 // ─── Routes ───
 app.use('/api/health', require('./routes/health'));
 app.use('/api/auth', authLimiter, require('./routes/auth'));
