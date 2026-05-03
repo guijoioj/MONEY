@@ -516,7 +516,7 @@ export default function Agenda() {
       if (!seen[role]) seen[role] = { role, profissionais: [] };
       seen[role].profissionais.push(p);
     });
-    const grouped = Object.values(seen).sort((a, b) => a.role.localeCompare(b.role, 'pt-BR'));
+    const grouped = Object.values(seen).sort((a, b) => (a.role < b.role ? -1 : a.role > b.role ? 1 : 0));
     return {
       groupedProfissionais: grouped,
       sortedProfissionais: grouped.flatMap(g => g.profissionais),
