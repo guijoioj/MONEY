@@ -330,8 +330,8 @@ export default function Agenda() {
   const autoConvertRef = useRef(false);
   const allAgendamentosRef = useRef([]);
   
-  const COL_WIDTH = 140;
-  const TIME_COL_WIDTH = 80;
+  const COL_WIDTH = 96;
+  const TIME_COL_WIDTH = 56;
 
   const [formData, setFormData] = useState({
     clienteId: '',
@@ -441,6 +441,8 @@ export default function Agenda() {
       setNotificacao({ tipo: 'info', mensagem: 'Conversão para atendimento não disponível neste servidor.' });
     },
   });
+
+  useEffect(() => { window.scrollTo(0, 0); }, []);
 
   useEffect(() => {
     if (notificacao) {
@@ -1046,56 +1048,79 @@ export default function Agenda() {
           </div>
         </div>
 
-        <div className="flex-1 bg-white rounded-xl shadow flex flex-col min-h-0" style={{ minWidth: 0 }}>
+        <div
+          className="flex-1 flex flex-col min-h-0 rounded-2xl overflow-hidden"
+          style={{
+            minWidth: 0,
+            background: 'rgba(255,255,255,0.65)',
+            backdropFilter: 'blur(32px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+            border: '1px solid rgba(255,255,255,0.7)',
+            boxShadow: '0 2px 32px rgba(0,0,0,0.07), 0 1px 0 rgba(255,255,255,0.9) inset',
+          }}
+        >
           <div className="overflow-auto flex-1" ref={gridRef} style={{ overflowX: 'auto', overflowY: 'auto' }}>
             <div style={{ minWidth: TIME_COL_WIDTH + (sortedProfissionais.length * COL_WIDTH), minHeight: '100%' }}>
-              <div className="sticky top-0 z-30 bg-gray-50 border-b border-r">
-                {/* Linha 1: Barras de cargo agrupadas */}
+              {/* Header sticky */}
+              <div className="sticky top-0 z-30" style={{ background: 'rgba(250,250,252,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                {/* Linha 1: grupos */}
                 <div className="flex">
-                  <div className="w-20 flex-shrink-0 border-r border-b" style={{ minHeight: 28 }} />
+                  <div className="w-20 flex-shrink-0" style={{ minHeight: 34, borderRight: '1px solid rgba(0,0,0,0.05)' }} />
                   {groupedProfissionais.map(({ role, profissionais: profs }) => {
                     const roleColor = getRoleColor(role);
                     return (
                       <div
                         key={role}
-                        className="border-r border-b flex items-center justify-center text-xs font-bold tracking-wide"
+                        className="flex items-center justify-center"
                         style={{
                           width: profs.length * COL_WIDTH,
                           minWidth: profs.length * COL_WIDTH,
-                          height: 28,
-                          backgroundColor: roleColor.bg,
-                          color: roleColor.text,
+                          height: 34,
+                          borderRight: '1px solid rgba(255,255,255,0.4)',
+                          background: `${roleColor.bg}18`,
+                          backdropFilter: 'blur(8px)',
                         }}
                       >
-                        {role.toUpperCase()}
+                        <span
+                          className="text-[10px] font-bold tracking-widest uppercase"
+                          style={{ color: roleColor.bg }}
+                        >
+                          {role}
+                        </span>
                       </div>
                     );
                   })}
                 </div>
-                {/* Linha 2: Nomes individuais */}
+                {/* Linha 2: profissionais */}
                 <div className="flex">
-                  <div className="w-20 flex-shrink-0 p-2 text-center border-r">
-                    <span className="text-xs font-semibold text-gray-600">Horário</span>
+                  <div className="w-20 flex-shrink-0 flex items-center justify-end pr-3" style={{ borderRight: '1px solid rgba(0,0,0,0.05)' }}>
+                    <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.08em', color: 'rgba(100,100,120,0.5)', textTransform: 'uppercase' }}>Hora</span>
                   </div>
                   {sortedProfissionais.map((profissional, idx) => {
-                    const color = PROFISSIONAL_COLORS[idx % PROFISSIONAL_COLORS.length];
+                    const roleColor = getRoleColor(normalizeRole(profissional.especialidade || ''));
                     return (
                       <div
                         key={profissional.id}
-                        className="min-w-[140px] w-[140px] p-1.5 text-center border-r"
+                        className="min-w-[96px] w-[96px] py-2 text-center"
+                        style={{ borderRight: '1px solid rgba(255,255,255,0.4)', background: `${roleColor.bg}10` }}
                       >
-                        <div className="flex flex-col items-center">
-                          <div className={`w-7 h-7 rounded-full ${color.bg} flex items-center justify-center mb-0.5`}>
-                            <User size={14} className={color.text} />
+                        <div className="flex flex-col items-center gap-0.5">
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm"
+                            style={{ background: `${roleColor.bg}25`, border: `1.5px solid ${roleColor.bg}40` }}
+                          >
+                            <User size={14} style={{ color: roleColor.bg }} />
                           </div>
-                          <span className="text-xs font-medium text-gray-800 leading-tight">{profissional.nome?.split(' ')[0]}</span>
+                          <span style={{ fontSize: 11, fontWeight: 500, color: 'rgba(40,40,60,0.75)', letterSpacing: '-0.01em' }}>
+                            {profissional.nome?.split(' ')[0]}
+                          </span>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-              
+
               <div style={{ position: 'relative', height: HORARIOS.length * SLOT_HEIGHT }}>
                 {HORARIOS.map((hora, horaIdx) => {
                   const isHour = hora.endsWith(':00');
@@ -1103,25 +1128,36 @@ export default function Agenda() {
                   return (
                     <div
                       key={hora}
-                      className="flex border-r"
+                      className="flex"
                       style={{
                         height: SLOT_HEIGHT,
-                        borderBottom: isHour ? '1px solid #d1d5db' : isHalfHour ? '1px dashed #e5e7eb' : '1px dotted #f3f4f6',
+                        borderBottom: isHour
+                          ? '1px solid rgba(0,0,0,0.08)'
+                          : isHalfHour
+                          ? '1px solid rgba(0,0,0,0.04)'
+                          : '1px solid rgba(0,0,0,0.02)',
                       }}
                     >
-                      <div className="w-20 flex-shrink-0 border-r bg-gray-50 flex items-start justify-end pr-2 pt-0.5">
+                      <div
+                        className="w-20 flex-shrink-0 flex items-start justify-end pr-3 pt-0.5"
+                        style={{ borderRight: '1px solid rgba(0,0,0,0.05)', background: 'rgba(248,248,252,0.6)' }}
+                      >
                         {isHour ? (
-                          <span className="text-xs font-semibold text-gray-700">{hora}</span>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(50,50,80,0.55)', letterSpacing: '-0.01em' }}>{hora}</span>
                         ) : isHalfHour ? (
-                          <span className="text-[10px] text-gray-400">{hora}</span>
-                        ) : (
-                          <span className="text-[9px] text-gray-300">{hora}</span>
-                        )}
+                          <span style={{ fontSize: 9, color: 'rgba(100,100,130,0.3)' }}>{hora}</span>
+                        ) : null}
                       </div>
                       {sortedProfissionais.map((profissional) => (
                         <div
                           key={profissional.id}
-                          className={`min-w-[140px] w-[140px] border-r relative ${Math.floor(horaIdx / 4) % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
+                          className="min-w-[96px] w-[96px] relative cursor-pointer agenda-cell"
+                          style={{
+                            borderRight: '1px solid rgba(0,0,0,0.04)',
+                            background: isHour && Math.floor(horaIdx / 4) % 2 === 0
+                              ? 'rgba(255,255,255,0.4)'
+                              : 'rgba(248,248,252,0.25)',
+                          }}
                           onClick={() => openModal(null, selectedDate, hora, profissional)}
                         />
                       ))}
