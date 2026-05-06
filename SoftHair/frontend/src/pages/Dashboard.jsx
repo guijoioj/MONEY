@@ -20,7 +20,7 @@ const normalizeRoleDash = (role) => {
   return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 };
 const getRoleColorDash = (role) => ROLE_COLORS_DASH[normalizeRoleDash(role)] || '#6B7280';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Treemap, LineChart, Line, AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Treemap, AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar } from 'recharts';
 import { Users, Package, AlertTriangle, TrendingUp, Calendar, DollarSign, ArrowUpRight, User, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -36,7 +36,7 @@ const CHART_TYPES = [
   { id: 'barra-v', label: 'Barras',     icon: '▮' },
   { id: 'barra-h', label: 'Horizontal', icon: '▬' },
   { id: 'treemap', label: 'Treemap',    icon: '⊞' },
-  { id: 'linha',   label: 'Linha',      icon: '〜' },
+  { id: 'radial',  label: 'Radial',     icon: '◎' },
   { id: 'area',    label: 'Área',       icon: '◭' },
   { id: 'radar',   label: 'Radar',      icon: '⬡' },
 ];
@@ -282,7 +282,7 @@ export default function Dashboard() {
               )}
             </div>
             {produtosPorCategoria.length > 0 && (
-              <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'rgba(0,0,0,0.04)' }}>
+              <div className="flex flex-wrap gap-1 p-1 rounded-xl" style={{ background: 'rgba(0,0,0,0.04)' }}>
                 {CHART_TYPES.map(ct => (
                   <button
                     key={ct.id}
@@ -357,14 +357,16 @@ export default function Dashboard() {
                     ))}
                   </Bar>
                 </BarChart>
-              ) : chartType === 'linha' ? (
-                <LineChart data={produtosPorCategoria} margin={{ top: 8, right: 24, left: 0, bottom: produtosPorCategoria.length > 5 ? 70 : 24 }}>
-                  <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(0,0,0,0.06)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'rgba(80,80,100,0.6)' }} angle={produtosPorCategoria.length > 5 ? -40 : 0} textAnchor={produtosPorCategoria.length > 5 ? 'end' : 'middle'} interval={0} axisLine={false} tickLine={false} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'rgba(80,80,100,0.6)' }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', fontSize: 13 }} />
-                  <Line type="monotone" dataKey="value" name="Produtos" stroke="var(--color-primary)" strokeWidth={2.5} dot={{ fill: 'var(--color-primary)', r: 4 }} activeDot={{ r: 6 }} />
-                </LineChart>
+              ) : chartType === 'radial' ? (
+                <RadialBarChart
+                  data={[...produtosPorCategoria].sort((a,b) => b.value - a.value).map((d, i) => ({ ...d, fill: COLORS[i % COLORS.length] }))}
+                  cx="50%" cy="50%" innerRadius="15%" outerRadius="90%"
+                  startAngle={90} endAngle={-270}
+                >
+                  <RadialBar dataKey="value" background={{ fill: 'rgba(0,0,0,0.03)' }} label={{ position: 'insideStart', fill: '#fff', fontSize: 10, fontWeight: 600 }} />
+                  <Legend iconSize={10} layout="vertical" verticalAlign="middle" align="right" formatter={(v) => <span style={{ fontSize: 11, color: 'rgba(60,60,80,0.7)' }}>{v}</span>} />
+                  <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', fontSize: 13 }} formatter={(v, n) => [v, n]} />
+                </RadialBarChart>
               ) : chartType === 'area' ? (
                 <AreaChart data={produtosPorCategoria} margin={{ top: 8, right: 24, left: 0, bottom: produtosPorCategoria.length > 5 ? 70 : 24 }}>
                   <defs>
