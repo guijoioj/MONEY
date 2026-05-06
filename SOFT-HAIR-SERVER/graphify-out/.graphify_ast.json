@@ -12,7 +12,7 @@
       "label": "gracefulShutdown()",
       "file_type": "code",
       "source_file": "src/server.js",
-      "source_location": "L173"
+      "source_location": "L179"
     },
     {
       "id": "src_config_database_js",
@@ -75,21 +75,21 @@
       "label": "createIndexes()",
       "file_type": "code",
       "source_file": "src/config/initDb.js",
-      "source_location": "L282"
+      "source_location": "L369"
     },
     {
       "id": "initdb_createfunctions",
       "label": "createFunctions()",
       "file_type": "code",
       "source_file": "src/config/initDb.js",
-      "source_location": "L298"
+      "source_location": "L385"
     },
     {
       "id": "initdb_runmigrations",
       "label": "runMigrations()",
       "file_type": "code",
       "source_file": "src/config/initDb.js",
-      "source_location": "L359"
+      "source_location": "L446"
     },
     {
       "id": "src_middleware_auth_js",
@@ -110,14 +110,14 @@
       "label": "optionalAuth()",
       "file_type": "code",
       "source_file": "src/middleware/auth.js",
-      "source_location": "L49"
+      "source_location": "L52"
     },
     {
       "id": "auth_requireadmin",
       "label": "requireAdmin()",
       "file_type": "code",
       "source_file": "src/middleware/auth.js",
-      "source_location": "L78"
+      "source_location": "L84"
     },
     {
       "id": "src_middleware_validate_js",
@@ -160,6 +160,34 @@
       "file_type": "code",
       "source_file": "src/middleware/profissionalAuth.js",
       "source_location": "L3"
+    },
+    {
+      "id": "src_middleware_appauth_js",
+      "label": "appAuth.js",
+      "file_type": "code",
+      "source_file": "src/middleware/appAuth.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "appauth_getbearertoken",
+      "label": "getBearerToken()",
+      "file_type": "code",
+      "source_file": "src/middleware/appAuth.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "appauth_appauthmiddleware",
+      "label": "appAuthMiddleware()",
+      "file_type": "code",
+      "source_file": "src/middleware/appAuth.js",
+      "source_location": "L10"
+    },
+    {
+      "id": "appauth_profissionalappmiddleware",
+      "label": "profissionalAppMiddleware()",
+      "file_type": "code",
+      "source_file": "src/middleware/appAuth.js",
+      "source_location": "L37"
     },
     {
       "id": "src_models_agendamento_js",
@@ -223,6 +251,34 @@
       "file_type": "code",
       "source_file": "src/models/Agendamento.js",
       "source_location": "L149"
+    },
+    {
+      "id": "agendamento_agendamento_filterdata",
+      "label": ".filterData()",
+      "file_type": "code",
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L159"
+    },
+    {
+      "id": "agendamento_agendamento_getall",
+      "label": ".getAll()",
+      "file_type": "code",
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L184"
+    },
+    {
+      "id": "agendamento_agendamento_verificardisponibilidade",
+      "label": ".verificarDisponibilidade()",
+      "file_type": "code",
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L221"
+    },
+    {
+      "id": "agendamento_agendamento_proximohorariovago",
+      "label": ".proximoHorarioVago()",
+      "file_type": "code",
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L233"
     },
     {
       "id": "src_models_atendimento_js",
@@ -295,11 +351,25 @@
       "source_location": "L7"
     },
     {
+      "id": "basemodel_basemodel_instance",
+      "label": ".instance()",
+      "file_type": "code",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L11"
+    },
+    {
       "id": "basemodel_basemodel_findbyid",
       "label": ".findById()",
       "file_type": "code",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L11"
+      "source_location": "L15"
+    },
+    {
+      "id": "basemodel_basemodel_getall",
+      "label": ".getAll()",
+      "file_type": "code",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L19"
     },
     {
       "id": "basemodel_basemodel_findall",
@@ -313,42 +383,42 @@
       "label": ".create()",
       "file_type": "code",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L65"
+      "source_location": "L27"
     },
     {
       "id": "basemodel_basemodel_update",
       "label": ".update()",
       "file_type": "code",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L86"
+      "source_location": "L31"
     },
     {
       "id": "basemodel_basemodel_delete",
       "label": ".delete()",
       "file_type": "code",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L121"
+      "source_location": "L35"
     },
     {
       "id": "basemodel_basemodel_count",
       "label": ".count()",
       "file_type": "code",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L135"
+      "source_location": "L39"
     },
     {
       "id": "basemodel_basemodel_filterdata",
       "label": ".filterData()",
       "file_type": "code",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L156"
+      "source_location": "L188"
     },
     {
       "id": "basemodel_basemodel_withtransaction",
       "label": ".withTransaction()",
       "file_type": "code",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L160"
+      "source_location": "L192"
     },
     {
       "id": "src_models_cliente_js",
@@ -407,109 +477,18 @@
       "source_location": "L62"
     },
     {
-      "id": "src_models_clienteapp_js",
-      "label": "ClienteApp.js",
+      "id": "cliente_cliente_filterdata",
+      "label": ".filterData()",
       "file_type": "code",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L1"
+      "source_file": "src/models/Cliente.js",
+      "source_location": "L78"
     },
     {
-      "id": "clienteapp_clienteapp",
-      "label": "ClienteApp",
+      "id": "cliente_cliente_getall",
+      "label": ".getAll()",
       "file_type": "code",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L4"
-    },
-    {
-      "id": "clienteapp_clienteapp_create",
-      "label": ".create()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L5"
-    },
-    {
-      "id": "clienteapp_clienteapp_findbyid",
-      "label": ".findById()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L14"
-    },
-    {
-      "id": "clienteapp_clienteapp_findbyemail",
-      "label": ".findByEmail()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L18"
-    },
-    {
-      "id": "clienteapp_clienteapp_update",
-      "label": ".update()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L22"
-    },
-    {
-      "id": "clienteapp_clienteapp_sanitize",
-      "label": ".sanitize()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L35"
-    },
-    {
-      "id": "src_models_clientehistorico_js",
-      "label": "ClienteHistorico.js",
-      "file_type": "code",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "clientehistorico_clientehistorico",
-      "label": "ClienteHistorico",
-      "file_type": "code",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L4"
-    },
-    {
-      "id": "clientehistorico_clientehistorico_create",
-      "label": ".create()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L5"
-    },
-    {
-      "id": "clientehistorico_clientehistorico_findbyid",
-      "label": ".findById()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L14"
-    },
-    {
-      "id": "clientehistorico_clientehistorico_getbycliente",
-      "label": ".getByCliente()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L18"
-    },
-    {
-      "id": "clientehistorico_clientehistorico_getresumo",
-      "label": ".getResumo()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L27"
-    },
-    {
-      "id": "clientehistorico_clientehistorico_delete",
-      "label": ".delete()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L68"
-    },
-    {
-      "id": "clientehistorico_clientehistorico_deletebycliente",
-      "label": ".deleteByCliente()",
-      "file_type": "code",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L69"
+      "source_file": "src/models/Cliente.js",
+      "source_location": "L88"
     },
     {
       "id": "src_models_comissao_js",
@@ -566,321 +545,6 @@
       "file_type": "code",
       "source_file": "src/models/Comissao.js",
       "source_location": "L58"
-    },
-    {
-      "id": "src_models_comissaoestorno_js",
-      "label": "ComissaoEstorno.js",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "comissaoestorno_comissaoestorno",
-      "label": "ComissaoEstorno",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L4"
-    },
-    {
-      "id": "comissaoestorno_comissaoestorno_create",
-      "label": ".create()",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L5"
-    },
-    {
-      "id": "comissaoestorno_comissaoestorno_findbyid",
-      "label": ".findById()",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L14"
-    },
-    {
-      "id": "comissaoestorno_comissaoestorno_getall",
-      "label": ".getAll()",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L18"
-    },
-    {
-      "id": "comissaoestorno_comissaoestorno_gettotalestornado",
-      "label": ".getTotalEstornado()",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L27"
-    },
-    {
-      "id": "comissaoestorno_comissaoestorno_delete",
-      "label": ".delete()",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L35"
-    },
-    {
-      "id": "src_models_comissaopaga_js",
-      "label": "ComissaoPaga.js",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "comissaopaga_comissaopaga",
-      "label": "ComissaoPaga",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L4"
-    },
-    {
-      "id": "comissaopaga_comissaopaga_create",
-      "label": ".create()",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L5"
-    },
-    {
-      "id": "comissaopaga_comissaopaga_findbyid",
-      "label": ".findById()",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L14"
-    },
-    {
-      "id": "comissaopaga_comissaopaga_getall",
-      "label": ".getAll()",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L18"
-    },
-    {
-      "id": "comissaopaga_comissaopaga_gettotalpago",
-      "label": ".getTotalPago()",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L28"
-    },
-    {
-      "id": "comissaopaga_comissaopaga_delete",
-      "label": ".delete()",
-      "file_type": "code",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L36"
-    },
-    {
-      "id": "src_models_creditocliente_js",
-      "label": "CreditoCliente.js",
-      "file_type": "code",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "creditocliente_creditocliente",
-      "label": "CreditoCliente",
-      "file_type": "code",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L4"
-    },
-    {
-      "id": "creditocliente_creditocliente_create",
-      "label": ".create()",
-      "file_type": "code",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L5"
-    },
-    {
-      "id": "creditocliente_creditocliente_findbyid",
-      "label": ".findById()",
-      "file_type": "code",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L14"
-    },
-    {
-      "id": "creditocliente_creditocliente_getbycliente",
-      "label": ".getByCliente()",
-      "file_type": "code",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L18"
-    },
-    {
-      "id": "creditocliente_creditocliente_getsaldo",
-      "label": ".getSaldo()",
-      "file_type": "code",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L22"
-    },
-    {
-      "id": "creditocliente_creditocliente_getall",
-      "label": ".getAll()",
-      "file_type": "code",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L31"
-    },
-    {
-      "id": "creditocliente_creditocliente_getallwithsaldo",
-      "label": ".getAllWithSaldo()",
-      "file_type": "code",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L41"
-    },
-    {
-      "id": "creditocliente_creditocliente_delete",
-      "label": ".delete()",
-      "file_type": "code",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L51"
-    },
-    {
-      "id": "src_models_pedidoagendamento_js",
-      "label": "PedidoAgendamento.js",
-      "file_type": "code",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "pedidoagendamento_pedidoagendamento",
-      "label": "PedidoAgendamento",
-      "file_type": "code",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L4"
-    },
-    {
-      "id": "pedidoagendamento_pedidoagendamento_create",
-      "label": ".create()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L5"
-    },
-    {
-      "id": "pedidoagendamento_pedidoagendamento_findbyid",
-      "label": ".findById()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L15"
-    },
-    {
-      "id": "pedidoagendamento_pedidoagendamento_getbycliente",
-      "label": ".getByCliente()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L29"
-    },
-    {
-      "id": "pedidoagendamento_pedidoagendamento_getbysalao",
-      "label": ".getBySalao()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L41"
-    },
-    {
-      "id": "pedidoagendamento_pedidoagendamento_aprovar",
-      "label": ".aprovar()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L57"
-    },
-    {
-      "id": "pedidoagendamento_pedidoagendamento_rejeitar",
-      "label": ".rejeitar()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L65"
-    },
-    {
-      "id": "src_models_pedidoloja_js",
-      "label": "PedidoLoja.js",
-      "file_type": "code",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "pedidoloja_pedidoloja",
-      "label": "PedidoLoja",
-      "file_type": "code",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L4"
-    },
-    {
-      "id": "pedidoloja_pedidoloja_create",
-      "label": ".create()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L5"
-    },
-    {
-      "id": "pedidoloja_pedidoloja_findbyid",
-      "label": ".findById()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L20"
-    },
-    {
-      "id": "pedidoloja_pedidoloja_getbycliente",
-      "label": ".getByCliente()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L37"
-    },
-    {
-      "id": "pedidoloja_pedidoloja_getbysalao",
-      "label": ".getBySalao()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L49"
-    },
-    {
-      "id": "pedidoloja_pedidoloja_atualizarstatus",
-      "label": ".atualizarStatus()",
-      "file_type": "code",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L61"
-    },
-    {
-      "id": "src_models_pontoregistro_js",
-      "label": "PontoRegistro.js",
-      "file_type": "code",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "pontoregistro_pontoregistro",
-      "label": "PontoRegistro",
-      "file_type": "code",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L4"
-    },
-    {
-      "id": "pontoregistro_pontoregistro_registrar",
-      "label": ".registrar()",
-      "file_type": "code",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L5"
-    },
-    {
-      "id": "pontoregistro_pontoregistro_findbyid",
-      "label": ".findById()",
-      "file_type": "code",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L14"
-    },
-    {
-      "id": "pontoregistro_pontoregistro_getbyprofissional",
-      "label": ".getByProfissional()",
-      "file_type": "code",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L18"
-    },
-    {
-      "id": "pontoregistro_pontoregistro_getultimoponto",
-      "label": ".getUltimoPonto()",
-      "file_type": "code",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L26"
-    },
-    {
-      "id": "pontoregistro_pontoregistro_getresumohoje",
-      "label": ".getResumoHoje()",
-      "file_type": "code",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L30"
     },
     {
       "id": "src_models_produto_js",
@@ -951,6 +615,13 @@
       "file_type": "code",
       "source_file": "src/models/Produto.js",
       "source_location": "L96"
+    },
+    {
+      "id": "produto_produto_filterdata",
+      "label": ".filterData()",
+      "file_type": "code",
+      "source_file": "src/models/Produto.js",
+      "source_location": "L113"
     },
     {
       "id": "src_models_profissional_js",
@@ -1056,6 +727,13 @@
       "file_type": "code",
       "source_file": "src/models/Salao.js",
       "source_location": "L37"
+    },
+    {
+      "id": "salao_salao_findfirst",
+      "label": ".findFirst()",
+      "file_type": "code",
+      "source_file": "src/models/Salao.js",
+      "source_location": "L45"
     },
     {
       "id": "src_models_servico_js",
@@ -1170,6 +848,13 @@
       "source_location": "L32"
     },
     {
+      "id": "usuario_usuario_filterdata",
+      "label": ".filterData()",
+      "file_type": "code",
+      "source_file": "src/models/Usuario.js",
+      "source_location": "L40"
+    },
+    {
       "id": "src_models_venda_js",
       "label": "Venda.js",
       "file_type": "code",
@@ -1226,11 +911,529 @@
       "source_location": "L49"
     },
     {
+      "id": "venda_venda_filterdata",
+      "label": ".filterData()",
+      "file_type": "code",
+      "source_file": "src/models/Venda.js",
+      "source_location": "L58"
+    },
+    {
+      "id": "venda_venda_create",
+      "label": ".create()",
+      "file_type": "code",
+      "source_file": "src/models/Venda.js",
+      "source_location": "L82"
+    },
+    {
+      "id": "venda_venda_getall",
+      "label": ".getAll()",
+      "file_type": "code",
+      "source_file": "src/models/Venda.js",
+      "source_location": "L121"
+    },
+    {
       "id": "src_models_index_js",
       "label": "index.js",
       "file_type": "code",
       "source_file": "src/models/index.js",
       "source_location": "L1"
+    },
+    {
+      "id": "src_models_user_js",
+      "label": "User.js",
+      "file_type": "code",
+      "source_file": "src/models/User.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_models_fechamento_js",
+      "label": "Fechamento.js",
+      "file_type": "code",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "fechamento_fechamento",
+      "label": "Fechamento",
+      "file_type": "code",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L4"
+    },
+    {
+      "id": "fechamento_fechamento_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L5"
+    },
+    {
+      "id": "fechamento_fechamento_getall",
+      "label": ".getAll()",
+      "file_type": "code",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L9"
+    },
+    {
+      "id": "fechamento_fechamento_getbyclienteeprofissional",
+      "label": ".getByClienteEProfissional()",
+      "file_type": "code",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L31"
+    },
+    {
+      "id": "fechamento_fechamento_getresumo",
+      "label": ".getResumo()",
+      "file_type": "code",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L47"
+    },
+    {
+      "id": "src_models_clienteapp_js",
+      "label": "ClienteApp.js",
+      "file_type": "code",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "clienteapp_clienteapp",
+      "label": "ClienteApp",
+      "file_type": "code",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L4"
+    },
+    {
+      "id": "clienteapp_clienteapp_create",
+      "label": ".create()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L5"
+    },
+    {
+      "id": "clienteapp_clienteapp_findbyid",
+      "label": ".findById()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L15"
+    },
+    {
+      "id": "clienteapp_clienteapp_findbyemail",
+      "label": ".findByEmail()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L19"
+    },
+    {
+      "id": "clienteapp_clienteapp_update",
+      "label": ".update()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L23"
+    },
+    {
+      "id": "clienteapp_clienteapp_setpassword",
+      "label": ".setPassword()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L56"
+    },
+    {
+      "id": "clienteapp_clienteapp_toappshape",
+      "label": ".toAppShape()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L61"
+    },
+    {
+      "id": "clienteapp_clienteapp_sanitize",
+      "label": ".sanitize()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L72"
+    },
+    {
+      "id": "src_models_pontoregistro_js",
+      "label": "PontoRegistro.js",
+      "file_type": "code",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "pontoregistro_pontoregistro",
+      "label": "PontoRegistro",
+      "file_type": "code",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "pontoregistro_pontoregistro_create",
+      "label": ".create()",
+      "file_type": "code",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L4"
+    },
+    {
+      "id": "pontoregistro_pontoregistro_findbyid",
+      "label": ".findById()",
+      "file_type": "code",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L12"
+    },
+    {
+      "id": "pontoregistro_pontoregistro_getbyprofissional",
+      "label": ".getByProfissional()",
+      "file_type": "code",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L16"
+    },
+    {
+      "id": "pontoregistro_pontoregistro_getultimoponto",
+      "label": ".getUltimoPonto()",
+      "file_type": "code",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L27"
+    },
+    {
+      "id": "pontoregistro_pontoregistro_getresumohoje",
+      "label": ".getResumoHoje()",
+      "file_type": "code",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L36"
+    },
+    {
+      "id": "src_models_pedidoagendamento_js",
+      "label": "PedidoAgendamento.js",
+      "file_type": "code",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "pedidoagendamento_dateonly",
+      "label": "dateOnly()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "pedidoagendamento_toshape",
+      "label": "toShape()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L9"
+    },
+    {
+      "id": "pedidoagendamento_pedidoagendamento",
+      "label": "PedidoAgendamento",
+      "file_type": "code",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L28"
+    },
+    {
+      "id": "pedidoagendamento_pedidoagendamento_create",
+      "label": ".create()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L29"
+    },
+    {
+      "id": "pedidoagendamento_pedidoagendamento_findbyid",
+      "label": ".findById()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L50"
+    },
+    {
+      "id": "pedidoagendamento_pedidoagendamento_getbycliente",
+      "label": ".getByCliente()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L64"
+    },
+    {
+      "id": "pedidoagendamento_pedidoagendamento_getbysalao",
+      "label": ".getBySalao()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L78"
+    },
+    {
+      "id": "pedidoagendamento_pedidoagendamento_aprovar",
+      "label": ".aprovar()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L99"
+    },
+    {
+      "id": "pedidoagendamento_pedidoagendamento_rejeitar",
+      "label": ".rejeitar()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L108"
+    },
+    {
+      "id": "src_models_pedidoloja_js",
+      "label": "PedidoLoja.js",
+      "file_type": "code",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "pedidoloja_toshape",
+      "label": "toShape()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "pedidoloja_pedidoloja",
+      "label": "PedidoLoja",
+      "file_type": "code",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L16"
+    },
+    {
+      "id": "pedidoloja_pedidoloja_create",
+      "label": ".create()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L17"
+    },
+    {
+      "id": "pedidoloja_pedidoloja_findbyid",
+      "label": ".findById()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L52"
+    },
+    {
+      "id": "pedidoloja_pedidoloja_getbycliente",
+      "label": ".getByCliente()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L70"
+    },
+    {
+      "id": "pedidoloja_pedidoloja_getbysalao",
+      "label": ".getBySalao()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L89"
+    },
+    {
+      "id": "pedidoloja_pedidoloja_atualizarstatus",
+      "label": ".atualizarStatus()",
+      "file_type": "code",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L115"
+    },
+    {
+      "id": "src_models_creditocliente_js",
+      "label": "CreditoCliente.js",
+      "file_type": "code",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "creditocliente_creditocliente",
+      "label": "CreditoCliente",
+      "file_type": "code",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "creditocliente_creditocliente_create",
+      "label": ".create()",
+      "file_type": "code",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L4"
+    },
+    {
+      "id": "creditocliente_creditocliente_findbyid",
+      "label": ".findById()",
+      "file_type": "code",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L18"
+    },
+    {
+      "id": "creditocliente_creditocliente_getbycliente",
+      "label": ".getByCliente()",
+      "file_type": "code",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L27"
+    },
+    {
+      "id": "creditocliente_creditocliente_getsaldo",
+      "label": ".getSaldo()",
+      "file_type": "code",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L35"
+    },
+    {
+      "id": "creditocliente_creditocliente_getall",
+      "label": ".getAll()",
+      "file_type": "code",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L46"
+    },
+    {
+      "id": "creditocliente_creditocliente_getallwithsaldo",
+      "label": ".getAllWithSaldo()",
+      "file_type": "code",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L71"
+    },
+    {
+      "id": "creditocliente_creditocliente_delete",
+      "label": ".delete()",
+      "file_type": "code",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L79"
+    },
+    {
+      "id": "src_models_clientehistorico_js",
+      "label": "ClienteHistorico.js",
+      "file_type": "code",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "clientehistorico_clientehistorico",
+      "label": "ClienteHistorico",
+      "file_type": "code",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "clientehistorico_clientehistorico_create",
+      "label": ".create()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L4"
+    },
+    {
+      "id": "clientehistorico_clientehistorico_getbycliente",
+      "label": ".getByCliente()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L13"
+    },
+    {
+      "id": "clientehistorico_clientehistorico_getresumo",
+      "label": ".getResumo()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L32"
+    },
+    {
+      "id": "clientehistorico_clientehistorico_delete",
+      "label": ".delete()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L60"
+    },
+    {
+      "id": "clientehistorico_clientehistorico_deletebycliente",
+      "label": ".deleteByCliente()",
+      "file_type": "code",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L64"
+    },
+    {
+      "id": "src_models_comissaopaga_js",
+      "label": "ComissaoPaga.js",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "comissaopaga_comissaopaga",
+      "label": "ComissaoPaga",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "comissaopaga_comissaopaga_create",
+      "label": ".create()",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L4"
+    },
+    {
+      "id": "comissaopaga_comissaopaga_findbyid",
+      "label": ".findById()",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L18"
+    },
+    {
+      "id": "comissaopaga_comissaopaga_getall",
+      "label": ".getAll()",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L27"
+    },
+    {
+      "id": "comissaopaga_comissaopaga_gettotalpago",
+      "label": ".getTotalPago()",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L52"
+    },
+    {
+      "id": "comissaopaga_comissaopaga_delete",
+      "label": ".delete()",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L63"
+    },
+    {
+      "id": "src_models_comissaoestorno_js",
+      "label": "ComissaoEstorno.js",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "comissaoestorno_comissaoestorno",
+      "label": "ComissaoEstorno",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "comissaoestorno_comissaoestorno_create",
+      "label": ".create()",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L4"
+    },
+    {
+      "id": "comissaoestorno_comissaoestorno_findbyid",
+      "label": ".findById()",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L12"
+    },
+    {
+      "id": "comissaoestorno_comissaoestorno_getall",
+      "label": ".getAll()",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L21"
+    },
+    {
+      "id": "comissaoestorno_comissaoestorno_gettotalestornado",
+      "label": ".getTotalEstornado()",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L42"
+    },
+    {
+      "id": "comissaoestorno_comissaoestorno_delete",
+      "label": ".delete()",
+      "file_type": "code",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L53"
     },
     {
       "id": "src_routes_atendimentos_js",
@@ -1415,6 +1618,13 @@
       "source_location": "L1"
     },
     {
+      "id": "auth_signclientetoken",
+      "label": "signClienteToken()",
+      "file_type": "code",
+      "source_file": "src/routes/app/auth.js",
+      "source_location": "L10"
+    },
+    {
       "id": "src_routes_app_cliente_js",
       "label": "cliente.js",
       "file_type": "code",
@@ -1464,24 +1674,17 @@
       "source_location": "L14"
     },
     {
-      "id": "src_routes_app_profissional_js",
-      "label": "profissional.js",
-      "file_type": "code",
-      "source_file": "src/routes/app/profissional.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "profissional_checkprofissional",
-      "label": "checkProfissional()",
-      "file_type": "code",
-      "source_file": "src/routes/app/profissional.js",
-      "source_location": "L18"
-    },
-    {
       "id": "src_routes_app_security_js",
       "label": "security.js",
       "file_type": "code",
       "source_file": "src/routes/app/security.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_routes_app_profissional_js",
+      "label": "profissional.js",
+      "file_type": "code",
+      "source_file": "src/routes/app/profissional.js",
       "source_location": "L1"
     },
     {
@@ -1867,28 +2070,35 @@
       "label": ".atualizar()",
       "file_type": "code",
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L80"
+      "source_location": "L82"
     },
     {
       "id": "produtoservice_produtoservice_atualizarestoque",
       "label": ".atualizarEstoque()",
       "file_type": "code",
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L107"
+      "source_location": "L109"
     },
     {
       "id": "produtoservice_produtoservice_produtosemfalta",
       "label": ".produtosEmFalta()",
       "file_type": "code",
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L139"
+      "source_location": "L141"
+    },
+    {
+      "id": "produtoservice_produtoservice_estoquebaixo",
+      "label": ".estoqueBaixo()",
+      "file_type": "code",
+      "source_file": "src/services/ProdutoService.js",
+      "source_location": "L166"
     },
     {
       "id": "produtoservice_produtoservice_buscarportermo",
       "label": ".buscarPorTermo()",
       "file_type": "code",
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L164"
+      "source_location": "L170"
     },
     {
       "id": "src_services_profissionalservice_js",
@@ -2080,41 +2290,6 @@
       "source_location": "L203"
     },
     {
-      "id": "src_services_bootstrapservice_js",
-      "label": "bootstrapService.js",
-      "file_type": "code",
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "bootstrapservice_bootstrapservice",
-      "label": "BootstrapService",
-      "file_type": "code",
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L14"
-    },
-    {
-      "id": "bootstrapservice_bootstrapservice_ensureruntimeenvironment",
-      "label": ".ensureRuntimeEnvironment()",
-      "file_type": "code",
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L15"
-    },
-    {
-      "id": "bootstrapservice_bootstrapservice_ensuredefaultadmin",
-      "label": ".ensureDefaultAdmin()",
-      "file_type": "code",
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L25"
-    },
-    {
-      "id": "bootstrapservice_bootstrapservice_getjwtconfig",
-      "label": ".getJwtConfig()",
-      "file_type": "code",
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L58"
-    },
-    {
       "id": "src_services_emailservice_js",
       "label": "emailService.js",
       "file_type": "code",
@@ -2126,28 +2301,28 @@
       "label": "EmailService",
       "file_type": "code",
       "source_file": "src/services/emailService.js",
-      "source_location": "L3"
+      "source_location": "L8"
     },
     {
       "id": "emailservice_emailservice_gettransporter",
       "label": ".getTransporter()",
       "file_type": "code",
       "source_file": "src/services/emailService.js",
-      "source_location": "L6"
+      "source_location": "L11"
     },
     {
       "id": "emailservice_emailservice_sendpasswordresetemail",
       "label": ".sendPasswordResetEmail()",
       "file_type": "code",
       "source_file": "src/services/emailService.js",
-      "source_location": "L21"
+      "source_location": "L29"
     },
     {
       "id": "emailservice_emailservice_sendwelcomeemail",
       "label": ".sendWelcomeEmail()",
       "file_type": "code",
       "source_file": "src/services/emailService.js",
-      "source_location": "L58"
+      "source_location": "L66"
     },
     {
       "id": "src_services_index_js",
@@ -2269,11 +2444,32 @@
       "source_location": "L172"
     },
     {
+      "id": "websocketservice_websocketservice_notificarsalao",
+      "label": ".notificarSalao()",
+      "file_type": "code",
+      "source_file": "src/services/websocketService.js",
+      "source_location": "L176"
+    },
+    {
+      "id": "websocketservice_websocketservice_notificarcliente",
+      "label": ".notificarCliente()",
+      "file_type": "code",
+      "source_file": "src/services/websocketService.js",
+      "source_location": "L180"
+    },
+    {
+      "id": "websocketservice_websocketservice_notificarprofissional",
+      "label": ".notificarProfissional()",
+      "file_type": "code",
+      "source_file": "src/services/websocketService.js",
+      "source_location": "L184"
+    },
+    {
       "id": "websocketservice_websocketservice_getstats",
       "label": ".getStats()",
       "file_type": "code",
       "source_file": "src/services/websocketService.js",
-      "source_location": "L179"
+      "source_location": "L191"
     },
     {
       "id": "src_services_clienteservice_js",
@@ -2500,6 +2696,48 @@
       "source_location": "L242"
     },
     {
+      "id": "src_services_securityservice_js",
+      "label": "securityService.js",
+      "file_type": "code",
+      "source_file": "src/services/securityService.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "securityservice_securityservice",
+      "label": "SecurityService",
+      "file_type": "code",
+      "source_file": "src/services/securityService.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "securityservice_securityservice_getstatus",
+      "label": ".getStatus()",
+      "file_type": "code",
+      "source_file": "src/services/securityService.js",
+      "source_location": "L2"
+    },
+    {
+      "id": "securityservice_securityservice_validatedevice",
+      "label": ".validateDevice()",
+      "file_type": "code",
+      "source_file": "src/services/securityService.js",
+      "source_location": "L6"
+    },
+    {
+      "id": "securityservice_securityservice_logsecurityevent",
+      "label": ".logSecurityEvent()",
+      "file_type": "code",
+      "source_file": "src/services/securityService.js",
+      "source_location": "L10"
+    },
+    {
+      "id": "src_services_backupservice_js",
+      "label": "backupService.js",
+      "file_type": "code",
+      "source_file": "src/services/backupService.js",
+      "source_location": "L1"
+    },
+    {
       "id": "src_utils_encryption_js",
       "label": "encryption.js",
       "file_type": "code",
@@ -2673,6 +2911,62 @@
       "file_type": "code",
       "source_file": "src/utils/helpers.js",
       "source_location": "L220"
+    },
+    {
+      "id": "src_tests_integration_smoke_test_js",
+      "label": "integration.smoke.test.js",
+      "file_type": "code",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "integration_smoke_test_serverenv",
+      "label": "serverEnv()",
+      "file_type": "code",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L23"
+    },
+    {
+      "id": "integration_smoke_test_waitforhealth",
+      "label": "waitForHealth()",
+      "file_type": "code",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L36"
+    },
+    {
+      "id": "integration_smoke_test_request",
+      "label": "request()",
+      "file_type": "code",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L54"
+    },
+    {
+      "id": "integration_smoke_test_cleanupsmokedata",
+      "label": "cleanupSmokeData()",
+      "file_type": "code",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L85"
+    },
+    {
+      "id": "integration_smoke_test_enableprofissionalapplogin",
+      "label": "enableProfissionalAppLogin()",
+      "file_type": "code",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L150"
+    },
+    {
+      "id": "src_tests_static_test_js",
+      "label": "static.test.js",
+      "file_type": "code",
+      "source_file": "src/__tests__/static.test.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "static_test_listjsfiles",
+      "label": "listJsFiles()",
+      "file_type": "code",
+      "source_file": "src/__tests__/static.test.js",
+      "source_location": "L7"
     }
   ],
   "edges": [
@@ -2682,7 +2976,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server.js",
-      "source_location": "L173",
+      "source_location": "L179",
       "weight": 1.0
     },
     {
@@ -2772,7 +3066,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/config/initDb.js",
-      "source_location": "L282",
+      "source_location": "L369",
       "weight": 1.0
     },
     {
@@ -2781,7 +3075,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/config/initDb.js",
-      "source_location": "L298",
+      "source_location": "L385",
       "weight": 1.0
     },
     {
@@ -2790,7 +3084,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/config/initDb.js",
-      "source_location": "L359",
+      "source_location": "L446",
       "weight": 1.0
     },
     {
@@ -2835,7 +3129,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/middleware/auth.js",
-      "source_location": "L49",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -2844,7 +3138,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/middleware/auth.js",
-      "source_location": "L78",
+      "source_location": "L84",
       "weight": 1.0
     },
     {
@@ -2872,6 +3166,51 @@
       "confidence": "EXTRACTED",
       "source_file": "src/middleware/profissionalAuth.js",
       "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_middleware_appauth_js",
+      "target": "appauth_getbearertoken",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/middleware/appAuth.js",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_middleware_appauth_js",
+      "target": "appauth_appauthmiddleware",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/middleware/appAuth.js",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_middleware_appauth_js",
+      "target": "appauth_profissionalappmiddleware",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/middleware/appAuth.js",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "appauth_appauthmiddleware",
+      "target": "appauth_getbearertoken",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/middleware/appAuth.js",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "appauth_profissionalappmiddleware",
+      "target": "appauth_getbearertoken",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/middleware/appAuth.js",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -2944,6 +3283,60 @@
       "confidence": "EXTRACTED",
       "source_file": "src/models/Agendamento.js",
       "source_location": "L149",
+      "weight": 1.0
+    },
+    {
+      "source": "agendamento_agendamento",
+      "target": "agendamento_agendamento_filterdata",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L159",
+      "weight": 1.0
+    },
+    {
+      "source": "agendamento_agendamento",
+      "target": "agendamento_agendamento_getall",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L184",
+      "weight": 1.0
+    },
+    {
+      "source": "agendamento_agendamento",
+      "target": "agendamento_agendamento_verificardisponibilidade",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L221",
+      "weight": 1.0
+    },
+    {
+      "source": "agendamento_agendamento",
+      "target": "agendamento_agendamento_proximohorariovago",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L233",
+      "weight": 1.0
+    },
+    {
+      "source": "agendamento_agendamento_verificardisponibilidade",
+      "target": "agendamento_agendamento_verificarconflito",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L223",
+      "weight": 1.0
+    },
+    {
+      "source": "agendamento_agendamento_proximohorariovago",
+      "target": "agendamento_agendamento_verificardisponibilidade",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L237",
       "weight": 1.0
     },
     {
@@ -3020,11 +3413,29 @@
     },
     {
       "source": "basemodel_basemodel",
-      "target": "basemodel_basemodel_findbyid",
+      "target": "basemodel_basemodel_instance",
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/models/BaseModel.js",
       "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel",
+      "target": "basemodel_basemodel_findbyid",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel",
+      "target": "basemodel_basemodel_getall",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -3042,7 +3453,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L65",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -3051,7 +3462,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L86",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -3060,7 +3471,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L121",
+      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -3069,7 +3480,61 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L135",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel",
+      "target": "basemodel_basemodel_findbyid",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel",
+      "target": "basemodel_basemodel_findall",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel",
+      "target": "basemodel_basemodel_create",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L97",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel",
+      "target": "basemodel_basemodel_update",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L118",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel",
+      "target": "basemodel_basemodel_delete",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L153",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel",
+      "target": "basemodel_basemodel_count",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L167",
       "weight": 1.0
     },
     {
@@ -3078,7 +3543,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L156",
+      "source_location": "L188",
       "weight": 1.0
     },
     {
@@ -3087,7 +3552,79 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L160",
+      "source_location": "L192",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel_findbyid",
+      "target": "basemodel_basemodel_instance",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel_getall",
+      "target": "basemodel_basemodel_findall",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel_getall",
+      "target": "basemodel_basemodel_instance",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel_findall",
+      "target": "basemodel_basemodel_instance",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel_create",
+      "target": "basemodel_basemodel_instance",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel_update",
+      "target": "basemodel_basemodel_instance",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel_delete",
+      "target": "basemodel_basemodel_instance",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "basemodel_basemodel_count",
+      "target": "basemodel_basemodel_instance",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/BaseModel.js",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -3096,7 +3633,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L66",
+      "source_location": "L98",
       "weight": 1.0
     },
     {
@@ -3105,7 +3642,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L87",
+      "source_location": "L119",
       "weight": 1.0
     },
     {
@@ -3172,147 +3709,21 @@
       "weight": 1.0
     },
     {
-      "source": "src_models_clienteapp_js",
-      "target": "clienteapp_clienteapp",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "clienteapp_clienteapp",
-      "target": "clienteapp_clienteapp_create",
+      "source": "cliente_cliente",
+      "target": "cliente_cliente_filterdata",
       "relation": "method",
       "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L5",
+      "source_file": "src/models/Cliente.js",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
-      "source": "clienteapp_clienteapp",
-      "target": "clienteapp_clienteapp_findbyid",
+      "source": "cliente_cliente",
+      "target": "cliente_cliente_getall",
       "relation": "method",
       "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "clienteapp_clienteapp",
-      "target": "clienteapp_clienteapp_findbyemail",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "clienteapp_clienteapp",
-      "target": "clienteapp_clienteapp_update",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L22",
-      "weight": 1.0
-    },
-    {
-      "source": "clienteapp_clienteapp",
-      "target": "clienteapp_clienteapp_sanitize",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L35",
-      "weight": 1.0
-    },
-    {
-      "source": "clienteapp_clienteapp_create",
-      "target": "clienteapp_clienteapp_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "clienteapp_clienteapp_update",
-      "target": "clienteapp_clienteapp_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L28",
-      "weight": 1.0
-    },
-    {
-      "source": "src_models_clientehistorico_js",
-      "target": "clientehistorico_clientehistorico",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico",
-      "target": "clientehistorico_clientehistorico_create",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico",
-      "target": "clientehistorico_clientehistorico_findbyid",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico",
-      "target": "clientehistorico_clientehistorico_getbycliente",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico",
-      "target": "clientehistorico_clientehistorico_getresumo",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L27",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico",
-      "target": "clientehistorico_clientehistorico_delete",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L68",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico",
-      "target": "clientehistorico_clientehistorico_deletebycliente",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L69",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico_create",
-      "target": "clientehistorico_clientehistorico_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L11",
+      "source_file": "src/models/Cliente.js",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -3376,456 +3787,6 @@
       "confidence": "EXTRACTED",
       "source_file": "src/models/Comissao.js",
       "source_location": "L58",
-      "weight": 1.0
-    },
-    {
-      "source": "src_models_comissaoestorno_js",
-      "target": "comissaoestorno_comissaoestorno",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno",
-      "target": "comissaoestorno_comissaoestorno_create",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno",
-      "target": "comissaoestorno_comissaoestorno_findbyid",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno",
-      "target": "comissaoestorno_comissaoestorno_getall",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno",
-      "target": "comissaoestorno_comissaoestorno_gettotalestornado",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L27",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno",
-      "target": "comissaoestorno_comissaoestorno_delete",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L35",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno_create",
-      "target": "comissaoestorno_comissaoestorno_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "src_models_comissaopaga_js",
-      "target": "comissaopaga_comissaopaga",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga",
-      "target": "comissaopaga_comissaopaga_create",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga",
-      "target": "comissaopaga_comissaopaga_findbyid",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga",
-      "target": "comissaopaga_comissaopaga_getall",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga",
-      "target": "comissaopaga_comissaopaga_gettotalpago",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L28",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga",
-      "target": "comissaopaga_comissaopaga_delete",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L36",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga_create",
-      "target": "comissaopaga_comissaopaga_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "src_models_creditocliente_js",
-      "target": "creditocliente_creditocliente",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente",
-      "target": "creditocliente_creditocliente_create",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente",
-      "target": "creditocliente_creditocliente_findbyid",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente",
-      "target": "creditocliente_creditocliente_getbycliente",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente",
-      "target": "creditocliente_creditocliente_getsaldo",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L22",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente",
-      "target": "creditocliente_creditocliente_getall",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L31",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente",
-      "target": "creditocliente_creditocliente_getallwithsaldo",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L41",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente",
-      "target": "creditocliente_creditocliente_delete",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L51",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente_create",
-      "target": "creditocliente_creditocliente_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente_getallwithsaldo",
-      "target": "creditocliente_creditocliente_getsaldo",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L45",
-      "weight": 1.0
-    },
-    {
-      "source": "src_models_pedidoagendamento_js",
-      "target": "pedidoagendamento_pedidoagendamento",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento",
-      "target": "pedidoagendamento_pedidoagendamento_create",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento",
-      "target": "pedidoagendamento_pedidoagendamento_findbyid",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento",
-      "target": "pedidoagendamento_pedidoagendamento_getbycliente",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L29",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento",
-      "target": "pedidoagendamento_pedidoagendamento_getbysalao",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L41",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento",
-      "target": "pedidoagendamento_pedidoagendamento_aprovar",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L57",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento",
-      "target": "pedidoagendamento_pedidoagendamento_rejeitar",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L65",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento_create",
-      "target": "pedidoagendamento_pedidoagendamento_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L12",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento_aprovar",
-      "target": "pedidoagendamento_pedidoagendamento_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L62",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento_rejeitar",
-      "target": "pedidoagendamento_pedidoagendamento_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L70",
-      "weight": 1.0
-    },
-    {
-      "source": "src_models_pedidoloja_js",
-      "target": "pedidoloja_pedidoloja",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja",
-      "target": "pedidoloja_pedidoloja_create",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja",
-      "target": "pedidoloja_pedidoloja_findbyid",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L20",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja",
-      "target": "pedidoloja_pedidoloja_getbycliente",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L37",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja",
-      "target": "pedidoloja_pedidoloja_getbysalao",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L49",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja",
-      "target": "pedidoloja_pedidoloja_atualizarstatus",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L61",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja_create",
-      "target": "pedidoloja_pedidoloja_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja_atualizarstatus",
-      "target": "pedidoloja_pedidoloja_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L63",
-      "weight": 1.0
-    },
-    {
-      "source": "src_models_pontoregistro_js",
-      "target": "pontoregistro_pontoregistro",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro",
-      "target": "pontoregistro_pontoregistro_registrar",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro",
-      "target": "pontoregistro_pontoregistro_findbyid",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro",
-      "target": "pontoregistro_pontoregistro_getbyprofissional",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro",
-      "target": "pontoregistro_pontoregistro_getultimoponto",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L26",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro",
-      "target": "pontoregistro_pontoregistro_getresumohoje",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L30",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro_registrar",
-      "target": "pontoregistro_pontoregistro_findbyid",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro_getresumohoje",
-      "target": "pontoregistro_pontoregistro_getbyprofissional",
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -3907,6 +3868,15 @@
       "confidence": "EXTRACTED",
       "source_file": "src/models/Produto.js",
       "source_location": "L96",
+      "weight": 1.0
+    },
+    {
+      "source": "produto_produto",
+      "target": "produto_produto_filterdata",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Produto.js",
+      "source_location": "L113",
       "weight": 1.0
     },
     {
@@ -4024,6 +3994,15 @@
       "confidence": "EXTRACTED",
       "source_file": "src/models/Salao.js",
       "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "salao_salao",
+      "target": "salao_salao_findfirst",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Salao.js",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -4153,6 +4132,24 @@
       "weight": 1.0
     },
     {
+      "source": "usuario_usuario",
+      "target": "usuario_usuario_filterdata",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Usuario.js",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "usuario_usuario",
+      "target": "usuario_usuario_findbyemail",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Usuario.js",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
       "source": "src_models_venda_js",
       "target": "venda_venda",
       "relation": "contains",
@@ -4216,6 +4213,735 @@
       "weight": 1.0
     },
     {
+      "source": "venda_venda",
+      "target": "venda_venda_filterdata",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Venda.js",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "venda_venda",
+      "target": "venda_venda_create",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Venda.js",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "venda_venda",
+      "target": "venda_venda_getall",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Venda.js",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_fechamento_js",
+      "target": "fechamento_fechamento",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "fechamento_fechamento",
+      "target": "fechamento_fechamento_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "fechamento_fechamento",
+      "target": "fechamento_fechamento_getall",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "fechamento_fechamento",
+      "target": "fechamento_fechamento_getbyclienteeprofissional",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "fechamento_fechamento",
+      "target": "fechamento_fechamento_getresumo",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_clienteapp_js",
+      "target": "clienteapp_clienteapp",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp",
+      "target": "clienteapp_clienteapp_create",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp",
+      "target": "clienteapp_clienteapp_findbyid",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp",
+      "target": "clienteapp_clienteapp_findbyemail",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp",
+      "target": "clienteapp_clienteapp_update",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp",
+      "target": "clienteapp_clienteapp_setpassword",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L56",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp",
+      "target": "clienteapp_clienteapp_toappshape",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp",
+      "target": "clienteapp_clienteapp_sanitize",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp_create",
+      "target": "clienteapp_clienteapp_toappshape",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp_findbyid",
+      "target": "clienteapp_clienteapp_toappshape",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp_findbyemail",
+      "target": "clienteapp_clienteapp_toappshape",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp_update",
+      "target": "clienteapp_clienteapp_findbyid",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp_update",
+      "target": "clienteapp_clienteapp_toappshape",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp_setpassword",
+      "target": "clienteapp_clienteapp_update",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_pontoregistro_js",
+      "target": "pontoregistro_pontoregistro",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "pontoregistro_pontoregistro",
+      "target": "pontoregistro_pontoregistro_create",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "pontoregistro_pontoregistro",
+      "target": "pontoregistro_pontoregistro_findbyid",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "pontoregistro_pontoregistro",
+      "target": "pontoregistro_pontoregistro_getbyprofissional",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "pontoregistro_pontoregistro",
+      "target": "pontoregistro_pontoregistro_getultimoponto",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "pontoregistro_pontoregistro",
+      "target": "pontoregistro_pontoregistro_getresumohoje",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "pontoregistro_pontoregistro_getresumohoje",
+      "target": "pontoregistro_pontoregistro_getbyprofissional",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_pedidoagendamento_js",
+      "target": "pedidoagendamento_dateonly",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_pedidoagendamento_js",
+      "target": "pedidoagendamento_toshape",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_pedidoagendamento_js",
+      "target": "pedidoagendamento_pedidoagendamento",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento",
+      "target": "pedidoagendamento_pedidoagendamento_create",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento",
+      "target": "pedidoagendamento_pedidoagendamento_findbyid",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento",
+      "target": "pedidoagendamento_pedidoagendamento_getbycliente",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento",
+      "target": "pedidoagendamento_pedidoagendamento_getbysalao",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento",
+      "target": "pedidoagendamento_pedidoagendamento_aprovar",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L99",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento",
+      "target": "pedidoagendamento_pedidoagendamento_rejeitar",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L108",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_toshape",
+      "target": "pedidoagendamento_dateonly",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento_create",
+      "target": "pedidoagendamento_pedidoagendamento_findbyid",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento_findbyid",
+      "target": "pedidoagendamento_toshape",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento_aprovar",
+      "target": "pedidoagendamento_pedidoagendamento_findbyid",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L105",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento_rejeitar",
+      "target": "pedidoagendamento_pedidoagendamento_findbyid",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L114",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_pedidoloja_js",
+      "target": "pedidoloja_toshape",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_pedidoloja_js",
+      "target": "pedidoloja_pedidoloja",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja",
+      "target": "pedidoloja_pedidoloja_create",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja",
+      "target": "pedidoloja_pedidoloja_findbyid",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja",
+      "target": "pedidoloja_pedidoloja_getbycliente",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L70",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja",
+      "target": "pedidoloja_pedidoloja_getbysalao",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L89",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja",
+      "target": "pedidoloja_pedidoloja_atualizarstatus",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja_create",
+      "target": "pedidoloja_pedidoloja_findbyid",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja_findbyid",
+      "target": "pedidoloja_toshape",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja_atualizarstatus",
+      "target": "pedidoloja_pedidoloja_findbyid",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_creditocliente_js",
+      "target": "creditocliente_creditocliente",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente",
+      "target": "creditocliente_creditocliente_create",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente",
+      "target": "creditocliente_creditocliente_findbyid",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente",
+      "target": "creditocliente_creditocliente_getbycliente",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente",
+      "target": "creditocliente_creditocliente_getsaldo",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente",
+      "target": "creditocliente_creditocliente_getall",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente",
+      "target": "creditocliente_creditocliente_getallwithsaldo",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L71",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente",
+      "target": "creditocliente_creditocliente_delete",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente_create",
+      "target": "creditocliente_creditocliente_getsaldo",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente_getallwithsaldo",
+      "target": "creditocliente_creditocliente_getsaldo",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_clientehistorico_js",
+      "target": "clientehistorico_clientehistorico",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "clientehistorico_clientehistorico",
+      "target": "clientehistorico_clientehistorico_create",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "clientehistorico_clientehistorico",
+      "target": "clientehistorico_clientehistorico_getbycliente",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "clientehistorico_clientehistorico",
+      "target": "clientehistorico_clientehistorico_getresumo",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "clientehistorico_clientehistorico",
+      "target": "clientehistorico_clientehistorico_delete",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L60",
+      "weight": 1.0
+    },
+    {
+      "source": "clientehistorico_clientehistorico",
+      "target": "clientehistorico_clientehistorico_deletebycliente",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_comissaopaga_js",
+      "target": "comissaopaga_comissaopaga",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaopaga_comissaopaga",
+      "target": "comissaopaga_comissaopaga_create",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaopaga_comissaopaga",
+      "target": "comissaopaga_comissaopaga_findbyid",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaopaga_comissaopaga",
+      "target": "comissaopaga_comissaopaga_getall",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaopaga_comissaopaga",
+      "target": "comissaopaga_comissaopaga_gettotalpago",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaopaga_comissaopaga",
+      "target": "comissaopaga_comissaopaga_delete",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "src_models_comissaoestorno_js",
+      "target": "comissaoestorno_comissaoestorno",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaoestorno_comissaoestorno",
+      "target": "comissaoestorno_comissaoestorno_create",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaoestorno_comissaoestorno",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaoestorno_comissaoestorno",
+      "target": "comissaoestorno_comissaoestorno_getall",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaoestorno_comissaoestorno",
+      "target": "comissaoestorno_comissaoestorno_gettotalestornado",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaoestorno_comissaoestorno",
+      "target": "comissaoestorno_comissaoestorno_delete",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
       "source": "src_routes_sync_js",
       "target": "sync_isallowedtable",
       "relation": "contains",
@@ -4252,6 +4978,15 @@
       "weight": 1.0
     },
     {
+      "source": "src_routes_app_auth_js",
+      "target": "auth_signclientetoken",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/app/auth.js",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
       "source": "src_routes_app_cliente_js",
       "target": "cliente_resolvercliente",
       "relation": "contains",
@@ -4285,15 +5020,6 @@
       "confidence": "EXTRACTED",
       "source_file": "src/routes/app/pedidos.js",
       "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "src_routes_app_profissional_js",
-      "target": "profissional_checkprofissional",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/routes/app/profissional.js",
-      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -4716,7 +5442,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L80",
+      "source_location": "L82",
       "weight": 1.0
     },
     {
@@ -4725,7 +5451,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L107",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -4734,7 +5460,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L139",
+      "source_location": "L141",
+      "weight": 1.0
+    },
+    {
+      "source": "produtoservice_produtoservice",
+      "target": "produtoservice_produtoservice_estoquebaixo",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/ProdutoService.js",
+      "source_location": "L166",
       "weight": 1.0
     },
     {
@@ -4743,7 +5478,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L164",
+      "source_location": "L170",
+      "weight": 1.0
+    },
+    {
+      "source": "produtoservice_produtoservice_estoquebaixo",
+      "target": "produtoservice_produtoservice_produtosemfalta",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/ProdutoService.js",
+      "source_location": "L167",
       "weight": 1.0
     },
     {
@@ -4972,48 +5716,12 @@
       "weight": 1.0
     },
     {
-      "source": "src_services_bootstrapservice_js",
-      "target": "bootstrapservice_bootstrapservice",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "bootstrapservice_bootstrapservice",
-      "target": "bootstrapservice_bootstrapservice_ensureruntimeenvironment",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "bootstrapservice_bootstrapservice",
-      "target": "bootstrapservice_bootstrapservice_ensuredefaultadmin",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L25",
-      "weight": 1.0
-    },
-    {
-      "source": "bootstrapservice_bootstrapservice",
-      "target": "bootstrapservice_bootstrapservice_getjwtconfig",
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L58",
-      "weight": 1.0
-    },
-    {
       "source": "src_services_emailservice_js",
       "target": "emailservice_emailservice",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/services/emailService.js",
-      "source_location": "L3",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -5022,7 +5730,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/services/emailService.js",
-      "source_location": "L6",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -5031,7 +5739,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/services/emailService.js",
-      "source_location": "L21",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -5040,7 +5748,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/services/emailService.js",
-      "source_location": "L58",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -5049,7 +5757,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/services/emailService.js",
-      "source_location": "L45",
+      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -5058,7 +5766,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/services/emailService.js",
-      "source_location": "L71",
+      "source_location": "L79",
       "weight": 1.0
     },
     {
@@ -5207,11 +5915,38 @@
     },
     {
       "source": "websocketservice_websocketservice",
+      "target": "websocketservice_websocketservice_notificarsalao",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/websocketService.js",
+      "source_location": "L176",
+      "weight": 1.0
+    },
+    {
+      "source": "websocketservice_websocketservice",
+      "target": "websocketservice_websocketservice_notificarcliente",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/websocketService.js",
+      "source_location": "L180",
+      "weight": 1.0
+    },
+    {
+      "source": "websocketservice_websocketservice",
+      "target": "websocketservice_websocketservice_notificarprofissional",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/websocketService.js",
+      "source_location": "L184",
+      "weight": 1.0
+    },
+    {
+      "source": "websocketservice_websocketservice",
       "target": "websocketservice_websocketservice_getstats",
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/services/websocketService.js",
-      "source_location": "L179",
+      "source_location": "L191",
       "weight": 1.0
     },
     {
@@ -5248,6 +5983,33 @@
       "confidence": "EXTRACTED",
       "source_file": "src/services/websocketService.js",
       "source_location": "L173",
+      "weight": 1.0
+    },
+    {
+      "source": "websocketservice_websocketservice_notificarsalao",
+      "target": "websocketservice_websocketservice_broadcast",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/websocketService.js",
+      "source_location": "L177",
+      "weight": 1.0
+    },
+    {
+      "source": "websocketservice_websocketservice_notificarcliente",
+      "target": "websocketservice_websocketservice_broadcast",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/websocketService.js",
+      "source_location": "L181",
+      "weight": 1.0
+    },
+    {
+      "source": "websocketservice_websocketservice_notificarprofissional",
+      "target": "websocketservice_websocketservice_broadcast",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/websocketService.js",
+      "source_location": "L185",
       "weight": 1.0
     },
     {
@@ -5503,6 +6265,42 @@
       "weight": 1.0
     },
     {
+      "source": "src_services_securityservice_js",
+      "target": "securityservice_securityservice",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/securityService.js",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "securityservice_securityservice",
+      "target": "securityservice_securityservice_getstatus",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/securityService.js",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "securityservice_securityservice",
+      "target": "securityservice_securityservice_validatedevice",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/securityService.js",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "securityservice_securityservice",
+      "target": "securityservice_securityservice_logsecurityevent",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/securityService.js",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
       "source": "src_utils_encryption_js",
       "target": "encryption_encrypt",
       "relation": "contains",
@@ -5710,13 +6508,67 @@
       "weight": 1.0
     },
     {
+      "source": "src_tests_integration_smoke_test_js",
+      "target": "integration_smoke_test_serverenv",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_integration_smoke_test_js",
+      "target": "integration_smoke_test_waitforhealth",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_integration_smoke_test_js",
+      "target": "integration_smoke_test_request",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_integration_smoke_test_js",
+      "target": "integration_smoke_test_cleanupsmokedata",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_integration_smoke_test_js",
+      "target": "integration_smoke_test_enableprofissionalapplogin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L150",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_static_test_js",
+      "target": "static_test_listjsfiles",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/__tests__/static.test.js",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
       "source": "initdb_createtables",
       "target": "database_query",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/config/initDb.js",
-      "source_location": "L278",
+      "source_location": "L365",
       "weight": 1.0
     },
     {
@@ -5726,7 +6578,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/config/initDb.js",
-      "source_location": "L294",
+      "source_location": "L381",
       "weight": 1.0
     },
     {
@@ -5736,7 +6588,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/config/initDb.js",
-      "source_location": "L355",
+      "source_location": "L442",
       "weight": 1.0
     },
     {
@@ -5746,7 +6598,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/config/initDb.js",
-      "source_location": "L360",
+      "source_location": "L447",
       "weight": 1.0
     },
     {
@@ -5766,17 +6618,17 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/middleware/auth.js",
-      "source_location": "L23",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
       "source": "auth_authmiddleware",
-      "target": "authservice_authservice_validatedevice",
+      "target": "securityservice_securityservice_validatedevice",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/middleware/auth.js",
-      "source_location": "L31",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -5786,7 +6638,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/middleware/auth.js",
-      "source_location": "L58",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -5796,17 +6648,17 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/middleware/auth.js",
-      "source_location": "L63",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
       "source": "auth_optionalauth",
-      "target": "authservice_authservice_validatedevice",
+      "target": "securityservice_securityservice_validatedevice",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/middleware/auth.js",
-      "source_location": "L67",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -5870,6 +6722,26 @@
       "weight": 1.0
     },
     {
+      "source": "agendamento_agendamento_getall",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L218",
+      "weight": 1.0
+    },
+    {
+      "source": "agendamento_agendamento_verificardisponibilidade",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/Agendamento.js",
+      "source_location": "L225",
+      "weight": 1.0
+    },
+    {
       "source": "atendimento_atendimento_findbycliente",
       "target": "database_query",
       "relation": "calls",
@@ -5916,7 +6788,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L20",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -5926,7 +6798,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L62",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
@@ -5936,7 +6808,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L83",
+      "source_location": "L115",
       "weight": 1.0
     },
     {
@@ -5946,7 +6818,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L118",
+      "source_location": "L150",
       "weight": 1.0
     },
     {
@@ -5956,7 +6828,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L132",
+      "source_location": "L164",
       "weight": 1.0
     },
     {
@@ -5966,7 +6838,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/models/BaseModel.js",
-      "source_location": "L152",
+      "source_location": "L184",
       "weight": 1.0
     },
     {
@@ -6020,103 +6892,13 @@
       "weight": 1.0
     },
     {
-      "source": "clienteapp_clienteapp_create",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "clienteapp_clienteapp_findbyid",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "clienteapp_clienteapp_findbyemail",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "clienteapp_clienteapp_update",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ClienteApp.js",
-      "source_location": "L31",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico_create",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico_findbyid",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico_getbycliente",
+      "source": "cliente_cliente_getall",
       "target": "database_query",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico_getresumo",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L28",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico_delete",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L68",
-      "weight": 1.0
-    },
-    {
-      "source": "clientehistorico_clientehistorico_deletebycliente",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ClienteHistorico.js",
-      "source_location": "L70",
+      "source_file": "src/models/Cliente.js",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -6167,336 +6949,6 @@
       "confidence_score": 0.8,
       "source_file": "src/models/Comissao.js",
       "source_location": "L60",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno_create",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno_findbyid",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno_getall",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno_gettotalestornado",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L31",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaoestorno_comissaoestorno_delete",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ComissaoEstorno.js",
-      "source_location": "L36",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga_create",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga_findbyid",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga_getall",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L25",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga_gettotalpago",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L32",
-      "weight": 1.0
-    },
-    {
-      "source": "comissaopaga_comissaopaga_delete",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/ComissaoPaga.js",
-      "source_location": "L37",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente_create",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente_findbyid",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente_getbycliente",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente_getsaldo",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L23",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente_getall",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L38",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente_getallwithsaldo",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L42",
-      "weight": 1.0
-    },
-    {
-      "source": "creditocliente_creditocliente_delete",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/CreditoCliente.js",
-      "source_location": "L52",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento_create",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento_findbyid",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento_getbycliente",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L30",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento_getbysalao",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L54",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento_aprovar",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L58",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoagendamento_pedidoagendamento_rejeitar",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoAgendamento.js",
-      "source_location": "L66",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja_create",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja_findbyid",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L21",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja_findbyid",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L29",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja_getbycliente",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L38",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja_getbysalao",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L54",
-      "weight": 1.0
-    },
-    {
-      "source": "pedidoloja_pedidoloja_atualizarstatus",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PedidoLoja.js",
-      "source_location": "L62",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro_registrar",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro_findbyid",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro_getbyprofissional",
-      "target": "database_query",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L23",
-      "weight": 1.0
-    },
-    {
-      "source": "pontoregistro_pontoregistro_getultimoponto",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/models/PontoRegistro.js",
-      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -6660,6 +7112,16 @@
       "weight": 1.0
     },
     {
+      "source": "salao_salao_findfirst",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/Salao.js",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
       "source": "servico_servico_buscarativosporsalao",
       "target": "database_query",
       "relation": "calls",
@@ -6810,8 +7272,468 @@
       "weight": 1.0
     },
     {
+      "source": "venda_venda_create",
+      "target": "basemodel_basemodel_withtransaction",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/Venda.js",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "venda_venda_getall",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/Venda.js",
+      "source_location": "L141",
+      "weight": 1.0
+    },
+    {
+      "source": "fechamento_fechamento_getall",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "fechamento_fechamento_getbyclienteeprofissional",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "fechamento_fechamento_getresumo",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/Fechamento.js",
+      "source_location": "L48",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp_create",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp_findbyid",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp_findbyemail",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "clienteapp_clienteapp_update",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ClienteApp.js",
+      "source_location": "L48",
+      "weight": 1.0
+    },
+    {
+      "source": "pontoregistro_pontoregistro_create",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "pontoregistro_pontoregistro_findbyid",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "pontoregistro_pontoregistro_getbyprofissional",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "pontoregistro_pontoregistro_getultimoponto",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PontoRegistro.js",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento_create",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento_findbyid",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento_getbycliente",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L65",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento_getbysalao",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento_aprovar",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L100",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoagendamento_pedidoagendamento_rejeitar",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoAgendamento.js",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja_create",
+      "target": "basemodel_basemodel_withtransaction",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja_findbyid",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja_findbyid",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja_getbycliente",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L71",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja_getbysalao",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "pedidoloja_pedidoloja_atualizarstatus",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/PedidoLoja.js",
+      "source_location": "L116",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente_create",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente_findbyid",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente_getbycliente",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente_getsaldo",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente_getall",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L68",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente_getallwithsaldo",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "creditocliente_creditocliente_delete",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/CreditoCliente.js",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
+      "source": "clientehistorico_clientehistorico_create",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "clientehistorico_clientehistorico_getbycliente",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "clientehistorico_clientehistorico_getresumo",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "clientehistorico_clientehistorico_getresumo",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ClienteHistorico.js",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaopaga_comissaopaga_create",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaopaga_comissaopaga_findbyid",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaopaga_comissaopaga_getall",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaopaga_comissaopaga_gettotalpago",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaopaga_comissaopaga_delete",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ComissaoPaga.js",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaoestorno_comissaoestorno_create",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaoestorno_comissaoestorno_findbyid",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaoestorno_comissaoestorno_getall",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaoestorno_comissaoestorno_gettotalestornado",
+      "target": "database_queryone",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "comissaoestorno_comissaoestorno_delete",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/models/ComissaoEstorno.js",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
       "source": "cliente_resolvercliente",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6821,7 +7743,7 @@
     },
     {
       "source": "cliente_resolvercliente",
-      "target": "creditocliente_creditocliente_getall",
+      "target": "comissaoestorno_comissaoestorno_getall",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6831,7 +7753,7 @@
     },
     {
       "source": "cliente_resolveroucriarcliente",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6841,7 +7763,7 @@
     },
     {
       "source": "cliente_resolveroucriarcliente",
-      "target": "creditocliente_creditocliente_getall",
+      "target": "comissaoestorno_comissaoestorno_getall",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6851,7 +7773,7 @@
     },
     {
       "source": "cliente_resolveroucriarcliente",
-      "target": "pedidoloja_pedidoloja_create",
+      "target": "comissaoestorno_comissaoestorno_create",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6861,7 +7783,7 @@
     },
     {
       "source": "loja_resolveroucriarcliente",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6871,7 +7793,7 @@
     },
     {
       "source": "loja_resolveroucriarcliente",
-      "target": "creditocliente_creditocliente_getall",
+      "target": "comissaoestorno_comissaoestorno_getall",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6881,7 +7803,7 @@
     },
     {
       "source": "loja_resolveroucriarcliente",
-      "target": "pedidoloja_pedidoloja_create",
+      "target": "comissaoestorno_comissaoestorno_create",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6891,7 +7813,7 @@
     },
     {
       "source": "pedidos_resolveroucriarcliente",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6901,7 +7823,7 @@
     },
     {
       "source": "pedidos_resolveroucriarcliente",
-      "target": "creditocliente_creditocliente_getall",
+      "target": "comissaoestorno_comissaoestorno_getall",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6911,7 +7833,7 @@
     },
     {
       "source": "pedidos_resolveroucriarcliente",
-      "target": "pedidoloja_pedidoloja_create",
+      "target": "comissaoestorno_comissaoestorno_create",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6931,7 +7853,7 @@
     },
     {
       "source": "createadmin_createadmin",
-      "target": "usuario_usuario_findbyemail",
+      "target": "clienteapp_clienteapp_findbyemail",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -6941,7 +7863,17 @@
     },
     {
       "source": "createadmin_createadmin",
-      "target": "pedidoloja_pedidoloja_create",
+      "target": "salao_salao_findfirst",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/scripts/createAdmin.js",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "createadmin_createadmin",
+      "target": "comissaoestorno_comissaoestorno_create",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7231,7 +8163,7 @@
     },
     {
       "source": "produtoservice_produtoservice_buscarporid",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7241,22 +8173,22 @@
     },
     {
       "source": "produtoservice_produtoservice_criar",
-      "target": "pedidoloja_pedidoloja_create",
+      "target": "comissaoestorno_comissaoestorno_create",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L59",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
       "source": "produtoservice_produtoservice_atualizar",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L84",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -7266,17 +8198,17 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L92",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
       "source": "produtoservice_produtoservice_atualizarestoque",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L111",
+      "source_location": "L113",
       "weight": 1.0
     },
     {
@@ -7286,7 +8218,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L124",
+      "source_location": "L126",
       "weight": 1.0
     },
     {
@@ -7296,7 +8228,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L143",
+      "source_location": "L145",
       "weight": 1.0
     },
     {
@@ -7306,7 +8238,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/services/ProdutoService.js",
-      "source_location": "L168",
+      "source_location": "L174",
       "weight": 1.0
     },
     {
@@ -7321,7 +8253,7 @@
     },
     {
       "source": "profissionalservice_profissionalservice_buscarporid",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7331,7 +8263,7 @@
     },
     {
       "source": "profissionalservice_profissionalservice_criar",
-      "target": "pedidoloja_pedidoloja_create",
+      "target": "comissaoestorno_comissaoestorno_create",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7341,7 +8273,7 @@
     },
     {
       "source": "profissionalservice_profissionalservice_atualizar",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7361,7 +8293,7 @@
     },
     {
       "source": "profissionalservice_profissionalservice_deletar",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7401,7 +8333,7 @@
     },
     {
       "source": "servicoservice_servicoservice_buscarporid",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7411,7 +8343,7 @@
     },
     {
       "source": "servicoservice_servicoservice_criar",
-      "target": "pedidoloja_pedidoloja_create",
+      "target": "comissaoestorno_comissaoestorno_create",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7421,7 +8353,7 @@
     },
     {
       "source": "servicoservice_servicoservice_atualizar",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7441,7 +8373,7 @@
     },
     {
       "source": "servicoservice_servicoservice_deletar",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7580,46 +8512,6 @@
       "weight": 1.0
     },
     {
-      "source": "bootstrapservice_bootstrapservice_ensuredefaultadmin",
-      "target": "database_queryone",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L26",
-      "weight": 1.0
-    },
-    {
-      "source": "bootstrapservice_bootstrapservice_ensuredefaultadmin",
-      "target": "database_queryrun",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L31",
-      "weight": 1.0
-    },
-    {
-      "source": "bootstrapservice_bootstrapservice_ensuredefaultadmin",
-      "target": "basemodel_basemodel_count",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L39",
-      "weight": 1.0
-    },
-    {
-      "source": "bootstrapservice_bootstrapservice_ensuredefaultadmin",
-      "target": "pedidoloja_pedidoloja_create",
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/services/bootstrapService.js",
-      "source_location": "L51",
-      "weight": 1.0
-    },
-    {
       "source": "securityinitservice_securityinitservice_createsecuritytables",
       "target": "database_query",
       "relation": "calls",
@@ -7641,7 +8533,7 @@
     },
     {
       "source": "websocketservice_websocketservice_removeclient",
-      "target": "creditocliente_creditocliente_delete",
+      "target": "comissaoestorno_comissaoestorno_delete",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7661,7 +8553,7 @@
     },
     {
       "source": "clienteservice_clienteservice_buscarporid",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7671,7 +8563,7 @@
     },
     {
       "source": "clienteservice_clienteservice_criar",
-      "target": "pedidoloja_pedidoloja_create",
+      "target": "comissaoestorno_comissaoestorno_create",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7681,7 +8573,7 @@
     },
     {
       "source": "clienteservice_clienteservice_atualizar",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7701,7 +8593,7 @@
     },
     {
       "source": "clienteservice_clienteservice_deletar",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7721,7 +8613,7 @@
     },
     {
       "source": "clienteservice_clienteservice_adicionarcredito",
-      "target": "pontoregistro_pontoregistro_findbyid",
+      "target": "comissaoestorno_comissaoestorno_findbyid",
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
@@ -7967,6 +8859,26 @@
       "confidence_score": 0.8,
       "source_file": "src/utils/helpers.js",
       "source_location": "L129",
+      "weight": 1.0
+    },
+    {
+      "source": "integration_smoke_test_cleanupsmokedata",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L93",
+      "weight": 1.0
+    },
+    {
+      "source": "integration_smoke_test_enableprofissionalapplogin",
+      "target": "database_query",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/__tests__/integration.smoke.test.js",
+      "source_location": "L159",
       "weight": 1.0
     }
   ],
