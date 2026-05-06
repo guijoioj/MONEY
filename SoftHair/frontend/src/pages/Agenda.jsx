@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { agendamentosAPI, clientesAPI, servicosAPI, profissionaisAPI, atendimentosAPI } from '../services/api';
 import { 
@@ -442,7 +442,11 @@ export default function Agenda() {
     },
   });
 
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (searchParams.get('new') === '1') { openModal(); setSearchParams({}); }
+  }, []);
 
   useEffect(() => {
     if (notificacao) {

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicosAPI, produtosAPI } from '../services/api';
 import {
@@ -291,6 +292,8 @@ function AbaProdutos() {
   const [categoria, setCategoria] = useState('');
   const [estoqueBaixo, setEstoqueBaixo] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [_sp] = useSearchParams();
+  useEffect(() => { if (_sp.get('new') === 'produto') setTimeout(() => setIsModalOpen(true), 100); }, []);
   const [editingProduto, setEditingProduto] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, produto: null });
   const [formData, setFormData] = useState({
@@ -601,7 +604,9 @@ function AbaProdutos() {
 // ─── Página Principal ─────────────────────────────────────────────────────────
 
 export default function ServicosEProdutos() {
-  const [aba, setAba] = useState('servicos');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [aba, setAba] = useState(() => searchParams.get('new') === 'produto' ? 'produtos' : 'servicos');
+  useEffect(() => { if (searchParams.get('new') === 'produto') setSearchParams({}); }, []);
 
   return (
     <div>

@@ -1,5 +1,6 @@
 // v2
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clientesAPI, vendasAPI, fechamentosAPI } from '../services/api';
 import { Search, Plus, Edit2, Trash2, X, Phone, Mail, Calendar, AlertCircle, User, Clock, Package, Scissors, DollarSign, Star, TrendingUp, ShoppingCart, ShoppingBag, Gift } from 'lucide-react';
@@ -13,6 +14,14 @@ export default function Clientes() {
   const [profileModal, setProfileModal] = useState({ open: false, cliente: null });
   const [comprasModal, setComprasModal] = useState({ open: false, cliente: null });
   const [formData, setFormData] = useState({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', observacoes: '' });
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      openModal();
+      setSearchParams({});
+    }
+  }, []);
 
   const { data: queryData, isLoading, isFetching } = useQuery({
     queryKey: ['clientes', search],

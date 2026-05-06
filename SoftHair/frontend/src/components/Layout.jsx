@@ -93,10 +93,18 @@ export default function Layout() {
   const openLauncher = () => { setLauncherOpen(true); setLauncherQuery(''); setLauncherIdx(0); setTimeout(() => launcherInputRef.current?.focus(), 50); };
   const closeLauncher = () => { setLauncherOpen(false); setLauncherQuery(''); };
 
-  // Cmd+K / Ctrl+K global
+  // Keybind configurável
+  const getLauncherBind = () => {
+    try { return JSON.parse(localStorage.getItem('launcher_bind') || '{"key":"k","meta":true,"ctrl":false}'); } catch { return { key: 'k', meta: true, ctrl: false }; }
+  };
+
   useEffect(() => {
     const handler = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); launcherOpen ? closeLauncher() : openLauncher(); }
+      const bind = getLauncherBind();
+      const metaOk = bind.meta ? (e.metaKey || e.ctrlKey) : true;
+      const ctrlOk = bind.ctrl ? e.ctrlKey : true;
+      const keyMatch = e.key.toLowerCase() === bind.key.toLowerCase();
+      if (keyMatch && metaOk && !e.shiftKey && !e.altKey) { e.preventDefault(); launcherOpen ? closeLauncher() : openLauncher(); }
       if (e.key === 'Escape') closeLauncher();
     };
     document.addEventListener('keydown', handler);
@@ -206,9 +214,10 @@ export default function Layout() {
         const allCommands = [
           { section: 'Navegar', items: navItems.map(n => ({ ...n, type: 'nav', action: () => { navigate(n.to); closeLauncher(); } })) },
           { section: 'Ações Rápidas', items: [
-            { label: 'Novo Agendamento', icon: CalendarPlus, type: 'action', action: () => { navigate('/agenda'); closeLauncher(); } },
-            { label: 'Novo Cliente', icon: Users, type: 'action', action: () => { navigate('/clientes'); closeLauncher(); } },
-            { label: 'Nova Venda', icon: ShoppingCart, type: 'action', action: () => { navigate('/vendas'); closeLauncher(); } },
+            { label: 'Novo Agendamento', icon: CalendarPlus, type: 'action', action: () => { navigate('/agenda?new=1'); closeLauncher(); } },
+            { label: 'Novo Cliente', icon: Users, type: 'action', action: () => { navigate('/clientes?new=1'); closeLauncher(); } },
+            { label: 'Nova Venda', icon: ShoppingCart, type: 'action', action: () => { navigate('/vendas?new=1'); closeLauncher(); } },
+            { label: 'Novo Produto', icon: Package, type: 'action', action: () => { navigate('/servicos-e-produtos?new=produto'); closeLauncher(); } },
             { label: 'Sair', icon: LogOut, type: 'action', action: () => { closeLauncher(); handleLogout(); } },
           ]},
         ];

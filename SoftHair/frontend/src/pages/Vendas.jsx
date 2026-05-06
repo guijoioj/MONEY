@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { vendasAPI, clientesAPI, produtosAPI, servicosAPI, profissionaisAPI } from '../services/api';
 import { Plus, X, ShoppingCart, Trash2, Eye, Pencil } from 'lucide-react';
@@ -13,6 +14,8 @@ const FORMA_PAGAMENTO_LABEL = {
 export default function Vendas() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => { if (searchParams.get('new') === '1') { setIsModalOpen(true); setSearchParams({}); } }, []);
   const [viewVenda, setViewVenda] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [formData, setFormData] = useState({
