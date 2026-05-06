@@ -7,7 +7,7 @@ const { query } = require('../config/database');
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { profissional_id, mes, ano, meta_valor = 0, meta_atendimentos = 0 } = req.body;
-    const result = await query(
+    const rows = await query(
       `INSERT INTO metas_profissional (salao_id, profissional_id, mes, ano, meta_valor, meta_atendimentos)
        VALUES ($1, $2, $3, $4, $5, $6)
        ON CONFLICT (salao_id, profissional_id, mes, ano)
@@ -15,7 +15,7 @@ router.post('/', authMiddleware, async (req, res) => {
        RETURNING *`,
       [req.salaoId, profissional_id, mes, ano, meta_valor, meta_atendimentos]
     );
-    res.json({ success: true, data: result.rows[0] });
+    res.json({ success: true, data: rows[0] });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -27,7 +27,7 @@ router.get('/progresso', authMiddleware, async (req, res) => {
     const mes = parseInt(req.query.mes) || new Date().getMonth() + 1;
     const ano = parseInt(req.query.ano) || new Date().getFullYear();
 
-    const result = await query(
+    const rows = await query(
       `SELECT
          p.id, p.nome, p.foto,
          COALESCE(m.meta_valor, 0) as meta_valor,
@@ -56,7 +56,7 @@ router.get('/progresso', authMiddleware, async (req, res) => {
        ORDER BY p.nome`,
       [req.salaoId, mes, ano]
     );
-    res.json({ success: true, data: result.rows });
+    res.json({ success: true, data: rows });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
