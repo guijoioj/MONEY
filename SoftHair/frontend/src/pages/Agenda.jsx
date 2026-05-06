@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { agendamentosAPI, clientesAPI, servicosAPI, profissionaisAPI, atendimentosAPI } from '../services/api';
 import { 
   ChevronLeft, ChevronRight, Plus, X, Clock, User, Phone, 
@@ -312,6 +313,16 @@ function ServicoSearchSelect({ value, onChange, selectedServico, disabled }) {
 export default function Agenda() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Atualizar agenda em tempo real via WebSocket
+  useWebSocket('admin', 'salao', (msg) => {
+    if (msg.type === 'AGENDAMENTO_ATUALIZADO' || msg.type === 'NOVO_PEDIDO_AGENDAMENTO' ||
+        msg.tipo === 'agendamento_atualizado' || msg.tipo === 'novo_pedido_agendamento') {
+      queryClient.invalidateQueries(['agendamentos-calendario']);
+      queryClient.invalidateQueries(['agendamentos-dashboard']);
+      queryClient.invalidateQueries(['solicitacoes']);
+    }
+  });
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedProfissionais, setSelectedProfissionais] = useState([]);
