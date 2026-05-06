@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
+const { query } = require('../config/database');
 
 const HEARTBEAT_INTERVAL = 30000; // 30s
 const CLIENT_TIMEOUT = 45000; // 45s sem pong = desconectar
@@ -85,6 +86,9 @@ class WebSocketService {
       case 'ping':
         ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
         break;
+      case 'CHAT_MESSAGE':
+        this.handleChatMessage(ws, data);
+        break;
       default:
         ws.send(JSON.stringify({ type: 'error', message: `Tipo desconhecido: ${data.type}` }));
     }
@@ -142,6 +146,48 @@ class WebSocketService {
     const client = this.clients.get(ws);
     if (client) {
       client.subscriptions = client.subscriptions.filter(s => s !== data.channel);
+    }
+  }
+
+  async handleChatMessage(ws, data) {
+    const sender = this.clients.get(ws);
+    if (!sender) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Autenticação necessária' }));
+      return;
+    }
+    const { salaoId, remetenteId, remetenteTipo, destinatarioId, destinatarioTipo, mensagem } = data;
+    if (!mensagem || !remetenteId || !remetenteTipo) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Campos obrigatórios: remetenteId, remetenteTipo, mensagem' }));
+      return;
+    }
+    try {
+      await query(
+        'INSERT INTO chat_mensagens (salao_id, remetente_id, remetente_tipo, destinatario_id, destinatario_tipo, mensagem, created_at) VALUES ($1,$2,$3,$4,$5,$6,NOW())',
+        [salaoId || sender.salaoId, remetenteId, remetenteTipo, destinatarioId || null, destinatarioTipo || null, mensagem]
+      );
+    } catch (err) {
+      console.error('[WS] Erro ao salvar chat_mensagem:', err.message);
+    }
+    const payload = JSON.stringify({
+      type: 'CHAT_MESSAGE',
+      data: { salaoId: salaoId || sender.salaoId, remetenteId, remetenteTipo, destinatarioId, destinatarioTipo, mensagem, createdAt: new Date().toISOString() }
+    });
+    // Enviar para destinatário específico (se informado) ou broadcast do salão
+    let delivered = false;
+    if (destinatarioId) {
+      this.clients.forEach((client, clientWs) => {
+        if (client.userId === destinatarioId && clientWs.readyState === WebSocket.OPEN) {
+          clientWs.send(payload);
+          delivered = true;
+        }
+      });
+    }
+    if (!delivered) {
+      this.clients.forEach((client, clientWs) => {
+        if (client.salaoId === (salaoId || sender.salaoId) && clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+          clientWs.send(payload);
+        }
+      });
     }
   }
 
