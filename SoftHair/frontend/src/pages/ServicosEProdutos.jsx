@@ -606,7 +606,9 @@ function AbaProdutos() {
 export default function ServicosEProdutos() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [aba, setAba] = useState(() => searchParams.get('new') === 'produto' ? 'produtos' : 'servicos');
-  useEffect(() => { if (searchParams.get('new') === 'produto') setSearchParams({}); }, []);
+  useEffect(() => {
+    if (searchParams.get('new') === 'produto' || searchParams.get('new') === 'servico') setSearchParams({});
+  }, []);
 
   return (
     <div>

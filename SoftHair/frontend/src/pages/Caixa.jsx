@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DollarSign, RefreshCw } from 'lucide-react';
 import api from '../services/api';
 
@@ -20,6 +21,14 @@ export default function Caixa() {
   const [obsFecha, setObsFecha] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [erro, setErro] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get('action') === 'abrir') {
+      setSearchParams({});
+      // scroll to form after load
+      setTimeout(() => document.getElementById('form-abrir')?.scrollIntoView({ behavior: 'smooth' }), 500);
+    }
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -145,7 +154,7 @@ export default function Caixa() {
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div id="form-abrir" className="space-y-3">
             <h3 className="font-medium text-gray-700">Abrir Caixa</h3>
             <div className="flex gap-3 flex-wrap">
               <input
