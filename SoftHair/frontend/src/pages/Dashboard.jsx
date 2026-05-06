@@ -56,7 +56,6 @@ export default function Dashboard() {
   const [clientes, setClientes] = useState([]);
   const [servicos, setServicos] = useState([]);
   const [aniversariantes, setAniversariantes] = useState([]);
-  const [aniversariantes, setAniversariantes] = useState([]);
 
   const loadDashboardData = useCallback(async () => {
     try {
