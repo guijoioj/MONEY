@@ -15,10 +15,14 @@ import Atendimentos from './pages/Atendimentos';
 import Vendas from './pages/Vendas';
 import Fechamento from './pages/Fechamento';
 import Backup from './pages/Backup';
+import Despesas from './pages/Despesas';
+import Financeiro from './pages/Financeiro';
 import Customizacao from './pages/Customizacao';
 import Configuracoes from './pages/Configuracoes';
 import Notificacoes from './pages/Notificacoes';
 import Solicitacoes from './pages/Solicitacoes';
+import Caixa from './pages/Caixa';
+import Metas from './pages/Metas';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -79,9 +83,13 @@ export default function App() {
         <Route path="vendas" element={<Vendas />} />
         <Route path="fechamento" element={<Fechamento />} />
         <Route path="backup" element={<Backup />} />
+        <Route path="despesas" element={<Despesas />} />
+        <Route path="financeiro" element={<Financeiro />} />
         <Route path="customizacao" element={<Customizacao />} />
         <Route path="configuracoes" element={<Configuracoes />} />
         <Route path="notificacoes" element={<Notificacoes />} />
+        <Route path="caixa" element={<Caixa />} />
+        <Route path="metas" element={<Metas />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
