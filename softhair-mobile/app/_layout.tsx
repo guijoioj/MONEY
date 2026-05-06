@@ -8,6 +8,15 @@ import { View, Text, ScrollView } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 import { wsManager } from '../services/websocket';
 import { Loading } from '../components/ui/Loading';
+import * as Notifications from 'expo-notifications';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
