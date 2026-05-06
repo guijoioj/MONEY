@@ -89,6 +89,24 @@ class WebSocketManager {
     };
   }
 
+  /** Escutar mensagens brutas (qualquer tipo, incluindo CHAT_MESSAGE) */
+  onMessage(callback: (msg: any) => void): () => void {
+    const wrapper: WSListener = (data) => callback(data);
+    this.listeners.push(wrapper);
+    return () => {
+      this.listeners = this.listeners.filter((l) => l !== wrapper);
+    };
+  }
+
+  /** Enviar mensagem via WebSocket */
+  send(payload: object): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(payload));
+    } else {
+      console.warn('[WS] Tentativa de envio sem conexão ativa');
+    }
+  }
+
   isConnected() {
     return this.ws?.readyState === WebSocket.OPEN;
   }
