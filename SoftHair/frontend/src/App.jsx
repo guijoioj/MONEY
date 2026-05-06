@@ -23,6 +23,7 @@ import Notificacoes from './pages/Notificacoes';
 import Solicitacoes from './pages/Solicitacoes';
 import Caixa from './pages/Caixa';
 import Metas from './pages/Metas';
+import Relatorios from './pages/Relatorios';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -90,6 +91,7 @@ export default function App() {
         <Route path="notificacoes" element={<Notificacoes />} />
         <Route path="caixa" element={<Caixa />} />
         <Route path="metas" element={<Metas />} />
+        <Route path="relatorios" element={<Relatorios />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />

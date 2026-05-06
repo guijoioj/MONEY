@@ -128,6 +128,7 @@ export default function Layout() {
     { to: '/despesas', icon: DollarSign, label: 'Despesas' },
     { to: '/caixa', icon: DollarSign, label: 'Caixa' },
     { to: '/metas', icon: Target, label: 'Metas' },
+    { to: '/relatorios', icon: BarChart3, label: 'Relatórios' },
     { to: '/backup', icon: Database, label: 'Backup' },
     { to: '/notificacoes', icon: Bell, label: 'Notificações', badge: notifCount },
     { to: '/customizacao', icon: Palette, label: 'Personalizar' },
@@ -238,6 +239,11 @@ export default function Layout() {
             { label: 'Nova Despesa', icon: DollarSign, type: 'action', action: () => { navigate('/despesas?new=1'); closeLauncher(); } },
             { label: 'Ver Financeiro', icon: BarChart3, type: 'action', action: () => { navigate('/financeiro'); closeLauncher(); } },
             { label: 'Ver Metas', icon: Target, type: 'action', action: () => { navigate('/metas'); closeLauncher(); } },
+          ]},
+          { section: 'Relatórios', items: [
+            { label: 'Serviços Mais Vendidos', icon: BarChart3, type: 'action', action: () => { navigate('/relatorios?tab=servicos'); closeLauncher(); } },
+            { label: 'Clientes Inativos', icon: Users, type: 'action', action: () => { navigate('/relatorios?tab=inativos'); closeLauncher(); } },
+            { label: 'Horários de Pico', icon: Clock, type: 'action', action: () => { navigate('/relatorios?tab=pico'); closeLauncher(); } },
           ]},
           { section: 'Sistema', items: [
             { label: 'Sair', icon: LogOut, type: 'action', action: () => { closeLauncher(); handleLogout(); } },
