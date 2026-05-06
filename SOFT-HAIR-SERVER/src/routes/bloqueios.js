@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { query } = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 
 // GET /?data=YYYY-MM-DD
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const { data, profissionalId } = req.query;
     let sql = `SELECT b.*, p.nome as profissional_nome
@@ -34,7 +34,7 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // POST /
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const { profissionalId, dataInicio, dataFim, motivo, diaInteiro, salaoId } = req.body;
 
@@ -57,7 +57,7 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 // DELETE /:id
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await query('DELETE FROM bloqueios_horario WHERE id = $1 RETURNING id', [id]);
