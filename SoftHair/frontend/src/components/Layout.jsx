@@ -41,8 +41,6 @@ export default function Layout() {
   const [launcherQuery, setLauncherQuery] = useState('');
   const [launcherIdx, setLauncherIdx] = useState(0);
   const launcherInputRef = useRef(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiResult, setAiResult] = useState(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme_config');
@@ -92,38 +90,8 @@ export default function Layout() {
   const handleLogout = () => { logout(); navigate('/login'); };
   const dismissPopup = (id) => setPopups((prev) => prev.filter((p) => p.id !== id));
 
-  const openLauncher = () => { setLauncherOpen(true); setLauncherQuery(''); setLauncherIdx(0); setAiResult(null); setTimeout(() => launcherInputRef.current?.focus(), 50); };
-  const closeLauncher = () => { setLauncherOpen(false); setLauncherQuery(''); setAiResult(null); };
-
-  const runAiCommand = async (cmd) => {
-    setAiLoading(true); setAiResult(null);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`https://money-f5rz.onrender.com/api/ai/command`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ command: cmd }),
-      });
-      const data = await res.json();
-      if (!data.success) { setAiResult({ error: data.error }); return; }
-      setAiResult(data);
-      // Criado diretamente — fechar após 1.5s e navegar para agenda
-      if (data.action === 'created') {
-        setTimeout(() => { closeLauncher(); navigate('/agenda'); }, 1500);
-        return;
-      }
-      // Dados incompletos — abrir modal pré-preenchido
-      if (data.action === 'create_agendamento' && data.confidence > 0.5) {
-        const d = data.data || {};
-        const params = new URLSearchParams({ new: '1' });
-        if (d.professionalId) params.set('profId', d.professionalId);
-        if (d.serviceId) params.set('servId', d.serviceId);
-        if (d.dateTime) params.set('dt', d.dateTime);
-        if (d.clienteName) params.set('clienteName', d.clienteName);
-        setTimeout(() => { closeLauncher(); navigate(`/agenda?${params.toString()}`); }, 800);
-      }
-    } catch (e) { setAiResult({ error: 'Erro de conexão com o servidor' }); }
-    finally { setAiLoading(false); }
-  };
+  const openLauncher = () => { setLauncherOpen(true); setLauncherQuery(''); setLauncherIdx(0); setTimeout(() => launcherInputRef.current?.focus(), 50); };
+  const closeLauncher = () => { setLauncherOpen(false); setLauncherQuery(''); };
 
   // Keybind configurável
   const getLauncherBind = () => {
@@ -258,14 +226,10 @@ export default function Layout() {
         const flat = filtered.flatMap(s => s.items);
         const safeIdx = Math.min(launcherIdx, flat.length - 1);
 
-        const showAiOption = launcherQuery.length > 4 && filtered.length === 0;
         const handleKey = (e) => {
           if (e.key === 'ArrowDown') { e.preventDefault(); setLauncherIdx(i => Math.min(i + 1, flat.length - 1)); }
           if (e.key === 'ArrowUp') { e.preventDefault(); setLauncherIdx(i => Math.max(i - 1, 0)); }
-          if (e.key === 'Enter') {
-            if (showAiOption || (e.metaKey || e.ctrlKey)) { runAiCommand(launcherQuery); return; }
-            if (flat[safeIdx]) flat[safeIdx].action();
-          }
+          if (e.key === 'Enter' && flat[safeIdx]) { flat[safeIdx].action(); }
           if (e.key === 'Escape') closeLauncher();
         };
 
@@ -287,46 +251,10 @@ export default function Layout() {
                   spellCheck={false} autoComplete="off" />
                 <kbd className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)' }}>esc</kbd>
               </div>
-              {/* AI result */}
-              {aiResult && (
-                <div className="px-4 py-3 text-sm" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: aiResult.error ? 'rgba(220,38,38,0.08)' : 'rgba(94,106,210,0.08)' }}>
-                  {aiResult.error ? (
-                    <p style={{ color: 'rgba(252,165,165,0.9)' }}>⚠ {aiResult.error}</p>
-                  ) : (
-                    <div>
-                      <p style={{ color: 'rgba(167,179,255,0.9)', fontWeight: 500 }}>✦ {aiResult.message}</p>
-                      {aiResult.data?.clienteName && <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Cliente: {aiResult.data.clienteName} · Prof: {aiResult.data.professionalName} · {aiResult.data.dateTime}</p>}
-                    </div>
-                  )}
-                </div>
-              )}
               {/* Results */}
               <div className="max-h-[340px] overflow-y-auto py-2">
-                {aiLoading ? (
-                  <div className="flex items-center justify-center gap-2 py-8" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                    <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'rgba(94,106,210,0.6)', borderTopColor: 'transparent' }} />
-                    <span className="text-sm">IA processando…</span>
-                  </div>
-                ) : showAiOption ? (
-                  <div>
-                    <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>Assistente IA</p>
-                    <button onClick={() => runAiCommand(launcherQuery)}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all"
-                      style={{ background: 'rgba(94,106,210,0.15)', borderLeft: '2px solid var(--color-primary)' }}>
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(94,106,210,0.3)' }}>
-                        <span style={{ fontSize: 14 }}>✦</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.9)' }}>Executar com IA: "{launcherQuery}"</p>
-                        <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Enter · Interpreta comandos em linguagem natural</p>
-                      </div>
-                    </button>
-                  </div>
-                ) : (
-                  filtered.length === 0 ? <p className="text-center py-8 text-sm" style={{ color: 'rgba(255,255,255,0.25)' }}>Nenhum resultado</p> : null
-                )}
-                {!showAiOption && !aiLoading && (
-                  filtered.map(section => (
+                {filtered.length === 0 && <p className="text-center py-8 text-sm" style={{ color: 'rgba(255,255,255,0.25)' }}>Nenhum resultado</p>}
+                {filtered.map(section => (
                     <div key={section.section}>
                       <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>{section.section}</p>
                       {section.items.map(item => {
@@ -350,15 +278,13 @@ export default function Layout() {
                         );
                       })}
                     </div>
-                  ))
-                )}
+                  ))}
               </div>
               {/* Footer */}
               <div className="px-4 py-2.5 flex items-center gap-3 text-[10px]" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)' }}>
                 <span><kbd className="font-mono">↑↓</kbd> navegar</span>
                 <span><kbd className="font-mono">↵</kbd> executar</span>
                 <span><kbd className="font-mono">esc</kbd> fechar</span>
-                <span className="ml-auto" style={{ color: 'rgba(94,106,210,0.5)' }}>✦ IA disponível</span>
               </div>
             </div>
           </div>
