@@ -516,7 +516,7 @@ async function runMigrations() {
       saldo_inicial DECIMAL(10,2) DEFAULT 0,
       saldo_final DECIMAL(10,2),
       observacoes TEXT,
-      aberto_por INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      aberto_por INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
       aberto_em TIMESTAMPTZ DEFAULT NOW(),
       fechado_em TIMESTAMPTZ
     )
