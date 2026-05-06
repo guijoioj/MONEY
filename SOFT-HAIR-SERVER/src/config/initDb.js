@@ -536,6 +536,22 @@ async function runMigrations() {
     )
   `);
 
+  // Programa de pontos/fidelidade
+  await query(`
+    CREATE TABLE IF NOT EXISTS pontos_fidelidade (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      cliente_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+      pontos INTEGER NOT NULL DEFAULT 0,
+      tipo VARCHAR(50) NOT NULL,
+      descricao TEXT,
+      referencia_id INTEGER,
+      referencia_tipo VARCHAR(50),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_pontos_cliente ON pontos_fidelidade(cliente_id, salao_id);
+  `);
+
   console.log('✅ Migrations aplicadas');
 }
 

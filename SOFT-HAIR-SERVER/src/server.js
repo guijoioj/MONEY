@@ -120,6 +120,8 @@ app.use('/api/ai', require('./routes/ai'));
 app.use('/api/bloqueios', require('./routes/bloqueios'));
 app.use('/api/caixa', require('./routes/caixa'));
 app.use('/api/metas', require('./routes/metas'));
+app.use('/api/relatorios', require('./routes/relatorios'));
+app.use('/api/fidelidade', require('./routes/fidelidade'));
 
 // ─── 404 Handler ───
 app.use((req, res) => {
