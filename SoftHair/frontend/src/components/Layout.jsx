@@ -106,15 +106,20 @@ export default function Layout() {
       const data = await res.json();
       if (!data.success) { setAiResult({ error: data.error }); return; }
       setAiResult(data);
-      if (data.action === 'create_agendamento' && data.confidence > 0.6) {
+      // Criado diretamente — fechar após 1.5s e navegar para agenda
+      if (data.action === 'created') {
+        setTimeout(() => { closeLauncher(); navigate('/agenda'); }, 1500);
+        return;
+      }
+      // Dados incompletos — abrir modal pré-preenchido
+      if (data.action === 'create_agendamento' && data.confidence > 0.5) {
         const d = data.data || {};
         const params = new URLSearchParams({ new: '1' });
         if (d.professionalId) params.set('profId', d.professionalId);
         if (d.serviceId) params.set('servId', d.serviceId);
         if (d.dateTime) params.set('dt', d.dateTime);
         if (d.clienteName) params.set('clienteName', d.clienteName);
-        closeLauncher();
-        navigate(`/agenda?${params.toString()}`);
+        setTimeout(() => { closeLauncher(); navigate(`/agenda?${params.toString()}`); }, 800);
       }
     } catch (e) { setAiResult({ error: 'Erro de conexão com o servidor' }); }
     finally { setAiLoading(false); }
