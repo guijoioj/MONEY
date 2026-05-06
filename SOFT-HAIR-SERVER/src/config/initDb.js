@@ -387,6 +387,29 @@ async function createTables() {
       lida BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS bloqueios_horario (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE CASCADE,
+      data_inicio TIMESTAMPTZ NOT NULL,
+      data_fim TIMESTAMPTZ NOT NULL,
+      motivo TEXT DEFAULT 'Bloqueado',
+      dia_inteiro BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS despesas (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      descricao TEXT NOT NULL,
+      valor DECIMAL(10,2) NOT NULL,
+      categoria VARCHAR(100) DEFAULT 'Outros',
+      data DATE DEFAULT CURRENT_DATE,
+      recorrente BOOLEAN DEFAULT FALSE,
+      observacoes TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
   `;
 
   await query(sql);
@@ -482,7 +505,37 @@ async function runMigrations() {
     ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS app_ativo BOOLEAN DEFAULT false;
     ALTER TABLE clientes ADD COLUMN IF NOT EXISTS push_token TEXT;
     ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS push_token TEXT;
+    ALTER TABLE servicos ADD COLUMN IF NOT EXISTS cor VARCHAR(7) DEFAULT '#6366f1';
   `);
+
+  // Caixa diário
+  await query(`
+    CREATE TABLE IF NOT EXISTS caixa (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      saldo_inicial DECIMAL(10,2) DEFAULT 0,
+      saldo_final DECIMAL(10,2),
+      observacoes TEXT,
+      aberto_por INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      aberto_em TIMESTAMPTZ DEFAULT NOW(),
+      fechado_em TIMESTAMPTZ
+    )
+  `);
+
+  // Metas por profissional
+  await query(`
+    CREATE TABLE IF NOT EXISTS metas_profissional (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE CASCADE,
+      mes INTEGER NOT NULL,
+      ano INTEGER NOT NULL,
+      meta_valor DECIMAL(10,2) DEFAULT 0,
+      meta_atendimentos INTEGER DEFAULT 0,
+      UNIQUE(salao_id, profissional_id, mes, ano)
+    )
+  `);
+
   console.log('✅ Migrations aplicadas');
 }
 

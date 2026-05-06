@@ -113,8 +113,13 @@ app.use('/api/notificacoes', require('./routes/notificacoes'));
 app.use('/api/configuracoes', require('./routes/configuracoes'));
 app.use('/api/historico', require('./routes/historico'));
 app.use('/api/backup', require('./routes/backup'));
+app.use('/api/despesas', require('./routes/despesas'));
+app.use('/api/financeiro', require('./routes/financeiro'));
 app.use('/api/sync', require('./routes/sync'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/bloqueios', require('./routes/bloqueios'));
+app.use('/api/caixa', require('./routes/caixa'));
+app.use('/api/metas', require('./routes/metas'));
 
 // ─── 404 Handler ───
 app.use((req, res) => {

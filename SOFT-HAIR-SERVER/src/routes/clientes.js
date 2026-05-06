@@ -178,4 +178,50 @@ router.put('/:id/credito', authMiddleware, [
   }
 });
 
+// Clientes inadimplentes (vendas pendentes/abertas)
+router.get('/inadimplentes', authMiddleware, async (req, res) => {
+  try {
+    const { query } = require('../config/database');
+    const r = await query(`
+      SELECT c.id, c.nome, c.telefone, c.email,
+        COALESCE(SUM(v.valor_final),0) as total_devido,
+        COUNT(v.id) as qtd_vendas_abertas,
+        MAX(v.created_at) as ultima_venda
+      FROM clientes c
+      JOIN vendas v ON v.cliente_id = c.id
+      WHERE c.salao_id = $1
+        AND v.status IN ('pendente','aberto')
+        AND v.salao_id = $1
+      GROUP BY c.id, c.nome, c.telefone, c.email
+      HAVING SUM(v.valor_final) > 0
+      ORDER BY total_devido DESC
+    `, [req.salaoId]);
+    res.json({ success: true, data: r.rows });
+  } catch(e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+// Aniversariantes da semana
+router.get('/aniversariantes', authMiddleware, async (req, res) => {
+  try {
+    const { query } = require('../config/database');
+    const r = await query(`
+      SELECT id, nome, telefone, email, data_nascimento,
+        EXTRACT(DAY FROM data_nascimento) as dia,
+        EXTRACT(MONTH FROM data_nascimento) as mes
+      FROM clientes
+      WHERE salao_id = $1
+        AND data_nascimento IS NOT NULL
+        AND ativo = true
+        AND (
+          EXTRACT(MONTH FROM data_nascimento) = EXTRACT(MONTH FROM CURRENT_DATE)
+          AND EXTRACT(DAY FROM data_nascimento) BETWEEN
+            EXTRACT(DAY FROM CURRENT_DATE) AND
+            EXTRACT(DAY FROM CURRENT_DATE + INTERVAL '7 days')
+        )
+      ORDER BY EXTRACT(DAY FROM data_nascimento)
+    `, [req.salaoId]);
+    res.json({ success: true, data: r.rows });
+  } catch(e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
 module.exports = router;
