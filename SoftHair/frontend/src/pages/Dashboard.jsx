@@ -57,9 +57,9 @@ export default function Dashboard() {
   const [servicos, setServicos] = useState([]);
   const [aniversariantes, setAniversariantes] = useState([]);
 
-  const loadDashboardData = useCallback(async () => {
+  const loadDashboardData = useCallback(async (showSpinner = true) => {
     try {
-      setLoading(true);
+      if (showSpinner) setLoading(true);
       
       const [clientesRes, servicosRes, produtosRes, agendamentosRes, atendimentosRes, profissionaisRes, aniversariantesRes] = await Promise.all([
         api.get('/clientes'),
@@ -139,7 +139,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const handleFocus = () => {
-      loadDashboardData();
+      loadDashboardData(false);
     };
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);

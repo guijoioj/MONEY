@@ -22,6 +22,8 @@ import {
   Search,
   Plus,
   CalendarPlus,
+  DollarSign,
+  Target,
 } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../services/api';
@@ -122,6 +124,10 @@ export default function Layout() {
     { to: '/atendimentos', icon: ClipboardCheck, label: 'Atendimentos' },
     { to: '/vendas', icon: ShoppingCart, label: 'Vendas' },
     { to: '/fechamento', icon: ClipboardCheck, label: 'Fechamento' },
+    { to: '/financeiro', icon: BarChart3, label: 'Financeiro' },
+    { to: '/despesas', icon: DollarSign, label: 'Despesas' },
+    { to: '/caixa', icon: DollarSign, label: 'Caixa' },
+    { to: '/metas', icon: Target, label: 'Metas' },
     { to: '/backup', icon: Database, label: 'Backup' },
     { to: '/notificacoes', icon: Bell, label: 'Notificações', badge: notifCount },
     { to: '/customizacao', icon: Palette, label: 'Personalizar' },
