@@ -111,12 +111,23 @@ router.post('/produtos-utilizados', [
     if (!errors.isEmpty())
       return res.status(400).json({ success: false, errors: errors.array() });
 
-    const { marca, coloracao, quantidade, cliente_id, cliente_nome, observacoes, agendamento_id } = req.body;
+    const { marca, coloracao, quantidade, cliente_id, cliente_nome, observacoes, agendamento_id, produto_id } = req.body;
+    const qtd = quantidade || 1;
+
     const result = await pool.query(
-      `INSERT INTO produtos_utilizados (profissional_id, salao_id, cliente_id, cliente_nome, marca, coloracao, quantidade, observacoes, agendamento_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [req.profissionalId, req.salaoId, cliente_id || null, cliente_nome || null, marca, coloracao || null, quantidade || 1, observacoes || null, agendamento_id || null]
+      `INSERT INTO produtos_utilizados (profissional_id, salao_id, cliente_id, cliente_nome, marca, coloracao, quantidade, observacoes, agendamento_id, produto_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [req.profissionalId, req.salaoId, cliente_id || null, cliente_nome || null, marca, coloracao || null, qtd, observacoes || null, agendamento_id || null, produto_id || null]
     );
+
+    // Baixa automática no estoque se produto_id informado
+    if (produto_id) {
+      await pool.query(
+        'UPDATE produtos SET quantidade_estoque = GREATEST(0, quantidade_estoque - $1) WHERE id = $2 AND salao_id = $3',
+        [qtd, produto_id, req.salaoId]
+      );
+    }
+
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Erro ao registrar produto utilizado:', error);

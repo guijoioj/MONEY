@@ -360,6 +360,33 @@ async function createTables() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       UNIQUE (salao_id, chave)
     );
+
+    CREATE TABLE IF NOT EXISTS produtos_utilizados (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL,
+      agendamento_id INTEGER,
+      produto_id INTEGER REFERENCES produtos(id) ON DELETE SET NULL,
+      cliente_id INTEGER,
+      cliente_nome VARCHAR(255),
+      marca VARCHAR(255),
+      coloracao VARCHAR(255),
+      quantidade DECIMAL DEFAULT 1,
+      observacoes TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS chat_mensagens (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      remetente_id INTEGER NOT NULL,
+      remetente_tipo VARCHAR(20) NOT NULL,
+      destinatario_id INTEGER,
+      destinatario_tipo VARCHAR(20),
+      mensagem TEXT NOT NULL,
+      lida BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
   `;
 
   await query(sql);
@@ -453,6 +480,8 @@ async function runMigrations() {
     ALTER TABLE clientes ADD COLUMN IF NOT EXISTS app_ativo BOOLEAN DEFAULT false;
     ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(255);
     ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS app_ativo BOOLEAN DEFAULT false;
+    ALTER TABLE clientes ADD COLUMN IF NOT EXISTS push_token TEXT;
+    ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS push_token TEXT;
   `);
   console.log('✅ Migrations aplicadas');
 }
