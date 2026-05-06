@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { pool } = require('../config/database');
+const { sendPush } = require('../services/pushService');
 
 const TIPOS_PONTO = ['entrada', 'saida', 'pausa', 'retorno_pausa', 'inicio_atendimento', 'fim_atendimento'];
 
@@ -238,6 +239,22 @@ router.post('/aviso-atraso', [
       [req.salaoId, ag.cliente_id, textoNotif]
     );
 
+    // Enviar push para o cliente do agendamento
+    if (ag.cliente_id) {
+      const clienteRow = await pool.query(
+        'SELECT push_token FROM clientes WHERE id = $1 AND push_token IS NOT NULL LIMIT 1',
+        [ag.cliente_id]
+      );
+      if (clienteRow.rows[0]?.push_token) {
+        await sendPush(
+          clienteRow.rows[0].push_token,
+          'Aviso de atraso ⏰',
+          textoNotif,
+          { screen: 'pedidos' }
+        );
+      }
+    }
+
     res.json({ success: true, data: { agendamento_id, minutos, mensagem: textoNotif } });
   } catch (error) {
     console.error('Erro ao enviar aviso de atraso:', error);
@@ -290,6 +307,24 @@ router.post('/atendimentos/:id/finalizar', async (req, res) => {
     res.json({ success: true, data: atend.rows[0] });
   } catch (error) {
     console.error('Erro ao finalizar atendimento:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /chat — histórico de mensagens do profissional
+router.get('/chat', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM chat_mensagens
+       WHERE salao_id = $1
+         AND (remetente_id = $2 OR destinatario_id = $2)
+       ORDER BY created_at DESC
+       LIMIT 50`,
+      [req.salaoId, req.profissionalId]
+    );
+    res.json({ success: true, data: result.rows.reverse() });
+  } catch (error) {
+    console.error('Erro ao buscar chat:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

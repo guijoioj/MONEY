@@ -142,4 +142,15 @@ router.put('/perfil', clienteAuthMiddleware, [
   }
 });
 
+// PUT /push-token
+router.put('/push-token', clienteAuthMiddleware, async (req, res) => {
+  try {
+    const { pushToken } = req.body;
+    await pool.query('UPDATE clientes SET push_token = $1 WHERE id = $2', [pushToken, req.clienteId]);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 module.exports = router;

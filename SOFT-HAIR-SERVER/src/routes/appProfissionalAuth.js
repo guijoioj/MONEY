@@ -70,4 +70,15 @@ router.get('/me', profissionalAuthMiddleware, async (req, res) => {
   }
 });
 
+// PUT /push-token
+router.put('/push-token', profissionalAuthMiddleware, async (req, res) => {
+  try {
+    const { pushToken } = req.body;
+    await pool.query('UPDATE profissionais SET push_token = $1 WHERE id = $2', [pushToken, req.profissionalId]);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 module.exports = router;
