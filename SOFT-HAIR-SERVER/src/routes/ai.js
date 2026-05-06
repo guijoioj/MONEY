@@ -73,17 +73,63 @@ Para datas relativas: hoje=${new Date().toISOString().split('T')[0]}, amanhã=${
     try { parsed = JSON.parse(text); }
     catch { return res.status(422).json({ success: false, error: 'IA não retornou JSON válido', raw: text }); }
 
-    // Resolver IDs reais para profissional e serviço
+    // Resolver IDs e EXECUTAR a ação diretamente
     if (parsed.action === 'create_agendamento' && parsed.data) {
       const d = parsed.data;
+
+      // Resolver profissional
       if (d.professionalName) {
-        const match = profsRes.find(p => p.nome.toLowerCase().includes(d.professionalName.toLowerCase()) || d.professionalName.toLowerCase().includes(p.nome.split(' ')[0].toLowerCase()));
+        const pn = d.professionalName.toLowerCase();
+        const match = profsRes.find(p => p.nome.toLowerCase().includes(pn) || pn.includes(p.nome.split(' ')[0].toLowerCase()));
         if (match) { d.professionalId = match.id; d.professionalName = match.nome; }
       }
+
+      // Resolver serviço
       if (d.serviceName) {
-        const match = servicosRes.find(s => s.nome.toLowerCase().includes(d.serviceName.toLowerCase()) || d.serviceName.toLowerCase().includes(s.nome.split(' ')[0].toLowerCase()));
+        const sn = d.serviceName.toLowerCase();
+        const match = servicosRes.find(s => s.nome.toLowerCase().includes(sn) || sn.includes(s.nome.split(' ')[0].toLowerCase()));
         if (match) { d.serviceId = match.id; d.serviceName = match.nome; }
       }
+
+      // Resolver cliente por nome (busca parcial)
+      if (d.clienteName && !d.clienteId) {
+        const cn = d.clienteName.toLowerCase();
+        const clienteRows = await query(
+          `SELECT id, nome FROM clientes WHERE salao_id = $1 AND ativo = true AND nome ILIKE $2 ORDER BY nome LIMIT 1`,
+          [salaoId, `%${d.clienteName.split(' ')[0]}%`]
+        );
+        if (clienteRows.length > 0) { d.clienteId = clienteRows[0].id; d.clienteName = clienteRows[0].nome; }
+      }
+
+      // CRIAR AGENDAMENTO DIRETAMENTE se tiver tudo necessário
+      if (d.clienteId && d.professionalId && d.dateTime) {
+        const AgendamentoService = require('../services/AgendamentoService');
+        const svc = new AgendamentoService();
+        const result = await svc.criar({
+          cliente_id: d.clienteId,
+          profissional_id: d.professionalId,
+          servico_id: d.serviceId || null,
+          auxiliar_id: null,
+          data_hora: d.dateTime,
+          observacoes: d.observacoes || null,
+          status: 'agendado',
+        }, salaoId);
+
+        if (result.success) {
+          return res.json({
+            success: true,
+            action: 'created',
+            confidence: parsed.confidence,
+            message: `✅ Agendamento criado: ${d.clienteName} com ${d.professionalName} em ${d.dateTime}`,
+            data: { ...d, agendamentoId: result.data?.id },
+          });
+        } else {
+          return res.status(400).json({ success: false, error: `IA falhou ao criar: ${result.error}`, data: d });
+        }
+      }
+
+      // Falta algum dado — retorna para o frontend pré-preencher
+      parsed.message = `Não consegui identificar ${!d.clienteId ? 'o cliente' : !d.professionalId ? 'o profissional' : 'a data'}. Abrindo formulário...`;
     }
 
     res.json({ success: true, ...parsed });
