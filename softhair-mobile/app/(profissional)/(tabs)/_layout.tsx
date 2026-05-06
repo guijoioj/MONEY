@@ -54,6 +54,15 @@ export default function ProfissionalTabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="produtos-atendimento"
+        options={{
+          title: 'Produtos',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="cube-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="perfil"
         options={{
           title: 'Perfil',
