@@ -186,7 +186,7 @@ export default function Layout() {
             style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)', color: 'rgba(80,80,110,0.55)', minWidth: 240 }}>
             <Search size={13} />
             <span className="flex-1 text-left text-xs">Buscar ou executar ação…</span>
-            <kbd className="text-[10px] px-1.5 py-0.5 rounded-md font-mono" style={{ background: 'rgba(0,0,0,0.06)', color: 'rgba(80,80,110,0.5)' }}>⌘K</kbd>
+            <kbd className="text-[10px] px-1.5 py-0.5 rounded-md font-mono" style={{ background: 'rgba(0,0,0,0.06)', color: 'rgba(80,80,110,0.5)' }}>{(() => { const b = getLauncherBind(); return `${b.meta ? '⌘' : ''}${b.ctrl && !b.meta ? 'Ctrl+' : ''}${b.key.toUpperCase()}`; })()}</kbd>
           </button>
         </div>
 
