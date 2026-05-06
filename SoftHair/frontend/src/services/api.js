@@ -180,6 +180,11 @@ export const backupAPI = {
   disconnectGoogle: () => api.get('/backup/google/disconnect'),
 };
 
+export const saloesAPI = {
+  getMe: () => api.get('/saloes/me'),
+  updateMe: (data) => api.put('/saloes/me', data),
+};
+
 export const bloqueiosAPI = {
   getByData: (data, profissionalId) => api.get('/bloqueios', { params: { data, profissionalId } }),
   create: (data) => api.post('/bloqueios', data),
