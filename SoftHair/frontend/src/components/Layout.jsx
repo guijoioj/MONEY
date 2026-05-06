@@ -219,11 +219,27 @@ export default function Layout() {
       {launcherOpen && (() => {
         const allCommands = [
           { section: 'Navegar', items: navItems.map(n => ({ ...n, type: 'nav', action: () => { navigate(n.to); closeLauncher(); } })) },
-          { section: 'Ações Rápidas', items: [
+          { section: 'Agendamento', items: [
             { label: 'Novo Agendamento', icon: CalendarPlus, type: 'action', action: () => { navigate('/agenda?new=1'); closeLauncher(); } },
+            { label: 'Ver Agenda Hoje', icon: Calendar, type: 'action', action: () => { navigate('/agenda'); closeLauncher(); } },
+            { label: 'Solicitações Pendentes', icon: Inbox, type: 'action', action: () => { navigate('/solicitacoes'); closeLauncher(); } },
+          ]},
+          { section: 'Clientes & Vendas', items: [
             { label: 'Novo Cliente', icon: Users, type: 'action', action: () => { navigate('/clientes?new=1'); closeLauncher(); } },
             { label: 'Nova Venda', icon: ShoppingCart, type: 'action', action: () => { navigate('/vendas?new=1'); closeLauncher(); } },
+            { label: 'Novo Atendimento', icon: ClipboardCheck, type: 'action', action: () => { navigate('/atendimentos?new=1'); closeLauncher(); } },
+          ]},
+          { section: 'Produtos & Serviços', items: [
             { label: 'Novo Produto', icon: Package, type: 'action', action: () => { navigate('/servicos-e-produtos?new=produto'); closeLauncher(); } },
+            { label: 'Novo Serviço', icon: Scissors, type: 'action', action: () => { navigate('/servicos-e-produtos?new=servico'); closeLauncher(); } },
+          ]},
+          { section: 'Financeiro', items: [
+            { label: 'Abrir Caixa', icon: DollarSign, type: 'action', action: () => { navigate('/caixa?action=abrir'); closeLauncher(); } },
+            { label: 'Nova Despesa', icon: DollarSign, type: 'action', action: () => { navigate('/despesas?new=1'); closeLauncher(); } },
+            { label: 'Ver Financeiro', icon: BarChart3, type: 'action', action: () => { navigate('/financeiro'); closeLauncher(); } },
+            { label: 'Ver Metas', icon: Target, type: 'action', action: () => { navigate('/metas'); closeLauncher(); } },
+          ]},
+          { section: 'Sistema', items: [
             { label: 'Sair', icon: LogOut, type: 'action', action: () => { closeLauncher(); handleLogout(); } },
           ]},
         ];
