@@ -7,12 +7,30 @@ router.post('/command', authMiddleware, async (req, res) => {
   const { command, context = {} } = req.body;
   if (!command) return res.status(400).json({ success: false, error: 'Comando vazio' });
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return res.status(503).json({ success: false, error: 'ANTHROPIC_API_KEY não configurada no servidor' });
+  const groqKey = process.env.GROQ_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (!groqKey && !anthropicKey) return res.status(503).json({ success: false, error: 'Configure GROQ_API_KEY ou ANTHROPIC_API_KEY no servidor' });
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
-    const client = new Anthropic.default({ apiKey });
+    // Função de chat unificada: Groq tem prioridade (grátis), fallback para Anthropic
+    const chat = async (systemPrompt, userMsg) => {
+      if (groqKey) {
+        const Groq = require('groq-sdk');
+        const groq = new Groq.default({ apiKey: groqKey });
+        const r = await groq.chat.completions.create({
+          model: 'llama-3.1-8b-instant',
+          messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMsg }],
+          max_tokens: 512, temperature: 0.1,
+        });
+        return r.choices[0].message.content.trim();
+      } else {
+        const Anthropic = require('@anthropic-ai/sdk');
+        const client = new Anthropic.default({ apiKey: anthropicKey });
+        const r = await client.messages.create({ model: 'claude-haiku-4-5', max_tokens: 512, system: systemPrompt, messages: [{ role: 'user', content: userMsg }] });
+        return r.content[0].text.trim();
+      }
+    };
+    const _unused = null; // placeholder
 
     // Buscar contexto do banco
     const salaoId = req.salaoId;
@@ -50,14 +68,7 @@ Retorne APENAS JSON válido (sem markdown, sem explicação) com esta estrutura:
 Para datas relativas: hoje=${new Date().toISOString().split('T')[0]}, amanhã=${new Date(Date.now()+86400000).toISOString().split('T')[0]}
 `;
 
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 512,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: command }],
-    });
-
-    const text = response.content[0].text.trim();
+    const text = await chat(systemPrompt, command);
     let parsed;
     try { parsed = JSON.parse(text); }
     catch { return res.status(422).json({ success: false, error: 'IA não retornou JSON válido', raw: text }); }
