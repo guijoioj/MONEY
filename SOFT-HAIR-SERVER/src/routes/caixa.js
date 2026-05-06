@@ -7,19 +7,19 @@ const { query } = require('../config/database');
 router.get('/hoje', authMiddleware, async (req, res) => {
   try {
     const hoje = new Date().toISOString().split('T')[0];
-    const caixaResult = await query(
+    const caixaRows = await query(
       `SELECT * FROM caixa WHERE salao_id = $1 AND DATE(aberto_em) = $2 ORDER BY aberto_em DESC LIMIT 1`,
       [req.salaoId, hoje]
     );
-    const caixa = caixaResult.rows[0] || null;
+    const caixa = caixaRows[0] || null;
 
     let totalVendas = 0;
     if (caixa) {
-      const vendasResult = await query(
-        `SELECT COALESCE(SUM(total), 0) as total FROM vendas WHERE salao_id = $1 AND DATE(created_at) = $2 AND status != 'cancelada'`,
+      const vendasRows = await query(
+        `SELECT COALESCE(SUM(valor_final), 0) as total FROM vendas WHERE salao_id = $1 AND DATE(created_at) = $2 AND status != 'cancelada'`,
         [req.salaoId, hoje]
       );
-      totalVendas = parseFloat(vendasResult.rows[0].total);
+      totalVendas = parseFloat(vendasRows[0]?.total || 0);
     }
 
     res.json({
@@ -39,11 +39,11 @@ router.get('/hoje', authMiddleware, async (req, res) => {
 // GET /api/caixa — histórico 30 dias
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const result = await query(
+    const rows = await query(
       `SELECT * FROM caixa WHERE salao_id = $1 AND aberto_em >= NOW() - INTERVAL '30 days' ORDER BY aberto_em DESC`,
       [req.salaoId]
     );
-    res.json({ success: true, data: result.rows });
+    res.json({ success: true, data: rows });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -59,15 +59,15 @@ router.post('/abrir', authMiddleware, async (req, res) => {
       `SELECT id FROM caixa WHERE salao_id = $1 AND DATE(aberto_em) = $2 AND fechado_em IS NULL`,
       [req.salaoId, hoje]
     );
-    if (existing.rows.length > 0) {
+    if (existing.length > 0) {
       return res.status(400).json({ success: false, error: 'Caixa já está aberto hoje.' });
     }
 
-    const result = await query(
+    const inserted = await query(
       `INSERT INTO caixa (salao_id, saldo_inicial, observacoes, aberto_por) VALUES ($1, $2, $3, $4) RETURNING *`,
       [req.salaoId, saldo_inicial, observacoes || null, req.userId]
     );
-    res.json({ success: true, data: result.rows[0] });
+    res.json({ success: true, data: inserted[0] });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -77,15 +77,15 @@ router.post('/abrir', authMiddleware, async (req, res) => {
 router.put('/:id/fechar', authMiddleware, async (req, res) => {
   try {
     const { saldo_final, observacoes } = req.body;
-    const result = await query(
+    const updated = await query(
       `UPDATE caixa SET saldo_final = $1, fechado_em = NOW(), observacoes = COALESCE($2, observacoes)
        WHERE id = $3 AND salao_id = $4 AND fechado_em IS NULL RETURNING *`,
       [saldo_final, observacoes || null, req.params.id, req.salaoId]
     );
-    if (result.rows.length === 0) {
+    if (updated.length === 0) {
       return res.status(404).json({ success: false, error: 'Caixa não encontrado ou já fechado.' });
     }
-    res.json({ success: true, data: result.rows[0] });
+    res.json({ success: true, data: updated[0] });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
