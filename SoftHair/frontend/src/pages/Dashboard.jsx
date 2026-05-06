@@ -20,7 +20,7 @@ const normalizeRoleDash = (role) => {
   return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 };
 const getRoleColorDash = (role) => ROLE_COLORS_DASH[normalizeRoleDash(role)] || '#6B7280';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Treemap } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Treemap, LineChart, Line, AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import { Users, Package, AlertTriangle, TrendingUp, Calendar, DollarSign, ArrowUpRight, User, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -36,6 +36,9 @@ const CHART_TYPES = [
   { id: 'barra-v', label: 'Barras',     icon: '▮' },
   { id: 'barra-h', label: 'Horizontal', icon: '▬' },
   { id: 'treemap', label: 'Treemap',    icon: '⊞' },
+  { id: 'linha',   label: 'Linha',      icon: '〜' },
+  { id: 'area',    label: 'Área',       icon: '◭' },
+  { id: 'radar',   label: 'Radar',      icon: '⬡' },
 ];
 
 const PROFISSIONAL_COLORS = [
@@ -255,7 +258,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="flex flex-col gap-6">
         <div
           className="rounded-2xl p-6"
           style={{
@@ -354,6 +357,36 @@ export default function Dashboard() {
                     ))}
                   </Bar>
                 </BarChart>
+              ) : chartType === 'linha' ? (
+                <LineChart data={produtosPorCategoria} margin={{ top: 8, right: 24, left: 0, bottom: produtosPorCategoria.length > 5 ? 70 : 24 }}>
+                  <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(0,0,0,0.06)" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'rgba(80,80,100,0.6)' }} angle={produtosPorCategoria.length > 5 ? -40 : 0} textAnchor={produtosPorCategoria.length > 5 ? 'end' : 'middle'} interval={0} axisLine={false} tickLine={false} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'rgba(80,80,100,0.6)' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', fontSize: 13 }} />
+                  <Line type="monotone" dataKey="value" name="Produtos" stroke="var(--color-primary)" strokeWidth={2.5} dot={{ fill: 'var(--color-primary)', r: 4 }} activeDot={{ r: 6 }} />
+                </LineChart>
+              ) : chartType === 'area' ? (
+                <AreaChart data={produtosPorCategoria} margin={{ top: 8, right: 24, left: 0, bottom: produtosPorCategoria.length > 5 ? 70 : 24 }}>
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(0,0,0,0.06)" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'rgba(80,80,100,0.6)' }} angle={produtosPorCategoria.length > 5 ? -40 : 0} textAnchor={produtosPorCategoria.length > 5 ? 'end' : 'middle'} interval={0} axisLine={false} tickLine={false} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'rgba(80,80,100,0.6)' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', fontSize: 13 }} />
+                  <Area type="monotone" dataKey="value" name="Produtos" stroke="var(--color-primary)" strokeWidth={2.5} fill="url(#areaGrad)" dot={{ fill: 'var(--color-primary)', r: 3 }} />
+                </AreaChart>
+              ) : chartType === 'radar' ? (
+                <RadarChart data={produtosPorCategoria} cx="50%" cy="50%" outerRadius="75%">
+                  <PolarGrid stroke="rgba(0,0,0,0.08)" />
+                  <PolarAngleAxis dataKey="name" tick={{ fontSize: 10, fill: 'rgba(80,80,100,0.7)' }} />
+                  <PolarRadiusAxis allowDecimals={false} tick={{ fontSize: 9, fill: 'rgba(80,80,100,0.5)' }} />
+                  <Radar name="Produtos" dataKey="value" stroke="var(--color-primary)" fill="var(--color-primary)" fillOpacity={0.2} strokeWidth={2} />
+                  <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', fontSize: 13 }} />
+                </RadarChart>
               ) : (
                 <Treemap
                   data={produtosPorCategoria.map((d, i) => ({ ...d, fill: COLORS[i % COLORS.length] }))}
@@ -385,6 +418,7 @@ export default function Dashboard() {
           )}
         </div>
 
+        <div style={{ order: -1 }}>
         {(() => {
           const handleExpand = () => {
             if (miniHeaderRef.current) {
@@ -562,6 +596,9 @@ export default function Dashboard() {
           </div>
           );
         })()}
+        </div>
+
+        {/* Gráfico — order:2 aparece depois da mini-agenda */}
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">
