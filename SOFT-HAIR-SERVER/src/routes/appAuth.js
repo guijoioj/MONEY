@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { pool } = require('../config/database');
-const { clienteAuthMiddleware } = require('../middleware/clienteAuth');
+const { clienteAuthMiddleware, invalidateClienteCache } = require('../middleware/clienteAuth');
 
 const crypto = require('crypto');
 const signToken = (clienteId) =>
@@ -230,6 +230,10 @@ router.delete('/me/delete-data', clienteAuthMiddleware, async (req, res) => {
         await AuthService.revokeToken(token);
       }
     } catch (_) { /* não bloqueia */ }
+
+    // [P7-M3] Invalidar cache do middleware imediatamente para fechar a janela
+    // de 2min em que o status app_ativo cacheado ainda poderia ser true.
+    try { invalidateClienteCache(req.clienteId); } catch (_) { /* não bloqueia */ }
 
     res.json({
       success: true,

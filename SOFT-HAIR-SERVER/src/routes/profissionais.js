@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { ProfissionalService } = require('../services');
+const { invalidateProfissionalCache } = require('../middleware/profissionalAuth');
 
 const service = new ProfissionalService();
 
@@ -119,6 +120,12 @@ router.put('/:id', authMiddleware, requireAdmin, [
     }
     const result = await service.atualizar(req.params.id, body, req.salaoId);
     if (result.success) {
+      // [P7-M3] Se ativo/app_ativo mudou (incluindo via reset de senha_app), invalidar cache
+      // do middleware para fechar a janela de até 2min onde token desativado ainda passaria.
+      if (Object.prototype.hasOwnProperty.call(body, 'ativo') ||
+          Object.prototype.hasOwnProperty.call(body, 'app_ativo')) {
+        try { invalidateProfissionalCache(parseInt(req.params.id, 10) || req.params.id); } catch (_) { /* não-fatal */ }
+      }
       res.json({ success: true, data: result.data });
     } else {
       res.status(404).json({ success: false, error: result.error });
@@ -133,6 +140,8 @@ router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const result = await service.deletar(req.params.id, req.salaoId);
     if (result.success) {
+      // [P7-M3] Soft-delete desativa profissional — invalidar cache para fechar janela.
+      try { invalidateProfissionalCache(parseInt(req.params.id, 10) || req.params.id); } catch (_) { /* não-fatal */ }
       res.json({ success: true, message: result.message || 'Profissional desativado' });
     } else {
       res.status(404).json({ success: false, error: result.error });

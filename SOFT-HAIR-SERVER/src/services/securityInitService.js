@@ -15,10 +15,51 @@ class SecurityInitService {
       // Criar admin padrão se não existir
       await this.createDefaultAdmin();
 
+      // [P7-M1] Iniciar cleanup job da jwt_blacklist — purga entradas expiradas
+      // a cada 1h. Sem esse job, a tabela cresce indefinidamente (1 linha por
+      // logout/password change/LGPD delete) e ataca o disco em meses.
+      this.startJwtBlacklistCleanupJob();
+
       console.log('✅ Segurança inicializada');
     } catch (error) {
       console.error('❌ Erro na inicialização de segurança:', error);
       throw error;
+    }
+  }
+
+  // [P7-M1] Cleanup periódico de jwt_blacklist — entradas com expires_at < NOW()
+  // já são ignoradas por isTokenRevoked, mas continuam ocupando disco e degradando
+  // o índice. Roda a cada 1h. Em ambiente de teste (NODE_ENV=test) ou se a env
+  // DISABLE_JWT_CLEANUP_JOB=1, NÃO inicia (evita handle aberto em jest).
+  static startJwtBlacklistCleanupJob() {
+    if (process.env.NODE_ENV === 'test' || process.env.DISABLE_JWT_CLEANUP_JOB === '1') {
+      return;
+    }
+    if (this._jwtCleanupInterval) return; // idempotente
+
+    const ONE_HOUR_MS = 60 * 60 * 1000;
+    const runCleanup = async () => {
+      try {
+        const r = await pool.query('DELETE FROM jwt_blacklist WHERE expires_at < NOW()');
+        if (r.rowCount > 0) {
+          console.log(`[SECURITY] jwt_blacklist cleanup: ${r.rowCount} entradas expiradas removidas`);
+        }
+      } catch (err) {
+        console.error('[SECURITY] jwt_blacklist cleanup falhou:', err.message);
+      }
+    };
+
+    // Rodar uma vez no boot (não-bloqueante) e depois a cada 1h.
+    setImmediate(runCleanup);
+    this._jwtCleanupInterval = setInterval(runCleanup, ONE_HOUR_MS);
+    // unref para não impedir o processo de encerrar em testes/ctrl-c.
+    if (this._jwtCleanupInterval.unref) this._jwtCleanupInterval.unref();
+  }
+
+  static stopJwtBlacklistCleanupJob() {
+    if (this._jwtCleanupInterval) {
+      clearInterval(this._jwtCleanupInterval);
+      this._jwtCleanupInterval = null;
     }
   }
 

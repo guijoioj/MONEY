@@ -17,12 +17,18 @@ const TABLE_COLUMNS = {
   servicos: ['nome', 'descricao', 'preco', 'duracao_minutos', 'comissao_percentual', 'cor', 'ativo'],
   produtos: ['nome', 'descricao', 'preco_custo', 'preco_venda', 'quantidade_estoque', 'quantidade_minima', 'categoria', 'codigo_barras', 'ativo'],
   agendamentos: ['cliente_id', 'profissional_id', 'servico_id', 'data_hora', 'duracao_minutos', 'status', 'observacoes', 'valor'],
-  vendas: ['cliente_id', 'profissional_id', 'tipo', 'status', 'valor_total', 'desconto', 'valor_final', 'forma_pagamento', 'observacoes'],
+  // [P7-A1] `status` e `valor_final` REMOVIDOS — sync não pode finalizar venda nem definir valor_final.
+  // Finalização ocorre via rota dedicada (`POST /vendas/:id/finalizar`); `valor_final` é derivado
+  // (valor_total - desconto) no fluxo oficial com audit log.
+  vendas: ['cliente_id', 'profissional_id', 'tipo', 'valor_total', 'desconto', 'forma_pagamento', 'observacoes'],
   // [P5-C4] `pago` e `data_pagamento` REMOVIDOS — sync nunca pode marcar comissão como paga.
   // Pagamento deve passar pelo fluxo oficial (`POST /api/comissoes/pagar` ou `PUT /:id/pagar`)
   // que tem `requireAdmin`, reconciliação de valor e audit log persistente.
   comissoes: ['profissional_id', 'venda_id', 'valor_total', 'percentual', 'valor_comissao'],
-  atendimentos: ['cliente_id', 'profissional_id', 'servico_id', 'agendamento_id', 'valor', 'status', 'observacoes'],
+  // [P7-A1] `status` e `valor` REMOVIDOS — sync não pode reabrir/cancelar atendimento nem alterar
+  // valor monetário (que afeta cálculo de comissão). Status/valor migram via rotas oficiais
+  // (`/atendimentos/:id/finalizar`, `/atendimentos/:id/cancelar`) com audit log.
+  atendimentos: ['cliente_id', 'profissional_id', 'servico_id', 'agendamento_id', 'observacoes'],
   // [P5-C4] `status` REMOVIDO — sync não pode reabrir/fechar fechamento. Use rota oficial com audit.
   fechamentos: ['data_inicio', 'data_fim', 'tipo', 'total_vendas', 'total_servicos', 'total_produtos', 'total_comissoes', 'total_liquido', 'observacoes'],
   // [P5-C4] `saldo_anterior`/`saldo_novo` REMOVIDOS — crédito é append-only via rota dedicada.

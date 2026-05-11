@@ -3,6 +3,7 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { ClienteService } = require('../services');
+const { invalidateClienteCache } = require('../middleware/clienteAuth');
 
 const clienteService = new ClienteService();
 
@@ -163,6 +164,12 @@ router.put('/:id', authMiddleware, requireAdmin, [
     const result = await clienteService.atualizar(id, safeBody, salaoId);
 
     if (result.success) {
+      // [P7-M3] Se ativo/app_ativo mudou, invalidar cache do middleware para fechar
+      // a janela de até 2min onde token de cliente desativado ainda passaria.
+      if (Object.prototype.hasOwnProperty.call(safeBody, 'ativo') ||
+          Object.prototype.hasOwnProperty.call(safeBody, 'app_ativo')) {
+        try { invalidateClienteCache(parseInt(id, 10) || id); } catch (_) { /* não-fatal */ }
+      }
       res.json({ success: true, data: result.data });
     } else if (result.error.includes('não encontrado')) {
       res.status(404).json({ success: false, error: result.error });
@@ -185,6 +192,8 @@ router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
     const result = await clienteService.deletar(id, salaoId);
 
     if (result.success) {
+      // [P7-M3] Soft-delete desativa cliente — invalidar cache para fechar janela de 2min.
+      try { invalidateClienteCache(parseInt(id, 10) || id); } catch (_) { /* não-fatal */ }
       res.json({ success: true, message: result.message || 'Cliente desativado com sucesso' });
     } else if (result.error.includes('não encontrado')) {
       res.status(404).json({ success: false, error: result.error });
