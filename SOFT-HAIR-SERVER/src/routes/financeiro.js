@@ -19,7 +19,7 @@ router.get('/dre', authMiddleware, async (req, res) => {
       [salaoId, mes, ano]
     );
 
-    const receitaDetalhes = receitasResult.rows.map(r => ({
+    const receitaDetalhes = receitasResult.map(r => ({
       tipo: r.tipo,
       total: parseFloat(r.total || 0)
     }));
@@ -33,7 +33,7 @@ router.get('/dre', authMiddleware, async (req, res) => {
       [salaoId, mes, ano]
     );
 
-    const despesaDetalhes = despesasResult.rows.map(d => ({
+    const despesaDetalhes = despesasResult.map(d => ({
       categoria: d.categoria,
       total: parseFloat(d.total || 0)
     }));
@@ -45,7 +45,7 @@ router.get('/dre', authMiddleware, async (req, res) => {
        WHERE salao_id=$1 AND EXTRACT(MONTH FROM created_at)=$2 AND EXTRACT(YEAR FROM created_at)=$3`,
       [salaoId, mes, ano]
     );
-    const comissoesTotal = parseFloat(comissoesResult.rows[0]?.total || 0);
+    const comissoesTotal = parseFloat(comissoesResult[0]?.total || 0);
 
     const lucroBruto = receitaTotal - comissoesTotal;
     const lucroLiquido = lucroBruto - despesaTotal;
@@ -95,8 +95,8 @@ router.get('/projecao', authMiddleware, async (req, res) => {
       historico.push({
         mes, ano,
         label: `${String(mes).padStart(2,'0')}/${ano}`,
-        receita: parseFloat(recResult.rows[0].receita),
-        despesa: parseFloat(despResult.rows[0].despesa)
+        receita: parseFloat(recResult[0].receita),
+        despesa: parseFloat(despResult[0].despesa)
       });
     }
 

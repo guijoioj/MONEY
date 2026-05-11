@@ -29,7 +29,7 @@ router.get('/progresso', authMiddleware, async (req, res) => {
 
     const rows = await query(
       `SELECT
-         p.id, p.nome, p.foto,
+         p.id, p.nome, p.foto_url,
          COALESCE(m.meta_valor, 0) as meta_valor,
          COALESCE(m.meta_atendimentos, 0) as meta_atendimentos,
          m.id as meta_id,

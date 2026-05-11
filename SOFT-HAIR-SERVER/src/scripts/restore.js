@@ -24,4 +24,8 @@ async function restoreBackup() {
   }
 }
 
-restoreBackup();
+if (require.main === module) {
+  restoreBackup();
+}
+
+module.exports = restoreBackup;
