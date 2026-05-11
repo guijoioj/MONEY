@@ -12,26 +12,51 @@ const { query } = require('../../config/database');
 
 router.use(appAuthMiddleware);
 
+// Garante que o cliente autenticado está vinculado ao salão por email exato (case-insensitive).
+// Sem isso, qualquer cliente poderia iterar salonId e ver dados de outros (IDOR — vide [C2]).
 async function resolverCliente(clienteAppId, salonId) {
   const app = await ClienteApp.findById(clienteAppId);
-  if (!app) return null;
+  if (!app || !app.email) return null;
+  if (!salonId) return null;
   const lista = await Cliente.getAll({ search: app.email }, salonId);
-  return lista[0] || null;
+  // Cliente.getAll usa LIKE/ILIKE — exigir match EXATO de email para evitar substring hits.
+  const match = lista.find(c => (c.email || '').toLowerCase() === app.email.toLowerCase());
+  return match || null;
 }
 
 async function resolverOuCriarCliente(clienteAppId, salonId) {
+  const cliente = await resolverCliente(clienteAppId, salonId);
+  if (cliente) return cliente;
   const app = await ClienteApp.findById(clienteAppId);
   if (!app) return null;
-  const lista = await Cliente.getAll({ search: app.email }, salonId);
-  if (lista.length) return lista[0];
   return Cliente.create({
     nome: app.nome, email: app.email,
     telefone: app.telefone || '', observacoes: 'Vinculado via app mobile'
   }, salonId);
 }
 
+// Middleware de autorização: rejeita 403 se o cliente autenticado não está vinculado ao :salonId.
+// Aplicado às rotas que retornam dados sensíveis (perfil, histórico, resumo, fechamentos, compras, etc).
+async function requireClienteVinculado(req, res, next) {
+  try {
+    const salonId = req.params.salonId;
+    if (!salonId) return res.status(400).json({ error: 'salonId é obrigatório' });
+    const cliente = await resolverCliente(req.clienteApp.clienteAppId, salonId);
+    if (!cliente) {
+      return res.status(403).json({ error: 'Acesso negado a este salão' });
+    }
+    req.clienteSalao = cliente;
+    next();
+  } catch (e) {
+    res.status(500).json({ error: 'Erro ao validar vínculo' });
+  }
+}
+
 router.get('/perfil/:salonId', async (req, res) => {
   try {
+    // [C2] resolverCliente agora exige EMAIL EXATO (case-insensitive) entre cliente_app e cliente do salão.
+    // Substring/colisão por LIKE não vaza mais dados. Se não vinculado, retorna sinalização clara
+    // SEM dados do salão (apenas vinculado:false), permitindo onboarding sem IDOR.
     const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
     const appUser = await ClienteApp.findById(req.clienteApp.clienteAppId);
     res.json({
@@ -39,7 +64,10 @@ router.get('/perfil/:salonId', async (req, res) => {
       clienteSalao: cliente || null,
       vinculado: !!cliente
     });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[cliente perfil] erro:', e.message);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 });
 
 router.get('/historico/:salonId', async (req, res) => {

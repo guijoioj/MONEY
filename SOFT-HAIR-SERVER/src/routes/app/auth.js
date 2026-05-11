@@ -7,11 +7,19 @@ const Cliente = require('../../models/Cliente');
 const { appAuthMiddleware } = require('../../middleware/appAuth');
 const { query } = require('../../config/database');
 
+const crypto = require('crypto');
 function signClienteToken(cliente) {
   return jwt.sign(
-    { clienteAppId: cliente.id, clienteId: cliente.id, email: cliente.email, nome: cliente.nome, type: 'cliente' },
+    {
+      clienteAppId: cliente.id,
+      clienteId: cliente.id,
+      email: cliente.email,
+      nome: cliente.nome,
+      type: 'cliente',
+      jti: crypto.randomBytes(16).toString('hex'),
+    },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
   );
 }
 

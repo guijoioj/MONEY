@@ -7,9 +7,12 @@ const { authMiddleware, requireAdmin } = require('../middleware/auth');
 // Registrar novo salão
 router.post('/register', [
   body('nome').notEmpty().withMessage('Nome do salão é obrigatório'),
-  body('email').isEmail().withMessage('Email inválido'),
-  body('adminEmail').isEmail().withMessage('Email do admin inválido'),
-  body('adminSenha').isLength({ min: 6 }).withMessage('Senha deve ter no mínimo 6 caracteres'),
+  body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
+  body('adminEmail').isEmail().normalizeEmail().withMessage('Email do admin inválido'),
+  body('adminSenha')
+    .isLength({ min: 8 })
+    .matches(/^(?=.*[A-Za-z])(?=.*\d)/)
+    .withMessage('Senha precisa de mínimo 8 caracteres, com letra e número'),
   body('adminNome').notEmpty().withMessage('Nome do admin é obrigatório'),
 ], async (req, res) => {
   try {
@@ -35,7 +38,7 @@ router.post('/register', [
 
 // Login
 router.post('/login', [
-  body('email').isEmail().withMessage('Email inválido'),
+  body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
   body('senha').notEmpty().withMessage('Senha é obrigatória'),
 ], async (req, res) => {
   try {
@@ -150,6 +153,19 @@ router.get('/me', authMiddleware, async (req, res) => {
     success: true,
     data: req.user || req.device
   });
+});
+
+// Logout — revoga o JWT atual via blacklist
+router.post('/logout', authMiddleware, async (req, res) => {
+  try {
+    if (req.user) {
+      await AuthService.revokeToken(req.user);
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro no logout:', error);
+    res.status(500).json({ success: false, error: 'Erro ao revogar token' });
+  }
 });
 
 module.exports = router;

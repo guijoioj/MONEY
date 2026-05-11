@@ -95,17 +95,20 @@ class AuthService {
 
   /**
    * Gerar token JWT
+   * [A3] JWT curto (default 24h) + jti para permitir revogação via jwt_blacklist.
    */
   static generateToken(user) {
+    const crypto = require('crypto');
     return jwt.sign(
       {
         userId: user.id,
         email: user.email,
         tipo: user.tipo,
-        salaoId: user.salao_id
+        salaoId: user.salao_id,
+        jti: crypto.randomBytes(16).toString('hex'),
       },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
   }
 
@@ -114,6 +117,45 @@ class AuthService {
    */
   static verifyToken(token) {
     return jwt.verify(token, process.env.JWT_SECRET);
+  }
+
+  /**
+   * Revogar token (logout) — adiciona jti à blacklist até a expiração natural.
+   */
+  static async revokeToken(decodedOrToken) {
+    let decoded = decodedOrToken;
+    if (typeof decodedOrToken === 'string') {
+      try { decoded = jwt.decode(decodedOrToken); } catch { return false; }
+    }
+    if (!decoded || !decoded.jti || !decoded.exp) return false;
+    try {
+      await query(
+        `INSERT INTO jwt_blacklist (jti, user_id, salao_id, expires_at)
+         VALUES ($1, $2, $3, to_timestamp($4))
+         ON CONFLICT (jti) DO NOTHING`,
+        [decoded.jti, decoded.userId || null, decoded.salaoId || null, decoded.exp]
+      );
+      return true;
+    } catch (e) {
+      console.error('[revokeToken] erro:', e.message);
+      return false;
+    }
+  }
+
+  /**
+   * Checa se jti está revogado.
+   */
+  static async isTokenRevoked(decoded) {
+    if (!decoded?.jti) return false;
+    try {
+      const row = await queryOne(
+        'SELECT 1 FROM jwt_blacklist WHERE jti = $1 AND expires_at > NOW()',
+        [decoded.jti]
+      );
+      return !!row;
+    } catch {
+      return false; // não bloqueia em caso de erro de DB
+    }
   }
 
   /**
@@ -212,8 +254,8 @@ class AuthService {
       throw new Error('Senha atual incorreta');
     }
 
-    if (newPassword.length < 6) {
-      throw new Error('Nova senha deve ter no mínimo 6 caracteres');
+    if (newPassword.length < 8 || !/^(?=.*[A-Za-z])(?=.*\d)/.test(newPassword)) {
+      throw new Error('Nova senha precisa de mínimo 8 caracteres, com letra e número');
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);

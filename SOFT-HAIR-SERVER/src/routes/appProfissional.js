@@ -6,17 +6,26 @@ const { sendPush } = require('../services/pushService');
 
 const TIPOS_PONTO = ['entrada', 'saida', 'pausa', 'retorno_pausa', 'inicio_atendimento', 'fim_atendimento'];
 
+// Helper: erro genérico em produção, detalhado em dev
+function sendErr(res, code, message, error) {
+  const isProd = process.env.NODE_ENV === 'production';
+  res.status(code).json({
+    success: false,
+    error: isProd ? message : (error?.message || message)
+  });
+}
+
 // GET /ponto
 router.get('/ponto', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT * FROM registros_ponto WHERE profissional_id = $1 AND DATE(created_at) = CURRENT_DATE ORDER BY created_at`,
-      [req.profissionalId]
+      `SELECT * FROM registros_ponto WHERE profissional_id = $1 AND salao_id = $2 AND DATE(created_at) = CURRENT_DATE ORDER BY created_at`,
+      [req.profissionalId, req.salaoId]
     );
     res.json({ success: true, data: result.rows });
   } catch (error) {
     console.error('Erro ao buscar ponto:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao buscar ponto', error);
   }
 });
 
@@ -49,14 +58,14 @@ router.get('/agenda', async (req, res) => {
        FROM agendamentos a
        LEFT JOIN clientes c ON c.id = a.cliente_id
        LEFT JOIN servicos s ON s.id = a.servico_id
-       WHERE a.profissional_id = $1 AND DATE(a.data_hora) = $2::date
+       WHERE a.profissional_id = $1 AND a.salao_id = $2 AND DATE(a.data_hora) = $3::date
        ORDER BY a.data_hora`,
-      [req.profissionalId, data]
+      [req.profissionalId, req.salaoId, data]
     );
     res.json({ success: true, data: result.rows });
   } catch (error) {
     console.error('Erro ao buscar agenda:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao buscar agenda', error);
   }
 });
 
@@ -69,14 +78,14 @@ router.get('/atendimentos', async (req, res) => {
        FROM atendimentos at
        LEFT JOIN clientes c ON c.id = at.cliente_id
        LEFT JOIN servicos s ON s.id = at.servico_id
-       WHERE at.profissional_id = $1 AND DATE(at.created_at) = $2::date
+       WHERE at.profissional_id = $1 AND at.salao_id = $2 AND DATE(at.created_at) = $3::date
        ORDER BY at.created_at DESC`,
-      [req.profissionalId, data]
+      [req.profissionalId, req.salaoId, data]
     );
     res.json({ success: true, data: result.rows });
   } catch (error) {
     console.error('Erro ao buscar atendimentos:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao buscar atendimentos', error);
   }
 });
 
@@ -92,14 +101,14 @@ router.get('/comissoes', async (req, res) => {
 
     const result = await pool.query(
       `SELECT * FROM comissoes
-       WHERE profissional_id = $1 AND DATE(created_at) BETWEEN $2::date AND $3::date
+       WHERE profissional_id = $1 AND salao_id = $2 AND DATE(created_at) BETWEEN $3::date AND $4::date
        ORDER BY created_at DESC`,
-      [req.profissionalId, data_inicio, data_fim]
+      [req.profissionalId, req.salaoId, data_inicio, data_fim]
     );
     res.json({ success: true, data: result.rows });
   } catch (error) {
     console.error('Erro ao buscar comissões:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao buscar comissões', error);
   }
 });
 
@@ -114,6 +123,20 @@ router.post('/produtos-utilizados', [
 
     const { marca, coloracao, quantidade, cliente_id, cliente_nome, observacoes, agendamento_id, produto_id } = req.body;
     const qtd = quantidade || 1;
+
+    // Validar que IDs referenciados pertencem ao salão do profissional (defesa cross-tenant)
+    if (cliente_id) {
+      const ok = await pool.query('SELECT 1 FROM clientes WHERE id = $1 AND salao_id = $2', [cliente_id, req.salaoId]);
+      if (!ok.rows.length) return res.status(403).json({ success: false, error: 'cliente_id não pertence ao salão' });
+    }
+    if (agendamento_id) {
+      const ok = await pool.query('SELECT 1 FROM agendamentos WHERE id = $1 AND salao_id = $2', [agendamento_id, req.salaoId]);
+      if (!ok.rows.length) return res.status(403).json({ success: false, error: 'agendamento_id não pertence ao salão' });
+    }
+    if (produto_id) {
+      const ok = await pool.query('SELECT 1 FROM produtos WHERE id = $1 AND salao_id = $2', [produto_id, req.salaoId]);
+      if (!ok.rows.length) return res.status(403).json({ success: false, error: 'produto_id não pertence ao salão' });
+    }
 
     const result = await pool.query(
       `INSERT INTO produtos_utilizados (profissional_id, salao_id, cliente_id, cliente_nome, marca, coloracao, quantidade, observacoes, agendamento_id, produto_id)
@@ -132,7 +155,7 @@ router.post('/produtos-utilizados', [
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Erro ao registrar produto utilizado:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao registrar produto utilizado', error);
   }
 });
 
@@ -140,13 +163,13 @@ router.post('/produtos-utilizados', [
 router.get('/produtos-utilizados', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT * FROM produtos_utilizados WHERE profissional_id = $1 ORDER BY created_at DESC LIMIT 100`,
-      [req.profissionalId]
+      `SELECT * FROM produtos_utilizados WHERE profissional_id = $1 AND salao_id = $2 ORDER BY created_at DESC LIMIT 100`,
+      [req.profissionalId, req.salaoId]
     );
     res.json({ success: true, data: result.rows });
   } catch (error) {
     console.error('Erro ao listar produtos utilizados:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao listar produtos utilizados', error);
   }
 });
 
@@ -159,14 +182,14 @@ router.get('/atendimentos-hoje', async (req, res) => {
       FROM agendamentos a
       LEFT JOIN clientes c ON c.id = a.cliente_id
       LEFT JOIN servicos s ON s.id = a.servico_id
-      WHERE a.profissional_id = $1 AND DATE(a.data_hora) = $2::date
+      WHERE a.profissional_id = $1 AND a.salao_id = $2 AND DATE(a.data_hora) = $3::date
         AND a.status IN ('agendado', 'confirmado', 'em_andamento')
       ORDER BY a.data_hora
-    `, [req.profissionalId, hoje]);
+    `, [req.profissionalId, req.salaoId, hoje]);
     res.json({ success: true, data: result.rows });
   } catch (error) {
     console.error('Erro ao buscar atendimentos de hoje:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao buscar atendimentos de hoje', error);
   }
 });
 
@@ -175,9 +198,9 @@ router.post('/atendimentos/:id/iniciar', async (req, res) => {
   try {
     const { rows } = await pool.query(
       `UPDATE agendamentos SET status = 'em_andamento', updated_at = NOW()
-       WHERE id = $1 AND profissional_id = $2
+       WHERE id = $1 AND profissional_id = $2 AND salao_id = $3
        RETURNING *, (SELECT nome FROM clientes WHERE id = agendamentos.cliente_id) as cliente_nome`,
-      [req.params.id, req.profissionalId]
+      [req.params.id, req.profissionalId, req.salaoId]
     );
     if (!rows.length)
       return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
@@ -189,7 +212,7 @@ router.post('/atendimentos/:id/iniciar', async (req, res) => {
     res.json({ success: true, data: rows[0] });
   } catch (error) {
     console.error('Erro ao iniciar atendimento:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao iniciar atendimento', error);
   }
 });
 
@@ -198,15 +221,15 @@ router.get('/perfil', async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT id, nome, email, telefone, especialidade, comissao, ativo
-       FROM profissionais WHERE id = $1`,
-      [req.profissionalId]
+       FROM profissionais WHERE id = $1 AND salao_id = $2`,
+      [req.profissionalId, req.salaoId]
     );
     if (!result.rows.length)
       return res.status(404).json({ success: false, error: 'Profissional não encontrado' });
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Erro ao buscar perfil do profissional:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao buscar perfil', error);
   }
 });
 
@@ -223,8 +246,8 @@ router.post('/aviso-atraso', [
     const { agendamento_id, minutos, mensagem } = req.body;
 
     const agend = await pool.query(
-      'SELECT * FROM agendamentos WHERE id = $1 AND profissional_id = $2',
-      [agendamento_id, req.profissionalId]
+      'SELECT * FROM agendamentos WHERE id = $1 AND profissional_id = $2 AND salao_id = $3',
+      [agendamento_id, req.profissionalId, req.salaoId]
     );
     if (!agend.rows.length)
       return res.status(404).json({ success: false, error: 'Agendamento não encontrado' });
@@ -239,11 +262,11 @@ router.post('/aviso-atraso', [
       [req.salaoId, ag.cliente_id, textoNotif]
     );
 
-    // Enviar push para o cliente do agendamento
+    // Enviar push para o cliente do agendamento (validar tenant)
     if (ag.cliente_id) {
       const clienteRow = await pool.query(
-        'SELECT push_token FROM clientes WHERE id = $1 AND push_token IS NOT NULL LIMIT 1',
-        [ag.cliente_id]
+        'SELECT push_token FROM clientes WHERE id = $1 AND salao_id = $2 AND push_token IS NOT NULL LIMIT 1',
+        [ag.cliente_id, req.salaoId]
       );
       if (clienteRow.rows[0]?.push_token) {
         await sendPush(
@@ -258,7 +281,7 @@ router.post('/aviso-atraso', [
     res.json({ success: true, data: { agendamento_id, minutos, mensagem: textoNotif } });
   } catch (error) {
     console.error('Erro ao enviar aviso de atraso:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao enviar aviso de atraso', error);
   }
 });
 
@@ -266,8 +289,8 @@ router.post('/aviso-atraso', [
 router.post('/atendimentos/:id/finalizar', async (req, res) => {
   try {
     const agend = await pool.query(
-      'SELECT * FROM agendamentos WHERE id = $1 AND profissional_id = $2',
-      [req.params.id, req.profissionalId]
+      'SELECT * FROM agendamentos WHERE id = $1 AND profissional_id = $2 AND salao_id = $3',
+      [req.params.id, req.profissionalId, req.salaoId]
     );
     if (!agend.rows.length)
       return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
@@ -275,17 +298,17 @@ router.post('/atendimentos/:id/finalizar', async (req, res) => {
     const ag = agend.rows[0];
 
     let atend = await pool.query(
-      `SELECT * FROM atendimentos WHERE agendamento_id = $1 AND profissional_id = $2`,
-      [ag.id, req.profissionalId]
+      `SELECT * FROM atendimentos WHERE agendamento_id = $1 AND profissional_id = $2 AND salao_id = $3`,
+      [ag.id, req.profissionalId, req.salaoId]
     );
 
     if (atend.rows.length) {
       atend = await pool.query(`
         UPDATE atendimentos
         SET status = 'finalizado', observacoes = COALESCE($3, observacoes), updated_at = NOW()
-        WHERE agendamento_id = $1 AND profissional_id = $2
+        WHERE agendamento_id = $1 AND profissional_id = $2 AND salao_id = $4
         RETURNING *
-      `, [ag.id, req.profissionalId, req.body.observacoes || null]);
+      `, [ag.id, req.profissionalId, req.body.observacoes || null, req.salaoId]);
     } else {
       atend = await pool.query(`
         INSERT INTO atendimentos (agendamento_id, cliente_id, profissional_id, salao_id, servico_id, data_atendimento, status, observacoes, valor)
@@ -295,8 +318,8 @@ router.post('/atendimentos/:id/finalizar', async (req, res) => {
     }
 
     await pool.query(
-      `UPDATE agendamentos SET status = 'finalizado', updated_at = NOW() WHERE id = $1`,
-      [req.params.id]
+      `UPDATE agendamentos SET status = 'finalizado', updated_at = NOW() WHERE id = $1 AND salao_id = $2`,
+      [req.params.id, req.salaoId]
     );
 
     await pool.query(
@@ -307,7 +330,7 @@ router.post('/atendimentos/:id/finalizar', async (req, res) => {
     res.json({ success: true, data: atend.rows[0] });
   } catch (error) {
     console.error('Erro ao finalizar atendimento:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao finalizar atendimento', error);
   }
 });
 
@@ -325,7 +348,7 @@ router.get('/chat', async (req, res) => {
     res.json({ success: true, data: result.rows.reverse() });
   } catch (error) {
     console.error('Erro ao buscar chat:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao buscar chat', error);
   }
 });
 

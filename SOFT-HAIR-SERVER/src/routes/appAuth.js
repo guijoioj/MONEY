@@ -6,18 +6,22 @@ const { body, validationResult } = require('express-validator');
 const { pool } = require('../config/database');
 const { clienteAuthMiddleware } = require('../middleware/clienteAuth');
 
+const crypto = require('crypto');
 const signToken = (clienteId) =>
   jwt.sign(
-    { clienteId, type: 'cliente' },
+    { clienteId, type: 'cliente', jti: crypto.randomBytes(16).toString('hex') },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
   );
 
 // POST /register
 router.post('/register', [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
-  body('email').isEmail().withMessage('Email inválido'),
-  body('password').isLength({ min: 6 }).withMessage('Senha deve ter no mínimo 6 caracteres'),
+  body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
+  body('password')
+    .isLength({ min: 8 })
+    .matches(/^(?=.*[A-Za-z])(?=.*\d)/)
+    .withMessage('Senha precisa de mínimo 8 caracteres, com letra e número'),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -30,7 +34,7 @@ router.post('/register', [
     if (existing.rows.length > 0)
       return res.status(409).json({ success: false, error: 'Email já cadastrado' });
 
-    const senha_hash = await bcrypt.hash(password, 10);
+    const senha_hash = await bcrypt.hash(password, 12);
 
     const result = await pool.query(
       `INSERT INTO clientes (nome, email, telefone, senha_hash, app_ativo)

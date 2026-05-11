@@ -6,11 +6,17 @@ const { body, validationResult } = require('express-validator');
 const { pool } = require('../config/database');
 const { profissionalAuthMiddleware } = require('../middleware/profissionalAuth');
 
+const crypto = require('crypto');
 const signToken = (profissional) =>
   jwt.sign(
-    { profissionalId: profissional.id, salaoId: profissional.salao_id, type: 'profissional' },
+    {
+      profissionalId: profissional.id,
+      salaoId: profissional.salao_id,
+      type: 'profissional',
+      jti: crypto.randomBytes(16).toString('hex'),
+    },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
   );
 
 // POST /login

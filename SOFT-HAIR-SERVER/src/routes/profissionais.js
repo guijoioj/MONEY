@@ -57,8 +57,11 @@ router.post('/', authMiddleware, [
     if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
     const { senha_app, ...body } = req.body;
-    if (senha_app && senha_app.length >= 6) {
-      body.senha_hash = await bcrypt.hash(senha_app, 10);
+    if (senha_app) {
+      if (senha_app.length < 8 || !/^(?=.*[A-Za-z])(?=.*\d)/.test(senha_app)) {
+        return res.status(400).json({ success: false, error: 'senha_app precisa de mínimo 8 caracteres, com letra e número' });
+      }
+      body.senha_hash = await bcrypt.hash(senha_app, 12);
       body.app_ativo = true;
     }
     const result = await service.criar(body, req.salaoId);
@@ -82,8 +85,11 @@ router.put('/:id', authMiddleware, [
     if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
     const { senha_app, ...body } = req.body;
-    if (senha_app && senha_app.length >= 6) {
-      body.senha_hash = await bcrypt.hash(senha_app, 10);
+    if (senha_app) {
+      if (senha_app.length < 8 || !/^(?=.*[A-Za-z])(?=.*\d)/.test(senha_app)) {
+        return res.status(400).json({ success: false, error: 'senha_app precisa de mínimo 8 caracteres, com letra e número' });
+      }
+      body.senha_hash = await bcrypt.hash(senha_app, 12);
       body.app_ativo = true;
     }
     const result = await service.atualizar(req.params.id, body, req.salaoId);
