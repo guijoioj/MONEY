@@ -32,6 +32,9 @@ app.use(helmet({
   },
   crossOriginOpenerPolicy: { policy: 'same-origin' },
   referrerPolicy: { policy: 'no-referrer' },
+  // [B4] preload:true gera o header com 'preload' — mas o domínio só entra na
+  // lista do navegador se for submetido a https://hstspreload.org. Mantemos por
+  // consistência; submeter o domínio é um passo manual fora do código.
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
