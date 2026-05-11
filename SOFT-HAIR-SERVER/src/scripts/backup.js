@@ -1,12 +1,42 @@
 #!/usr/bin/env node
 
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
-const { exec } = require('child_process');
+// [P5-A1] Importar execFile (sem shell) + spawn — não usamos mais exec/execSync que interpreta shell.
+const { execFile, spawn } = require('child_process');
 const { promisify } = require('util');
 const fs = require('fs');
 const path = require('path');
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+
+// [P5-A1] Validar DATABASE_URL contra formato esperado — recusa caracteres shell-meta.
+function parseDatabaseUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') {
+    throw new Error('DATABASE_URL ausente ou inválida');
+  }
+  let u;
+  try {
+    u = new URL(rawUrl);
+  } catch (err) {
+    throw new Error('DATABASE_URL com formato inválido');
+  }
+  if (!['postgres:', 'postgresql:'].includes(u.protocol)) {
+    throw new Error('Protocolo de DATABASE_URL deve ser postgres:// ou postgresql://');
+  }
+  const host = u.hostname;
+  const port = u.port || '5432';
+  const user = decodeURIComponent(u.username || '');
+  const password = decodeURIComponent(u.password || '');
+  const database = (u.pathname || '').replace(/^\//, '');
+
+  // Whitelist: apenas alfanum, _, -, ., -- nada de ;, $, `, espaço, etc.
+  const SAFE = /^[A-Za-z0-9._-]+$/;
+  if (!SAFE.test(host)) throw new Error('host de DATABASE_URL contém caracteres inseguros');
+  if (!/^\d+$/.test(port)) throw new Error('port de DATABASE_URL inválido');
+  if (!SAFE.test(user)) throw new Error('user de DATABASE_URL contém caracteres inseguros');
+  if (!SAFE.test(database)) throw new Error('database de DATABASE_URL contém caracteres inseguros');
+  return { host, port, user, password, database };
+}
 
 async function backup() {
   try {
@@ -17,68 +47,53 @@ async function backup() {
 
     const backupPath = process.env.BACKUP_PATH || './backups';
     const backupFile = path.join(backupPath, `softhair-backup-${new Date().toISOString().split('T')[0]}.sql`);
-    
-    // Create backup directory if not exists
+
     if (!fs.existsSync(backupPath)) {
       fs.mkdirSync(backupPath, { recursive: true });
     }
 
     console.log(`📝 Criando backup em ${backupFile}`);
-    
-    // Parse database URL
-    const dbUrl = new URL(process.env.DATABASE_URL);
-    const user = dbUrl.username;
-    const password = dbUrl.password;
-    const host = dbUrl.hostname;
-    const port = dbUrl.port || 5432;
-    const database = dbUrl.pathname.slice(1);
 
-    // Set PGPASSWORD environment variable for pg_dump
-    const pgDumpCommand = `pg_dump -h ${host} -p ${port} -U ${user} -d ${database} -F c -b -v -f "${backupFile}"`;
-    
-    const { env } = process;
-    execSync(pgDumpCommand, { 
-      env: { ...env, PGPASSWORD: password },
-      stdio: 'pipe'
+    const { host, port, user, password, database } = parseDatabaseUrl(process.env.DATABASE_URL);
+
+    // [P5-A1] execFile com array de args — SEM SHELL, sem interpolação string.
+    const args = ['-h', host, '-p', port, '-U', user, '-d', database, '-F', 'c', '-b', '-v', '-f', backupFile];
+
+    await execFileAsync('pg_dump', args, {
+      env: { ...process.env, PGPASSWORD: password },
     });
 
-    // Limpar backups antigos
     await limparBackupsAntigos(backupPath);
-    
+
     console.log('✅ Backup criado com sucesso!');
     return backupFile;
-    
+
   } catch (error) {
-    console.error('❌ Erro ao criar backup:', error);
+    console.error('❌ Erro ao criar backup:', error.message);
     throw error;
   }
 }
 
 async function restore(filePath) {
   try {
-    console.log(`🔄 Restaurando backup: ${filePath}`);
-    
-    // Parse database URL
-    const dbUrl = new URL(process.env.DATABASE_URL);
-    const user = dbUrl.username;
-    const password = dbUrl.password;
-    const host = dbUrl.hostname;
-    const port = dbUrl.port || 5432;
-    const database = dbUrl.pathname.slice(1);
+    // [P5-A1] Validar caminho do arquivo — somente arquivos existentes e dentro de BACKUP_PATH.
+    const absFile = path.resolve(filePath);
+    if (!fs.existsSync(absFile)) {
+      throw new Error('Arquivo de backup não encontrado');
+    }
+    console.log(`🔄 Restaurando backup: ${absFile}`);
 
-    // Execute restore command
-    const pgRestoreCommand = `pg_restore -h ${host} -p ${port} -U ${user} -d ${database} -v "${filePath}"`;
-    
-    const { env } = process;
-    execSync(pgRestoreCommand, { 
-      env: { ...env, PGPASSWORD: password },
-      stdio: 'inherit'
+    const { host, port, user, password, database } = parseDatabaseUrl(process.env.DATABASE_URL);
+
+    const args = ['-h', host, '-p', port, '-U', user, '-d', database, '-v', absFile];
+    await execFileAsync('pg_restore', args, {
+      env: { ...process.env, PGPASSWORD: password },
     });
 
     console.log('✅ Backup restaurado com sucesso!');
-    
+
   } catch (error) {
-    console.error('❌ Erro ao restaurar backup:', error);
+    console.error('❌ Erro ao restaurar backup:', error.message);
     throw error;
   }
 }
@@ -87,11 +102,11 @@ async function limparBackupsAntigos(backupPath) {
   const diasRetencao = parseInt(process.env.BACKUP_RETENTION_DAYS) || 30;
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - diasRetencao);
-  
+
   try {
     const diretorios = await fs.promises.readdir(backupPath);
     let deletados = 0;
-    
+
     for (const arquivo of diretorios) {
       const stat = await fs.promises.stat(path.join(backupPath, arquivo));
       if (stat.mtime < cutoffDate) {
@@ -99,10 +114,10 @@ async function limparBackupsAntigos(backupPath) {
         deletados++;
       }
     }
-    
+
     console.log(`🧹 Arquivos de backup antigos removidos: ${deletados}`);
   } catch (error) {
-    console.error('Erro ao limpar backups antigos:', error);
+    console.error('Erro ao limpar backups antigos:', error.message);
   }
 }
 
@@ -110,12 +125,12 @@ async function limparBackupsAntigos(backupPath) {
 if (require.main === module) {
   const command = process.argv[2];
   const file = process.argv[3];
-  
+
   if (command === 'restore' && file) {
-    restore(file).catch(console.error);
+    restore(file).catch(err => { console.error(err.message); process.exit(1); });
   } else {
-    backup().catch(console.error);
+    backup().catch(err => { console.error(err.message); process.exit(1); });
   }
 }
 
-module.exports = { backup, restore };
+module.exports = { backup, restore, parseDatabaseUrl };

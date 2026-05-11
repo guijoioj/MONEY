@@ -36,12 +36,23 @@ router.post('/register', [
 
     const senha_hash = await bcrypt.hash(password, 12);
 
-    const result = await pool.query(
-      `INSERT INTO clientes (nome, email, telefone, senha_hash, app_ativo)
-       VALUES ($1, $2, $3, $4, true)
-       RETURNING id, nome, email, telefone`,
-      [nome, email, telefone || null, senha_hash]
-    );
+    // [P5-A3] Catch UNIQUE violation por race condition (dois INSERTs paralelos com mesmo email).
+    // Combinado com constraint uq_clientes_app_email (initDb runMigrations) — fecha a janela.
+    let result;
+    try {
+      result = await pool.query(
+        `INSERT INTO clientes (nome, email, telefone, senha_hash, app_ativo)
+         VALUES ($1, $2, $3, $4, true)
+         RETURNING id, nome, email, telefone`,
+        [nome, email, telefone || null, senha_hash]
+      );
+    } catch (err) {
+      // 23505 = unique_violation
+      if (err.code === '23505') {
+        return res.status(409).json({ success: false, error: 'Email já cadastrado' });
+      }
+      throw err;
+    }
 
     const user = result.rows[0];
     const token = signToken(user.id);
@@ -77,7 +88,7 @@ router.post('/login', [
     const hashToCompare = cliente?.senha_hash || DUMMY_HASH;
     const valid = await bcrypt.compare(password, hashToCompare);
 
-    if (result.rows.length === 0)
+    if (!cliente)
       return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
     if (!cliente.senha_hash)
       return res.status(401).json({ success: false, error: 'Credenciais inválidas' });

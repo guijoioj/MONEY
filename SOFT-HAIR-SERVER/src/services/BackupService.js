@@ -1,4 +1,51 @@
 const { query, withTransaction } = require('../config/database');
+const crypto = require('crypto');
+
+// [P5-A2] Criptografia de backup com AES-256-GCM
+// Chave: BACKUP_ENCRYPTION_KEY (hex 64 chars = 32 bytes) ou fallback para ENCRYPTION_KEY.
+// Quando indisponível, backup retorna em plaintext mas com aviso.
+function _getBackupKey() {
+  const raw = process.env.BACKUP_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+  if (!raw) return null;
+  try {
+    const buf = Buffer.from(raw, 'hex');
+    if (buf.length !== 32) return null;
+    return buf;
+  } catch {
+    return null;
+  }
+}
+
+function encryptBackupPayload(jsonString) {
+  const key = _getBackupKey();
+  if (!key) return null;
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const encrypted = Buffer.concat([cipher.update(jsonString, 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return {
+    encrypted: true,
+    version: 'v1',
+    algo: 'aes-256-gcm',
+    iv: iv.toString('hex'),
+    tag: tag.toString('hex'),
+    payload: encrypted.toString('base64'),
+  };
+}
+
+function decryptBackupPayload(envelope) {
+  if (!envelope || !envelope.encrypted) return null;
+  const key = _getBackupKey();
+  if (!key) throw new Error('BACKUP_ENCRYPTION_KEY ausente para descriptografar');
+  if (envelope.algo !== 'aes-256-gcm') throw new Error('Algoritmo de backup desconhecido');
+  const iv = Buffer.from(envelope.iv, 'hex');
+  const tag = Buffer.from(envelope.tag, 'hex');
+  const payload = Buffer.from(envelope.payload, 'base64');
+  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+  decipher.setAuthTag(tag);
+  const decrypted = Buffer.concat([decipher.update(payload), decipher.final()]);
+  return JSON.parse(decrypted.toString('utf8'));
+}
 
 const BACKUP_TABLES = [
   'clientes', 'profissionais', 'servicos', 'produtos',
@@ -110,6 +157,16 @@ class BackupService {
         }
       }
 
+      // [P5-A2] Criptografar se chave disponível. Mantém metadata clara mas envelopa data.
+      const envelope = encryptBackupPayload(JSON.stringify(backup.data));
+      if (envelope) {
+        backup.encrypted_data = envelope;
+        backup.metadata.encrypted = true;
+        delete backup.data;
+      } else {
+        backup.metadata.encrypted = false;
+        backup.metadata.warning = 'BACKUP_ENCRYPTION_KEY não configurada — backup em plaintext';
+      }
       return { success: true, data: backup };
     } catch (error) {
       console.error('[BackupService] Erro ao gerar backup:', error);
@@ -122,8 +179,19 @@ class BackupService {
    */
   async restaurarBackup(salaoId, backupData) {
     try {
-      if (!backupData || !backupData.metadata || !backupData.data) {
+      if (!backupData || !backupData.metadata) {
         return { success: false, error: 'Formato de backup inválido' };
+      }
+      // [P5-A2] Descriptografar payload se necessário
+      if (backupData.encrypted_data && !backupData.data) {
+        try {
+          backupData.data = decryptBackupPayload(backupData.encrypted_data);
+        } catch (err) {
+          return { success: false, error: `Falha ao descriptografar backup: ${err.message}` };
+        }
+      }
+      if (!backupData.data) {
+        return { success: false, error: 'Formato de backup inválido (payload ausente)' };
       }
 
       return await withTransaction(async (client) => {
@@ -174,6 +242,24 @@ class BackupService {
 
             if (table !== 'venda_itens') {
               filteredRow.salao_id = salaoId; // força tenant correto
+            }
+
+            // [P5-M7] Validar FKs cross-tenant em notificacoes: descarta linha se ref não bate.
+            if (table === 'notificacoes') {
+              if (filteredRow.cliente_id) {
+                const r = await client.query(
+                  'SELECT 1 FROM clientes WHERE id = $1 AND salao_id = $2',
+                  [filteredRow.cliente_id, salaoId]
+                );
+                if (!r.rows.length) continue; // descarta linha
+              }
+              if (filteredRow.usuario_id) {
+                const r = await client.query(
+                  'SELECT 1 FROM usuarios WHERE id = $1 AND salao_id = $2',
+                  [filteredRow.usuario_id, salaoId]
+                );
+                if (!r.rows.length) continue;
+              }
             }
 
             const columns = Object.keys(filteredRow);

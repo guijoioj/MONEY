@@ -2,12 +2,14 @@ const { query, queryOne } = require('../config/database');
 
 class ClienteHistorico {
   static async create(data, salaoId) {
-    const observacoes = [data.tipo, data.descricao].filter(Boolean).join(': ');
+    // [P5-A5] Usa tabela dedicada `historico_cliente` em vez de poluir `agendamentos`.
+    // clienteId vem do PATH (rota), nunca do body.
+    const clienteId = data.clienteId || data.cliente_id;
     return queryOne(`
-      INSERT INTO agendamentos (salao_id, cliente_id, data_hora, status, observacoes)
-      VALUES ($1, $2, COALESCE($3::timestamp, NOW()), 'historico', $4)
+      INSERT INTO historico_cliente (salao_id, cliente_id, tipo, descricao, entidade_id, data)
+      VALUES ($1, $2, $3, $4, $5, COALESCE($6::timestamptz, NOW()))
       RETURNING *
-    `, [salaoId, data.cliente_id || data.clienteId, data.data || null, observacoes || null]);
+    `, [salaoId, clienteId, data.tipo, data.descricao, data.entidadeId || null, data.data || null]);
   }
 
   static async getByCliente(clienteId, filters = {}, salaoId) {

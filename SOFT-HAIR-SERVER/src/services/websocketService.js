@@ -5,11 +5,35 @@ const { query } = require('../config/database');
 const HEARTBEAT_INTERVAL = 30000; // 30s
 const CLIENT_TIMEOUT = 45000; // 45s sem pong = desconectar
 
+// [P5-A8] Limite de conexões WS por user (default 5)
+const MAX_CONNECTIONS_PER_USER = parseInt(process.env.WS_MAX_CONNECTIONS_PER_USER) || 5;
+
 class WebSocketService {
   constructor() {
     this.wss = null;
     this.clients = new Map();
+    // [P5-A8] Tracking de conexões por userId (string composto: type:userId)
+    this.connectionsByUser = new Map();
     this.heartbeatTimer = null;
+  }
+
+  _userKey(decoded) {
+    const uid = decoded.userId || decoded.profissionalId || decoded.clienteAppId || decoded.clienteId || 'anon';
+    const t = decoded.type || 'admin';
+    return `${t}:${uid}`;
+  }
+
+  _incUserConn(key) {
+    const cur = this.connectionsByUser.get(key) || 0;
+    this.connectionsByUser.set(key, cur + 1);
+    return cur + 1;
+  }
+
+  _decUserConn(key) {
+    if (!key) return;
+    const cur = this.connectionsByUser.get(key) || 0;
+    if (cur <= 1) this.connectionsByUser.delete(key);
+    else this.connectionsByUser.set(key, cur - 1);
   }
 
   init(server) {
@@ -47,7 +71,15 @@ class WebSocketService {
           }
           // [P4-M1] Travar algorithm em HS256.
           const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+          // [P5-A8] Limite de conexões simultâneas por user — recusa nova conexão acima do cap.
+          const userKey = this._userKey(decoded);
+          const currentConns = this.connectionsByUser.get(userKey) || 0;
+          if (currentConns >= MAX_CONNECTIONS_PER_USER) {
+            console.warn(`[WS] Limite de ${MAX_CONNECTIONS_PER_USER} conexões atingido para ${userKey}`);
+            return cb(false, 4002, 'Limite de conexões WS atingido');
+          }
           info.req._wsAuth = decoded;
+          info.req._wsUserKey = userKey;
           cb(true);
         } catch (e) {
           console.warn('[WS] handshake JWT inválido:', e.message);
@@ -63,6 +95,9 @@ class WebSocketService {
       // Se autenticou via handshake (?token=...), já registra cliente
       if (req._wsAuth) {
         const decoded = req._wsAuth;
+        const userKey = req._wsUserKey || this._userKey(decoded);
+        ws._wsUserKey = userKey; // [P5-A8] guardar para decrement no close
+        this._incUserConn(userKey);
         this.clients.set(ws, {
           salaoId: decoded.salaoId,
           userId: decoded.userId || decoded.profissionalId || decoded.clienteAppId || decoded.clienteId,
@@ -304,6 +339,11 @@ class WebSocketService {
 
   removeClient(ws) {
     // [P3-B8] _authTimeout removido; nada a limpar aqui além do Map.
+    // [P5-A8] Decrementa contagem de conexões por user.
+    if (ws._wsUserKey) {
+      this._decUserConn(ws._wsUserKey);
+      ws._wsUserKey = null;
+    }
     this.clients.delete(ws);
   }
 

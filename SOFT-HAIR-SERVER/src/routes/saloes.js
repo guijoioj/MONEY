@@ -51,9 +51,31 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 // Atualizar salão atual
+// [P5-A7] Validador customizado de logo_url:
+// - Permite http(s)://
+// - Permite data:image/{png,jpeg,jpg,gif,webp,svg+xml};base64,...
+// - Bloqueia javascript:, vbscript:, file:, data:text/html, etc.
+function isSafeLogoUrl(value) {
+  if (value === null || value === undefined || value === '') return true; // opcional
+  if (typeof value !== 'string') return false;
+  if (value.length > 2048) return false;
+  const v = value.trim();
+  // http(s)
+  if (/^https?:\/\/[^\s<>"'`]+$/i.test(v)) return true;
+  // data: imagem apenas
+  if (/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$/i.test(v)) return true;
+  return false;
+}
+
 router.put('/me', authMiddleware, requireAdmin, [
   body('nome').optional().isLength({ min: 2 }),
   body('email').optional().isEmail(),
+  body('logo_url').optional().custom((v) => {
+    if (!isSafeLogoUrl(v)) {
+      throw new Error('logo_url inválida (apenas http(s) ou data:image)');
+    }
+    return true;
+  }),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);

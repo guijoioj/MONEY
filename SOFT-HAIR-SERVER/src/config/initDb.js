@@ -583,6 +583,22 @@ async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_pontos_cliente ON pontos_fidelidade(cliente_id, salao_id);
   `);
 
+  // [P5-A5] Tabela dedicada para histórico de cliente (substitui pollution em agendamentos)
+  await query(`
+    CREATE TABLE IF NOT EXISTS historico_cliente (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      cliente_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+      tipo VARCHAR(50) NOT NULL,
+      descricao TEXT NOT NULL,
+      entidade_id INTEGER,
+      data TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_historico_cliente_cliente ON historico_cliente(cliente_id, salao_id);
+    CREATE INDEX IF NOT EXISTS idx_historico_cliente_data ON historico_cliente(salao_id, created_at DESC);
+  `);
+
   // [P5-C5] Fechamentos: adicionar campos para soft-delete + motivo de reabertura
   await query(`
     ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;

@@ -44,10 +44,8 @@ router.post('/login', [
 
     const result = await pool.query(sql, params);
 
-    if (result.rows.length === 0)
-      return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
-
-    // [M4] Se mais de um profissional ativo com o mesmo email e salaoId não informado, exige escolha
+    // [M4] Se mais de um profissional ativo com o mesmo email e salaoId não informado, exige escolha.
+    // Mantemos esta verificação ANTES do bcrypt: o caso é raro e o timing extra é desprezível.
     if (result.rows.length > 1 && !salaoId) {
       return res.status(409).json({
         success: false,
@@ -56,12 +54,15 @@ router.post('/login', [
       });
     }
 
-    // [P4-M7] Constant-time: garantir bcrypt.compare mesmo com senha_hash ausente.
+    // [P5-A4] Constant-time: SEMPRE executa bcrypt.compare, mesmo se rows.length === 0.
+    // Antes o early-return revelava enumeração de email via timing.
     const DUMMY_HASH = '$2a$12$' + 'X'.repeat(53);
-    const profissional = result.rows[0];
+    const profissional = result.rows[0]; // pode ser undefined
     const hashToCompare = profissional?.senha_hash || DUMMY_HASH;
     const valid = await bcrypt.compare(password, hashToCompare);
 
+    if (!profissional)
+      return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
     if (!profissional.senha_hash)
       return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
     if (!valid)
