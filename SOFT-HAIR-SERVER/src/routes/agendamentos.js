@@ -21,7 +21,7 @@ router.get('/', authMiddleware, async (req, res) => {
       res.status(500).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -31,7 +31,7 @@ router.get('/pendentes', authMiddleware, async (req, res) => {
     const result = await service.listar(req.salaoId, { status: 'pendente' });
     res.json({ success: result.success, data: result.data || [] });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -47,7 +47,7 @@ router.get('/proximos', authMiddleware, async (req, res) => {
     const result = await service.listar(req.salaoId, { data_inicio: dataInicio, data_fim: dataFim });
     res.json({ success: result.success, data: result.data || [] });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -59,7 +59,7 @@ router.get('/disponiveis/:profissionalId', authMiddleware, async (req, res) => {
     const result = await service.getHorariosDisponiveis(req.params.profissionalId, data, req.salaoId);
     res.json({ success: true, data: result.data });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -73,7 +73,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
       res.status(404).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -111,7 +111,7 @@ router.post('/', authMiddleware, [
       res.status(400).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -158,7 +158,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       res.status(404).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -172,7 +172,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       res.status(404).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

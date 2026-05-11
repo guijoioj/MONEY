@@ -26,7 +26,7 @@ router.get('/', authMiddleware, async (req, res) => {
     }
   } catch (error) {
     console.error('Erro ao listar clientes:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -49,7 +49,7 @@ router.get('/inadimplentes', authMiddleware, async (req, res) => {
       ORDER BY total_devido DESC
     `, [req.salaoId]);
     res.json({ success: true, data: r.rows });
-  } catch(e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch(e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // Aniversariantes da semana (DEVE ficar antes de /:id)
@@ -73,7 +73,7 @@ router.get('/aniversariantes', authMiddleware, async (req, res) => {
       ORDER BY EXTRACT(DAY FROM data_nascimento)
     `, [req.salaoId]);
     res.json({ success: true, data: r.rows });
-  } catch(e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch(e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // Obter cliente por ID
@@ -93,7 +93,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
     }
   } catch (error) {
     console.error('Erro ao obter cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -121,7 +121,7 @@ router.post('/', authMiddleware, [
     }
   } catch (error) {
     console.error('Erro ao criar cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -151,7 +151,7 @@ router.put('/:id', authMiddleware, [
     }
   } catch (error) {
     console.error('Erro ao atualizar cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -172,7 +172,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
   } catch (error) {
     console.error('Erro ao deletar cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -191,7 +191,7 @@ router.get('/search/:termo', authMiddleware, async (req, res) => {
     }
   } catch (error) {
     console.error('Erro ao buscar clientes:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -220,7 +220,7 @@ router.put('/:id/credito', authMiddleware, [
     }
   } catch (error) {
     console.error('Erro ao adicionar crédito:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

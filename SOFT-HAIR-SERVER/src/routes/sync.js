@@ -202,7 +202,10 @@ router.post('/push', authMiddleware, async (req, res) => {
 
           txResults.push({ table, operation, success: true, data: result });
         } catch (error) {
-          txResults.push({ table, operation, success: false, error: error.message });
+          // [P2-M1] Sanitizar mensagem em prod (mensagens Postgres podem vazar schema).
+          console.error('[SYNC] erro em mudança:', table, operation, error.message);
+          const safe = process.env.NODE_ENV === 'production' ? 'Erro ao processar mudança' : error.message;
+          txResults.push({ table, operation, success: false, error: safe });
         }
       }
 
@@ -232,7 +235,7 @@ router.get('/last-sync', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('[SYNC] Erro ao obter última sincronização:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -252,7 +255,7 @@ router.post('/reset', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('[SYNC] Erro ao resetar sincronização:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

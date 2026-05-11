@@ -11,7 +11,7 @@ router.get('/saldo/:clienteId', authMiddleware, async (req, res) => {
       [req.salaoId, req.params.clienteId]
     );
     res.json({ success: true, data: { saldo: parseInt(rows[0]?.saldo || 0) } });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // GET /api/fidelidade/historico/:clienteId
@@ -22,7 +22,7 @@ router.get('/historico/:clienteId', authMiddleware, async (req, res) => {
       [req.salaoId, req.params.clienteId]
     );
     res.json({ success: true, data: rows });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // POST /api/fidelidade/adicionar
@@ -35,7 +35,7 @@ router.post('/adicionar', authMiddleware, async (req, res) => {
       [req.salaoId, clienteId, pontos, descricao || 'Pontos adicionados', referenciaId || null, referenciaTipo || null]
     );
     res.json({ success: true, data: row[0] });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // POST /api/fidelidade/resgatar
@@ -54,7 +54,7 @@ router.post('/resgatar', authMiddleware, async (req, res) => {
       [req.salaoId, clienteId, -pontos, descricao || 'Resgate de pontos']
     );
     res.json({ success: true, data: row[0], saldoAnterior: saldo, saldoNovo: saldo - pontos });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // GET /api/fidelidade/ranking
@@ -70,7 +70,7 @@ router.get('/ranking', authMiddleware, async (req, res) => {
       ORDER BY saldo DESC LIMIT 20
     `, [req.salaoId]);
     res.json({ success: true, data: rows });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 module.exports = router;

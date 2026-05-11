@@ -16,7 +16,7 @@ router.get('/servicos-mais-vendidos', authMiddleware, async (req, res) => {
       GROUP BY s.id, s.nome ORDER BY total DESC LIMIT 10
     `, [req.salaoId]);
     res.json({ success: true, data: rows });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // GET /api/relatorios/horarios-pico?semanas=4
@@ -34,7 +34,7 @@ router.get('/horarios-pico', authMiddleware, async (req, res) => {
       GROUP BY dia_semana, hora ORDER BY dia_semana, hora
     `, [req.salaoId]);
     res.json({ success: true, data: rows });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // GET /api/relatorios/cancelamentos?dias=30
@@ -53,7 +53,7 @@ router.get('/cancelamentos', authMiddleware, async (req, res) => {
       GROUP BY p.id, p.nome ORDER BY cancelados DESC
     `, [req.salaoId]);
     res.json({ success: true, data: rows });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // GET /api/relatorios/clientes-inativos?dias=60
@@ -74,7 +74,7 @@ router.get('/clientes-inativos', authMiddleware, async (req, res) => {
       ORDER BY ultimo_agendamento ASC NULLS FIRST LIMIT 50
     `, [req.salaoId]);
     res.json({ success: true, data: rows });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // GET /api/relatorios/comparativo-mensal?meses=6
@@ -92,7 +92,7 @@ router.get('/comparativo-mensal', authMiddleware, async (req, res) => {
       GROUP BY mes ORDER BY mes
     `, [req.salaoId]);
     res.json({ success: true, data: rows });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // GET /api/relatorios/ticket-medio?dias=30
@@ -113,7 +113,7 @@ router.get('/ticket-medio', authMiddleware, async (req, res) => {
       ORDER BY total_gasto DESC LIMIT 20
     `, [req.salaoId]);
     res.json({ success: true, data: rows });
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+  } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 module.exports = router;

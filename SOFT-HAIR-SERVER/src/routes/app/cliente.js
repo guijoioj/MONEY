@@ -52,11 +52,10 @@ async function requireClienteVinculado(req, res, next) {
   }
 }
 
+// [P2-B1/C2] /perfil é especial: cliente PRECISA poder pedir perfil mesmo sem
+// vínculo (para onboarding) — retornamos vinculado:false. Outras rotas exigem vínculo.
 router.get('/perfil/:salonId', async (req, res) => {
   try {
-    // [C2] resolverCliente agora exige EMAIL EXATO (case-insensitive) entre cliente_app e cliente do salão.
-    // Substring/colisão por LIKE não vaza mais dados. Se não vinculado, retorna sinalização clara
-    // SEM dados do salão (apenas vinculado:false), permitindo onboarding sem IDOR.
     const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
     const appUser = await ClienteApp.findById(req.clienteApp.clienteAppId);
     res.json({
@@ -70,58 +69,67 @@ router.get('/perfil/:salonId', async (req, res) => {
   }
 });
 
-router.get('/historico/:salonId', async (req, res) => {
+router.get('/historico/:salonId', requireClienteVinculado, async (req, res) => {
   try {
-    const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
-    if (!cliente) return res.json({ data: [], message: 'Não cadastrado neste salão ainda' });
+    const cliente = req.clienteSalao;
     const historico = await ClienteHistorico.getByCliente(cliente.id, req.query, req.params.salonId);
     res.json({ data: historico });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[cliente historico] erro:', e.message);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 });
 
-router.get('/resumo/:salonId', async (req, res) => {
+router.get('/resumo/:salonId', requireClienteVinculado, async (req, res) => {
   try {
-    const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
-    if (!cliente) return res.json({ data: null, message: 'Não cadastrado neste salão ainda' });
+    const cliente = req.clienteSalao;
     const resumo = await ClienteHistorico.getResumo(cliente.id, req.params.salonId);
     res.json({ data: resumo });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[cliente resumo] erro:', e.message);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 });
 
-router.get('/fechamentos/:salonId', async (req, res) => {
+router.get('/fechamentos/:salonId', requireClienteVinculado, async (req, res) => {
   try {
-    const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
-    if (!cliente) return res.json({ data: [] });
+    const cliente = req.clienteSalao;
     const fechamentos = await Fechamento.getAll({ clienteId: cliente.id, ...req.query }, req.params.salonId);
     res.json({ data: fechamentos });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[cliente fechamentos] erro:', e.message);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 });
 
-router.get('/compras/:salonId', async (req, res) => {
+router.get('/compras/:salonId', requireClienteVinculado, async (req, res) => {
   try {
-    const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
-    if (!cliente) return res.json({ data: [] });
+    const cliente = req.clienteSalao;
     const vendas = await Venda.getAll({ clienteId: cliente.id, ...req.query }, req.params.salonId);
     res.json({ data: vendas });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[cliente compras] erro:', e.message);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 });
 
-router.get('/creditos/:salonId', async (req, res) => {
+router.get('/creditos/:salonId', requireClienteVinculado, async (req, res) => {
   try {
-    const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
-    if (!cliente) return res.json({ data: { creditos: [], saldo: 0 } });
+    const cliente = req.clienteSalao;
     const [creditos, saldo] = await Promise.all([
       CreditoCliente.getByCliente(cliente.id, req.params.salonId),
       CreditoCliente.getSaldo(cliente.id, req.params.salonId)
     ]);
     res.json({ data: { creditos, saldo } });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[cliente creditos] erro:', e.message);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 });
 
-router.get('/favoritos/:salonId', async (req, res) => {
+router.get('/favoritos/:salonId', requireClienteVinculado, async (req, res) => {
   try {
-    const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
-    if (!cliente) return res.json({ data: { servicos: [], produtos: [] } });
+    const cliente = req.clienteSalao;
     const [servicos, produtos] = await Promise.all([
       query(`
         SELECT s.nome, NULL::text as categoria, COUNT(*)::int as quantidade, COALESCE(SUM(a.valor), 0) as total_gasto
@@ -144,23 +152,26 @@ router.get('/favoritos/:salonId', async (req, res) => {
       `, [cliente.id, req.params.salonId])
     ]);
     res.json({ data: { servicos, produtos } });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[cliente favoritos] erro:', e.message);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 });
 
-router.get('/agendamentos/:salonId', async (req, res) => {
+router.get('/agendamentos/:salonId', requireClienteVinculado, async (req, res) => {
   try {
-    const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
-    if (!cliente) return res.json({ data: [] });
+    const cliente = req.clienteSalao;
     const agendamentos = await Agendamento.getAll({ clienteId: cliente.id }, req.params.salonId);
     res.json({ data: agendamentos });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[cliente agendamentos] erro:', e.message);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 });
 
-router.get('/dashboard/:salonId', async (req, res) => {
+router.get('/dashboard/:salonId', requireClienteVinculado, async (req, res) => {
   try {
-    const cliente = await resolverCliente(req.clienteApp.clienteAppId, req.params.salonId);
-    if (!cliente) return res.json({ data: null });
-
+    const cliente = req.clienteSalao;
     const [resumo, saldo, proximosAgendamentos] = await Promise.all([
       ClienteHistorico.getResumo(cliente.id, req.params.salonId),
       CreditoCliente.getSaldo(cliente.id, req.params.salonId),
@@ -182,7 +193,10 @@ router.get('/dashboard/:salonId', async (req, res) => {
         proximoAgendamento
       }
     });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[cliente dashboard] erro:', e.message);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 });
 
 module.exports = router;

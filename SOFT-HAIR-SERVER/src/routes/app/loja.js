@@ -28,7 +28,7 @@ router.get('/saloes/:salonId/produtos', async (req, res) => {
   try {
     const produtos = await Produto.getAll({ ativo: true, ...req.query }, req.params.salonId);
     res.json({ data: produtos });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.post('/pedido', appAuthMiddleware, async (req, res) => {
@@ -81,17 +81,17 @@ router.post('/pedido', appAuthMiddleware, async (req, res) => {
       pedido
     });
     res.status(201).json(pedido);
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 router.get('/meus-pedidos', appAuthMiddleware, async (req, res) => {
   try { res.json({ data: await PedidoLoja.getByCliente(req.clienteApp.clienteAppId) }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.get('/pedidos', authMiddleware, async (req, res) => {
   try { res.json({ data: await PedidoLoja.getBySalao(req.salaoId, req.query) }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.put('/pedidos/:id/status', authMiddleware, async (req, res) => {
@@ -109,7 +109,7 @@ router.put('/pedidos/:id/status', authMiddleware, async (req, res) => {
       pedido
     });
     res.json(pedido);
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 module.exports = router;

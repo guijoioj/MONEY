@@ -29,12 +29,12 @@ async function resolverOuCriarCliente(clienteAppId, salonId) {
 
 router.get('/saloes', async (req, res) => {
   try { res.json({ data: await Salao.getAll(req.query) }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.get('/saloes/:salonId/servicos', async (req, res) => {
   try { res.json({ data: await Servico.getAll({ ativo: true }, req.params.salonId) }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.get('/saloes/:salonId/profissionais', async (req, res) => {
@@ -55,7 +55,7 @@ router.get('/saloes/:salonId/profissionais', async (req, res) => {
       })
     );
     res.json({ data: resultado });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.post('/', appAuthMiddleware, async (req, res) => {
@@ -77,17 +77,17 @@ router.post('/', appAuthMiddleware, async (req, res) => {
     });
 
     res.status(201).json(pedido);
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 router.get('/meus', appAuthMiddleware, async (req, res) => {
   try { res.json({ data: await PedidoAgendamento.getByCliente(req.clienteApp.clienteAppId) }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.get('/salao', authMiddleware, async (req, res) => {
   try { res.json({ data: await PedidoAgendamento.getBySalao(req.salaoId, req.query) }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.put('/:id/aprovar', authMiddleware, async (req, res) => {
@@ -126,7 +126,7 @@ router.put('/:id/aprovar', authMiddleware, async (req, res) => {
     }
 
     res.json(pedidoAtualizado);
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 router.get('/:id/verificar-disponibilidade', authMiddleware, async (req, res) => {
@@ -138,7 +138,7 @@ router.get('/:id/verificar-disponibilidade', authMiddleware, async (req, res) =>
     const duracao = pedido.servicoDuracao || 30;
     const resultado = await Agendamento.verificarDisponibilidade(pedido.profissionalId, dataHora, duracao, req.salaoId);
     res.json(resultado);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.get('/:id/proximo-horario', authMiddleware, async (req, res) => {
@@ -151,7 +151,7 @@ router.get('/:id/proximo-horario', authMiddleware, async (req, res) => {
     const proximo = await Agendamento.proximoHorarioVago(pedido.profissionalId, dataHora, duracao, req.salaoId);
     if (!proximo) return res.status(404).json({ error: 'Nenhum horário disponível encontrado' });
     res.json({ dataHora: proximo });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.put('/:id/rejeitar', authMiddleware, async (req, res) => {
@@ -167,7 +167,7 @@ router.put('/:id/rejeitar', authMiddleware, async (req, res) => {
       pedido: pedidoAtualizado
     });
     res.json(pedidoAtualizado);
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 module.exports = router;

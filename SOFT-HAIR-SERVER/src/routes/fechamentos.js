@@ -12,7 +12,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const result = await service.listar(req.salaoId, { status, tipo });
     res.json({ success: result.success, data: result.data || [] });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -44,7 +44,7 @@ router.get('/em-aberto', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: rows });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -54,7 +54,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
     if (result.success) res.json({ success: true, data: result.data });
     else res.status(404).json({ success: false, error: result.error });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -71,7 +71,7 @@ router.post('/', authMiddleware, [
     if (result.success) res.status(201).json({ success: true, data: result.data });
     else res.status(400).json({ success: false, error: result.error });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -81,7 +81,7 @@ router.put('/:id/reabrir', authMiddleware, async (req, res) => {
     if (result.success) res.json({ success: true, data: result.data });
     else res.status(404).json({ success: false, error: result.error });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -98,7 +98,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     await pool.query('DELETE FROM fechamentos WHERE id = $1 AND salao_id = $2', [req.params.id, req.salaoId]);
     res.json({ success: true, data: { id: req.params.id } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

@@ -26,7 +26,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const result = await query(sql, params);
     res.json({ success: true, data: result.rows });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -56,7 +56,7 @@ router.get('/resumo', authMiddleware, async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -77,7 +77,7 @@ router.post('/', authMiddleware, [
     );
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -93,7 +93,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     if (!result.rows.length) return res.status(404).json({ success: false, error: 'Despesa não encontrada' });
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -107,7 +107,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     if (!result.rows.length) return res.status(404).json({ success: false, error: 'Despesa não encontrada' });
     res.json({ success: true, message: 'Despesa excluída' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

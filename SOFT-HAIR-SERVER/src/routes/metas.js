@@ -17,7 +17,7 @@ router.post('/', authMiddleware, async (req, res) => {
     );
     res.json({ success: true, data: rows[0] });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -58,7 +58,7 @@ router.get('/progresso', authMiddleware, async (req, res) => {
     );
     res.json({ success: true, data: rows });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

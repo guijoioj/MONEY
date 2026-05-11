@@ -49,7 +49,7 @@ router.post('/register', [
     res.status(201).json({ success: true, data: { user, token } });
   } catch (error) {
     console.error('Erro no registro do cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -89,7 +89,7 @@ router.post('/login', [
     res.json({ success: true, data: { user, token } });
   } catch (error) {
     console.error('Erro no login do cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -107,7 +107,7 @@ router.get('/me', clienteAuthMiddleware, async (req, res) => {
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Erro ao buscar cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -143,7 +143,7 @@ router.put('/perfil', clienteAuthMiddleware, [
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Erro ao atualizar perfil do cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -154,7 +154,7 @@ router.put('/push-token', clienteAuthMiddleware, async (req, res) => {
     await pool.query('UPDATE clientes SET push_token = $1 WHERE id = $2', [pushToken, req.clienteId]);
     res.json({ success: true });
   } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", e);
   }
 });
 

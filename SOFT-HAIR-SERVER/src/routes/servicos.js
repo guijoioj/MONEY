@@ -29,7 +29,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const data = rows.rows || rows;
     res.json({ success: true, data, total: parseInt((total.rows || total)[0].count) });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -43,7 +43,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
       res.status(404).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -64,7 +64,7 @@ router.post('/', authMiddleware, [
       res.status(400).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -84,7 +84,7 @@ router.put('/:id', authMiddleware, [
       res.status(404).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -98,7 +98,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       res.status(404).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

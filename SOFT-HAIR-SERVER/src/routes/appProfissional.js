@@ -45,7 +45,7 @@ router.post('/ponto', [
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Erro ao registrar ponto:', error);
-    res.status(500).json({ success: false, error: error.message });
+    sendErr(res, 500, 'Erro ao registrar ponto', error);
   }
 });
 

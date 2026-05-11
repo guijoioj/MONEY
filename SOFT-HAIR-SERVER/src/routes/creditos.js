@@ -23,7 +23,7 @@ router.get('/', authMiddleware, async (req, res) => {
     `, params);
     res.json({ success: true, data: rows });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -39,7 +39,7 @@ router.get('/saldo/:clienteId', authMiddleware, async (req, res) => {
     const c = rows[0];
     res.json({ success: true, data: { id: c.id, nome: c.nome, saldo: parseFloat(c.credito_disponivel) || 0 } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -56,7 +56,7 @@ router.get('/todos-com-saldo', authMiddleware, async (req, res) => {
     );
     res.json({ success: true, data: rows });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -74,7 +74,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     await pool.query('DELETE FROM creditos_cliente WHERE id = $1', [req.params.id]);
     res.json({ success: true, data: { id: req.params.id } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -84,7 +84,7 @@ router.get('/cliente/:clienteId', authMiddleware, async (req, res) => {
     if (result.success) res.json({ success: true, data: result.data });
     else res.status(404).json({ success: false, error: result.error });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -102,7 +102,7 @@ router.post('/', authMiddleware, [
     if (result.success) res.status(201).json({ success: true, data: result.data, message: result.message });
     else res.status(400).json({ success: false, error: result.error });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

@@ -61,7 +61,7 @@ router.post('/restore', authMiddleware, requireAdmin, async (req, res) => {
       res.status(400).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

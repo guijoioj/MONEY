@@ -29,15 +29,27 @@ interface AuthState {
 
 // SECURITY: token vai em SecureStore (Keychain iOS / Keystore Android).
 // AsyncStorage segue sendo usado para dados não-sensíveis (user, userType).
+// [P2-A7/P2-M8] NÃO há mais fallback para AsyncStorage em produção:
+// se SecureStore não estiver disponível, falhamos para forçar reauth e evitar
+// persistir o JWT em localStorage/AsyncStorage (acessível a XSS no web build).
 const TOKEN_KEY = 'softhair_token';
 const LEGACY_TOKEN_KEY = '@softhair:token';
+
+function isSecureStoreUnavailableError(e: any): boolean {
+  // SecureStore lança em web/Expo Go quando não está disponível.
+  return !!e;
+}
 
 async function setToken(token: string): Promise<void> {
   try {
     await SecureStore.setItemAsync(TOKEN_KEY, token);
   } catch (e) {
-    // Fallback (web/Expo Go onde SecureStore não está disponível)
-    await AsyncStorage.setItem(LEGACY_TOKEN_KEY, token);
+    // [P2-A7] Não cai mais em AsyncStorage — propaga o erro para forçar reauth.
+    // Mantemos o token APENAS em memória (zustand state) durante a sessão.
+    if (__DEV__) {
+      console.warn('[authStore] SecureStore indisponível — token NÃO foi persistido. Sessão será perdida ao fechar o app.');
+    }
+    // Não relança: a sessão segue válida em memória até o usuário fechar o app.
   }
 }
 
@@ -46,13 +58,25 @@ async function getToken(): Promise<string | null> {
     const v = await SecureStore.getItemAsync(TOKEN_KEY);
     if (v) return v;
   } catch {}
-  // Migração: se existir token em AsyncStorage de versões anteriores, migra
+  // [P2-A7] Migração legacy: se existir token em AsyncStorage de versões anteriores,
+  // tenta migrar para SecureStore. Se SecureStore não estiver disponível, o token
+  // legado é REMOVIDO e o usuário precisa fazer login novamente (não retornamos token
+  // a partir de AsyncStorage, para fechar o vetor XSS no web).
   try {
     const legacy = await AsyncStorage.getItem(LEGACY_TOKEN_KEY);
     if (legacy) {
-      try { await SecureStore.setItemAsync(TOKEN_KEY, legacy); } catch {}
-      try { await AsyncStorage.removeItem(LEGACY_TOKEN_KEY); } catch {}
-      return legacy;
+      try {
+        await SecureStore.setItemAsync(TOKEN_KEY, legacy);
+        try { await AsyncStorage.removeItem(LEGACY_TOKEN_KEY); } catch {}
+        return legacy;
+      } catch {
+        // SecureStore não disponível — apaga o token plaintext e força reauth.
+        try { await AsyncStorage.removeItem(LEGACY_TOKEN_KEY); } catch {}
+        if (__DEV__) {
+          console.warn('[authStore] Token legacy descartado (SecureStore indisponível). Faça login novamente.');
+        }
+        return null;
+      }
     }
   } catch {}
   return null;

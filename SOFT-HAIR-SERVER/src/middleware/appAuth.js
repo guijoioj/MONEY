@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const AuthService = require('../services/authService');
 
 function getBearerToken(req) {
   const authHeader = req.headers.authorization;
@@ -7,7 +8,7 @@ function getBearerToken(req) {
   return bearer === 'Bearer' ? token : null;
 }
 
-function appAuthMiddleware(req, res, next) {
+async function appAuthMiddleware(req, res, next) {
   const token = getBearerToken(req);
   if (!token) {
     return res.status(401).json({ success: false, error: 'Autenticacao necessaria' });
@@ -25,6 +26,11 @@ function appAuthMiddleware(req, res, next) {
       return res.status(403).json({ success: false, error: 'Acesso nao autorizado' });
     }
 
+    // [P2-A5] Checar blacklist — logout do cliente deve revogar o token.
+    if (await AuthService.isTokenRevoked(decoded)) {
+      return res.status(401).json({ success: false, error: 'Token revogado' });
+    }
+
     req.clienteApp = {
       clienteAppId: clienteId,
       clienteId,
@@ -39,7 +45,7 @@ function appAuthMiddleware(req, res, next) {
   }
 }
 
-function profissionalAppMiddleware(req, res, next) {
+async function profissionalAppMiddleware(req, res, next) {
   const token = getBearerToken(req);
   if (!token) {
     return res.status(401).json({ success: false, error: 'Autenticacao necessaria' });
@@ -54,6 +60,11 @@ function profissionalAppMiddleware(req, res, next) {
     const profissionalId = decoded.profissionalId;
     if (!profissionalId) {
       return res.status(403).json({ success: false, error: 'Acesso nao autorizado' });
+    }
+
+    // [P2-A5] Checar blacklist — logout do profissional deve revogar o token.
+    if (await AuthService.isTokenRevoked(decoded)) {
+      return res.status(401).json({ success: false, error: 'Token revogado' });
     }
 
     req.profissionalId = profissionalId;

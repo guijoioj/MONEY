@@ -16,7 +16,8 @@ class WebSocketService {
     this.wss = new WebSocket.Server({
       server,
       path: process.env.WS_PATH || '/ws',
-      // [A8] Validar JWT no handshake. Aceita ?token=... ou header Sec-WebSocket-Protocol.
+      // [A8/P2-M2] Validar JWT no handshake. Token é OBRIGATÓRIO — sem token, rejeita.
+      // Aceita ?token=... ou header Sec-WebSocket-Protocol. Sem fallback legacy.
       verifyClient: (info, cb) => {
         try {
           const url = new URL(info.req.url, 'http://x');
@@ -24,10 +25,9 @@ class WebSocketService {
           const hToken = (info.req.headers['sec-websocket-protocol'] || '').split(',').map(s => s.trim()).find(Boolean);
           const token = qToken || hToken;
           if (!token) {
-            // Não rejeita imediatamente — permite o fluxo de auth via mensagem ('auth') que já existe.
-            // Mas marca como anônimo até autenticar.
-            info.req._wsAnonymous = true;
-            return cb(true);
+            // [P2-M2] Token obrigatório — não permite mais auth-via-mensagem.
+            console.warn('[WS] handshake sem token — rejeitando');
+            return cb(false, 4001, 'Token obrigatório no handshake');
           }
           const decoded = jwt.verify(token, process.env.JWT_SECRET);
           info.req._wsAuth = decoded;
@@ -48,7 +48,9 @@ class WebSocketService {
         const decoded = req._wsAuth;
         this.clients.set(ws, {
           salaoId: decoded.salaoId,
-          userId: decoded.userId || decoded.profissionalId || decoded.clienteAppId,
+          userId: decoded.userId || decoded.profissionalId || decoded.clienteAppId || decoded.clienteId,
+          // [P2-C1] type vem do JWT — usado para validação de chat cross-tenant
+          type: decoded.type || 'admin',
           email: decoded.email,
           subscriptions: []
         });
@@ -107,7 +109,12 @@ class WebSocketService {
   handleMessage(ws, data) {
     switch (data.type) {
       case 'auth':
-        this.authenticateClient(ws, data);
+        // [P2-M2] Auth-via-mensagem foi descontinuado — token é obrigatório no handshake.
+        ws.send(JSON.stringify({
+          type: 'auth',
+          success: false,
+          error: 'Auth via mensagem foi descontinuado. Envie o token no handshake (?token=...).'
+        }));
         break;
       case 'subscribe':
         this.subscribeClient(ws, data);
@@ -188,28 +195,65 @@ class WebSocketService {
       ws.send(JSON.stringify({ type: 'error', message: 'Autenticação necessária' }));
       return;
     }
-    const { salaoId, remetenteId, remetenteTipo, destinatarioId, destinatarioTipo, mensagem } = data;
-    if (!mensagem || !remetenteId || !remetenteTipo) {
-      ws.send(JSON.stringify({ type: 'error', message: 'Campos obrigatórios: remetenteId, remetenteTipo, mensagem' }));
+    // [P2-C1] NUNCA confiar em salaoId/remetenteId/remetenteTipo do cliente.
+    // Tudo vem do JWT verificado no handshake. Cliente só pode forjar mensagem
+    // em nome de outro usuário/salão se conseguir falsificar o JWT (impossível
+    // sem JWT_SECRET).
+    const { destinatarioId, destinatarioTipo, mensagem } = data;
+    if (!mensagem || typeof mensagem !== 'string' || !mensagem.trim()) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Campo obrigatório: mensagem' }));
       return;
     }
+
+    const salaoId = sender.salaoId;
+    const remetenteId = sender.userId;
+    const remetenteTipo = sender.type || 'admin';
+
+    // [P2-C1] Validar que destinatarioId pertence ao mesmo salão (defense in depth).
+    if (destinatarioId) {
+      try {
+        const tabela = destinatarioTipo === 'cliente'
+          ? 'clientes'
+          : destinatarioTipo === 'profissional'
+            ? 'profissionais'
+            : 'usuarios';
+        // Whitelist de tabelas para evitar injection
+        if (!['clientes', 'profissionais', 'usuarios'].includes(tabela)) {
+          ws.send(JSON.stringify({ type: 'error', message: 'destinatarioTipo inválido' }));
+          return;
+        }
+        const owns = await query(
+          `SELECT 1 FROM ${tabela} WHERE id = $1 AND salao_id = $2`,
+          [destinatarioId, salaoId]
+        );
+        if (!owns.length) {
+          ws.send(JSON.stringify({ type: 'error', message: 'destinatário não pertence ao salão' }));
+          return;
+        }
+      } catch (err) {
+        console.error('[WS] erro ao validar destinatário:', err.message);
+        return;
+      }
+    }
+
     try {
       await query(
         'INSERT INTO chat_mensagens (salao_id, remetente_id, remetente_tipo, destinatario_id, destinatario_tipo, mensagem, created_at) VALUES ($1,$2,$3,$4,$5,$6,NOW())',
-        [salaoId || sender.salaoId, remetenteId, remetenteTipo, destinatarioId || null, destinatarioTipo || null, mensagem]
+        [salaoId, remetenteId, remetenteTipo, destinatarioId || null, destinatarioTipo || null, mensagem]
       );
     } catch (err) {
       console.error('[WS] Erro ao salvar chat_mensagem:', err.message);
     }
     const payload = JSON.stringify({
       type: 'CHAT_MESSAGE',
-      data: { salaoId: salaoId || sender.salaoId, remetenteId, remetenteTipo, destinatarioId, destinatarioTipo, mensagem, createdAt: new Date().toISOString() }
+      data: { salaoId, remetenteId, remetenteTipo, destinatarioId, destinatarioTipo, mensagem, createdAt: new Date().toISOString() }
     });
     // Enviar para destinatário específico (se informado) ou broadcast do salão
     let delivered = false;
     if (destinatarioId) {
       this.clients.forEach((client, clientWs) => {
-        if (client.userId === destinatarioId && clientWs.readyState === WebSocket.OPEN) {
+        // [P2-C1] Só entrega se o destinatário estiver no MESMO salão do remetente.
+        if (client.userId === destinatarioId && client.salaoId === salaoId && clientWs.readyState === WebSocket.OPEN) {
           clientWs.send(payload);
           delivered = true;
         }
@@ -217,7 +261,7 @@ class WebSocketService {
     }
     if (!delivered) {
       this.clients.forEach((client, clientWs) => {
-        if (client.salaoId === (salaoId || sender.salaoId) && clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+        if (client.salaoId === salaoId && clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
           clientWs.send(payload);
         }
       });

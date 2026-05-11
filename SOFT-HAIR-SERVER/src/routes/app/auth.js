@@ -45,7 +45,7 @@ router.post('/register', async (req, res) => {
     const cliente = await ClienteApp.create({ nome, email, password: hashedPassword, telefone });
     const token = signClienteToken(cliente);
     res.status(201).json({ user: ClienteApp.sanitize(cliente), token });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 router.post('/login', async (req, res) => {
@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Credenciais inválidas' });
     const token = signClienteToken(cliente);
     res.json({ user: ClienteApp.sanitize(cliente), token });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 // [M5] Rota legacy: redireciona para a rota canônica do profissional.
@@ -77,7 +77,7 @@ router.get('/me', appAuthMiddleware, async (req, res) => {
     const cliente = await ClienteApp.findById(req.clienteApp.clienteAppId);
     if (!cliente) return res.status(404).json({ error: 'Usuário não encontrado' });
     res.json({ user: ClienteApp.sanitize(cliente) });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.put('/me', appAuthMiddleware, async (req, res) => {
@@ -105,7 +105,7 @@ router.put('/me', appAuthMiddleware, async (req, res) => {
     }
 
     res.json({ user: ClienteApp.sanitize(cliente) });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 router.put('/me/senha', appAuthMiddleware, async (req, res) => {
@@ -129,7 +129,7 @@ router.put('/me/senha', appAuthMiddleware, async (req, res) => {
     const hash = await bcrypt.hash(novaSenha, 12);
     await ClienteApp.update(req.clienteApp.clienteAppId, { password: hash });
     res.json({ message: 'Senha alterada com sucesso' });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 router.put('/me/push-token', appAuthMiddleware, async (req, res) => {
@@ -137,7 +137,7 @@ router.put('/me/push-token', appAuthMiddleware, async (req, res) => {
     const { pushToken } = req.body;
     await ClienteApp.update(req.clienteApp.clienteAppId, { pushToken });
     res.json({ message: 'Push token atualizado' });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 module.exports = router;
