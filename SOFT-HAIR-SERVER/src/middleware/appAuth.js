@@ -15,7 +15,8 @@ async function appAuthMiddleware(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // [P4-M1] Travar algorithm em HS256.
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     // [M7] Exige explicitamente type === 'cliente'. JWT antigos (sem type) ou de outro tipo são rejeitados.
     // Não aceita mais decoded.userId como fallback (vetor de escalada admin→cliente).
     if (decoded.type !== 'cliente') {
@@ -52,7 +53,8 @@ async function profissionalAppMiddleware(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // [P4-M1] Travar algorithm em HS256.
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     // [M7] Exige explicitamente type === 'profissional'. Sem fallback para userId.
     if (decoded.type !== 'profissional') {
       return res.status(403).json({ success: false, error: 'Acesso nao autorizado' });

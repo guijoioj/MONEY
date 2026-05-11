@@ -56,12 +56,14 @@ router.post('/login', [
       });
     }
 
+    // [P4-M7] Constant-time: garantir bcrypt.compare mesmo com senha_hash ausente.
+    const DUMMY_HASH = '$2a$12$' + 'X'.repeat(53);
     const profissional = result.rows[0];
+    const hashToCompare = profissional?.senha_hash || DUMMY_HASH;
+    const valid = await bcrypt.compare(password, hashToCompare);
 
     if (!profissional.senha_hash)
       return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
-
-    const valid = await bcrypt.compare(password, profissional.senha_hash);
     if (!valid)
       return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
 

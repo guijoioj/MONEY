@@ -71,15 +71,16 @@ router.post('/login', [
       [email]
     );
 
+    // [P4-M7] Constant-time: roda bcrypt.compare mesmo quando cliente não existe.
+    const DUMMY_HASH = '$2a$12$' + 'X'.repeat(53);
+    const cliente = result.rows[0];
+    const hashToCompare = cliente?.senha_hash || DUMMY_HASH;
+    const valid = await bcrypt.compare(password, hashToCompare);
+
     if (result.rows.length === 0)
       return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
-
-    const cliente = result.rows[0];
-
     if (!cliente.senha_hash)
       return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
-
-    const valid = await bcrypt.compare(password, cliente.senha_hash);
     if (!valid)
       return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
 

@@ -27,7 +27,12 @@ class EmailService {
   }
 
   static async sendPasswordResetEmail(email, token, userName) {
-    const resetUrl = `http://localhost:3000/reset-password/${token}`;
+    // [P4-M2] URL base agora vem de FRONTEND_URL — não mais hardcoded em localhost
+    // (que quebraria o link de reset em produção). Token já é gerado server-side
+    // como string segura; URL-encoded para evitar injection no link gerado.
+    const base = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/+$/, '');
+    const safeToken = encodeURIComponent(token);
+    const resetUrl = `${base}/reset-password/${safeToken}`;
     
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

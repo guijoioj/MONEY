@@ -11,7 +11,9 @@ const clienteAuthMiddleware = async (req, res, next) => {
     return res.status(401).json({ success: false, error: 'Token inválido' });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // [P4-M1] Travar algorithm em HS256 — defense-in-depth para evitar confusão
+    // de algoritmo caso JWT_SECRET seja trocado por PEM acidentalmente.
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     if (decoded.type !== 'cliente')
       return res.status(403).json({ success: false, error: 'Acesso não autorizado' });
     // [P2-A5] Checar blacklist também para cliente — logout deve revogar.

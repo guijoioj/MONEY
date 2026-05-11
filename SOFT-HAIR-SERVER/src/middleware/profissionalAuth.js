@@ -11,7 +11,8 @@ const profissionalAuthMiddleware = async (req, res, next) => {
     return res.status(401).json({ success: false, error: 'Token inválido' });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // [P4-M1] Travar algorithm em HS256.
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     if (decoded.type !== 'profissional')
       return res.status(403).json({ success: false, error: 'Acesso não autorizado' });
     // [P2-A5] Checar blacklist — logout deve revogar token de profissional.

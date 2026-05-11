@@ -138,10 +138,12 @@ router.post('/push', authMiddleware, async (req, res) => {
       });
     }
 
-    if (changes.length > 500) {
+    // [P4-M6] Limite reduzido para 100 — antes 500 podia gerar long-lock no Postgres
+    // dentro da transação serializável, exaurindo conexões sob concorrência.
+    if (changes.length > 100) {
       return res.status(400).json({
         success: false,
-        error: 'Máximo de 500 mudanças por requisição'
+        error: 'Máximo de 100 mudanças por requisição'
       });
     }
 
@@ -149,6 +151,9 @@ router.post('/push', authMiddleware, async (req, res) => {
 
     // Processar todas as mudanças dentro de uma transaction
     const results = await withTransaction(async (client) => {
+      // [P4-M6] Timeout de statement por transação — bloqueia escalada de long-lock
+      // se um INSERT bater em índice corrompido / lock pesado. 10s é folgado para 100 changes.
+      try { await client.query("SET LOCAL statement_timeout = '10s'"); } catch (_) { /* não-fatal */ }
       const txResults = [];
 
       for (const change of changes) {

@@ -59,11 +59,16 @@ class AuthService {
       [email]
     );
 
+    // [P4-M7] Constant-time login: SEMPRE executa bcrypt.compare, mesmo se user não existe.
+    // Antes: usuário inexistente retornava imediato (~ms), existente esperava ~100ms — diferença
+    // mensurável permitia user enumeration por timing.
+    const DUMMY_HASH = '$2a$12$' + 'X'.repeat(53);
+    const hashToCompare = user?.senha_hash || DUMMY_HASH;
+    const validPassword = await bcrypt.compare(senha, hashToCompare);
+
     if (!user) {
       throw new Error('Credenciais inválidas');
     }
-
-    const validPassword = await bcrypt.compare(senha, user.senha_hash);
     if (!validPassword) {
       throw new Error('Credenciais inválidas');
     }
@@ -123,7 +128,8 @@ class AuthService {
    * Verificar token JWT
    */
   static verifyToken(token) {
-    return jwt.verify(token, process.env.JWT_SECRET);
+    // [P4-M1] Travar algorithm em HS256 — defense-in-depth.
+    return jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
   }
 
   /**

@@ -244,6 +244,22 @@ function loginAttemptLogger(req, res, next) {
 app.locals.accountLockout = accountLockout;
 app.locals.loginAttemptLogger = loginAttemptLogger;
 
+// [P4-M8] Normaliza parameter pollution em req.query.
+// Express trata `?id=1&id=2` como array — services constroem SQL com `cliente_id = $1`
+// e o `pg` rejeita arrays para coluna integer, causando 500 + log spam. Mantemos o último
+// valor (semântica POSIX) e nivelamos tudo a string.
+app.use((req, res, next) => {
+  if (req.query && typeof req.query === 'object') {
+    for (const k of Object.keys(req.query)) {
+      const v = req.query[k];
+      if (Array.isArray(v)) {
+        req.query[k] = v.length > 0 ? String(v[v.length - 1]) : '';
+      }
+    }
+  }
+  next();
+});
+
 // ─── Camelize: snake_case → camelCase em todas as respostas JSON ───
 const { camelizeResponse } = require('./middleware/camelize');
 app.use(camelizeResponse);

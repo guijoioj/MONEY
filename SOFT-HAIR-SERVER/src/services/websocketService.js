@@ -16,6 +16,9 @@ class WebSocketService {
     this.wss = new WebSocket.Server({
       server,
       path: process.env.WS_PATH || '/ws',
+      // [P4-M4] Limite explícito de payload — sem isso, ws@8 aceita até 100MiB,
+      // permitindo DoS via JSON.parse síncrono de mensagem gigante. 64KB > suficiente.
+      maxPayload: 64 * 1024,
       // [A8/P2-M2] Validar JWT no handshake. Token é OBRIGATÓRIO — sem token, rejeita.
       // Aceita ?token=... ou header Sec-WebSocket-Protocol. Sem fallback legacy.
       verifyClient: (info, cb) => {
@@ -42,7 +45,8 @@ class WebSocketService {
             console.warn('[WS] handshake sem token — rejeitando');
             return cb(false, 4001, 'Token obrigatório no handshake');
           }
-          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          // [P4-M1] Travar algorithm em HS256.
+          const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
           info.req._wsAuth = decoded;
           cb(true);
         } catch (e) {
