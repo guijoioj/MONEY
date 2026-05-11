@@ -110,8 +110,14 @@ class ProfissionalService {
         };
       }
 
-      // Soft delete
-      await profissionalModel.update(id, { ativo: false }, salaoId);
+      // [P3-B9] Soft delete: zera senha_hash + app_ativo. Senha antiga não volta
+      // se admin reativar — força reset.
+      await profissionalModel.update(id, {
+        ativo: false,
+        app_ativo: false,
+        senha_hash: null,
+        push_token: null,
+      }, salaoId);
 
       return {
         success: true,

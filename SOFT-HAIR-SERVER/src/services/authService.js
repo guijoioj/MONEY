@@ -97,10 +97,15 @@ class AuthService {
 
   /**
    * Gerar token JWT
-   * [A3] JWT curto (default 24h) + jti para permitir revogação via jwt_blacklist.
+   * [A3] JWT curto + jti para permitir revogação via jwt_blacklist.
+   * [P3-B1] Admin recebe TTL menor (8h default) que usuários comuns (24h default).
+   * Pode ser sobrescrito por env JWT_EXPIRES_IN / JWT_ADMIN_EXPIRES_IN.
    */
   static generateToken(user) {
     const crypto = require('crypto');
+    const adminTTL = process.env.JWT_ADMIN_EXPIRES_IN || '8h';
+    const regularTTL = process.env.JWT_EXPIRES_IN || '24h';
+    const expiresIn = user.tipo === 'admin' ? adminTTL : regularTTL;
     return jwt.sign(
       {
         userId: user.id,
@@ -110,7 +115,7 @@ class AuthService {
         jti: crypto.randomBytes(16).toString('hex'),
       },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      { expiresIn }
     );
   }
 

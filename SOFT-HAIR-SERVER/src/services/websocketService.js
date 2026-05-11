@@ -91,12 +91,8 @@ class WebSocketService {
         this.removeClient(ws);
       });
 
-      // Timeout de auth: se não autenticar em 10s, desconectar
-      ws._authTimeout = setTimeout(() => {
-        if (!this.clients.has(ws)) {
-          ws.close(4001, 'Timeout de autenticação');
-        }
-      }, 10000);
+      // [P3-B8] Auth-timeout removido — handshake já exige token (verifyClient).
+      // Toda conexão que chega aqui está autenticada; o timer era dead code.
     });
 
     // Heartbeat: verificar conexões mortas a cada 30s
@@ -167,7 +163,6 @@ class WebSocketService {
       };
 
       this.clients.set(ws, clientInfo);
-      clearTimeout(ws._authTimeout);
 
       ws.send(JSON.stringify({
         type: 'auth',
@@ -288,7 +283,7 @@ class WebSocketService {
   }
 
   removeClient(ws) {
-    clearTimeout(ws._authTimeout);
+    // [P3-B8] _authTimeout removido; nada a limpar aqui além do Map.
     this.clients.delete(ws);
   }
 

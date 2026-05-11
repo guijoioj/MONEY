@@ -92,10 +92,20 @@ router.get('/me', profissionalAuthMiddleware, async (req, res) => {
 });
 
 // PUT /push-token
+// [P3-B5] Valida formato de pushToken — só ExponentPushToken[...] ou FCM:...
 router.put('/push-token', profissionalAuthMiddleware, async (req, res) => {
   try {
     const { pushToken } = req.body;
-    await pool.query('UPDATE profissionais SET push_token = $1 WHERE id = $2', [pushToken, req.profissionalId]);
+    if (pushToken && typeof pushToken !== 'string') {
+      return res.status(400).json({ success: false, error: 'pushToken inválido' });
+    }
+    if (pushToken && !/^ExponentPushToken\[.+\]$|^FCM:.+/i.test(pushToken)) {
+      return res.status(400).json({ success: false, error: 'Formato de pushToken inválido' });
+    }
+    if (pushToken && pushToken.length > 256) {
+      return res.status(400).json({ success: false, error: 'pushToken muito longo' });
+    }
+    await pool.query('UPDATE profissionais SET push_token = $1 WHERE id = $2', [pushToken || null, req.profissionalId]);
     res.json({ success: true });
   } catch (e) {
     return sendError(res, 500, 'Erro ao atualizar push token', e);

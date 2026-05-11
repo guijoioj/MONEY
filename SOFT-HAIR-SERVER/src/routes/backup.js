@@ -20,7 +20,8 @@ function safeFilename(input) {
 // Gerar backup completo do salão
 router.get('/', authMiddleware, requireAdmin, async (req, res) => {
   try {
-    console.log(`[BACKUP][AUDIT] salao=${req.salaoId} user=${req.user?.userId} reauth=${!!req.headers['x-reauth-token']}`);
+    // [P3-B10] Audit log completo com IP + User-Agent para forense
+    console.log(`[BACKUP][AUDIT] salao=${req.salaoId} user=${req.user?.userId} ip=${req.ip} ua="${(req.headers['user-agent'] || '').slice(0, 120)}" reauth=${!!req.headers['x-reauth-token']}`);
     const result = await service.gerarBackup(req.salaoId);
     if (result.success) {
       res.json({ success: true, data: result.data });
@@ -34,7 +35,7 @@ router.get('/', authMiddleware, requireAdmin, async (req, res) => {
 
 // Download como arquivo JSON
 router.get('/download', authMiddleware, requireAdmin, async (req, res) => {
-  console.log(`[BACKUP][AUDIT][DOWNLOAD] salao=${req.salaoId} user=${req.user?.userId}`);
+  console.log(`[BACKUP][AUDIT][DOWNLOAD] salao=${req.salaoId} user=${req.user?.userId} ip=${req.ip} ua="${(req.headers['user-agent'] || '').slice(0, 120)}"`);
   try {
     const result = await service.gerarBackup(req.salaoId);
     if (!result.success) return res.status(500).json({ success: false, error: result.error });

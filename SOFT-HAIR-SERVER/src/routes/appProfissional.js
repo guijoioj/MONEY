@@ -44,7 +44,8 @@ router.post('/ponto', [
     );
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
-    console.error('Erro ao registrar ponto:', error);
+    // [P3-B6] Em prod logar apenas message + stack curta (não objeto inteiro com params)
+    console.error('Erro ao registrar ponto:', error.message);
     sendErr(res, 500, 'Erro ao registrar ponto', error);
   }
 });
