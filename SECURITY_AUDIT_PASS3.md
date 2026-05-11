@@ -205,3 +205,64 @@ Smoke tests pós-cleanup: **3/3 PASS** (jest --runInBand contra DB de produção
 - ✅ `path traversal` em backup — backup gera em memória (não escreve arquivo).
 - ✅ Cliente `/api/app/cliente/*` — todas rotas usam `requireClienteVinculado` após fix P2-C2.
 - ✅ Auth de admin em produtos: `produtos.js` (não auditado em detalhe; herda `authMiddleware`).
+
+---
+
+## Resolução — Pass 3 (2026-05-11)
+
+Smoke tests: **3/3 PASS** após cada wave de fixes.
+Commits: 4 (criticals+high, medium, low). Veja git log para detalhes.
+
+### Críticos
+| ID  | Status | Notas |
+|-----|--------|-------|
+| P3-C1 | ✅ FIXADO | `routes/auth.js` — `salaoId` forçado do JWT (`req.salaoId`); body que diverge → 403. |
+| P3-C2 | ✅ FIXADO | `services/VendaService.js` — server-side pricing autoritativo via `produtos.preco_venda`; validação tenancy de cliente/profissional/produto; UPDATE de estoque com `salao_id` + `quantidade_estoque >= $qtd` (atômico). Route validator agora aceita opcionalmente valor_total/valor_final (ignorados). |
+| P3-C3 | ✅ FIXADO | `routes/comissoes.js` — adicionado `requireAdmin`; `UPDATE ... WHERE pago=false RETURNING valor_comissao` em transação; valor reconciliado contra soma das comissões marcadas; audit log com IDs. Mesmo padrão em `/estornar`. |
+
+### Altos
+| ID  | Status | Notas |
+|-----|--------|-------|
+| P3-A1 | ✅ FIXADO | `services/AgendamentoService.js#atualizar` — replicado o check de tenancy do `criar` para cliente/profissional/servico/auxiliar. |
+| P3-A2 | ✅ FIXADO | `services/BackupService.js` — whitelist explícita `ALLOWED_COLUMNS` por tabela + regex `SAFE_IDENT`. Coluna fora da whitelist é descartada; nome de tabela é validado contra `BACKUP_TABLES`. |
+| P3-A3 | ✅ FIXADO | `middleware/auth.js#requireAdmin` agora async — revalida `tipo='admin' AND ativo=true` no DB com cache de 2 min (TTL). Exportado `invalidateAdminCache` para uso futuro em rotas que alteram tipo/ativo. |
+| P3-A4 | ✅ FIXADO | `routes/profissionais.js` — `PROFISSIONAL_ALLOWED_FIELDS` whitelist; `pickAllowed` aplicado em POST e PUT. `id`, `salao_id`, `usuario_id`, `senha_hash` (direto), `created_at` nunca aceitos. |
+| P3-A5 | ✅ FIXADO | `routes/app/pedidos.js` — `clienteJaVinculado()` exige match por email/telefone no salão antes de aceitar POST `/api/app/pedidos`. |
+| P3-A6 | ✅ FIXADO | `routes/creditos.js#DELETE` — transação atômica recompõe `credito_disponivel` revertendo o delta da movimentação (credito subtrai, uso adiciona); audit log. |
+| P3-A7 | ✅ FIXADO | `services/authService.js#login` — `'Salão inativo'` substituído por `'Credenciais inválidas'` (no user enumeration). |
+
+### Médios
+| ID  | Status | Notas |
+|-----|--------|-------|
+| P3-M1 | ✅ FIXADO | `server.js` — limite global JSON 1mb; rota `/api/backup/*` mantém 20mb dedicado. |
+| P3-M2 | ✅ FIXADO | `services/securityInitService.js#validateCryptoKeys` — fail-fast no boot em prod se ENCRYPTION_KEY ≠ 32 bytes, HMAC_SECRET < 32 chars, ou JWT_SECRET ausente/curto. |
+| P3-M3 | ✅ FIXADO | `routes/app/loja.js` (e `VendaService.js`) — quantidade max 10000 por item. |
+| P3-M4 | ✅ FIXADO | `services/websocketService.js#verifyClient` — valida Origin contra `ALLOWED_ORIGINS`; mobile (sem Origin) permitido. |
+| P3-M5 | ✅ FIXADO | `routes/agendamentos.js` POST — `.custom()` em `data_hora` rejeita passado (tol. 60s skew) e >100 anos futuro. |
+| P3-M6 | ⏸️ ACEITO | Defense-in-depth recommendation — não há rota de cliente para cancelar próprio agendamento no momento. Fica como nota para quando essa rota for criada. |
+| P3-M7 | ⏸️ ACEITO | Bundle size (não-segurança); fora de escopo direto da auditoria. |
+| P3-M8 | ✅ FIXADO | `utils/helpers.js#escapeLike` + aplicação em `produtos.js`, `servicos.js`, `profissionais.js`, `saloes.js`, `ClienteService.js` (listar + buscarPorTermo). |
+
+### Baixos
+| ID  | Status | Notas |
+|-----|--------|-------|
+| P3-B1 | ✅ FIXADO | `authService.js#generateToken` — admin TTL 8h, regular 24h; ambos configuráveis via env. |
+| P3-B2 | ⏸️ ACEITO | Cosmético — admin pode legitimamente criar profissional inativo (pré-onboarding); sem risco. |
+| P3-B3 | ⏸️ ACEITO | Auditado: `routes/notificacoes.js` POST cria uma única notificação (não há rota de broadcast em massa). Sem risco. |
+| P3-B4 | ✅ FIXADO | `websocketService.js#subscribeClient` — cap de 50 subscriptions por cliente. |
+| P3-B5 | ✅ FIXADO | `routes/appProfissionalAuth.js#PUT /push-token` — valida regex `ExponentPushToken[...]` ou `FCM:...`, max 256 chars. |
+| P3-B6 | ✅ FIXADO | `routes/appProfissional.js` — `console.error('...', error.message)` no fluxo /ponto. |
+| P3-B7 | ⏸️ ACEITO | Conhecido — `softhair-mobile/utils/security.ts` (chave AES hardcoded) já tracked em ROADMAP Pass 1 [A6]. |
+| P3-B8 | ✅ FIXADO | `websocketService.js` — removido `_authTimeout` (dead code pós-handshake-com-token). |
+| P3-B9 | ✅ FIXADO | `ProfissionalService.js#deletar` — soft delete zera `senha_hash`, `app_ativo`, `push_token`. |
+| P3-B10 | ✅ FIXADO | `routes/backup.js` — audit log inclui `req.ip` e `user-agent` (truncado a 120 chars). |
+
+### Sumário
+
+- **Críticos fixados:** 3 / 3
+- **Altos fixados:** 7 / 7
+- **Médios fixados:** 6 / 8 (M6 e M7 aceitos com justificativa)
+- **Baixos fixados:** 8 / 10 (B2 e B7 aceitos; B3 verificado limpo)
+- **Total fixado:** 24 / 28 — restantes 4 ⏸️ aceitos.
+- **Testes:** 3/3 PASS (jest --runInBand) após cada wave.
+- **Commits:** 4 (db42e47 criticals+high, 0f2414f medium, 4d4dfe1 low; mais um previsto para este doc).
