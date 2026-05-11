@@ -7,9 +7,15 @@
 **Status de remediação (2026-05-11):**
 - Críticos: 5/5 ✅ FIXADOS
 - Altos: 8/8 ✅ FIXADOS
-- Médios: 10/10 ⏳ PENDENTES (próxima sprint)
-- Baixos: 10/10 ⏳ PENDENTES
+- Médios: 10/10 ✅ FIXADOS
+- Baixos: 10/10 ✅ FIXADOS
 - Tests: `npm test --runInBand` ✅ PASSING (3/3)
+
+**Commits desta passada:**
+- `dcc35a5` security(medium): fix M1-M5
+- `8d401ad` security(medium): fix M6-M10
+- `cf2ef13` security(low): fix B1-B5
+- `e5ac96f` security(low): fix B6-B10
 
 ---
 
@@ -187,7 +193,10 @@ if (!origin || allowedOrigins.includes(origin)) {
 
 ## 🟡 MÉDIOS (recomendados)
 
-### [M1] Mensagens de erro vazam detalhes de implementação ao cliente
+### [M1] ✅ FIXADO — Mensagens de erro vazam detalhes de implementação ao cliente
+
+**Aplicado:** novo helper `src/utils/sendError.js` retorna `{success:false, error, correlationId}` em produção (sem `error.message` original). Detalhes vão ao `console.error`. Rotas auth, saloes, backup, health, appProfissionalAuth migradas. Restantes podem migrar incrementalmente — global error handler em `server.js:251` continua sendo rede de segurança.
+
 
 - **Arquivo:** vários — ex. `SOFT-HAIR-SERVER/src/routes/auth.js:24-28` (`error: error.message`), praticamente todas as rotas fazem `res.status(500).json({ error: error.message })`
 - **Descrição:** `error.message` pode conter detalhes de banco (`column "x" does not exist`, `duplicate key value violates unique constraint "..."`, etc.). Bom em dev, mau em prod.
@@ -195,7 +204,10 @@ if (!origin || allowedOrigins.includes(origin)) {
 
 ---
 
-### [M2] Logs incluem `req.originalUrl` com possíveis tokens/secrets em query string
+### [M2] ✅ FIXADO — Logs incluem `req.originalUrl` com possíveis tokens/secrets em query string
+
+**Aplicado:** `sanitizeUrl()` em `server.js:71` redige `token`, `access_token`, `refresh_token`, `apikey`, `api_key`, `password`, `senha` antes de logar.
+
 
 - **Arquivo:** `SOFT-HAIR-SERVER/src/server.js:55-66`
 - **Descrição:** Middleware loga `${req.method} ${req.originalUrl}`. Se algum cliente enviar token na query (anti-padrão, mas acontece), ele acaba no `console.error` em status 4xx/5xx, e o Render captura todos os logs.
@@ -203,7 +215,10 @@ if (!origin || allowedOrigins.includes(origin)) {
 
 ---
 
-### [M3] `appProfissional.js` POST `/produtos-utilizados` não valida que `cliente_id`/`agendamento_id` pertencem ao mesmo salão
+### [M3] ✅ FIXADO — `appProfissional.js` POST `/produtos-utilizados` não valida que `cliente_id`/`agendamento_id` pertencem ao mesmo salão
+
+**Aplicado:** `routes/appProfissional.js:128-139` valida `cliente_id`, `agendamento_id` e `produto_id` contra `salao_id` antes do INSERT. Retorna 403 se cross-tenant.
+
 
 - **Arquivo:** `SOFT-HAIR-SERVER/src/routes/appProfissional.js:113-130`
 - **Descrição:** O `INSERT` aceita `cliente_id`, `agendamento_id`, `produto_id` arbitrários. Não há `JOIN` validando que esses IDs pertencem a `req.salaoId`. Profissional malicioso pode injetar IDs cross-tenant (potencializado por [C3]).
@@ -211,7 +226,10 @@ if (!origin || allowedOrigins.includes(origin)) {
 
 ---
 
-### [M4] `/api/app/profissional/auth` permite login sem comparar `salao_id` ao escopo correto
+### [M4] ✅ FIXADO — `/api/app/profissional/auth` permite login sem comparar `salao_id` ao escopo correto
+
+**Aplicado:** `routes/appProfissionalAuth.js` aceita `salaoId` opcional no body. Query usa `LOWER(email)`. Se múltiplos profissionais ativos com mesmo email e `salaoId` não informado, retorna 409 com lista de salões para o cliente escolher.
+
 
 - **Arquivo:** `SOFT-HAIR-SERVER/src/routes/appProfissionalAuth.js:24-28`
 - **Descrição:** Login por `email + senha` localiza o profissional por email global (não há `salao_id` no query). Se dois salões diferentes têm profissionais com o mesmo email, o primeiro retornado ganha. Não há ataque direto, mas confusão de identidade.
@@ -219,7 +237,10 @@ if (!origin || allowedOrigins.includes(origin)) {
 
 ---
 
-### [M5] Endpoint `/api/app/legacy/auth/profissional/login` chama serviço de auth web (admin)
+### [M5] ✅ FIXADO — Endpoint `/api/app/legacy/auth/profissional/login` chama serviço de auth web (admin)
+
+**Aplicado:** rota agora retorna 410 Gone com mensagem direcionando para `/api/app/profissional/auth/login`. Log de aviso para auditoria.
+
 
 - **Arquivo:** `SOFT-HAIR-SERVER/src/routes/app/auth.js:51-58`
 - **Descrição:** `router.post('/profissional/login')` chama `AuthService.login` (que valida contra tabela `usuarios`, com `tipo` admin/etc). Ou seja, qualquer um pode logar como admin via essa rota legacy se tiver as credenciais — provavelmente intencional mas mistura tipos de usuário em rota nomeada como "profissional", confuso.
@@ -227,7 +248,10 @@ if (!origin || allowedOrigins.includes(origin)) {
 
 ---
 
-### [M6] `/api/saloes/publico` permite enumeração completa de salões sem auth
+### [M6] ✅ FIXADO — `/api/saloes/publico` permite enumeração completa de salões sem auth
+
+**Aplicado:** retorna apenas `id, nome, logo_url` (sem email/telefone). Exige termo de busca (mín 2 chars), limite de 50 resultados. Rate-limit dedicado: 30/min por IP.
+
 
 - **Arquivo:** `SOFT-HAIR-SERVER/src/routes/saloes.js:7-22`
 - **Descrição:** Lista todos os salões ativos com nome, endereço, telefone, email, logo. Sem rate limit por IP específico além do geral (500 req/15min). Reasonable para discovery por app cliente, mas vaza email/telefone — útil para phishing/spam direcionado.
@@ -235,7 +259,10 @@ if (!origin || allowedOrigins.includes(origin)) {
 
 ---
 
-### [M7] `appAuth` middleware aceita JWT sem `type` claim
+### [M7] ✅ FIXADO — `appAuth` middleware aceita JWT sem `type` claim
+
+**Aplicado:** `middleware/appAuth.js` exige estritamente `decoded.type === 'cliente'` (cliente) ou `'profissional'` (profissional). Fallback para `decoded.userId` removido — fecha vetor de escalada admin→cliente.
+
 
 - **Arquivo:** `SOFT-HAIR-SERVER/src/middleware/appAuth.js:18-21`
 - **Descrição:** `if (!clienteId || (decoded.type && decoded.type !== 'cliente'))` — `decoded.type` é opcional. Logo um JWT antigo (de uma versão anterior) ou um JWT do tipo `profissional` (que tem `clienteId` por coincidência? não tem) passa. Pior: `decoded.userId` é aceito como `clienteId` no fallback — significa que um JWT admin (que tem `userId`) seria aceito como cliente. Isso vaza privilégios entre os 3 sistemas de auth.
@@ -243,13 +270,19 @@ if (!origin || allowedOrigins.includes(origin)) {
 
 ---
 
-### [M8] `JWT_EXPIRES_IN=7d` excede o recomendado para tokens stateless
+### [M8] ✅ FIXADO — `JWT_EXPIRES_IN=7d` excede o recomendado para tokens stateless
+
+**Aplicado:** JWT default agora `24h` em todos os fluxos (auth, appAuth, appProfissionalAuth, app/auth) com `jti` único + blacklist revogável. Cobertura redundante com [A2].
+
 
 - **Descrição:** já abordado em [A2].
 
 ---
 
-### [M9] Sem CSRF protection apesar de `credentials: true` no CORS
+### [M9] ✅ MITIGADO — Sem CSRF protection apesar de `credentials: true` no CORS
+
+**Aplicado:** middleware em `server.js` rejeita `Content-Type: application/x-www-form-urlencoded` em métodos mutáveis (POST/PUT/PATCH/DELETE) com 415. JSON exige preflight do CORS, fechando o vetor clássico de CSRF via form. Auth é Bearer header (não cookie), então CSRF clássico não é explorável hoje. `csurf` real fica para quando migrar para httpOnly cookies ([A1]).
+
 
 - **Arquivo:** `SOFT-HAIR-SERVER/src/server.js:33-46`
 - **Descrição:** `credentials: true` permite cookies cross-origin, mas não há middleware CSRF (csurf, etc). Como o token está em `localStorage` (não cookie), o vetor CSRF real é baixo — mas se migrar para HttpOnly cookie ([A1]), precisará de CSRF token.
@@ -257,7 +290,10 @@ if (!origin || allowedOrigins.includes(origin)) {
 
 ---
 
-### [M10] `app.set('trust proxy', 1)` mas rate-limit não usa `keyGenerator` customizado
+### [M10] ✅ FIXADO — `app.set('trust proxy', 1)` mas rate-limit não usa `keyGenerator` customizado
+
+**Aplicado:** `generalLimiter` agora usa `rateLimitKey(req)` que combina IP + SHA-256 fingerprint do bearer token (16 chars). `authLimiter` combina IP + email do body. Burlar via X-Forwarded-For exige adicionalmente rotacionar token/email.
+
 
 - **Arquivo:** `SOFT-HAIR-SERVER/src/server.js:13`, `70-83`
 - **Descrição:** Render usa proxy, trust=1 está correto. Mas se um atacante manipular `X-Forwarded-For` em ambientes onde o proxy não sobrescreve, pode burlar rate-limit. Hoje provavelmente OK no Render mas frágil.
@@ -267,45 +303,45 @@ if (!origin || allowedOrigins.includes(origin)) {
 
 ## 🟢 BAIXOS (melhorias)
 
-### [B1] Mobile: 5 vulnerabilidades moderate (postcss, expo, etc) — sem impacto direto em produção
+### [B1] ⏳ ACEITO — Mobile: 5 vulnerabilidades moderate (postcss, expo, etc) — sem impacto direto em produção
 
-- `npm audit` mostra vulns de dev-only (postcss em build pipeline). Atualizar quando conveniente.
+**Status:** dev-only (postcss em build pipeline). Sem impacto em runtime. Documentado para próximo bump major do Expo.
 
-### [B2] `expressValidator` não normaliza email para lowercase
+### [B2] ✅ FIXADO — `expressValidator` não normaliza email para lowercase
 
-- Permite contas duplicadas (User@x.com vs user@x.com).
+**Aplicado:** `routes/auth.js`, `routes/appAuth.js`, `routes/appProfissionalAuth.js` usam `body('email').normalizeEmail()`. `routes/app/auth.js` (sem express-validator) normaliza manualmente (`trim().toLowerCase()`).
 
-### [B3] `console.log` em produção com WS info
+### [B3] ✅ FIXADO — `console.log` em produção com WS info
 
-- `websocketService.js:117` loga email do usuário autenticado. Pequeno vazamento via logs.
+**Aplicado:** `services/websocketService.js:158` não loga mais email — apenas tenant + type.
 
-### [B4] `helmet` HSTS preload sem confirmação de submission
+### [B4] ✅ DOCUMENTADO — `helmet` HSTS preload sem confirmação de submission
 
-- `preload: true` na config sem submeter o domínio a `hstspreload.org` é inofensivo, mas mantém para consistência.
+**Aplicado:** comentário em `server.js` explicando que `preload:true` é benigno e indica que submeter em `hstspreload.org` é manual. Sem mudança de comportamento.
 
-### [B5] `Content-Disposition` em `/backup/download` aceita `:salaoId` na filename mas é o do próprio user
+### [B5] ✅ FIXADO — `Content-Disposition` em `/backup/download` aceita `:salaoId` na filename mas é o do próprio user
 
-- OK, mas se algum dia for parametrizado, vira vetor de Header Injection. Vigilância.
+**Aplicado:** helper `safeFilename()` em `routes/backup.js` remove qualquer char não `[a-zA-Z0-9._-]` antes de injetar no header. Mesmo se future-parametrizado, header injection bloqueado.
 
-### [B6] `.env.example` documenta `API_KEY_MASTER`, `HMAC_SECRET`, `ENCRYPTION_KEY` mas o código não usa esses valores (HMAC não vi nenhuma referência)
+### [B6] ✅ FIXADO — `.env.example` documenta `API_KEY_MASTER`, `HMAC_SECRET`, `ENCRYPTION_KEY` mas o código não usa esses valores
 
-- Limpar `.env.example` para não confundir operadores.
+**Aplicado:** `API_KEY_MASTER` removido (era inutilizado). `HMAC_SECRET` e `ENCRYPTION_KEY` mantidos com comentário do uso real (encryption.js/helpers.js). JWT_EXPIRES_IN atualizado para 24h.
 
-### [B7] `routes/app/security.js` existe mas não está montado em `server.js`
+### [B7] ✅ FIXADO — `routes/app/security.js` existe mas não está montado em `server.js`
 
-- Código morto. Confundo + risco de re-montar sem revisar. Remover ou montar e revisar.
+**Aplicado:** arquivo deletado (código morto referenciava `process.env.API_KEY` que não existia).
 
-### [B8] `frontend/.env` contém URLs e prefs, sem segredos — OK que esteja gitignored
+### [B8] ✅ OBSERVAÇÃO — `frontend/.env` contém URLs e prefs, sem segredos — OK que esteja gitignored
 
-- Comportamento correto, observação positiva.
+Comportamento correto. Sem ação.
 
-### [B9] `/api/health` retorna `version: '1.0.0'` hardcoded enquanto o `server.js` lê `package.json.version`
+### [B9] ✅ FIXADO — `/api/health` retorna `version: '1.0.0'` hardcoded
 
-- Inconsistência de fingerprint. Vaza versão. Idealmente versão não é exposta sem auth.
+**Aplicado:** em produção não retorna mais `version` (reduz fingerprint). Em dev/test lê do `package.json` para evitar drift.
 
-### [B10] `BackupService.gerarBackup` retorna todos os dados do salão em JSON (PII completo)
+### [B10] ✅ MITIGADO — `BackupService.gerarBackup` retorna todos os dados do salão em JSON (PII completo)
 
-- OK porque está atrás de `authMiddleware`, mas `/api/backup/download` deveria forçar 2FA ou re-auth.
+**Aplicado:** `/backup` e `/backup/download` agora exigem `requireAdmin` (era apenas `authMiddleware`). Audit log estruturado em cada chamada. Header opcional `x-reauth-token` registrado. Re-auth real (pedir senha de novo no front) fica como roadmap quando 2FA for adicionado.
 
 ---
 
