@@ -102,12 +102,18 @@ Para datas relativas: hoje=${new Date().toISOString().split('T')[0]}, amanhã=${
       return res.status(422).json({ success: false, error: 'IA retornou action não permitida' });
     }
 
+    // [P4-B6] Redação de PII antes de logar comando do usuário.
+    // Telefone BR (com/sem máscara), CPF, email — substituídos por [REDACTED].
+    const _redact = (s) => String(s)
+      .replace(/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g, '[CPF]')
+      .replace(/(\(?\d{2}\)?\s?9?\d{4}-?\d{4})/g, '[TEL]')
+      .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[EMAIL]');
     // Auditoria: log de TODA execução para análise posterior
     console.log('[AI][AUDIT]', JSON.stringify({
       timestamp: new Date().toISOString(),
       userId: req.user?.userId,
       salaoId,
-      command: String(command).slice(0, 200),
+      command: _redact(command).slice(0, 200),
       action: parsed.action,
       confidence: parsed.confidence,
     }));

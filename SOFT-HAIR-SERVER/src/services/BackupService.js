@@ -16,9 +16,12 @@ const ALLOWED_COLUMNS = {
     'push_token', 'salao_id'
   ],
   profissionais: [
+    // [P4-B8] `senha_hash` removido do whitelist de restore — backup adulterado offline
+    // poderia injetar hash controlado pelo atacante e permitir login como qualquer
+    // profissional. Recuperação de senha deve ocorrer pelo fluxo dedicado.
     'nome', 'email', 'telefone', 'especialidade', 'comissao_percentual', 'comissao',
     'ativo', 'foto_url', 'created_at', 'updated_at', 'salao_id', 'app_ativo',
-    'senha_hash', 'push_token', 'cpf', 'usuario_id'
+    'push_token', 'cpf', 'usuario_id'
   ],
   servicos: [
     'nome', 'descricao', 'preco', 'duracao_minutos', 'cor', 'ativo', 'categoria',

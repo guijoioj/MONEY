@@ -194,6 +194,22 @@ class WebSocketService {
       ws.send(JSON.stringify({ type: 'error', message: `Limite de ${MAX_SUBSCRIPTIONS} subscriptions atingido` }));
       return;
     }
+    // [P4-B5] Restringir canais admin-only para tokens admin. Tokens de cliente/profissional
+    // só podem subscrever seus próprios canais (cliente:<id>, profissional:<id>).
+    const channel = String(data.channel || '');
+    if (client.type === 'cliente') {
+      const isOwnChannel = channel === `cliente:${client.userId}`;
+      if (!isOwnChannel) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Canal não permitido para este tipo de token' }));
+        return;
+      }
+    } else if (client.type === 'profissional') {
+      const isOwnChannel = channel === `profissional:${client.userId}`;
+      if (!isOwnChannel) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Canal não permitido para este tipo de token' }));
+        return;
+      }
+    }
     if (!client.subscriptions.includes(data.channel)) {
       client.subscriptions.push(data.channel);
     }
