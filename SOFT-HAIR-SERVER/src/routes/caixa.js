@@ -52,21 +52,32 @@ router.get('/', authMiddleware, async (req, res) => {
 // POST /api/caixa/abrir
 router.post('/abrir', authMiddleware, async (req, res) => {
   try {
-    const { saldo_inicial = 0, observacoes } = req.body;
-    const hoje = new Date().toISOString().split('T')[0];
+    // [P2-M3] saldo_inicial não pode ser negativo (evita lavagem contábil)
+    const saldoInicialRaw = req.body?.saldo_inicial;
+    const saldo_inicial = saldoInicialRaw === undefined || saldoInicialRaw === null ? 0 : Number(saldoInicialRaw);
+    if (!Number.isFinite(saldo_inicial) || saldo_inicial < 0) {
+      return res.status(400).json({ success: false, error: 'saldo_inicial deve ser número >= 0' });
+    }
+    const observacoes = req.body?.observacoes;
 
-    const existing = await query(
-      `SELECT id FROM caixa WHERE salao_id = $1 AND DATE(aberto_em) = $2 AND fechado_em IS NULL`,
-      [req.salaoId, hoje]
+    // [P2-B7] authMiddleware seta req.user (com userId dentro), não req.userId — pegar de req.user
+    const abertoPor = req.user?.userId || req.user?.id || null;
+
+    // [P2-A3] INSERT atômico — só insere se não houver outro caixa aberto hoje no mesmo salão.
+    // Fecha a janela de race condition entre dois requests simultâneos (check-then-insert).
+    const inserted = await query(
+      `INSERT INTO caixa (salao_id, saldo_inicial, observacoes, aberto_por)
+       SELECT $1, $2, $3, $4
+       WHERE NOT EXISTS (
+         SELECT 1 FROM caixa
+         WHERE salao_id = $1 AND DATE(aberto_em) = CURRENT_DATE AND fechado_em IS NULL
+       )
+       RETURNING *`,
+      [req.salaoId, saldo_inicial, observacoes || null, abertoPor]
     );
-    if (existing.length > 0) {
+    if (!inserted.length) {
       return res.status(400).json({ success: false, error: 'Caixa já está aberto hoje.' });
     }
-
-    const inserted = await query(
-      `INSERT INTO caixa (salao_id, saldo_inicial, observacoes, aberto_por) VALUES ($1, $2, $3, $4) RETURNING *`,
-      [req.salaoId, saldo_inicial, observacoes || null, req.userId]
-    );
     res.json({ success: true, data: inserted[0] });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);

@@ -97,7 +97,22 @@ class AgendamentoService {
   async criar(data, salaoId) {
     try {
       const { queryOne } = require('../config/database');
-      
+
+      // [P2-A7] Validar tenancy das FKs antes do INSERT (cliente/profissional/servico/auxiliar)
+      const checks = [
+        ['clientes', data.cliente_id, 'cliente_id'],
+        ['profissionais', data.profissional_id, 'profissional_id'],
+        ['servicos', data.servico_id, 'servico_id'],
+      ];
+      if (data.auxiliar_id) checks.push(['profissionais', data.auxiliar_id, 'auxiliar_id']);
+      for (const [table, id, label] of checks) {
+        if (!id) continue;
+        const ok = await queryOne(`SELECT 1 FROM ${table} WHERE id = $1 AND salao_id = $2`, [id, salaoId]);
+        if (!ok) {
+          return { success: false, error: `${label} não pertence ao salão` };
+        }
+      }
+
       const result = await queryOne(`
         INSERT INTO agendamentos (cliente_id, profissional_id, auxiliar_id, servico_id, data_hora,
                                   observacoes, valor, status, salao_id)
@@ -123,7 +138,7 @@ class AgendamentoService {
       console.error('Erro ao criar agendamento:', error);
       return {
         success: false,
-        error: error.message
+        error: process.env.NODE_ENV === 'production' ? 'Erro ao criar agendamento' : error.message
       };
     }
   }

@@ -48,6 +48,34 @@ function sanitizeData(table, data) {
   return sanitized;
 }
 
+// [P2-A6] Mapa de FKs conhecidas → tabela referenciada. Antes de INSERT/UPDATE,
+// validamos que cada FK aponta para um registro do MESMO salao_id (cross-tenant FKs).
+const FK_TABLE_MAP = {
+  cliente_id: 'clientes',
+  profissional_id: 'profissionais',
+  servico_id: 'servicos',
+  produto_id: 'produtos',
+  agendamento_id: 'agendamentos',
+  venda_id: 'vendas',
+  auxiliar_id: 'profissionais',
+};
+
+async function validateFkTenancy(client, sanitized, salaoId) {
+  for (const [col, value] of Object.entries(sanitized)) {
+    if (value === null || value === undefined) continue;
+    const refTable = FK_TABLE_MAP[col];
+    if (!refTable) continue;
+    const r = await client.query(
+      `SELECT 1 FROM ${refTable} WHERE id = $1 AND salao_id = $2`,
+      [value, salaoId]
+    );
+    if (!r.rows.length) {
+      return `FK ${col} (${value}) não pertence ao salão`;
+    }
+  }
+  return null;
+}
+
 // ─── GET /changes — Obter mudanças desde a última sincronização ───
 router.get('/changes', authMiddleware, async (req, res) => {
   try {
@@ -145,6 +173,16 @@ router.post('/push', authMiddleware, async (req, res) => {
         try {
           let result;
           const sanitized = sanitizeData(table, data);
+
+          // [P2-A6] Antes de INSERT/UPDATE, validar que todas as FKs (cliente_id, profissional_id,
+          // servico_id, produto_id, agendamento_id, venda_id, auxiliar_id) pertencem ao salao_id atual.
+          if (operation === 'INSERT' || operation === 'UPDATE') {
+            const fkErr = await validateFkTenancy(client, sanitized, salaoId);
+            if (fkErr) {
+              txResults.push({ table, operation, success: false, error: fkErr });
+              continue;
+            }
+          }
 
           switch (operation) {
             case 'INSERT': {
