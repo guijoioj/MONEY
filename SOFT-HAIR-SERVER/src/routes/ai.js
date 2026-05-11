@@ -116,6 +116,14 @@ Para datas relativas: hoje=${new Date().toISOString().split('T')[0]}, amanhã=${
     if (parsed.action === 'create_agendamento' && parsed.data) {
       const d = parsed.data;
 
+      // [P4-A7] NUNCA confiar em IDs forjados pelo LLM (prompt injection no `command` pode
+      // induzir o modelo a emitir `clienteId`/`professionalId`/`serviceId` arbitrários).
+      // Descartamos qualquer ID vindo do JSON do LLM ANTES da resolução — só permitimos IDs
+      // resolvidos internamente por busca de nome contra registros do salão autenticado.
+      delete d.clienteId;
+      delete d.professionalId;
+      delete d.serviceId;
+
       // Resolver profissional
       if (d.professionalName) {
         const pn = d.professionalName.toLowerCase();
@@ -130,8 +138,8 @@ Para datas relativas: hoje=${new Date().toISOString().split('T')[0]}, amanhã=${
         if (match) { d.serviceId = match.id; d.serviceName = match.nome; }
       }
 
-      // Resolver cliente por nome (busca parcial)
-      if (d.clienteName && !d.clienteId) {
+      // Resolver cliente por nome (busca parcial) — única fonte permitida para clienteId.
+      if (d.clienteName) {
         const cn = d.clienteName.toLowerCase();
         const clienteRows = await query(
           `SELECT id, nome FROM clientes WHERE salao_id = $1 AND ativo = true AND nome ILIKE $2 ORDER BY nome LIMIT 1`,

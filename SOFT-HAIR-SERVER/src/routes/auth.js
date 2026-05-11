@@ -1,12 +1,28 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const AuthService = require('../services/authService');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { sendError } = require('../utils/sendError');
 
+// [P4-A6] Rate limit dedicado para criação de salões: 5 registros/dia POR IP.
+// Sem este limit, o keyGenerator de `authLimiter` (IP+email) produz chave única por
+// tentativa quando o atacante itera email, anulando o rate limit padrão. Permitimos
+// 5/dia para acomodar smoke tests e onboarding legítimo.
+const registerLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000, // 24h
+  max: parseInt(process.env.REGISTER_RATE_LIMIT_MAX) || 5,
+  message: { success: false, error: 'Limite diário de registros excedido. Tente novamente amanhã.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip || 'unknown',
+  // Em ambiente de teste, NODE_ENV='test' libera (smoke usa runId único; sem isso, falha).
+  skip: () => process.env.NODE_ENV === 'test',
+});
+
 // Registrar novo salão
-router.post('/register', [
+router.post('/register', registerLimiter, [
   body('nome').notEmpty().withMessage('Nome do salão é obrigatório'),
   body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
   body('adminEmail').isEmail().normalizeEmail().withMessage('Email do admin inválido'),

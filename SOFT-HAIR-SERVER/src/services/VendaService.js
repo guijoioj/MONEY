@@ -186,10 +186,14 @@ class VendaService {
         if (result.rows.length === 0) return { success: false, error: 'Venda não encontrada ou já cancelada' };
         const venda = result.rows[0];
 
-        // Restore stock
+        // [P4-A1] Restore stock com tenancy guard. Vendas legadas (pré-P3-C2) podiam ter
+        // produto_id apontando para outro salão; cancelar agora não incrementa estoque alheio.
         const itens = await client.query('SELECT produto_id, quantidade FROM venda_itens WHERE venda_id = $1', [id]);
         for (const item of itens.rows) {
-          await client.query('UPDATE produtos SET quantidade_estoque = quantidade_estoque + $1 WHERE id = $2', [item.quantidade, item.produto_id]);
+          await client.query(
+            'UPDATE produtos SET quantidade_estoque = quantidade_estoque + $1 WHERE id = $2 AND salao_id = $3',
+            [item.quantidade, item.produto_id, salaoId]
+          );
         }
 
         return { success: true, data: venda, message: 'Venda cancelada' };
