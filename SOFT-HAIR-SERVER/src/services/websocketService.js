@@ -155,7 +155,8 @@ class WebSocketService {
         salaoId: decoded.salaoId
       }));
 
-      console.log(`[WS] Cliente autenticado: ${decoded.email} (salão: ${decoded.salaoId})`);
+      // [B3] Não loga email/PII — apenas tenant + tipo
+      console.log(`[WS] Cliente autenticado (salão: ${decoded.salaoId}, type: ${decoded.type || 'admin'})`);
     } catch (error) {
       ws.send(JSON.stringify({ type: 'auth', success: false, error: 'Token inválido' }));
       ws.close(4003, 'Token inválido');

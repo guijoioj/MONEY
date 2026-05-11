@@ -25,7 +25,9 @@ function signClienteToken(cliente) {
 
 router.post('/register', async (req, res) => {
   try {
-    const { nome, email, password, telefone } = req.body;
+    const { nome, password, telefone } = req.body;
+    // [B2] normaliza email para evitar duplicação User@x.com vs user@x.com
+    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
     if (!nome || !email || !password) return res.status(400).json({ error: 'nome, email e password são obrigatórios' });
     
     // Validate password strength
@@ -48,7 +50,8 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
     const cliente = await ClienteApp.findByEmail(email);
     if (!cliente) return res.status(401).json({ error: 'Credenciais inválidas' });
     const valid = await bcrypt.compare(password, cliente.password);

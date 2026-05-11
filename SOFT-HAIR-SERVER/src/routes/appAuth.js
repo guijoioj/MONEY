@@ -54,8 +54,9 @@ router.post('/register', [
 });
 
 // POST /login
+// [B2] normalizeEmail evita criar contas duplicadas com casing diferente
 router.post('/login', [
-  body('email').isEmail().withMessage('Email inválido'),
+  body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
   body('password').notEmpty().withMessage('Senha é obrigatória'),
 ], async (req, res) => {
   try {
