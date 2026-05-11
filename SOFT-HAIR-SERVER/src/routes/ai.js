@@ -108,14 +108,15 @@ Para datas relativas: hoje=${new Date().toISOString().split('T')[0]}, amanhã=${
       .replace(/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g, '[CPF]')
       .replace(/(\(?\d{2}\)?\s?9?\d{4}-?\d{4})/g, '[TEL]')
       .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[EMAIL]');
-    // Auditoria: log de TODA execução para análise posterior
+    // [P5-B4] Auditoria: NÃO loga texto livre do usuário (mesmo redacted) em logs externos.
+    // Logtail/Datadog/Papertrail receberiam stdout do Render. Mantemos apenas metadata estrutural.
     console.log('[AI][AUDIT]', JSON.stringify({
       timestamp: new Date().toISOString(),
       userId: req.user?.userId,
       salaoId,
-      command: _redact(command).slice(0, 200),
       action: parsed.action,
       confidence: parsed.confidence,
+      cmdLen: typeof command === 'string' ? command.length : 0,
     }));
 
     // Resolver IDs e EXECUTAR a ação diretamente

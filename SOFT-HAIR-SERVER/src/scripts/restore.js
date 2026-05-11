@@ -1,31 +1,12 @@
-require('dotenv').config();
-const BackupService = require('../services/backupService');
-
-async function restoreBackup() {
-  const filename = process.argv[2];
-  
-  if (!filename) {
-    console.log('Uso: npm run restore <nome_do_arquivo>');
-    console.log('\nBackups disponíveis:');
-    const backups = BackupService.getLocalBackups();
-    backups.forEach(b => {
-      console.log(`  - ${b.filename}`);
-    });
-    process.exit(1);
-  }
-
-  try {
-    console.log(`Restaurando backup: ${filename}...`);
-    const result = await BackupService.restoreBackupFromFilename(filename);
-    console.log('Backup restaurado com sucesso!');
-  } catch (error) {
-    console.error('Erro ao restaurar backup:', error.message);
-    process.exit(1);
-  }
-}
+#!/usr/bin/env node
+// [P5-B3] Script removido — métodos `getLocalBackups` / `restoreBackupFromFilename`
+// nunca existiram em services/BackupService.js. Para restaurar backup, use:
+//   POST /api/backup/restore { backup: { ... } }
+// ou consuma BackupService.restaurarBackup(salaoId, backupData) diretamente.
 
 if (require.main === module) {
-  restoreBackup();
+  console.error('Este script foi removido. Use POST /api/backup/restore ou BackupService.restaurarBackup().');
+  process.exit(1);
 }
 
-module.exports = restoreBackup;
+module.exports = {};

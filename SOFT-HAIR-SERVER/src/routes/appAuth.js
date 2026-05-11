@@ -170,4 +170,63 @@ router.put('/push-token', clienteAuthMiddleware, async (req, res) => {
   }
 });
 
+// [P5-B6] LGPD/GDPR: cliente pode solicitar anonimização dos próprios dados pessoais.
+// Soft-delete: app_ativo=false, dados PII anonimizados. Histórico (agendamentos, vendas)
+// preservado para compliance fiscal (até 5 anos por nota fiscal BR).
+router.delete('/me/delete-data', clienteAuthMiddleware, async (req, res) => {
+  try {
+    const { confirmacao } = req.body || {};
+    if (confirmacao !== 'EXCLUIR_MEUS_DADOS') {
+      return res.status(400).json({
+        success: false,
+        error: 'Para confirmar, envie { "confirmacao": "EXCLUIR_MEUS_DADOS" }'
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE clientes
+         SET nome = 'Cliente Removido',
+             email = NULL,
+             telefone = NULL,
+             cpf = NULL,
+             endereco = NULL,
+             foto_url = NULL,
+             push_token = NULL,
+             observacoes = NULL,
+             senha_hash = NULL,
+             data_nascimento = NULL,
+             app_ativo = false,
+             ativo = false,
+             updated_at = NOW()
+       WHERE id = $1
+       RETURNING id`,
+      [req.clienteId]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({ success: false, error: 'Cliente não encontrado' });
+    }
+
+    // Audit log
+    try {
+      const { logAction } = require('../utils/auditLog');
+      await logAction({
+        req,
+        action: 'cliente.lgpd_delete',
+        entityType: 'cliente',
+        entityId: req.clienteId,
+        actorId: req.clienteId,
+        actorType: 'cliente',
+      });
+    } catch (_) { /* não bloqueia */ }
+
+    res.json({
+      success: true,
+      message: 'Dados pessoais anonimizados. Histórico fiscal preservado por exigência legal.'
+    });
+  } catch (e) {
+    require("../utils/sendError").sendError(res, 500, "Erro interno", e);
+  }
+});
+
 module.exports = router;

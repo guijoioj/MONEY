@@ -26,7 +26,9 @@ class VendaService {
         params.push(filtros.data_inicio, filtros.data_fim);
       }
 
-      sql += ' ORDER BY v.created_at DESC LIMIT 200';
+      // [P5-B9] LIMIT configurável via env
+      const lim = Math.min(parseInt(process.env.VENDAS_LIST_LIMIT || '200', 10) || 200, 2000);
+      sql += ` ORDER BY v.created_at DESC LIMIT ${lim}`;
       const data = await query(sql, params);
       return { success: true, data };
     } catch (error) {

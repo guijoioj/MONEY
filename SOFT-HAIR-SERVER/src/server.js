@@ -31,6 +31,9 @@ app.use(helmet({
     },
   },
   crossOriginOpenerPolicy: { policy: 'same-origin' },
+  // [P5-B5] COEP habilita uso futuro de SharedArrayBuffer (workers crypto, etc).
+  // 'credentialless' é menos restritivo que 'require-corp' e não quebra recursos externos.
+  crossOriginEmbedderPolicy: { policy: 'credentialless' },
   referrerPolicy: { policy: 'no-referrer' },
   // [B4] preload:true gera o header com 'preload' — mas o domínio só entra na
   // lista do navegador se for submetido a https://hstspreload.org. Mantemos por
