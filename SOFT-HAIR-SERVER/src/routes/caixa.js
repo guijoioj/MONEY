@@ -88,10 +88,20 @@ router.post('/abrir', authMiddleware, async (req, res) => {
 router.put('/:id/fechar', authMiddleware, async (req, res) => {
   try {
     const { saldo_final, observacoes } = req.body;
+
+    // [P5-M8] Validar saldo_final: número finito, >= 0, limite superior sanidade
+    const saldoFinalNum = Number(saldo_final);
+    if (!Number.isFinite(saldoFinalNum) || saldoFinalNum < 0 || saldoFinalNum > 10_000_000) {
+      return res.status(400).json({
+        success: false,
+        error: 'saldo_final deve ser número >= 0 e <= 10000000'
+      });
+    }
+
     const updated = await query(
       `UPDATE caixa SET saldo_final = $1, fechado_em = NOW(), observacoes = COALESCE($2, observacoes)
        WHERE id = $3 AND salao_id = $4 AND fechado_em IS NULL RETURNING *`,
-      [saldo_final, observacoes || null, req.params.id, req.salaoId]
+      [saldoFinalNum, observacoes || null, req.params.id, req.salaoId]
     );
     if (updated.length === 0) {
       return res.status(404).json({ success: false, error: 'Caixa não encontrado ou já fechado.' });

@@ -1,8 +1,20 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const { pool } = require('../config/database');
 const { sendPush } = require('../services/pushService');
+
+// [P5-M3] Rate limit por profissional+IP: 10 pontos/min — bloqueia double-clicks e abuse.
+const pontoLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { success: false, error: 'Muitas requisições de ponto. Aguarde um momento.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `${req.profissionalId || 'anon'}|${req.ip || 'unknown'}`,
+  skip: () => process.env.NODE_ENV === 'test',
+});
 
 const TIPOS_PONTO = ['entrada', 'saida', 'pausa', 'retorno_pausa', 'inicio_atendimento', 'fim_atendimento'];
 
@@ -30,7 +42,8 @@ router.get('/ponto', async (req, res) => {
 });
 
 // POST /ponto
-router.post('/ponto', [
+// [P5-M3] rate limit aplicado
+router.post('/ponto', pontoLimiter, [
   body('tipo').isIn(TIPOS_PONTO).withMessage('Tipo inválido'),
 ], async (req, res) => {
   try {
@@ -212,17 +225,32 @@ router.get('/atendimentos-hoje', async (req, res) => {
 });
 
 // POST /atendimentos/:id/iniciar
+// [P5-M4] Idempotente: UPDATE só altera se status != 'em_andamento'.
+// Apenas insere registro de ponto se UPDATE efetivamente mudou o status.
 router.post('/atendimentos/:id/iniciar', async (req, res) => {
   try {
     const { rows } = await pool.query(
       `UPDATE agendamentos SET status = 'em_andamento', updated_at = NOW()
        WHERE id = $1 AND profissional_id = $2 AND salao_id = $3
+         AND status <> 'em_andamento'
        RETURNING *, (SELECT nome FROM clientes WHERE id = agendamentos.cliente_id) as cliente_nome`,
       [req.params.id, req.profissionalId, req.salaoId]
     );
-    if (!rows.length)
-      return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
 
+    if (!rows.length) {
+      // Verifica se já estava em andamento (idempotência) ou se não existe.
+      const check = await pool.query(
+        `SELECT * FROM agendamentos WHERE id = $1 AND profissional_id = $2 AND salao_id = $3`,
+        [req.params.id, req.profissionalId, req.salaoId]
+      );
+      if (!check.rows.length) {
+        return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
+      }
+      // Já em_andamento — retorna 200 sem duplicar ponto.
+      return res.json({ success: true, data: check.rows[0], message: 'já em andamento' });
+    }
+
+    // Só agora insere ponto, pois UPDATE realmente mudou o status.
     await pool.query(
       `INSERT INTO registros_ponto (profissional_id, salao_id, tipo) VALUES ($1, $2, 'inicio_atendimento')`,
       [req.profissionalId, req.salaoId]
@@ -335,15 +363,18 @@ router.post('/atendimentos/:id/finalizar', async (req, res) => {
       `, [ag.id, ag.cliente_id, req.profissionalId, req.salaoId, ag.servico_id, req.body.observacoes || null, ag.valor || null]);
     }
 
-    await pool.query(
-      `UPDATE agendamentos SET status = 'finalizado', updated_at = NOW() WHERE id = $1 AND salao_id = $2`,
+    // [P5-M4] Idempotente: só insere fim_atendimento se realmente mudou status.
+    const updFinal = await pool.query(
+      `UPDATE agendamentos SET status = 'finalizado', updated_at = NOW()
+       WHERE id = $1 AND salao_id = $2 AND status <> 'finalizado' RETURNING id`,
       [req.params.id, req.salaoId]
     );
-
-    await pool.query(
-      `INSERT INTO registros_ponto (profissional_id, salao_id, tipo) VALUES ($1, $2, 'fim_atendimento')`,
-      [req.profissionalId, req.salaoId]
-    );
+    if (updFinal.rowCount > 0) {
+      await pool.query(
+        `INSERT INTO registros_ponto (profissional_id, salao_id, tipo) VALUES ($1, $2, 'fim_atendimento')`,
+        [req.profissionalId, req.salaoId]
+      );
+    }
 
     res.json({ success: true, data: atend.rows[0] });
   } catch (error) {

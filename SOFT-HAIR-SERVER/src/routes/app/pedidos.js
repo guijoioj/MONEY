@@ -191,7 +191,9 @@ router.put('/:id/aprovar', authMiddleware, async (req, res) => {
       observacoes: pedido.observacoes
     }, req.salaoId);
 
-    const pedidoAtualizado = await PedidoAgendamento.aprovar(req.params.id, req.salaoId, agendamento.id, req.user.id);
+    // [P5-M6] req.user.id NÃO existe — JWT usa userId. Fallback compatível.
+    const aprovadoPorId = req.user?.userId || req.user?.id || null;
+    const pedidoAtualizado = await PedidoAgendamento.aprovar(req.params.id, req.salaoId, agendamento.id, aprovadoPorId);
 
     ws.notificarCliente(pedido.clienteAppId, {
       tipo: 'pedido_aprovado',
