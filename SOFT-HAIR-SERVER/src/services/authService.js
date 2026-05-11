@@ -117,6 +117,8 @@ class AuthService {
         email: user.email,
         tipo: user.tipo,
         salaoId: user.salao_id,
+        // [P6-M2] tokenVersion no payload — invalidação por troca de senha
+        tokenVersion: user.token_version || 0,
         jti: crypto.randomBytes(16).toString('hex'),
       },
       process.env.JWT_SECRET,
@@ -272,8 +274,9 @@ class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);
+    // [P6-M2] Incrementa token_version para invalidar JWTs anteriores
     await query(
-      'UPDATE usuarios SET senha_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      'UPDATE usuarios SET senha_hash = $1, token_version = COALESCE(token_version, 0) + 1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       [hashedPassword, userId]
     );
 

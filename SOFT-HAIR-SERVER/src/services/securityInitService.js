@@ -57,6 +57,11 @@ class SecurityInitService {
       problems.push(`JWT_SECRET tem ${process.env.JWT_SECRET.length} chars — mínimo 32 em produção`);
     }
 
+    // [P6-M1] BACKUP_ENCRYPTION_KEY obrigatória em produção
+    if (isProd && !process.env.BACKUP_ENCRYPTION_KEY && !process.env.ENCRYPTION_KEY) {
+      problems.push('BACKUP_ENCRYPTION_KEY (ou ENCRYPTION_KEY) ausente em produção — backups em plaintext serão recusados');
+    }
+
     if (problems.length) {
       const msg = `[SECURITY] Problemas com chaves criptográficas:\n  - ${problems.join('\n  - ')}`;
       if (isProd) {

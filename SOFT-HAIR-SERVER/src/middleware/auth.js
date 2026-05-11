@@ -104,22 +104,24 @@ const optionalAuth = async (req, res, next) => {
 
 // [P3-A3] Cache em memória de revalidação admin (2 min TTL).
 // Reduz hit ao DB sem deixar token-stale válido por 24h se o admin for demoted/desativado.
-const _adminCache = new Map(); // userId -> { ok: boolean, exp: epochMs }
+// [P6-M2] cache passa a guardar token_version também
+const _adminCache = new Map(); // userId -> { ok, tokenVersion, exp }
 const ADMIN_CACHE_TTL_MS = 2 * 60 * 1000;
 
 async function _adminFresh(userId) {
   const now = Date.now();
   const cached = _adminCache.get(userId);
-  if (cached && cached.exp > now) return cached.ok;
+  if (cached && cached.exp > now) return cached;
   try {
     const { queryOne } = require('../config/database');
     const row = await queryOne(
-      'SELECT tipo, COALESCE(ativo, true) AS ativo FROM usuarios WHERE id = $1',
+      'SELECT tipo, COALESCE(ativo, true) AS ativo, COALESCE(token_version, 0) AS token_version FROM usuarios WHERE id = $1',
       [userId]
     );
     const ok = !!(row && row.ativo && row.tipo === 'admin');
-    _adminCache.set(userId, { ok, exp: now + ADMIN_CACHE_TTL_MS });
-    return ok;
+    const entry = { ok, tokenVersion: row?.token_version || 0, exp: now + ADMIN_CACHE_TTL_MS };
+    _adminCache.set(userId, entry);
+    return entry;
   } catch {
     // Em caso de falha DB, cai no JWT (não derruba sistema)
     return null;
@@ -135,13 +137,22 @@ const requireAdmin = async (req, res, next) => {
     });
   }
   // [P3-A3] Revalida tipo/ativo no DB (cached). Bloqueia se foi demoted/desativado.
+  // [P6-M2] Também valida tokenVersion — bloqueia se senha foi trocada após emissão do token.
   const userId = req.user.userId || req.user.id;
   if (userId) {
     const fresh = await _adminFresh(userId);
-    if (fresh === false) {
+    if (fresh && fresh.ok === false) {
       return res.status(403).json({
         success: false,
         error: 'Acesso restrito a administradores'
+      });
+    }
+    if (fresh && typeof fresh.tokenVersion === 'number' &&
+        typeof req.user.tokenVersion === 'number' &&
+        req.user.tokenVersion < fresh.tokenVersion) {
+      return res.status(401).json({
+        success: false,
+        error: 'Token revogado (senha foi alterada)'
       });
     }
   }
