@@ -24,7 +24,7 @@ export function useAuth() {
   const store = useAuthStore();
   const router = useRouter();
 
-  const loginCliente = async (email, password) => {
+  const loginCliente = async (email: string, password: string) => {
     const response = await api.post('/app/auth/login', { email, password });
     const { user, token } = response.data.data;
     const userWithId = { ...user, clienteAppId: user.id };
@@ -34,7 +34,7 @@ export function useAuth() {
     router.replace('/(cliente)/(tabs)');
   };
 
-  const loginProfissional = async (email, password) => {
+  const loginProfissional = async (email: string, password: string) => {
     const response = await api.post('/app/profissional/auth/login', {
       email,
       password,
@@ -43,14 +43,14 @@ export function useAuth() {
     await store.setAuth(user, token, 'profissional');
     wsManager.connect(user.profissionalId, 'profissional');
     registerPushToken('profissional');
-    router.replace('/(profissional)/(tabs)');
+    router.replace('/(profissional)/(tabs)' as any);
   };
 
   const registerCliente = async (
-    nome,
-    email,
-    password,
-    telefone,
+    nome: string,
+    email: string,
+    password: string,
+    telefone: string,
   ) => {
     let response;
     try {

@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
       ]);
 
-      const [token, userStr, userType] = results as [string, string, string][];
+      const [token, userStr, userType] = results as unknown as [string, string, string][];
       const tokenVal = token[1];
       const userVal = userStr[1];
       const typeVal = userType[1] as UserType;

@@ -5,7 +5,8 @@ import api from '../../../services/api';
 import { useAuthStore } from '../../../store/authStore';
 
 export default function ProdutosAtendimento() {
-  const { salaoId } = useAuthStore();
+  const { user } = useAuthStore();
+  const salaoId = user?.salonId;
   const [search, setSearch] = useState('');
   const [quantidade, setQuantidade] = useState('1');
   const queryClient = useQueryClient();
