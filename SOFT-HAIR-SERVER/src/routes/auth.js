@@ -3,6 +3,7 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const AuthService = require('../services/authService');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { sendError } = require('../utils/sendError');
 
 // Registrar novo salão
 router.post('/register', [
@@ -28,11 +29,7 @@ router.post('/register', [
       data: result
     });
   } catch (error) {
-    console.error('Erro no registro:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    return sendError(res, 500, 'Erro ao registrar salão', error);
   }
 });
 
@@ -55,11 +52,7 @@ router.post('/login', [
       data: result
     });
   } catch (error) {
-    console.error('Erro no login:', error);
-    res.status(401).json({
-      success: false,
-      error: error.message
-    });
+    return sendError(res, 401, 'Credenciais inválidas', error);
   }
 });
 
@@ -88,11 +81,7 @@ router.post('/device/register', authMiddleware, requireAdmin, async (req, res) =
       data: device
     });
   } catch (error) {
-    console.error('Erro ao registrar dispositivo:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    return sendError(res, 500, 'Erro ao registrar dispositivo', error);
   }
 });
 
@@ -115,10 +104,7 @@ router.post('/device/validate', async (req, res) => {
       data: device
     });
   } catch (error) {
-    res.status(401).json({
-      success: false,
-      error: error.message
-    });
+    return sendError(res, 401, 'Dispositivo inválido', error);
   }
 });
 
@@ -139,11 +125,7 @@ router.post('/apikey', authMiddleware, requireAdmin, async (req, res) => {
       data: apiKey
     });
   } catch (error) {
-    console.error('Erro ao criar API Key:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    return sendError(res, 500, 'Erro ao criar API Key', error);
   }
 });
 

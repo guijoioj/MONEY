@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { pool } = require('../config/database');
 const { profissionalAuthMiddleware } = require('../middleware/profissionalAuth');
+const { sendError } = require('../utils/sendError');
 
 const crypto = require('crypto');
 const signToken = (profissional) =>
@@ -20,24 +21,40 @@ const signToken = (profissional) =>
   );
 
 // POST /login
+// [M4] Aceita `salaoId` opcional no body para desambiguar profissionais com mesmo email
+// em diferentes salões. Se múltiplos matches e nenhum salaoId informado, retorna 409.
 router.post('/login', [
-  body('email').isEmail().withMessage('Email inválido'),
+  body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
   body('password').notEmpty().withMessage('Senha é obrigatória'),
+  body('salaoId').optional().isInt({ min: 1 }).withMessage('salaoId inválido'),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ success: false, errors: errors.array() });
 
-    const { email, password } = req.body;
+    const { email, password, salaoId } = req.body;
 
-    const result = await pool.query(
-      'SELECT id, nome, email, telefone, salao_id, senha_hash FROM profissionais WHERE email = $1 AND app_ativo = true',
-      [email]
-    );
+    const params = [email];
+    let sql = 'SELECT id, nome, email, telefone, salao_id, senha_hash FROM profissionais WHERE LOWER(email) = LOWER($1) AND app_ativo = true';
+    if (salaoId) {
+      params.push(salaoId);
+      sql += ' AND salao_id = $2';
+    }
+
+    const result = await pool.query(sql, params);
 
     if (result.rows.length === 0)
       return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
+
+    // [M4] Se mais de um profissional ativo com o mesmo email e salaoId não informado, exige escolha
+    if (result.rows.length > 1 && !salaoId) {
+      return res.status(409).json({
+        success: false,
+        error: 'Múltiplos salões para este email. Informe salaoId.',
+        saloes: result.rows.map(r => ({ salaoId: r.salao_id, nome: r.nome }))
+      });
+    }
 
     const profissional = result.rows[0];
 
@@ -53,8 +70,7 @@ router.post('/login', [
 
     res.json({ success: true, data: { user, token } });
   } catch (error) {
-    console.error('Erro no login do profissional:', error);
-    res.status(500).json({ success: false, error: error.message });
+    return sendError(res, 500, 'Erro no login do profissional', error);
   }
 });
 
@@ -71,8 +87,7 @@ router.get('/me', profissionalAuthMiddleware, async (req, res) => {
 
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
-    console.error('Erro ao buscar profissional:', error);
-    res.status(500).json({ success: false, error: error.message });
+    return sendError(res, 500, 'Erro ao buscar profissional', error);
   }
 });
 
@@ -83,7 +98,7 @@ router.put('/push-token', profissionalAuthMiddleware, async (req, res) => {
     await pool.query('UPDATE profissionais SET push_token = $1 WHERE id = $2', [pushToken, req.profissionalId]);
     res.json({ success: true });
   } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
+    return sendError(res, 500, 'Erro ao atualizar push token', e);
   }
 });
 

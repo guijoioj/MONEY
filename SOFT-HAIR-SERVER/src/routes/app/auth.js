@@ -58,13 +58,15 @@ router.post('/login', async (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
+// [M5] Rota legacy: redireciona para a rota canônica do profissional.
+// Mantida temporariamente para compatibilidade com versões antigas do app.
+// TODO: remover após confirmação de que nenhum app < v2 está em uso.
 router.post('/profissional/login', async (req, res) => {
-  try {
-    const AuthService = require('../../services/authService');
-    const { email, password } = req.body;
-    const result = await AuthService.login(email, password);
-    res.json(result);
-  } catch (e) { res.status(401).json({ error: e.message }); }
+  console.warn('[DEPRECATED] /api/app/legacy/auth/profissional/login chamado. Migrar para /api/app/profissional/auth/login');
+  return res.status(410).json({
+    success: false,
+    error: 'Rota legacy descontinuada. Use POST /api/app/profissional/auth/login.'
+  });
 });
 
 router.get('/me', appAuthMiddleware, async (req, res) => {

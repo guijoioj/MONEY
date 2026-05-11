@@ -66,6 +66,30 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// ─── CSRF Mitigation [M9] ───
+// Atualmente a autenticação é Bearer token em header (Authorization), não cookie.
+// CSRF clássico requer cookies enviados automaticamente — sem cookies, navegador não
+// envia credenciais cross-origin. Mantemos `credentials:true` apenas para futura migração.
+// Defesa adicional: rejeitar requisições state-changing com Content-Type incompatível
+// (form-encoded sem preflight pode burlar CORS em browsers antigos).
+app.use((req, res, next) => {
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+    const ct = (req.headers['content-type'] || '').toLowerCase();
+    // Aceita JSON (preflight obrigatório), multipart (login, upload), ou vazio.
+    const okTypes = ['application/json', 'multipart/form-data', 'application/octet-stream'];
+    if (ct && !okTypes.some(t => ct.startsWith(t))) {
+      // form-urlencoded permitido apenas no /webhooks futuros — bloqueia por enquanto.
+      if (ct.startsWith('application/x-www-form-urlencoded')) {
+        return res.status(415).json({
+          success: false,
+          error: 'Content-Type não suportado. Use application/json.'
+        });
+      }
+    }
+  }
+  next();
+});
+
 // ─── Request Logging ───
 // Sanitiza URL para não logar tokens em query string ([M2])
 function sanitizeUrl(originalUrl) {
@@ -94,6 +118,20 @@ app.use((req, res, next) => {
   next();
 });
 
+// [M10] keyGenerator robusto: combina IP + bearer-token-fingerprint quando autenticado.
+// Mitiga abuso quando atacante alterna X-Forwarded-For mas mantém o mesmo token,
+// e também quando vários usuários compartilham IP (NAT corporativo).
+const crypto = require('crypto');
+function rateLimitKey(req) {
+  const ip = req.ip || 'unknown';
+  const auth = req.headers.authorization || '';
+  if (auth.startsWith('Bearer ')) {
+    const fp = crypto.createHash('sha256').update(auth.slice(7)).digest('hex').slice(0, 16);
+    return `${ip}|${fp}`;
+  }
+  return ip;
+}
+
 // ─── Rate Limiting (geral) ───
 const generalLimiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
@@ -101,6 +139,7 @@ const generalLimiter = rateLimit({
   message: { success: false, error: 'Muitas requisições. Tente novamente em alguns minutos.' },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: rateLimitKey,
 });
 app.use(generalLimiter);
 
@@ -112,6 +151,12 @@ const authLimiter = rateLimit({
   message: { success: false, error: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
   standardHeaders: true,
   legacyHeaders: false,
+  // Em /login não há token ainda — IP + email do body
+  keyGenerator: (req) => {
+    const ip = req.ip || 'unknown';
+    const email = ((req.body?.email || '') + '').toLowerCase().trim();
+    return email ? `${ip}|${email}` : ip;
+  },
 });
 
 // Lockout por email/usuário: 3 falhas nos últimos 30min → bloqueia 30min.

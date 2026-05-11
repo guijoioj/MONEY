@@ -15,8 +15,13 @@ function appAuthMiddleware(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const clienteId = decoded.clienteAppId || decoded.clienteId || decoded.userId;
-    if (!clienteId || (decoded.type && decoded.type !== 'cliente')) {
+    // [M7] Exige explicitamente type === 'cliente'. JWT antigos (sem type) ou de outro tipo são rejeitados.
+    // Não aceita mais decoded.userId como fallback (vetor de escalada admin→cliente).
+    if (decoded.type !== 'cliente') {
+      return res.status(403).json({ success: false, error: 'Acesso nao autorizado' });
+    }
+    const clienteId = decoded.clienteAppId || decoded.clienteId;
+    if (!clienteId) {
       return res.status(403).json({ success: false, error: 'Acesso nao autorizado' });
     }
 
@@ -42,8 +47,12 @@ function profissionalAppMiddleware(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const profissionalId = decoded.profissionalId || decoded.userId;
-    if (!profissionalId || (decoded.type && decoded.type !== 'profissional')) {
+    // [M7] Exige explicitamente type === 'profissional'. Sem fallback para userId.
+    if (decoded.type !== 'profissional') {
+      return res.status(403).json({ success: false, error: 'Acesso nao autorizado' });
+    }
+    const profissionalId = decoded.profissionalId;
+    if (!profissionalId) {
       return res.status(403).json({ success: false, error: 'Acesso nao autorizado' });
     }
 
