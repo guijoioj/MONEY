@@ -7,21 +7,29 @@ router.get('/', async (req, res) => {
     // Check database connection
     await pool.query('SELECT 1');
 
-    res.json({
+    // [B9] Em produção não expõe versão (reduz fingerprint).
+    // Em dev/test, lê do package.json para evitar drift.
+    const isProd = process.env.NODE_ENV === 'production';
+    const payload = {
       success: true,
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '1.0.0',
       services: {
         database: 'connected',
         api: 'running'
       }
-    });
+    };
+    if (!isProd) {
+      try { payload.version = require('../../package.json').version; } catch { /* noop */ }
+    }
+    res.json(payload);
   } catch (error) {
+    // [M1] Não vaza error.message; logs detalhados via console
+    console.error('[HEALTH] DB error:', error.message);
     res.status(503).json({
       success: false,
       status: 'unhealthy',
-      error: error.message
+      error: 'Service degraded'
     });
   }
 });
