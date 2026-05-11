@@ -1,4 +1,20 @@
 const { query, queryOne, withTransaction } = require('../config/database');
+const { logAction } = require('../utils/auditLog');
+
+// [P8-A1] State machine de status de venda — transições válidas:
+//   pendente   → concluida | finalizada | cancelada
+//   concluida  → cancelada (estorno)
+//   finalizada → cancelada (estorno)
+//   cancelada  → ∅ (terminal)
+// Qualquer outra transição é rejeitada.
+const VENDA_STATUS_TRANSITIONS = {
+  pendente: ['concluida', 'finalizada', 'cancelada'],
+  concluida: ['cancelada'],
+  finalizada: ['cancelada'],
+  cancelada: [],
+};
+
+const VENDA_STATUS_VALIDOS = ['pendente', 'concluida', 'finalizada', 'cancelada'];
 
 class VendaService {
   async listar(salaoId, filtros = {}) {
@@ -159,8 +175,72 @@ class VendaService {
     }
   }
 
-  async atualizar(id, data, salaoId) {
+  async atualizar(id, data, salaoId, opts = {}) {
     try {
+      // [P8-A1] State machine + tenancy + audit
+      const existing = await queryOne(
+        'SELECT id, status FROM vendas WHERE id = $1 AND salao_id = $2',
+        [id, salaoId]
+      );
+      if (!existing) return { success: false, error: 'Venda não encontrada' };
+
+      // [P8-A1] Validar status com state machine se foi enviado.
+      if (data.status && data.status !== existing.status) {
+        if (!VENDA_STATUS_VALIDOS.includes(data.status)) {
+          return { success: false, error: `Status inválido: ${data.status}` };
+        }
+        const allowed = VENDA_STATUS_TRANSITIONS[existing.status] || [];
+        if (!allowed.includes(data.status)) {
+          return {
+            success: false,
+            error: `Transição inválida: ${existing.status} → ${data.status}`,
+          };
+        }
+      }
+
+      // [P8-A1] Transição para `cancelada` via PUT precisa restaurar estoque
+      // (mesma lógica do DELETE /vendas/:id) — se transitar diretamente sem isso,
+      // o estoque fica double-decrement quando uma nova venda real for criada.
+      if (data.status === 'cancelada' && existing.status !== 'cancelada') {
+        return await withTransaction(async (client) => {
+          const upd = await client.query(`
+            UPDATE vendas SET
+              status = 'cancelada',
+              forma_pagamento = COALESCE($1, forma_pagamento),
+              observacoes = COALESCE($2, observacoes),
+              updated_at = CURRENT_TIMESTAMP
+            WHERE id = $3 AND salao_id = $4 RETURNING *
+          `, [data.forma_pagamento || null, data.observacoes || null, id, salaoId]);
+          if (!upd.rows.length) return { success: false, error: 'Venda não encontrada' };
+          const venda = upd.rows[0];
+
+          // Restore stock com tenancy guard
+          const itens = await client.query(
+            'SELECT produto_id, quantidade FROM venda_itens WHERE venda_id = $1',
+            [id]
+          );
+          for (const item of itens.rows) {
+            await client.query(
+              'UPDATE produtos SET quantidade_estoque = quantidade_estoque + $1 WHERE id = $2 AND salao_id = $3',
+              [item.quantidade, item.produto_id, salaoId]
+            );
+          }
+
+          // [P8-A1] Audit
+          await logAction({
+            req: opts.req,
+            action: 'venda.status_change',
+            entityType: 'venda',
+            entityId: id,
+            before: { status: existing.status },
+            after: { status: 'cancelada' },
+            salaoId,
+          }).catch(() => {});
+
+          return { success: true, data: venda };
+        });
+      }
+
       const result = await queryOne(`
         UPDATE vendas SET
           status = COALESCE($1, status),
@@ -171,6 +251,20 @@ class VendaService {
       `, [data.status, data.forma_pagamento, data.observacoes, id, salaoId]);
 
       if (!result) return { success: false, error: 'Venda não encontrada' };
+
+      // [P8-A1] Audit log se status mudou
+      if (data.status && data.status !== existing.status) {
+        await logAction({
+          req: opts.req,
+          action: 'venda.status_change',
+          entityType: 'venda',
+          entityId: id,
+          before: { status: existing.status },
+          after: { status: data.status },
+          salaoId,
+        }).catch(() => {});
+      }
+
       return { success: true, data: result };
     } catch (error) {
       return { success: false, error: error.message };

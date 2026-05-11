@@ -1,4 +1,19 @@
 const { query, queryOne, withTransaction } = require('../config/database');
+const { logAction } = require('../utils/auditLog');
+
+// [P8-A2] State machine de status de atendimento — transições válidas:
+//   agendado     → em_andamento | cancelado
+//   em_andamento → finalizado | cancelado
+//   finalizado   → ∅ (terminal — não pode voltar nem cancelar)
+//   cancelado    → ∅ (terminal)
+const ATEND_STATUS_TRANSITIONS = {
+  agendado: ['em_andamento', 'cancelado'],
+  em_andamento: ['finalizado', 'cancelado'],
+  finalizado: [],
+  cancelado: [],
+};
+
+const ATEND_STATUS_VALIDOS = ['agendado', 'em_andamento', 'finalizado', 'cancelado'];
 
 class AtendimentoService {
   async listar(salaoId, filtros = {}) {
@@ -97,11 +112,39 @@ class AtendimentoService {
     }
   }
 
-  async atualizar(id, data, salaoId) {
+  async atualizar(id, data, salaoId, opts = {}) {
     try {
       // [P4-A3] Recupera estado atual — necessário para validar transição e re-derivar valor de servico.preco.
       const existing = await queryOne('SELECT id, status, servico_id FROM atendimentos WHERE id = $1 AND salao_id = $2', [id, salaoId]);
       if (!existing) return { success: false, error: 'Atendimento não encontrado' };
+
+      // [P8-A2] State machine de status. Bloqueia transições inválidas
+      // (`finalizado → qualquer`, `cancelado → qualquer`, etc.)
+      if (data.status && data.status !== existing.status) {
+        if (!ATEND_STATUS_VALIDOS.includes(data.status)) {
+          return { success: false, error: `Status inválido: ${data.status}` };
+        }
+        const allowed = ATEND_STATUS_TRANSITIONS[existing.status] || [];
+        if (!allowed.includes(data.status)) {
+          return {
+            success: false,
+            error: `Transição inválida: ${existing.status} → ${data.status}`,
+          };
+        }
+      }
+
+      // [P8-A2] Atendimento em estado terminal (finalizado/cancelado) NÃO aceita
+      // updates de campos não-status — bloqueia "patch" silencioso de observacoes
+      // em registros financeiros consolidados.
+      const terminal = existing.status === 'finalizado' || existing.status === 'cancelado';
+      const tentandoMudarStatus = !!data.status && data.status !== existing.status;
+      if (terminal && !tentandoMudarStatus) {
+        // Não tem transição válida — bloqueia qualquer modificação
+        return {
+          success: false,
+          error: `Atendimento em estado ${existing.status} é imutável`,
+        };
+      }
 
       // [P4-A3] BLOQUEAR alteração de `valor` arbitrariamente. Se o caller insistir em mandar `valor`,
       // ignoramos o payload e re-derivamos do `servicos.preco`. Após finalizado, valor é READ-ONLY.
@@ -113,6 +156,20 @@ class AtendimentoService {
           updated_at = CURRENT_TIMESTAMP
         WHERE id = $3 AND salao_id = $4 RETURNING *
       `, [data.status, data.observacoes, id, salaoId]);
+
+      // [P8-A2] Audit log se status mudou
+      if (data.status && data.status !== existing.status) {
+        await logAction({
+          req: opts.req,
+          action: 'atendimento.status_change',
+          entityType: 'atendimento',
+          entityId: id,
+          before: { status: existing.status },
+          after: { status: data.status },
+          salaoId,
+        }).catch(() => {});
+      }
+
       return { success: true, data: result };
     } catch (error) {
       return { success: false, error: error.message };

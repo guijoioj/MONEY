@@ -576,6 +576,17 @@ async function runMigrations() {
     )
   `);
 
+  // [P8-M1] UNIQUE partial index: 1 único caixa aberto por dia por salão.
+  // Permite múltiplos caixas no mesmo dia se já fechados (fechamento + reabertura).
+  // Fecha a janela de race em READ COMMITTED do INSERT...WHERE NOT EXISTS em /caixa/abrir.
+  await query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS unq_caixa_salao_dia_aberto
+      ON caixa(salao_id, (DATE(aberto_em)))
+      WHERE fechado_em IS NULL;
+  `).catch((e) => {
+    console.warn('[P8-M1] unique index caixa falhou (provavelmente duplicatas restantes):', e.message);
+  });
+
   // Metas por profissional
   await query(`
     CREATE TABLE IF NOT EXISTS metas_profissional (

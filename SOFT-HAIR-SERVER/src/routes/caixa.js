@@ -64,21 +64,32 @@ router.post('/abrir', authMiddleware, async (req, res) => {
     const abertoPor = req.user?.userId || req.user?.id || null;
 
     // [P2-A3] INSERT atômico — só insere se não houver outro caixa aberto hoje no mesmo salão.
-    // Fecha a janela de race condition entre dois requests simultâneos (check-then-insert).
-    const inserted = await query(
-      `INSERT INTO caixa (salao_id, saldo_inicial, observacoes, aberto_por)
-       SELECT $1, $2, $3, $4
-       WHERE NOT EXISTS (
-         SELECT 1 FROM caixa
-         WHERE salao_id = $1 AND DATE(aberto_em) = CURRENT_DATE AND fechado_em IS NULL
-       )
-       RETURNING *`,
-      [req.salaoId, saldo_inicial, observacoes || null, abertoPor]
-    );
-    if (!inserted.length) {
-      return res.status(400).json({ success: false, error: 'Caixa já está aberto hoje.' });
+    // [P8-M1] Combinado com UNIQUE partial index `unq_caixa_salao_dia_aberto`:
+    //   - INSERT...WHERE NOT EXISTS resolve o caso comum (sem race)
+    //   - UNIQUE constraint resolve a janela de race em READ COMMITTED (dois INSERTs
+    //     paralelos podem ambos ver NOT EXISTS=true; o segundo levanta 23505)
+    try {
+      const inserted = await query(
+        `INSERT INTO caixa (salao_id, saldo_inicial, observacoes, aberto_por)
+         SELECT $1, $2, $3, $4
+         WHERE NOT EXISTS (
+           SELECT 1 FROM caixa
+           WHERE salao_id = $1 AND DATE(aberto_em) = CURRENT_DATE AND fechado_em IS NULL
+         )
+         RETURNING *`,
+        [req.salaoId, saldo_inicial, observacoes || null, abertoPor]
+      );
+      if (!inserted.length) {
+        return res.status(409).json({ success: false, error: 'Caixa já está aberto hoje.' });
+      }
+      return res.json({ success: true, data: inserted[0] });
+    } catch (err) {
+      // [P8-M1] unique_violation = race detectado pelo DB
+      if (err && err.code === '23505') {
+        return res.status(409).json({ success: false, error: 'Caixa já está aberto hoje.' });
+      }
+      throw err;
     }
-    res.json({ success: true, data: inserted[0] });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
