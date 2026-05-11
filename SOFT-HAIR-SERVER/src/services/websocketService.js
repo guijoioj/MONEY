@@ -15,12 +15,44 @@ class WebSocketService {
   init(server) {
     this.wss = new WebSocket.Server({
       server,
-      path: process.env.WS_PATH || '/ws'
+      path: process.env.WS_PATH || '/ws',
+      // [A8] Validar JWT no handshake. Aceita ?token=... ou header Sec-WebSocket-Protocol.
+      verifyClient: (info, cb) => {
+        try {
+          const url = new URL(info.req.url, 'http://x');
+          const qToken = url.searchParams.get('token');
+          const hToken = (info.req.headers['sec-websocket-protocol'] || '').split(',').map(s => s.trim()).find(Boolean);
+          const token = qToken || hToken;
+          if (!token) {
+            // Não rejeita imediatamente — permite o fluxo de auth via mensagem ('auth') que já existe.
+            // Mas marca como anônimo até autenticar.
+            info.req._wsAnonymous = true;
+            return cb(true);
+          }
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          info.req._wsAuth = decoded;
+          cb(true);
+        } catch (e) {
+          console.warn('[WS] handshake JWT inválido:', e.message);
+          cb(false, 4001, 'Token inválido');
+        }
+      }
     });
 
     this.wss.on('connection', (ws, req) => {
       console.log('[WS] Nova conexão WebSocket');
       ws.isAlive = true;
+
+      // Se autenticou via handshake (?token=...), já registra cliente
+      if (req._wsAuth) {
+        const decoded = req._wsAuth;
+        this.clients.set(ws, {
+          salaoId: decoded.salaoId,
+          userId: decoded.userId || decoded.profissionalId || decoded.clienteAppId,
+          email: decoded.email,
+          subscriptions: []
+        });
+      }
 
       ws.on('pong', () => {
         ws.isAlive = true;

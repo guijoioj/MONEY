@@ -1,9 +1,32 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
 const { query } = require('../config/database');
 
-router.post('/command', authMiddleware, async (req, res) => {
+// [A4] Rate limit específico — AI é caro e abre vetor de prompt injection
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { success: false, error: 'Muitas requisições à IA. Aguarde 1 minuto.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Whitelist de actions que o LLM tem permissão de retornar
+const ALLOWED_ACTIONS = new Set(['create_agendamento', 'navigate', 'unknown']);
+
+function isPositiveInt(v) {
+  return Number.isInteger(v) && v > 0;
+}
+
+function isIsoDateTime(v) {
+  if (typeof v !== 'string') return false;
+  // YYYY-MM-DDTHH:MM(:SS)?
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(v) && !isNaN(Date.parse(v));
+}
+
+router.post('/command', authMiddleware, aiLimiter, async (req, res) => {
   const { command, context = {} } = req.body;
   if (!command) return res.status(400).json({ success: false, error: 'Comando vazio' });
 
@@ -73,6 +96,22 @@ Para datas relativas: hoje=${new Date().toISOString().split('T')[0]}, amanhã=${
     try { parsed = JSON.parse(text); }
     catch { return res.status(422).json({ success: false, error: 'IA não retornou JSON válido', raw: text }); }
 
+    // [A4] Validar estrutura: action whitelisted
+    if (!parsed || typeof parsed !== 'object' || !ALLOWED_ACTIONS.has(parsed.action)) {
+      console.warn('[AI][AUDIT] Resposta com action inválida:', { userId: req.user?.userId, salaoId, action: parsed?.action });
+      return res.status(422).json({ success: false, error: 'IA retornou action não permitida' });
+    }
+
+    // Auditoria: log de TODA execução para análise posterior
+    console.log('[AI][AUDIT]', JSON.stringify({
+      timestamp: new Date().toISOString(),
+      userId: req.user?.userId,
+      salaoId,
+      command: String(command).slice(0, 200),
+      action: parsed.action,
+      confidence: parsed.confidence,
+    }));
+
     // Resolver IDs e EXECUTAR a ação diretamente
     if (parsed.action === 'create_agendamento' && parsed.data) {
       const d = parsed.data;
@@ -103,6 +142,29 @@ Para datas relativas: hoje=${new Date().toISOString().split('T')[0]}, amanhã=${
 
       // CRIAR AGENDAMENTO DIRETAMENTE se tiver tudo necessário
       if (d.clienteId && d.professionalId && d.dateTime) {
+        // [A4] Validações fortes: IDs positivos, dateTime válido, IDs pertencem ao salão
+        if (!isPositiveInt(Number(d.clienteId)) ||
+            !isPositiveInt(Number(d.professionalId)) ||
+            (d.serviceId && !isPositiveInt(Number(d.serviceId)))) {
+          return res.status(422).json({ success: false, error: 'IDs retornados pela IA são inválidos' });
+        }
+        if (!isIsoDateTime(d.dateTime)) {
+          return res.status(422).json({ success: false, error: 'dateTime retornado pela IA é inválido' });
+        }
+
+        // Garantir tenant-binding dos IDs
+        const [cliOk, profOk, srvOk] = await Promise.all([
+          query('SELECT 1 FROM clientes WHERE id = $1 AND salao_id = $2', [d.clienteId, salaoId]),
+          query('SELECT 1 FROM profissionais WHERE id = $1 AND salao_id = $2', [d.professionalId, salaoId]),
+          d.serviceId
+            ? query('SELECT 1 FROM servicos WHERE id = $1 AND salao_id = $2', [d.serviceId, salaoId])
+            : Promise.resolve([{}]),
+        ]);
+        if (!cliOk.length || !profOk.length || !srvOk.length) {
+          console.warn('[AI][AUDIT] IDs fora do salão', { userId: req.user?.userId, salaoId, d });
+          return res.status(403).json({ success: false, error: 'Recurso não pertence ao salão autenticado' });
+        }
+
         const AgendamentoService = require('../services/AgendamentoService');
         const svc = new AgendamentoService();
         const result = await svc.criar({
@@ -111,7 +173,7 @@ Para datas relativas: hoje=${new Date().toISOString().split('T')[0]}, amanhã=${
           servico_id: d.serviceId || null,
           auxiliar_id: null,
           data_hora: d.dateTime,
-          observacoes: d.observacoes || null,
+          observacoes: typeof d.observacoes === 'string' ? d.observacoes.slice(0, 500) : null,
           status: 'agendado',
         }, salaoId);
 
@@ -135,7 +197,8 @@ Para datas relativas: hoje=${new Date().toISOString().split('T')[0]}, amanhã=${
     res.json({ success: true, ...parsed });
   } catch (err) {
     console.error('[AI] Erro:', err.message);
-    res.status(500).json({ success: false, error: err.message });
+    const isProd = process.env.NODE_ENV === 'production';
+    res.status(500).json({ success: false, error: isProd ? 'Erro interno na IA' : err.message });
   }
 });
 

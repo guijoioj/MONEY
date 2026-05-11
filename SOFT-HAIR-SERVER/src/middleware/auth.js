@@ -12,7 +12,12 @@ const authMiddleware = async (req, res, next) => {
       const [bearer, token] = authHeader.split(' ');
       if (bearer === 'Bearer' && token) {
         const decoded = AuthService.verifyToken(token);
+        // [A3] Bloquear tokens revogados via jwt_blacklist
+        if (await AuthService.isTokenRevoked(decoded)) {
+          return res.status(401).json({ success: false, error: 'Token revogado' });
+        }
         req.user = decoded;
+        req.token = token;
         req.salaoId = decoded.salaoId;
         req.salonId = decoded.salaoId;
         return next();
