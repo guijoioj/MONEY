@@ -12,6 +12,17 @@ const authMiddleware = async (req, res, next) => {
       const [bearer, token] = authHeader.split(' ');
       if (bearer === 'Bearer' && token) {
         const decoded = AuthService.verifyToken(token);
+        // [P4-C1] Bloquear tokens de cliente/profissional em endpoints admin.
+        // authMiddleware é gateway para rotas de admin (`/api/clientes`, `/api/vendas`, etc.).
+        // Tokens emitidos pelo app móvel (`appAuth`/`appProfissionalAuth`) carregam
+        // `decoded.type` ∈ {'cliente','profissional'} e DEVEM ser rejeitados aqui —
+        // só funcionam nos middlewares específicos (`clienteAuthMiddleware`/`profissionalAuthMiddleware`).
+        if (decoded.type === 'cliente' || decoded.type === 'profissional') {
+          return res.status(403).json({
+            success: false,
+            error: 'Token de usuário móvel não autorizado neste endpoint'
+          });
+        }
         // [A3] Bloquear tokens revogados via jwt_blacklist
         if (await AuthService.isTokenRevoked(decoded)) {
           return res.status(401).json({ success: false, error: 'Token revogado' });
@@ -64,6 +75,11 @@ const optionalAuth = async (req, res, next) => {
       const [bearer, token] = authHeader.split(' ');
       if (bearer === 'Bearer' && token) {
         const decoded = AuthService.verifyToken(token);
+        // [P4-C1] Simetria com authMiddleware: optionalAuth também ignora tokens móveis
+        // para não popular req.user de admin com dados de cliente/profissional.
+        if (decoded.type === 'cliente' || decoded.type === 'profissional') {
+          return next();
+        }
         req.user = decoded;
         req.salaoId = decoded.salaoId;
         req.salonId = decoded.salaoId;
