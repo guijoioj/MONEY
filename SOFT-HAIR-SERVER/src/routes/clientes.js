@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { ClienteService } = require('../services');
 
 const clienteService = new ClienteService();
@@ -128,7 +128,23 @@ router.post('/', authMiddleware, [
 });
 
 // Atualizar cliente
-router.put('/:id', authMiddleware, [
+// [P6-A3] requireAdmin + whitelist explícita de campos editáveis.
+// NUNCA aceitar senha_hash, credito_disponivel, app_ativo, push_token direto —
+// esses campos têm rotas dedicadas com lógica própria (PUT /credito, /push-token, etc).
+const CLIENTE_UPDATABLE_FIELDS = [
+  'nome', 'telefone', 'email', 'cpf', 'data_nascimento',
+  'endereco', 'observacoes', 'foto_url', 'ativo'
+];
+function pickWhitelist(body, allowed) {
+  const out = {};
+  if (!body || typeof body !== 'object') return out;
+  for (const k of allowed) {
+    if (Object.prototype.hasOwnProperty.call(body, k)) out[k] = body[k];
+  }
+  return out;
+}
+
+router.put('/:id', authMiddleware, requireAdmin, [
   body('nome').optional().isLength({ min: 2 }).withMessage('Nome deve ter pelo menos 2 caracteres'),
   body('telefone').optional().isMobilePhone('pt-BR').withMessage('Telefone inválido'),
   body('email').optional().isEmail().withMessage('Email inválido'),
@@ -142,7 +158,9 @@ router.put('/:id', authMiddleware, [
     const { id } = req.params;
     const salaoId = req.salaoId;
 
-    const result = await clienteService.atualizar(id, req.body, salaoId);
+    // [P6-A3] Filtrar body antes de chegar no service (mass-assignment defense)
+    const safeBody = pickWhitelist(req.body, CLIENTE_UPDATABLE_FIELDS);
+    const result = await clienteService.atualizar(id, safeBody, salaoId);
 
     if (result.success) {
       res.json({ success: true, data: result.data });
@@ -158,7 +176,8 @@ router.put('/:id', authMiddleware, [
 });
 
 // Deletar cliente (soft delete)
-router.delete('/:id', authMiddleware, async (req, res) => {
+// [P6-A3] requireAdmin — apenas admin pode desativar clientes
+router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const salaoId = req.salaoId;

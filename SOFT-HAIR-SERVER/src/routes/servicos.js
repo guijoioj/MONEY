@@ -1,10 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { ServicoService } = require('../services');
 
 const service = new ServicoService();
+
+// [P6-A3] Whitelist explícita de campos editáveis em servicos
+const SERVICO_UPDATABLE_FIELDS = [
+  'nome', 'descricao', 'preco', 'duracao_minutos', 'cor',
+  'categoria', 'comissao_percentual', 'ativo'
+];
+function pickWhitelist(body, allowed) {
+  const out = {};
+  if (!body || typeof body !== 'object') return out;
+  for (const k of allowed) {
+    if (Object.prototype.hasOwnProperty.call(body, k)) out[k] = body[k];
+  }
+  return out;
+}
 
 // Listar serviços
 router.get('/', authMiddleware, async (req, res) => {
@@ -53,7 +67,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // Criar serviço
-router.post('/', authMiddleware, [
+// [P6-A3] requireAdmin + whitelist
+router.post('/', authMiddleware, requireAdmin, [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
   body('preco').isFloat({ min: 0 }).withMessage('Preço deve ser um número positivo'),
   body('duracao_minutos').optional().isInt({ min: 1 }).withMessage('Duração deve ser em minutos'),
@@ -62,7 +77,8 @@ router.post('/', authMiddleware, [
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
-    const result = await service.criar(req.body, req.salaoId);
+    const safeBody = pickWhitelist(req.body, SERVICO_UPDATABLE_FIELDS);
+    const result = await service.criar(safeBody, req.salaoId);
     if (result.success) {
       res.status(201).json({ success: true, data: result.data });
     } else {
@@ -74,7 +90,8 @@ router.post('/', authMiddleware, [
 });
 
 // Atualizar
-router.put('/:id', authMiddleware, [
+// [P6-A3] requireAdmin + whitelist
+router.put('/:id', authMiddleware, requireAdmin, [
   body('nome').optional().isLength({ min: 2 }),
   body('preco').optional().isFloat({ min: 0 }),
 ], async (req, res) => {
@@ -82,7 +99,8 @@ router.put('/:id', authMiddleware, [
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
-    const result = await service.atualizar(req.params.id, req.body, req.salaoId);
+    const safeBody = pickWhitelist(req.body, SERVICO_UPDATABLE_FIELDS);
+    const result = await service.atualizar(req.params.id, safeBody, req.salaoId);
     if (result.success) {
       res.json({ success: true, data: result.data });
     } else {
@@ -94,7 +112,8 @@ router.put('/:id', authMiddleware, [
 });
 
 // Desativar
-router.delete('/:id', authMiddleware, async (req, res) => {
+// [P6-A3] requireAdmin
+router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const result = await service.deletar(req.params.id, req.salaoId);
     if (result.success) {

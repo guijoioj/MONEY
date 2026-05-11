@@ -53,8 +53,11 @@ router.get('/me', authMiddleware, async (req, res) => {
 // Atualizar salão atual
 // [P5-A7] Validador customizado de logo_url:
 // - Permite http(s)://
-// - Permite data:image/{png,jpeg,jpg,gif,webp,svg+xml};base64,...
+// - Permite data:image/{png,jpeg,jpg,gif,webp};base64,... (SVG bloqueado — P6-A2)
 // - Bloqueia javascript:, vbscript:, file:, data:text/html, etc.
+// [P6-A2] svg+xml REMOVIDO: SVG é XML executável (script tags, onload, foreignObject).
+// Quando renderizado por <object>, <iframe>, dangerouslySetInnerHTML ou alguns
+// user-agents legados via <img>, dispara XSS persistente.
 function isSafeLogoUrl(value) {
   if (value === null || value === undefined || value === '') return true; // opcional
   if (typeof value !== 'string') return false;
@@ -62,8 +65,8 @@ function isSafeLogoUrl(value) {
   const v = value.trim();
   // http(s)
   if (/^https?:\/\/[^\s<>"'`]+$/i.test(v)) return true;
-  // data: imagem apenas
-  if (/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$/i.test(v)) return true;
+  // data: imagem apenas (raster — SVG bloqueado por XSS persistente)
+  if (/^data:image\/(png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=]+$/i.test(v)) return true;
   return false;
 }
 

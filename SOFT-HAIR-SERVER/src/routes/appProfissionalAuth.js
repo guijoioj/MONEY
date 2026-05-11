@@ -44,30 +44,37 @@ router.post('/login', [
 
     const result = await pool.query(sql, params);
 
-    // [M4] Se mais de um profissional ativo com o mesmo email e salaoId não informado, exige escolha.
-    // Mantemos esta verificação ANTES do bcrypt: o caso é raro e o timing extra é desprezível.
-    if (result.rows.length > 1 && !salaoId) {
+    // [P6-A1] BCRYPT FIRST — só depois decide se precisa escolha de salão.
+    // Antes: early-return em rows.length>1 antes do bcrypt vazava lista de salões
+    // ao atacante que digitava email correto + senha QUALQUER.
+    // Agora: tenta autenticar contra TODOS os candidatos (constant-time via DUMMY_HASH
+    // quando vazio). Só após uma match positiva considera enviar resposta.
+    const DUMMY_HASH = '$2a$12$' + 'X'.repeat(53);
+    const rows = result.rows.length ? result.rows : [{ senha_hash: DUMMY_HASH, _dummy: true }];
+
+    // Roda bcrypt.compare contra cada candidato sequencialmente (timing fixo proporcional ao número de matches).
+    const matches = [];
+    for (const r of rows) {
+      const hash = r.senha_hash || DUMMY_HASH;
+      const ok = password ? await bcrypt.compare(password, hash) : false;
+      if (ok && !r._dummy && r.senha_hash) matches.push(r);
+    }
+
+    if (matches.length === 0) {
+      return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
+    }
+
+    if (matches.length > 1 && !salaoId) {
+      // Múltiplos profissionais com a MESMA senha (raríssimo) — só agora pedir salaoId.
+      // Resposta inclui só salões cujas SENHAS conferem (não enumera outros vínculos).
       return res.status(409).json({
         success: false,
-        error: 'Múltiplos salões para este email. Informe salaoId.',
-        saloes: result.rows.map(r => ({ salaoId: r.salao_id, nome: r.nome }))
+        error: 'Múltiplos salões para estas credenciais. Informe salaoId.',
+        saloes: matches.map(r => ({ salaoId: r.salao_id, nome: r.nome }))
       });
     }
 
-    // [P5-A4] Constant-time: SEMPRE executa bcrypt.compare, mesmo se rows.length === 0.
-    // Antes o early-return revelava enumeração de email via timing.
-    const DUMMY_HASH = '$2a$12$' + 'X'.repeat(53);
-    const profissional = result.rows[0]; // pode ser undefined
-    const hashToCompare = profissional?.senha_hash || DUMMY_HASH;
-    const valid = await bcrypt.compare(password, hashToCompare);
-
-    if (!profissional)
-      return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
-    if (!profissional.senha_hash)
-      return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
-    if (!valid)
-      return res.status(401).json({ success: false, error: 'Credenciais inválidas' });
-
+    const profissional = matches[0];
     const { senha_hash, ...user } = profissional;
     const token = signToken(profissional);
 

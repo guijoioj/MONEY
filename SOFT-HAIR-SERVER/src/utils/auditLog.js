@@ -2,6 +2,31 @@
 // Não-bloqueante: falhas de log não impedem a operação principal (apenas console.error).
 const { pool } = require('../config/database');
 
+// [P6-A4] Sanitização: remove campos sensíveis antes de gravar em before_data/after_data.
+// Audit log é queryable por admin via psql — não pode conter senha_hash, tokens, etc.
+const SENSITIVE_KEYS = new Set([
+  'senha_hash', 'senha', 'password', 'passwordhash', 'password_hash',
+  'token', 'jwt', 'jti', 'api_key', 'api_key_hash', 'apikey',
+  'push_token', 'pushtoken', 'refresh_token', 'access_token',
+  'secret', 'private_key', 'auth_token'
+]);
+
+function redactSensitive(obj, depth = 0) {
+  if (obj == null || typeof obj !== 'object' || depth > 6) return obj;
+  if (Array.isArray(obj)) return obj.map((v) => redactSensitive(v, depth + 1));
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (SENSITIVE_KEYS.has(String(k).toLowerCase())) {
+      out[k] = '[REDACTED]';
+    } else if (v && typeof v === 'object') {
+      out[k] = redactSensitive(v, depth + 1);
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
 /**
  * Registra uma ação sensível no audit_log.
  * @param {Object} opts
@@ -53,8 +78,9 @@ async function logAction({ req, action, entityType = null, entityId = null, befo
         String(action).slice(0, 100),
         entityType ? String(entityType).slice(0, 50) : null,
         entityId || null,
-        before ? JSON.stringify(before) : null,
-        after ? JSON.stringify(after) : null,
+        // [P6-A4] Sanitizar antes de persistir
+        before ? JSON.stringify(redactSensitive(before)) : null,
+        after ? JSON.stringify(redactSensitive(after)) : null,
         ip ? String(ip).slice(0, 45) : null,
         ua ? String(ua).slice(0, 500) : null,
       ]
