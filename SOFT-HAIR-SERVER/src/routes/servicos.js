@@ -18,7 +18,12 @@ router.get('/', authMiddleware, async (req, res) => {
     let idx = 2;
 
     if (ativo !== undefined) { conditions.push(`ativo = $${idx++}`); params.push(ativo === 'true'); }
-    if (search) { conditions.push(`(nome ILIKE $${idx} OR descricao ILIKE $${idx})`); params.push(`%${search}%`); idx++; }
+    if (search) {
+      // [P3-M8] Escapa wildcards
+      const safe = require('../utils/helpers').escapeLike(search);
+      conditions.push(`(nome ILIKE $${idx} OR descricao ILIKE $${idx})`);
+      params.push(`%${safe}%`); idx++;
+    }
 
     const lim = Math.min(parseInt(limit) || 100, 2000);
     const rows = await query(

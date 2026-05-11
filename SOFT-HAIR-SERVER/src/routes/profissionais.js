@@ -35,7 +35,12 @@ router.get('/', authMiddleware, async (req, res) => {
     let idx = 2;
 
     if (ativo !== undefined) { conditions.push(`ativo = $${idx++}`); params.push(ativo === 'true'); }
-    if (search) { conditions.push(`(nome ILIKE $${idx} OR especialidade ILIKE $${idx})`); params.push(`%${search}%`); idx++; }
+    if (search) {
+      // [P3-M8] Escapa wildcards
+      const safe = require('../utils/helpers').escapeLike(search);
+      conditions.push(`(nome ILIKE $${idx} OR especialidade ILIKE $${idx})`);
+      params.push(`%${safe}%`); idx++;
+    }
 
     const rows = await query(
       `SELECT * FROM profissionais WHERE ${conditions.join(' AND ')} ORDER BY nome ASC`,

@@ -21,8 +21,10 @@ class ClienteService {
       }
 
       if (searchTerm) {
+        // [P3-M8] Escapa wildcards LIKE/ILIKE
+        const safe = require('../utils/helpers').escapeLike(searchTerm);
         conditions.push(`(nome ILIKE $${paramCount} OR telefone ILIKE $${paramCount} OR email ILIKE $${paramCount})`);
-        params.push(`%${searchTerm}%`);
+        params.push(`%${safe}%`);
         paramCount++;
       }
 
@@ -208,15 +210,16 @@ class ClienteService {
     try {
       const clienteModel = new Cliente();
       const { query } = require('../config/database');
-      
+      // [P3-M8] Escapa wildcards
+      const safe = require('../utils/helpers').escapeLike(termo);
       const clientes = await query(`
-        SELECT * FROM clientes 
-        WHERE salao_id = $1 
-        AND ativo = true 
-        AND (nome ILIKE $2 OR telefone ILIKE $2 OR email ILIKE $2) 
-        ORDER BY nome 
+        SELECT * FROM clientes
+        WHERE salao_id = $1
+        AND ativo = true
+        AND (nome ILIKE $2 OR telefone ILIKE $2 OR email ILIKE $2)
+        ORDER BY nome
         LIMIT $3
-      `, [salaoId, `%${termo}%`, limit]);
+      `, [salaoId, `%${safe}%`, limit]);
 
       return {
         success: true,

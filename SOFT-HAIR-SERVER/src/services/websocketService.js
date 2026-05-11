@@ -20,6 +20,19 @@ class WebSocketService {
       // Aceita ?token=... ou header Sec-WebSocket-Protocol. Sem fallback legacy.
       verifyClient: (info, cb) => {
         try {
+          // [P3-M4] Defense-in-depth: validar Origin contra ALLOWED_ORIGINS.
+          // Mobile (React Native) NÃO envia Origin — permitido (autenticação JWT cobre).
+          // Web/browser DEVE bater com a allowlist.
+          const origin = info.req.headers.origin;
+          if (origin) {
+            const allowed = (process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()).filter(Boolean)) || [];
+            const hasWildcard = allowed.includes('*');
+            if (!hasWildcard && !allowed.includes(origin)) {
+              console.warn(`[WS] Origin não permitido: ${origin}`);
+              return cb(false, 4003, 'Origin não permitido');
+            }
+          }
+
           const url = new URL(info.req.url, 'http://x');
           const qToken = url.searchParams.get('token');
           const hToken = (info.req.headers['sec-websocket-protocol'] || '').split(',').map(s => s.trim()).find(Boolean);
@@ -174,6 +187,12 @@ class WebSocketService {
     const client = this.clients.get(ws);
     if (!client) {
       ws.send(JSON.stringify({ type: 'error', message: 'Autenticação necessária' }));
+      return;
+    }
+    // [P3-B4] Cap de subscriptions por conexão (50) — evita memory bloat.
+    const MAX_SUBSCRIPTIONS = 50;
+    if (client.subscriptions.length >= MAX_SUBSCRIPTIONS && !client.subscriptions.includes(data.channel)) {
+      ws.send(JSON.stringify({ type: 'error', message: `Limite de ${MAX_SUBSCRIPTIONS} subscriptions atingido` }));
       return;
     }
     if (!client.subscriptions.includes(data.channel)) {

@@ -66,8 +66,16 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // ─── Body Parsing ───
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// [P3-M1] Limite global reduzido para 1mb (mitiga JSON bomb / DoS por payload grande).
+// Rotas que precisam de payloads maiores (backup/restore) montam parser próprio.
+app.use((req, res, next) => {
+  // Backup restore precisa de até 20mb — desvia para parser dedicado.
+  if (req.path.startsWith('/api/backup')) {
+    return express.json({ limit: '20mb' })(req, res, next);
+  }
+  return express.json({ limit: '1mb' })(req, res, next);
+});
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // ─── CSRF Mitigation [M9] ───
 // Atualmente a autenticação é Bearer token em header (Authorization), não cookie.

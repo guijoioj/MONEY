@@ -30,7 +30,9 @@ router.get('/publico', publicSaloesLimiter, async (req, res) => {
     const sql = `SELECT id, nome, logo_url
       FROM saloes WHERE ativo = true AND nome ILIKE $1
       ORDER BY nome LIMIT 50`;
-    const { rows } = await query(sql, [`%${term}%`]);
+    // [P3-M8] Escapa wildcards
+    const safe = require('../utils/helpers').escapeLike(term);
+    const { rows } = await query(sql, [`%${safe}%`]);
     res.json({ success: true, data: rows });
   } catch (error) {
     return sendError(res, 500, 'Erro ao listar salões', error);

@@ -58,11 +58,11 @@ router.post('/pedido', appAuthMiddleware, async (req, res) => {
     const { salonId, itens, enderecoEntrega, formaPagamento, observacoes } = req.body;
     if (!salonId || !itens?.length) return res.status(400).json({ error: 'salonId e itens são obrigatórios' });
 
-    // [P2-M4] Validar quantidade — inteiro positivo. Bloqueia subtotal negativo.
+    // [P2-M4 / P3-M3] Validar quantidade — inteiro positivo com upper bound 10000 (bloqueia DoS/overflow).
     for (const item of itens) {
       const qtd = Number(item.quantidade);
-      if (!Number.isInteger(qtd) || qtd <= 0) {
-        return res.status(400).json({ error: `Quantidade inválida para produto ${item.produtoId}` });
+      if (!Number.isInteger(qtd) || qtd <= 0 || qtd > 10000) {
+        return res.status(400).json({ error: `Quantidade inválida (1..10000) para produto ${item.produtoId}` });
       }
       item.quantidade = qtd;
     }

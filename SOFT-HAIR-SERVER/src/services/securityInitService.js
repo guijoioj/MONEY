@@ -6,6 +6,9 @@ class SecurityInitService {
     console.log('🔐 Inicializando segurança do servidor...');
 
     try {
+      // [P3-M2] Validar chaves criptográficas no boot — fail-fast em produção.
+      this.validateCryptoKeys();
+
       // Criar tabelas de segurança
       await this.createSecurityTables();
 
@@ -16,6 +19,54 @@ class SecurityInitService {
     } catch (error) {
       console.error('❌ Erro na inicialização de segurança:', error);
       throw error;
+    }
+  }
+
+  // [P3-M2] Validação fail-fast de ENCRYPTION_KEY (AES-256-GCM = 32 bytes / 64 hex chars)
+  // e HMAC_SECRET (>= 32 chars). Em produção, aborta o boot se inválido.
+  static validateCryptoKeys() {
+    const isProd = process.env.NODE_ENV === 'production';
+    const problems = [];
+
+    const encKey = process.env.ENCRYPTION_KEY || '';
+    if (encKey) {
+      try {
+        const buf = Buffer.from(encKey, 'hex');
+        if (buf.length !== 32) {
+          problems.push(`ENCRYPTION_KEY tem ${buf.length} bytes — esperado 32 (64 hex chars) para AES-256-GCM`);
+        }
+      } catch {
+        problems.push('ENCRYPTION_KEY não é hex válido');
+      }
+    } else if (isProd) {
+      problems.push('ENCRYPTION_KEY não definida em produção');
+    }
+
+    const hmac = process.env.HMAC_SECRET || '';
+    if (hmac) {
+      if (hmac.length < 32) {
+        problems.push(`HMAC_SECRET tem ${hmac.length} chars — mínimo 32 recomendado`);
+      }
+    } else if (isProd) {
+      problems.push('HMAC_SECRET não definido em produção');
+    }
+
+    if (!process.env.JWT_SECRET) {
+      problems.push('JWT_SECRET não definido');
+    } else if (process.env.JWT_SECRET.length < 32 && isProd) {
+      problems.push(`JWT_SECRET tem ${process.env.JWT_SECRET.length} chars — mínimo 32 em produção`);
+    }
+
+    if (problems.length) {
+      const msg = `[SECURITY] Problemas com chaves criptográficas:\n  - ${problems.join('\n  - ')}`;
+      if (isProd) {
+        console.error(msg);
+        throw new Error('Chaves criptográficas inválidas — abortando boot em produção');
+      } else {
+        console.warn(msg);
+      }
+    } else {
+      console.log('🔑 Chaves criptográficas validadas');
     }
   }
 

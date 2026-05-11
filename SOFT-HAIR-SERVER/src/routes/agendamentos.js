@@ -81,7 +81,18 @@ router.get('/:id', authMiddleware, async (req, res) => {
 router.post('/', authMiddleware, [
   body('cliente_id').isInt().withMessage('cliente_id é obrigatório'),
   body('servico_id').isInt().withMessage('servico_id é obrigatório'),
-  body('data_hora').isISO8601().withMessage('data_hora deve ser ISO 8601'),
+  body('data_hora').isISO8601().withMessage('data_hora deve ser ISO 8601')
+    // [P3-M5] data_hora deve ser razoavelmente futura (tolera 60s de clock skew para trás
+    // — também previne ano 1970 / passado distante que bagunça relatórios). Permite até
+    // 100 anos no futuro como sanidade básica (smoke tests usam 2099).
+    .custom((v) => {
+      const t = new Date(v).getTime();
+      const now = Date.now();
+      if (Number.isNaN(t)) throw new Error('data_hora inválida');
+      if (t < now - 60_000) throw new Error('data_hora não pode estar no passado');
+      if (t > now + 100 * 365 * 24 * 3600 * 1000) throw new Error('data_hora muito distante no futuro');
+      return true;
+    }),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
