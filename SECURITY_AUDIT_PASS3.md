@@ -240,7 +240,7 @@ Commits: 4 (criticals+high, medium, low). Veja git log para detalhes.
 | P3-M4 | ✅ FIXADO | `services/websocketService.js#verifyClient` — valida Origin contra `ALLOWED_ORIGINS`; mobile (sem Origin) permitido. |
 | P3-M5 | ✅ FIXADO | `routes/agendamentos.js` POST — `.custom()` em `data_hora` rejeita passado (tol. 60s skew) e >100 anos futuro. |
 | P3-M6 | ⏸️ ACEITO | Defense-in-depth recommendation — não há rota de cliente para cancelar próprio agendamento no momento. Fica como nota para quando essa rota for criada. |
-| P3-M7 | ⏸️ ACEITO | Bundle size (não-segurança); fora de escopo direto da auditoria. |
+| P3-M7 | ✅ FIXADO (cleanup 2026-05-11) | `SoftHair/frontend/vite.config.js` — `manualChunks` (rolldown function form) separa `react-vendor`, `tanstack`, `charts`, `icons`, `axios`, `dexie`. `App.jsx` — `React.lazy` em todas as 20 páginas pós-login (com `Suspense` + fallback). Entry `index.js` 1007 KB → **27 KB** (-97%). Recharts isolado em `charts-*.js` (591 KB) carregado on-demand somente em Dashboard/Relatórios. Build OK. |
 | P3-M8 | ✅ FIXADO | `utils/helpers.js#escapeLike` + aplicação em `produtos.js`, `servicos.js`, `profissionais.js`, `saloes.js`, `ClienteService.js` (listar + buscarPorTermo). |
 
 ### Baixos
@@ -266,3 +266,45 @@ Commits: 4 (criticals+high, medium, low). Veja git log para detalhes.
 - **Total fixado:** 24 / 28 — restantes 4 ⏸️ aceitos.
 - **Testes:** 3/3 PASS (jest --runInBand) após cada wave.
 - **Commits:** 4 (db42e47 criticals+high, 0f2414f medium, 4d4dfe1 low; mais um previsto para este doc).
+
+---
+
+## Cleanup pendentes — 2026-05-11
+
+Re-visitação dos 4 itens marcados ⏸️ ACEITO acima:
+
+### P3-M6 — Defense-in-depth (cancelar agendamento por cliente)
+**Status:** ⏸️ ACEITO (documentado).
+**Decisão:** Não há rota exposta para cliente cancelar próprio agendamento; o método `AgendamentoService.cancelar(id, motivo, salaoId)` é chamado apenas por rotas admin (`routes/agendamentos.js`) que já filtram por `req.salaoId`. Recomendação registrada: **quando** uma rota tipo `DELETE /api/app/cliente/agendamentos/:id` for criada, ela DEVE chamar uma sobrecarga `cancelar(id, motivo, salaoId, clienteId)` que adiciona `AND cliente_id = $clienteId` à cláusula WHERE. Nota deixada inline no service para captura futura.
+
+### P3-M7 — Bundle size
+**Status:** ✅ FIXADO.
+**Aplicado:**
+- `SoftHair/frontend/vite.config.js`: adicionado `build.rollupOptions.output.manualChunks` em forma de função (necessário no Vite 8 + rolldown), separando vendors em chunks dedicados (`react-vendor`, `tanstack`, `charts`, `icons`, `axios`, `dexie`).
+- `SoftHair/frontend/src/App.jsx`: convertidas 20 páginas pós-login para `React.lazy(() => import(...))` com `<Suspense fallback={<spinner/>}>`. Páginas de auth (Login/Register/Forgot/Reset) permanecem eager para first-paint.
+- `chunkSizeWarningLimit` ajustado para 800 KB (recharts isolado em 591 KB é o teto natural; é carregado on-demand somente em Dashboard/Relatorios/Metas/Financeiro).
+
+**Resultado de build (antes → depois):**
+| Arquivo | Antes | Depois |
+|---------|-------|--------|
+| `index-*.js` (entry) | **1007 KB** | **27 KB** |
+| `react-vendor-*.js` | (no chunk) | 26 KB |
+| `tanstack-*.js` | (no chunk) | 35 KB |
+| `axios-*.js` | (no chunk) | 41 KB |
+| `icons-*.js` | (no chunk) | 14 KB |
+| `charts-*.js` (lazy) | (no chunk) | 591 KB |
+| páginas individuais (lazy) | — | 0.8–52 KB cada |
+
+Initial JS no login: ~27 KB + 26 KB react-vendor + 41 KB axios ≈ **~94 KB** vs. **1007 KB** anterior.
+
+### P3-B2 — `ProfissionalService.criar` aceita `data.ativo` arbitrário
+**Status:** ⏸️ ACEITO (cosmético; sem risco de segurança).
+**Decisão:** Comportamento intencional para pre-onboarding (admin cria profissional desativado para configurar antes de liberar acesso ao app). Default permanece `true`. Whitelist de `PROFISSIONAL_ALLOWED_FIELDS` aplicada em P3-A4 já restringe os campos editáveis; `ativo` legitimamente faz parte dessa whitelist. Sem ação adicional.
+
+### P3-B7 — Mobile: chave AES hardcoded em `softhair-mobile/utils/security.ts`
+**Status:** ⏸️ ACEITO — tracking ativo em `SECURITY_AUDIT.md` Pass 1 [A6] (linhas 156–161).
+**Decisão:** Não é major migration mas exige decisão de arquitetura (remover camada AES manual e usar apenas `SecureStore` nativo, que já é Keychain/Keystore). Como `SecureStore` já fornece criptografia OS-level, a camada AES é defense-in-depth comprometida (não falha primária). Decisão arquitetural fica fora do escopo de "resolver agora" — permanece no ROADMAP de Pass 1 [A6] como referência única de tracking. Sem regressão neste pass.
+
+### Validação cleanup
+- Build frontend: ✅ OK (813ms, sem warnings de tamanho).
+- Backend smoke tests: ver seção a seguir.

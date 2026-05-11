@@ -208,12 +208,19 @@ class AgendamentoService {
     }
   }
 
+  // SECURITY NOTE (P3-M6 defense-in-depth): este método assume que o caller
+  // é admin/staff do salao (req.salaoId vem do JWT do admin via authMiddleware).
+  // Se no futuro uma rota for criada para o CLIENTE cancelar próprio agendamento
+  // (ex.: DELETE /api/app/cliente/agendamentos/:id), use uma sobrecarga
+  // `cancelar(id, motivo, salaoId, clienteId)` que adiciona `AND cliente_id = $clienteId`
+  // ao WHERE — caso contrário um cliente conseguiria cancelar agendamentos alheios
+  // dentro do mesmo salão. Tracking: SECURITY_AUDIT_PASS3.md#P3-M6.
   async cancelar(id, motivo, salaoId) {
     try {
       const { queryOne } = require('../config/database');
-      
+
       const result = await queryOne(`
-        UPDATE agendamentos 
+        UPDATE agendamentos
         SET status = 'cancelado',
             observacoes = COALESCE(observacoes || E'\\nCancelado: ', '') || $2,
             updated_at = CURRENT_TIMESTAMP

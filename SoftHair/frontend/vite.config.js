@@ -13,4 +13,22 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('react-router-dom') || id.match(/node_modules\/(react|react-dom|scheduler)\//)) {
+            return 'react-vendor';
+          }
+          if (id.includes('@tanstack')) return 'tanstack';
+          if (id.includes('recharts') || id.includes('d3-')) return 'charts';
+          if (id.includes('lucide-react')) return 'icons';
+          if (id.includes('axios')) return 'axios';
+          if (id.includes('dexie')) return 'dexie';
+        },
+      },
+    },
+  },
 });

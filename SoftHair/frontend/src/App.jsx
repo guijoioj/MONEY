@@ -1,29 +1,50 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
+
+// Eager: auth pages (lightweight, first-paint critical)
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-import Dashboard from './pages/Dashboard';
-import Administrativo from './pages/Administrativo';
-import Agenda from './pages/Agenda';
-import Clientes from './pages/Clientes';
-import ServicosEProdutos from './pages/ServicosEProdutos';
-import Profissionais from './pages/Profissionais';
-import Atendimentos from './pages/Atendimentos';
-import Vendas from './pages/Vendas';
-import Fechamento from './pages/Fechamento';
-import Backup from './pages/Backup';
-import Despesas from './pages/Despesas';
-import Financeiro from './pages/Financeiro';
-import Customizacao from './pages/Customizacao';
-import Configuracoes from './pages/Configuracoes';
-import Notificacoes from './pages/Notificacoes';
-import Solicitacoes from './pages/Solicitacoes';
-import Caixa from './pages/Caixa';
-import Metas from './pages/Metas';
-import Relatorios from './pages/Relatorios';
+
+// Lazy: post-login pages (heavy deps like recharts, dexie, etc.)
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Administrativo = lazy(() => import('./pages/Administrativo'));
+const Agenda = lazy(() => import('./pages/Agenda'));
+const Clientes = lazy(() => import('./pages/Clientes'));
+const ServicosEProdutos = lazy(() => import('./pages/ServicosEProdutos'));
+const Profissionais = lazy(() => import('./pages/Profissionais'));
+const Atendimentos = lazy(() => import('./pages/Atendimentos'));
+const Vendas = lazy(() => import('./pages/Vendas'));
+const Fechamento = lazy(() => import('./pages/Fechamento'));
+const Backup = lazy(() => import('./pages/Backup'));
+const Despesas = lazy(() => import('./pages/Despesas'));
+const Financeiro = lazy(() => import('./pages/Financeiro'));
+const Customizacao = lazy(() => import('./pages/Customizacao'));
+const Configuracoes = lazy(() => import('./pages/Configuracoes'));
+const Notificacoes = lazy(() => import('./pages/Notificacoes'));
+const Solicitacoes = lazy(() => import('./pages/Solicitacoes'));
+const Caixa = lazy(() => import('./pages/Caixa'));
+const Metas = lazy(() => import('./pages/Metas'));
+const Relatorios = lazy(() => import('./pages/Relatorios'));
+
+function PageFallback() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+    </div>
+  );
+}
+
+function lazyEl(Component) {
+  return (
+    <Suspense fallback={<PageFallback />}>
+      <Component />
+    </Suspense>
+  );
+}
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -71,27 +92,27 @@ export default function App() {
 
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="administrativo" element={<Administrativo />} />
-        <Route path="agenda" element={<Agenda />} />
-        <Route path="solicitacoes" element={<Solicitacoes />} />
-        <Route path="clientes" element={<Clientes />} />
-        <Route path="servicos-e-produtos" element={<ServicosEProdutos />} />
+        <Route path="dashboard" element={lazyEl(Dashboard)} />
+        <Route path="administrativo" element={lazyEl(Administrativo)} />
+        <Route path="agenda" element={lazyEl(Agenda)} />
+        <Route path="solicitacoes" element={lazyEl(Solicitacoes)} />
+        <Route path="clientes" element={lazyEl(Clientes)} />
+        <Route path="servicos-e-produtos" element={lazyEl(ServicosEProdutos)} />
         <Route path="servicos" element={<Navigate to="/servicos-e-produtos" replace />} />
         <Route path="produtos" element={<Navigate to="/servicos-e-produtos" replace />} />
-        <Route path="profissionais" element={<Profissionais />} />
-        <Route path="atendimentos" element={<Atendimentos />} />
-        <Route path="vendas" element={<Vendas />} />
-        <Route path="fechamento" element={<Fechamento />} />
-        <Route path="backup" element={<Backup />} />
-        <Route path="despesas" element={<Despesas />} />
-        <Route path="financeiro" element={<Financeiro />} />
-        <Route path="customizacao" element={<Customizacao />} />
-        <Route path="configuracoes" element={<Configuracoes />} />
-        <Route path="notificacoes" element={<Notificacoes />} />
-        <Route path="caixa" element={<Caixa />} />
-        <Route path="metas" element={<Metas />} />
-        <Route path="relatorios" element={<Relatorios />} />
+        <Route path="profissionais" element={lazyEl(Profissionais)} />
+        <Route path="atendimentos" element={lazyEl(Atendimentos)} />
+        <Route path="vendas" element={lazyEl(Vendas)} />
+        <Route path="fechamento" element={lazyEl(Fechamento)} />
+        <Route path="backup" element={lazyEl(Backup)} />
+        <Route path="despesas" element={lazyEl(Despesas)} />
+        <Route path="financeiro" element={lazyEl(Financeiro)} />
+        <Route path="customizacao" element={lazyEl(Customizacao)} />
+        <Route path="configuracoes" element={lazyEl(Configuracoes)} />
+        <Route path="notificacoes" element={lazyEl(Notificacoes)} />
+        <Route path="caixa" element={lazyEl(Caixa)} />
+        <Route path="metas" element={lazyEl(Metas)} />
+        <Route path="relatorios" element={lazyEl(Relatorios)} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
