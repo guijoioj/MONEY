@@ -86,14 +86,59 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
-const requireAdmin = (req, res, next) => {
+// [P3-A3] Cache em memória de revalidação admin (2 min TTL).
+// Reduz hit ao DB sem deixar token-stale válido por 24h se o admin for demoted/desativado.
+const _adminCache = new Map(); // userId -> { ok: boolean, exp: epochMs }
+const ADMIN_CACHE_TTL_MS = 2 * 60 * 1000;
+
+async function _adminFresh(userId) {
+  const now = Date.now();
+  const cached = _adminCache.get(userId);
+  if (cached && cached.exp > now) return cached.ok;
+  try {
+    const { queryOne } = require('../config/database');
+    const row = await queryOne(
+      'SELECT tipo, COALESCE(ativo, true) AS ativo FROM usuarios WHERE id = $1',
+      [userId]
+    );
+    const ok = !!(row && row.ativo && row.tipo === 'admin');
+    _adminCache.set(userId, { ok, exp: now + ADMIN_CACHE_TTL_MS });
+    return ok;
+  } catch {
+    // Em caso de falha DB, cai no JWT (não derruba sistema)
+    return null;
+  }
+}
+
+const requireAdmin = async (req, res, next) => {
+  // Verifica o JWT primeiro (rápido)
   if (!req.user || req.user.tipo !== 'admin') {
     return res.status(403).json({
       success: false,
       error: 'Acesso restrito a administradores'
     });
   }
+  // [P3-A3] Revalida tipo/ativo no DB (cached). Bloqueia se foi demoted/desativado.
+  const userId = req.user.userId || req.user.id;
+  if (userId) {
+    const fresh = await _adminFresh(userId);
+    if (fresh === false) {
+      return res.status(403).json({
+        success: false,
+        error: 'Acesso restrito a administradores'
+      });
+    }
+  }
   next();
 };
 
-module.exports = { authMiddleware, optionalAuth, requireAdmin };
+// Permite invalidar cache externamente (ex.: ao atualizar tipo/ativo de um user).
+function invalidateAdminCache(userId) {
+  if (userId == null) {
+    _adminCache.clear();
+  } else {
+    _adminCache.delete(userId);
+  }
+}
+
+module.exports = { authMiddleware, optionalAuth, requireAdmin, invalidateAdminCache };

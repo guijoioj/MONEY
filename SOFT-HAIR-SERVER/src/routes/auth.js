@@ -57,19 +57,29 @@ router.post('/login', [
 });
 
 // Registrar dispositivo (apenas administradores do salão)
+// [P3-C1] salaoId vem do JWT do admin autenticado — NUNCA do body. Impede escalada cross-tenant
+// (admin do salão A não pode criar device para salão B).
 router.post('/device/register', authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const { salaoId, tipo, nome, fingerprint, info } = req.body;
+    const { tipo, nome, fingerprint, info } = req.body;
 
-    if (!fingerprint || !salaoId) {
+    if (!fingerprint) {
       return res.status(400).json({
         success: false,
-        error: 'Fingerprint e salaoId são obrigatórios'
+        error: 'Fingerprint é obrigatório'
+      });
+    }
+
+    // [P3-C1] Se o body trouxe salaoId, exigir que bata com o do JWT. Ignora caso contrário.
+    if (req.body.salaoId !== undefined && Number(req.body.salaoId) !== Number(req.salaoId)) {
+      return res.status(403).json({
+        success: false,
+        error: 'salaoId do body diverge do salão do usuário autenticado'
       });
     }
 
     const device = await AuthService.registerDevice({
-      salaoId,
+      salaoId: req.salaoId, // [P3-C1] força tenant do JWT
       tipo,
       nome,
       fingerprint,

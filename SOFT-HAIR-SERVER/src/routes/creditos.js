@@ -61,18 +61,49 @@ router.get('/todos-com-saldo', authMiddleware, async (req, res) => {
 });
 
 // Remover lançamento de crédito (estorno)
+// [P3-A6] DELETE recompõe saldo do cliente em transação atômica, evitando fraude interna
+// (admin que apagava lançamentos sem ajustar saldo). Audit log gravado.
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    const { pool } = require('../config/database');
-    const { rows } = await pool.query(
-      `SELECT cc.* FROM creditos_cliente cc
-       JOIN clientes c ON c.id = cc.cliente_id
-       WHERE cc.id = $1 AND c.salao_id = $2`,
-      [req.params.id, req.salaoId]
-    );
-    if (rows.length === 0) return res.status(404).json({ success: false, error: 'Crédito não encontrado' });
-    await pool.query('DELETE FROM creditos_cliente WHERE id = $1', [req.params.id]);
-    res.json({ success: true, data: { id: req.params.id } });
+    const { withTransaction } = require('../config/database');
+    const result = await withTransaction(async (client) => {
+      // Buscar lançamento + cliente, validando tenancy
+      const found = await client.query(
+        `SELECT cc.*, c.salao_id AS cliente_salao_id, c.credito_disponivel
+           FROM creditos_cliente cc
+           JOIN clientes c ON c.id = cc.cliente_id
+          WHERE cc.id = $1 AND c.salao_id = $2
+          FOR UPDATE`,
+        [req.params.id, req.salaoId]
+      );
+      if (found.rows.length === 0) {
+        return { code: 404, body: { success: false, error: 'Crédito não encontrado' } };
+      }
+      const mov = found.rows[0];
+
+      // [P3-A6] Recompor saldo: reverter o efeito da movimentação.
+      // tipo='credito' adicionou X → ao deletar, subtrair X.
+      // tipo='uso' subtraiu X → ao deletar, adicionar X.
+      const valor = Number(mov.valor) || 0;
+      const delta = mov.tipo === 'credito' ? -valor : (mov.tipo === 'uso' ? +valor : 0);
+
+      await client.query('DELETE FROM creditos_cliente WHERE id = $1', [req.params.id]);
+
+      if (delta !== 0) {
+        await client.query(
+          `UPDATE clientes SET credito_disponivel = COALESCE(credito_disponivel, 0) + $1,
+                               updated_at = CURRENT_TIMESTAMP
+           WHERE id = $2 AND salao_id = $3`,
+          [delta, mov.cliente_id, req.salaoId]
+        );
+      }
+
+      // [P3-A6] Audit log do estorno
+      console.log(`[CREDITOS][AUDIT][DELETE] salao=${req.salaoId} user=${req.user?.userId} mov=${mov.id} cliente=${mov.cliente_id} tipo=${mov.tipo} valor=${valor} delta=${delta}`);
+
+      return { code: 200, body: { success: true, data: { id: req.params.id, saldoAjustado: delta } } };
+    });
+    return res.status(result.code).json(result.body);
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }

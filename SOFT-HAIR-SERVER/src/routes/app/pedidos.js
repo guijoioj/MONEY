@@ -52,6 +52,33 @@ async function resolverOuCriarCliente(clienteAppId, salonId) {
   return novo?.id ?? null;
 }
 
+// [P3-A5] Verifica se cliente já tem vínculo (registro Cliente) no salão. Permite criar pedido
+// apenas em salões onde já está vinculado, evitando spam cross-tenant. Match exato por email.
+async function clienteJaVinculado(clienteAppId, salonId) {
+  try {
+    const clienteApp = await ClienteApp.findById(clienteAppId);
+    if (!clienteApp) return false;
+    const { queryOne } = require('../../config/database');
+    if (clienteApp.email) {
+      const row = await queryOne(
+        'SELECT 1 FROM clientes WHERE LOWER(email) = LOWER($1) AND salao_id = $2 LIMIT 1',
+        [clienteApp.email, salonId]
+      );
+      if (row) return true;
+    }
+    if (clienteApp.telefone) {
+      const row = await queryOne(
+        'SELECT 1 FROM clientes WHERE telefone = $1 AND salao_id = $2 LIMIT 1',
+        [clienteApp.telefone, salonId]
+      );
+      if (row) return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 // [P2-A1] Lista de salões: campos limitados + rate-limit (impede enumeração/dump)
 router.get('/saloes', publicLimiter, async (req, res) => {
   try {
@@ -106,6 +133,14 @@ router.post('/', appAuthMiddleware, async (req, res) => {
     if (!salonId || !servicoId || !dataDesejada || !horarioDesejado) {
       return res.status(400).json({ error: 'salonId, servicoId, dataDesejada e horarioDesejado são obrigatórios' });
     }
+
+    // [P3-A5] Cliente só pode criar pedido em salão onde já existe vínculo (cliente registrado).
+    // Evita spam cross-tenant — cliente do salão A não pode bombardear salão B com pedidos falsos.
+    const vinculado = await clienteJaVinculado(req.clienteApp.clienteAppId, salonId);
+    if (!vinculado) {
+      return res.status(403).json({ error: 'Você ainda não está vinculado a este salão. Cadastre-se ou faça o primeiro contato presencial.' });
+    }
+
     // [P2-M6] Validar que servicoId e profissionalId pertencem ao salonId (cross-tenant)
     const { queryOne } = require('../../config/database');
     const servicoOk = await queryOne('SELECT 1 FROM servicos WHERE id = $1 AND salao_id = $2 AND ativo = true', [servicoId, salonId]);

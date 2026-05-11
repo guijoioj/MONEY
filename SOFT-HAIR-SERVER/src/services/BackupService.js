@@ -6,6 +6,75 @@ const BACKUP_TABLES = [
   'fechamentos', 'creditos_cliente', 'notificacoes'
 ];
 
+// [P3-A2] Whitelist EXPLÍCITA de colunas permitidas por tabela durante restore.
+// Qualquer coluna fora desta lista é descartada — impede SQL injection via JSON forjado
+// com chaves maliciosas (ex.: "nome) VALUES (1); DROP TABLE x;--").
+const ALLOWED_COLUMNS = {
+  clientes: [
+    'nome', 'email', 'telefone', 'cpf', 'data_nascimento', 'endereco', 'observacoes',
+    'credito_disponivel', 'ativo', 'foto_url', 'created_at', 'updated_at',
+    'push_token', 'salao_id'
+  ],
+  profissionais: [
+    'nome', 'email', 'telefone', 'especialidade', 'comissao_percentual', 'comissao',
+    'ativo', 'foto_url', 'created_at', 'updated_at', 'salao_id', 'app_ativo',
+    'senha_hash', 'push_token', 'cpf', 'usuario_id'
+  ],
+  servicos: [
+    'nome', 'descricao', 'preco', 'duracao_minutos', 'cor', 'ativo', 'categoria',
+    'created_at', 'updated_at', 'salao_id'
+  ],
+  produtos: [
+    'nome', 'descricao', 'preco_venda', 'preco_custo', 'quantidade_estoque',
+    'categoria', 'marca', 'codigo_barras', 'ativo', 'foto_url',
+    'created_at', 'updated_at', 'salao_id'
+  ],
+  agendamentos: [
+    'cliente_id', 'profissional_id', 'auxiliar_id', 'servico_id', 'data_hora',
+    'observacoes', 'valor', 'status', 'created_at', 'updated_at', 'salao_id',
+    'duracao_minutos'
+  ],
+  vendas: [
+    'cliente_id', 'profissional_id', 'tipo', 'status', 'valor_total', 'desconto',
+    'valor_final', 'forma_pagamento', 'observacoes', 'created_at', 'updated_at', 'salao_id'
+  ],
+  venda_itens: [
+    'venda_id', 'produto_id', 'servico_id', 'tipo', 'item_id', 'quantidade',
+    'preco_unitario', 'valor_total', 'subtotal', 'created_at'
+  ],
+  comissoes: [
+    'profissional_id', 'agendamento_id', 'atendimento_id', 'venda_id', 'servico_id',
+    'valor_servico', 'percentual', 'valor_comissao', 'pago', 'data_pagamento',
+    'observacoes', 'created_at', 'updated_at', 'salao_id'
+  ],
+  fechamentos: [
+    'data_inicio', 'data_fim', 'tipo', 'status', 'total_servicos', 'total_produtos',
+    'total_comissoes', 'total_liquido', 'observacoes', 'created_at', 'updated_at', 'salao_id'
+  ],
+  creditos_cliente: [
+    'cliente_id', 'tipo', 'valor', 'saldo_anterior', 'saldo_novo', 'observacoes',
+    'created_at'
+  ],
+  notificacoes: [
+    'salao_id', 'cliente_id', 'usuario_id', 'tipo', 'titulo', 'mensagem', 'lida',
+    'created_at', 'updated_at'
+  ],
+};
+
+// Regex de identificador SQL seguro — usado como segunda barreira além da whitelist.
+const SAFE_IDENT = /^[a-z_][a-z0-9_]*$/;
+
+function filterColumns(table, row) {
+  const allowed = ALLOWED_COLUMNS[table] || [];
+  const out = {};
+  for (const k of Object.keys(row)) {
+    if (!SAFE_IDENT.test(k)) continue;       // [P3-A2] rejeita identificadores não-padrão
+    if (!allowed.includes(k)) continue;       // [P3-A2] rejeita colunas fora da whitelist
+    out[k] = row[k];
+  }
+  return out;
+}
+
 class BackupService {
   /**
    * Gera um backup completo dos dados do salão (JSON)
@@ -89,17 +158,23 @@ class BackupService {
             continue;
           }
 
+          // [P3-A2] Validar nome da tabela contra a whitelist BACKUP_TABLES
+          if (!BACKUP_TABLES.includes(table) || !SAFE_IDENT.test(table)) {
+            throw new Error(`Tabela não permitida no restore: ${table}`);
+          }
           let inserted = 0;
           for (const row of rows) {
-            const filteredRow = { ...row };
-            // Remover campos que serão auto-gerados
+            // [P3-A2] Filtrar colunas contra a whitelist por tabela
+            const filteredRow = filterColumns(table, row);
+            // Auto-gerados / inválidos
             delete filteredRow.id;
 
             if (table !== 'venda_itens') {
-              filteredRow.salao_id = salaoId;
+              filteredRow.salao_id = salaoId; // força tenant correto
             }
 
             const columns = Object.keys(filteredRow);
+            if (columns.length === 0) continue; // nada válido restou
             const values = Object.values(filteredRow);
             const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { ComissaoService } = require('../services');
 
 const service = new ComissaoService();
@@ -53,43 +53,103 @@ router.get('/estornos', authMiddleware, async (req, res) => {
 });
 
 // Pagar comissões (em lote)
-router.post('/pagar', authMiddleware, async (req, res) => {
+// [P3-C3] requireAdmin + transação idempotente + reconciliação de valor.
+// - Apenas admin pode pagar comissões.
+// - UPDATE só marca comissões com pago=false (idempotente em re-execuções).
+// - Valor real = SUM(valor_comissao) das efetivamente marcadas; rejeita pagamento
+//   com discrepância > 1 centavo se valor for fornecido.
+router.post('/pagar', authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const { pool } = require('../config/database');
+    const { withTransaction } = require('../config/database');
     const { profissional_id, profissionalId, valor, observacoes, comissoes } = req.body;
     const pid = profissional_id || profissionalId;
-    if (!pid || !valor) {
-      return res.status(400).json({ success: false, error: 'profissional_id e valor obrigatórios' });
+    if (!pid) {
+      return res.status(400).json({ success: false, error: 'profissional_id obrigatório' });
     }
-    const { rows } = await pool.query(
-      `INSERT INTO comissoes_pagas (salao_id, profissional_id, valor, observacoes, comissoes_ids)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [req.salaoId, pid, valor, observacoes || null, comissoes || null]
-    );
-    if (Array.isArray(comissoes) && comissoes.length > 0) {
-      await pool.query(
-        `UPDATE comissoes SET pago = true WHERE id = ANY($1::int[]) AND salao_id = $2`,
-        [comissoes, req.salaoId]
+    if (!Array.isArray(comissoes) || comissoes.length === 0) {
+      return res.status(400).json({ success: false, error: 'comissoes (array de IDs) obrigatório' });
+    }
+
+    const result = await withTransaction(async (client) => {
+      // [P3-C3] Validar profissional pertence ao salão
+      const profOk = await client.query(
+        'SELECT 1 FROM profissionais WHERE id = $1 AND salao_id = $2',
+        [pid, req.salaoId]
       );
-    }
-    res.status(201).json({ success: true, data: rows[0] });
+      if (!profOk.rows.length) {
+        return { code: 403, body: { success: false, error: 'profissional_id não pertence ao salão' } };
+      }
+
+      // [P3-C3] UPDATE idempotente: só marca quem ainda não foi pago E pertence ao salão.
+      // RETURNING valor_comissao traz apenas as efetivamente alteradas nesta transação.
+      const updated = await client.query(
+        `UPDATE comissoes
+            SET pago = true, updated_at = CURRENT_TIMESTAMP
+          WHERE id = ANY($1::int[])
+            AND salao_id = $2
+            AND profissional_id = $3
+            AND COALESCE(pago, false) = false
+        RETURNING id, valor_comissao`,
+        [comissoes, req.salaoId, pid]
+      );
+
+      if (updated.rows.length === 0) {
+        return { code: 409, body: { success: false, error: 'Nenhuma comissão pendente para pagar (já pagas ou inexistentes)' } };
+      }
+
+      const valorReal = updated.rows.reduce((acc, r) => acc + Number(r.valor_comissao || 0), 0);
+
+      // [P3-C3] Reconciliação: se cliente passou valor, deve bater (tolerância 1 centavo)
+      if (valor !== undefined && valor !== null && Math.abs(Number(valor) - valorReal) > 0.01) {
+        // força rollback lançando erro
+        throw new Error(`Valor informado (${Number(valor).toFixed(2)}) não bate com a soma das comissões (${valorReal.toFixed(2)})`);
+      }
+
+      const ids = updated.rows.map(r => r.id);
+      const inserted = await client.query(
+        `INSERT INTO comissoes_pagas (salao_id, profissional_id, valor, observacoes, comissoes_ids)
+         VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        [req.salaoId, pid, valorReal, observacoes || null, ids]
+      );
+
+      // [P3-C3] Audit log
+      console.log(`[COMISSOES][AUDIT][PAGAR] salao=${req.salaoId} user=${req.user?.userId} prof=${pid} valor=${valorReal.toFixed(2)} ids=[${ids.join(',')}]`);
+
+      return { code: 201, body: { success: true, data: inserted.rows[0] } };
+    });
+
+    return res.status(result.code).json(result.body);
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
 // Estornar comissão
-router.post('/estornar', authMiddleware, async (req, res) => {
+// [P3-C3] Mesmo padrão: requireAdmin + transação + audit.
+router.post('/estornar', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { pool } = require('../config/database');
     const { fechamento_id, fechamentoId, motivo, valor, profissional_id, profissionalId } = req.body;
     const fid = fechamento_id || fechamentoId;
     const pid = profissional_id || profissionalId;
+
+    // [P3-C3] Se profissional informado, validar tenancy
+    if (pid) {
+      const profOk = await pool.query(
+        'SELECT 1 FROM profissionais WHERE id = $1 AND salao_id = $2',
+        [pid, req.salaoId]
+      );
+      if (!profOk.rows.length) {
+        return res.status(403).json({ success: false, error: 'profissional_id não pertence ao salão' });
+      }
+    }
+
     const { rows } = await pool.query(
       `INSERT INTO comissoes_estornos (salao_id, fechamento_id, profissional_id, valor, motivo)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [req.salaoId, fid || null, pid || null, valor || 0, motivo || null]
     );
+    console.log(`[COMISSOES][AUDIT][ESTORNAR] salao=${req.salaoId} user=${req.user?.userId} prof=${pid || 'null'} valor=${valor || 0}`);
     res.status(201).json({ success: true, data: rows[0] });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);

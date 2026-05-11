@@ -37,10 +37,12 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // Criar venda
+// [P3-C2] valor_total / valor_final são recalculados server-side a partir dos itens (não confiar no cliente).
 router.post('/', authMiddleware, [
   body('tipo').isIn(['servico', 'produto', 'misto']).withMessage('Tipo deve ser servico, produto ou misto'),
-  body('valor_total').isFloat({ min: 0 }).withMessage('Valor total deve ser positivo'),
-  body('valor_final').isFloat({ min: 0 }).withMessage('Valor final deve ser positivo'),
+  body('valor_total').optional().isFloat({ min: 0 }).withMessage('Valor total deve ser positivo'),
+  body('valor_final').optional().isFloat({ min: 0 }).withMessage('Valor final deve ser positivo'),
+  body('desconto').optional().isFloat({ min: 0 }).withMessage('Desconto deve ser positivo'),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);

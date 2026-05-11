@@ -68,8 +68,10 @@ class AuthService {
       throw new Error('Credenciais inválidas');
     }
 
+    // [P3-A7] Não revelar que salão existe-mas-está-inativo (user enumeration).
+    // Retornar mensagem genérica idêntica a "user não existe / senha errada".
     if (!user.salao_ativo) {
-      throw new Error('Salão inativo');
+      throw new Error('Credenciais inválidas');
     }
 
     // Atualizar último acesso

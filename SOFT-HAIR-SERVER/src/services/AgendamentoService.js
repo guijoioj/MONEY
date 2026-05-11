@@ -146,7 +146,22 @@ class AgendamentoService {
   async atualizar(id, data, salaoId) {
     try {
       const { queryOne } = require('../config/database');
-      
+
+      // [P3-A1] Validar tenancy das FKs no UPDATE (mesma proteção do criar/[P2-A7])
+      const checks = [
+        ['clientes', data.cliente_id, 'cliente_id'],
+        ['profissionais', data.profissional_id, 'profissional_id'],
+        ['servicos', data.servico_id, 'servico_id'],
+      ];
+      if (data.auxiliar_id) checks.push(['profissionais', data.auxiliar_id, 'auxiliar_id']);
+      for (const [table, fk, label] of checks) {
+        if (!fk) continue;
+        const ok = await queryOne(`SELECT 1 FROM ${table} WHERE id = $1 AND salao_id = $2`, [fk, salaoId]);
+        if (!ok) {
+          return { success: false, error: `${label} não pertence ao salão` };
+        }
+      }
+
       const result = await queryOne(`
         UPDATE agendamentos
         SET cliente_id = COALESCE($1, cliente_id),

@@ -7,6 +7,22 @@ const { ProfissionalService } = require('../services');
 
 const service = new ProfissionalService();
 
+// [P3-A4] Whitelist explícita de campos editáveis em profissionais (impede mass-assignment).
+// Campos NUNCA aceitos via body: id, salao_id, senha_hash (direto), usuario_id, created_at, push_token (vai por rota dedicada).
+const PROFISSIONAL_ALLOWED_FIELDS = [
+  'nome', 'email', 'telefone', 'cpf', 'especialidade', 'comissao_percentual', 'comissao',
+  'ativo', 'foto_url', 'app_ativo', 'data_admissao', 'data_nascimento', 'endereco',
+  'observacoes'
+];
+
+function pickAllowed(body, whitelist) {
+  const out = {};
+  for (const k of whitelist) {
+    if (body[k] !== undefined) out[k] = body[k];
+  }
+  return out;
+}
+
 // Listar profissionais
 router.get('/', authMiddleware, async (req, res) => {
   try {
@@ -56,7 +72,9 @@ router.post('/', authMiddleware, requireAdmin, [
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
-    const { senha_app, ...body } = req.body;
+    const { senha_app } = req.body;
+    // [P3-A4] Whitelist explícita: apenas campos permitidos vão pro service.
+    const body = pickAllowed(req.body, PROFISSIONAL_ALLOWED_FIELDS);
     if (senha_app) {
       if (senha_app.length < 8 || !/^(?=.*[A-Za-z])(?=.*\d)/.test(senha_app)) {
         return res.status(400).json({ success: false, error: 'senha_app precisa de mínimo 8 caracteres, com letra e número' });
@@ -84,7 +102,9 @@ router.put('/:id', authMiddleware, requireAdmin, [
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
-    const { senha_app, ...body } = req.body;
+    const { senha_app } = req.body;
+    // [P3-A4] Whitelist explícita no UPDATE: jamais aceitar id/salao_id/usuario_id/senha_hash direto.
+    const body = pickAllowed(req.body, PROFISSIONAL_ALLOWED_FIELDS);
     if (senha_app) {
       if (senha_app.length < 8 || !/^(?=.*[A-Za-z])(?=.*\d)/.test(senha_app)) {
         return res.status(400).json({ success: false, error: 'senha_app precisa de mínimo 8 caracteres, com letra e número' });
