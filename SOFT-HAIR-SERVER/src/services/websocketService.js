@@ -183,6 +183,8 @@ class WebSocketService {
 
   /**
    * Autenticação via JWT (não aceita mais salaoId arbitrário)
+   * [P6-B1] DEAD CODE — não chamado de handleMessage (que retorna erro genérico em 'auth').
+   * Mantido apenas com algorithms HS256 travado caso algum refactor o reative.
    */
   authenticateClient(ws, data) {
     const { token } = data;
@@ -193,7 +195,8 @@ class WebSocketService {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // [P6-B1] Travar algorithm em HS256 — evita alg confusion se rota for reativada.
+      const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
       const clientInfo = {
         salaoId: decoded.salaoId,
         userId: decoded.userId,
@@ -348,12 +351,16 @@ class WebSocketService {
   }
 
   /**
-   * Broadcast para todos os clientes de um salão inscritos em um canal
+   * Broadcast para todos os clientes inscritos em um canal.
+   * [P6-B4] Se salaoId for nullish, ignora o filtro de salão — usado por
+   * notificarCliente/notificarProfissional que entregam por canal específico
+   * (cliente:<id>, profissional:<id>) independentemente do salão.
    */
   broadcast(salaoId, channel, data) {
     let sent = 0;
     this.clients.forEach((client, ws) => {
-      if (client.salaoId === salaoId && client.subscriptions.includes(channel)) {
+      const salaoMatch = (salaoId == null) || client.salaoId === salaoId;
+      if (salaoMatch && client.subscriptions.includes(channel)) {
         if (ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify({ type: 'broadcast', channel, data, timestamp: Date.now() }));
           sent++;

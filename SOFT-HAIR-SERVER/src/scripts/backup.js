@@ -76,8 +76,13 @@ async function backup() {
 
 async function restore(filePath) {
   try {
-    // [P5-A1] Validar caminho do arquivo — somente arquivos existentes e dentro de BACKUP_PATH.
+    // [P5-A1/P6-B3] Validar caminho do arquivo — somente arquivos existentes E
+    // dentro de BACKUP_PATH (whitelist de diretório).
     const absFile = path.resolve(filePath);
+    const backupRoot = path.resolve(process.env.BACKUP_PATH || './backups');
+    if (!absFile.startsWith(backupRoot + path.sep) && absFile !== backupRoot) {
+      throw new Error(`Arquivo fora de BACKUP_PATH (${backupRoot})`);
+    }
     if (!fs.existsSync(absFile)) {
       throw new Error('Arquivo de backup não encontrado');
     }
@@ -103,14 +108,22 @@ async function limparBackupsAntigos(backupPath) {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - diasRetencao);
 
+  // [P6-B2] Apenas arquivos com nome `softhair-backup-YYYY-MM-DD.sql` são apagados.
+  // Antes, qualquer arquivo antigo no diretório era deletado — se BACKUP_PATH apontasse
+  // pra ~ por engano, dotfiles antigos seriam destruídos.
+  const BACKUP_FILE_RE = /^softhair-backup-\d{4}-\d{2}-\d{2}\.sql$/;
+
   try {
     const diretorios = await fs.promises.readdir(backupPath);
     let deletados = 0;
 
     for (const arquivo of diretorios) {
-      const stat = await fs.promises.stat(path.join(backupPath, arquivo));
+      if (!BACKUP_FILE_RE.test(arquivo)) continue; // [P6-B2] filtro de segurança
+      const fullPath = path.join(backupPath, arquivo);
+      const stat = await fs.promises.stat(fullPath);
+      if (!stat.isFile()) continue;
       if (stat.mtime < cutoffDate) {
-        await fs.promises.unlink(path.join(backupPath, arquivo));
+        await fs.promises.unlink(fullPath);
         deletados++;
       }
     }
