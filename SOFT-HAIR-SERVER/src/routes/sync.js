@@ -18,10 +18,15 @@ const TABLE_COLUMNS = {
   produtos: ['nome', 'descricao', 'preco_custo', 'preco_venda', 'quantidade_estoque', 'quantidade_minima', 'categoria', 'codigo_barras', 'ativo'],
   agendamentos: ['cliente_id', 'profissional_id', 'servico_id', 'data_hora', 'duracao_minutos', 'status', 'observacoes', 'valor'],
   vendas: ['cliente_id', 'profissional_id', 'tipo', 'status', 'valor_total', 'desconto', 'valor_final', 'forma_pagamento', 'observacoes'],
-  comissoes: ['profissional_id', 'venda_id', 'valor_total', 'percentual', 'valor_comissao', 'pago', 'data_pagamento'],
+  // [P5-C4] `pago` e `data_pagamento` REMOVIDOS — sync nunca pode marcar comissão como paga.
+  // Pagamento deve passar pelo fluxo oficial (`POST /api/comissoes/pagar` ou `PUT /:id/pagar`)
+  // que tem `requireAdmin`, reconciliação de valor e audit log persistente.
+  comissoes: ['profissional_id', 'venda_id', 'valor_total', 'percentual', 'valor_comissao'],
   atendimentos: ['cliente_id', 'profissional_id', 'servico_id', 'agendamento_id', 'valor', 'status', 'observacoes'],
-  fechamentos: ['data_inicio', 'data_fim', 'tipo', 'total_vendas', 'total_servicos', 'total_produtos', 'total_comissoes', 'total_liquido', 'observacoes', 'status'],
-  creditos_cliente: ['cliente_id', 'tipo', 'valor', 'saldo_anterior', 'saldo_novo', 'observacoes'],
+  // [P5-C4] `status` REMOVIDO — sync não pode reabrir/fechar fechamento. Use rota oficial com audit.
+  fechamentos: ['data_inicio', 'data_fim', 'tipo', 'total_vendas', 'total_servicos', 'total_produtos', 'total_comissoes', 'total_liquido', 'observacoes'],
+  // [P5-C4] `saldo_anterior`/`saldo_novo` REMOVIDOS — crédito é append-only via rota dedicada.
+  creditos_cliente: ['cliente_id', 'tipo', 'valor', 'observacoes'],
   notificacoes: ['tipo', 'titulo', 'mensagem', 'destinatario_id', 'destinatario_tipo', 'lida']
 };
 

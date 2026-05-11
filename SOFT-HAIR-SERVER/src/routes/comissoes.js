@@ -112,8 +112,16 @@ router.post('/pagar', authMiddleware, requireAdmin, async (req, res) => {
         [req.salaoId, pid, valorReal, observacoes || null, ids]
       );
 
-      // [P3-C3] Audit log
+      // [P3-C3] Audit log (console) + [P5-C2] audit_log persistente
       console.log(`[COMISSOES][AUDIT][PAGAR] salao=${req.salaoId} user=${req.user?.userId} prof=${pid} valor=${valorReal.toFixed(2)} ids=[${ids.join(',')}]`);
+      const { logAction } = require('../utils/auditLog');
+      await logAction({
+        req,
+        action: 'comissao.pagar_batch',
+        entityType: 'comissoes_pagas',
+        entityId: inserted.rows[0]?.id,
+        after: { profissional_id: pid, valor: valorReal, comissoes_ids: ids },
+      });
 
       return { code: 201, body: { success: true, data: inserted.rows[0] } };
     });
@@ -177,21 +185,78 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, async (req, res) => {
+// [P5-C3] requireAdmin + validação de tenancy + audit log
+router.post('/', authMiddleware, requireAdmin, async (req, res) => {
   try {
+    const { pool } = require('../config/database');
+    const { profissional_id, venda_id } = req.body;
+    if (!profissional_id) {
+      return res.status(400).json({ success: false, error: 'profissional_id obrigatório' });
+    }
+
+    // Validar profissional pertence ao salão
+    const profOk = await pool.query(
+      'SELECT id, comissao_percentual FROM profissionais WHERE id = $1 AND salao_id = $2',
+      [profissional_id, req.salaoId]
+    );
+    if (!profOk.rows.length) {
+      return res.status(403).json({ success: false, error: 'profissional_id não pertence ao salão' });
+    }
+
+    // Validar venda pertence ao salão (se informada)
+    if (venda_id) {
+      const vendaOk = await pool.query(
+        'SELECT id, valor_final FROM vendas WHERE id = $1 AND salao_id = $2',
+        [venda_id, req.salaoId]
+      );
+      if (!vendaOk.rows.length) {
+        return res.status(403).json({ success: false, error: 'venda_id não pertence ao salão' });
+      }
+    }
+
     const result = await service.criar(req.body, req.salaoId);
-    if (result.success) res.status(201).json({ success: true, data: result.data });
-    else res.status(400).json({ success: false, error: result.error });
+    if (result.success) {
+      const { logAction } = require('../utils/auditLog');
+      await logAction({
+        req,
+        action: 'comissao.criar',
+        entityType: 'comissao',
+        entityId: result.data?.id,
+        after: result.data,
+      });
+      res.status(201).json({ success: true, data: result.data });
+    } else {
+      res.status(400).json({ success: false, error: result.error });
+    }
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
-router.put('/:id/pagar', authMiddleware, async (req, res) => {
+// [P5-C3] requireAdmin + audit log
+router.put('/:id/pagar', authMiddleware, requireAdmin, async (req, res) => {
   try {
+    const { pool } = require('../config/database');
+    // Snapshot before
+    const before = await pool.query(
+      'SELECT * FROM comissoes WHERE id = $1 AND salao_id = $2',
+      [req.params.id, req.salaoId]
+    );
     const result = await service.marcarComoPaga(req.params.id, req.salaoId);
-    if (result.success) res.json({ success: true, data: result.data, message: result.message });
-    else res.status(404).json({ success: false, error: result.error });
+    if (result.success) {
+      const { logAction } = require('../utils/auditLog');
+      await logAction({
+        req,
+        action: 'comissao.pagar_individual',
+        entityType: 'comissao',
+        entityId: Number(req.params.id),
+        before: before.rows[0] || null,
+        after: result.data,
+      });
+      res.json({ success: true, data: result.data, message: result.message });
+    } else {
+      res.status(404).json({ success: false, error: result.error });
+    }
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }

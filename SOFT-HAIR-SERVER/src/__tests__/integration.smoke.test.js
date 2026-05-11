@@ -346,7 +346,7 @@ describe('SoftHair API smoke integration', () => {
     const fechamentoId = fechamento.data.id;
     await request('fechamentos list', 'GET', '/fechamentos');
     await request('fechamento get', 'GET', `/fechamentos/${fechamentoId}`);
-    await request('fechamento reabrir', 'PUT', `/fechamentos/${fechamentoId}/reabrir`);
+    await request('fechamento reabrir', 'PUT', `/fechamentos/${fechamentoId}/reabrir`, { motivo: 'Teste de reabertura via smoke test' });
 
     await request('backup get', 'GET', '/backup');
     await request('auth device unauth blocked', 'POST', '/auth/device/register', {

@@ -410,6 +410,37 @@ async function createTables() {
       observacoes TEXT,
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
+
+    -- [P5-C2] Audit log persistente — forense queryable de ações sensíveis
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER,
+      actor_id INTEGER,
+      actor_type VARCHAR(20),
+      action VARCHAR(100) NOT NULL,
+      entity_type VARCHAR(50),
+      entity_id INTEGER,
+      before_data JSONB,
+      after_data JSONB,
+      ip VARCHAR(45),
+      user_agent TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_audit_log_salao_created ON audit_log(salao_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log(action, created_at DESC);
+
+    -- [P5-A3] UNIQUE constraint para evitar duplicatas de cliente_app por race condition
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'uq_clientes_app_email'
+      ) THEN
+        BEGIN
+          ALTER TABLE clientes_app ADD CONSTRAINT uq_clientes_app_email UNIQUE (email);
+        EXCEPTION WHEN unique_violation OR duplicate_object THEN NULL;
+        END;
+      END IF;
+    END $$;
   `;
 
   await query(sql);
@@ -550,6 +581,61 @@ async function runMigrations() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_pontos_cliente ON pontos_fidelidade(cliente_id, salao_id);
+  `);
+
+  // [P5-C5] Fechamentos: adicionar campos para soft-delete + motivo de reabertura
+  await query(`
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS deleted_by INTEGER;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS motivo_delete TEXT;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS motivo_reabertura TEXT;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS reaberto_por INTEGER;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS reaberto_em TIMESTAMPTZ;
+    ALTER TABLE comissoes ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP;
+  `);
+
+  // [P5-C1] Trocar CASCADE → RESTRICT/SET NULL em FKs financeiras (preserva histórico)
+  // Idempotente: drop + recreate constraint só altera política, nada é apagado.
+  await query(`
+    DO $$
+    BEGIN
+      -- comissoes.profissional_id: histórico append-only → SET NULL (preserva valor pago)
+      IF EXISTS (SELECT 1 FROM information_schema.referential_constraints
+                 WHERE constraint_name = 'comissoes_profissional_id_fkey' AND delete_rule = 'CASCADE') THEN
+        ALTER TABLE comissoes DROP CONSTRAINT comissoes_profissional_id_fkey;
+        ALTER TABLE comissoes ADD CONSTRAINT comissoes_profissional_id_fkey
+          FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE SET NULL;
+      END IF;
+
+      -- comissoes.venda_id: histórico append-only → SET NULL
+      IF EXISTS (SELECT 1 FROM information_schema.referential_constraints
+                 WHERE constraint_name = 'comissoes_venda_id_fkey' AND delete_rule = 'CASCADE') THEN
+        ALTER TABLE comissoes DROP CONSTRAINT comissoes_venda_id_fkey;
+        ALTER TABLE comissoes ADD CONSTRAINT comissoes_venda_id_fkey
+          FOREIGN KEY (venda_id) REFERENCES vendas(id) ON DELETE SET NULL;
+      END IF;
+
+      -- venda_itens.produto_id: histórico append-only → SET NULL
+      IF EXISTS (SELECT 1 FROM information_schema.referential_constraints
+                 WHERE constraint_name = 'venda_itens_produto_id_fkey' AND delete_rule = 'CASCADE') THEN
+        ALTER TABLE venda_itens DROP CONSTRAINT venda_itens_produto_id_fkey;
+        ALTER TABLE venda_itens ADD CONSTRAINT venda_itens_produto_id_fkey
+          FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE SET NULL;
+      END IF;
+
+      -- atendimentos.cliente/profissional/servico já são SET NULL em initDb (linhas 176-178)
+
+      -- comissoes_pagamentos.profissional_id → SET NULL (preserva evidência de pagamento)
+      IF EXISTS (SELECT 1 FROM information_schema.referential_constraints
+                 WHERE constraint_name = 'comissoes_pagamentos_profissional_id_fkey' AND delete_rule = 'CASCADE') THEN
+        ALTER TABLE comissoes_pagamentos DROP CONSTRAINT comissoes_pagamentos_profissional_id_fkey;
+        ALTER TABLE comissoes_pagamentos ADD CONSTRAINT comissoes_pagamentos_profissional_id_fkey
+          FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE SET NULL;
+      END IF;
+    EXCEPTION WHEN OTHERS THEN
+      -- Tolerância: tabelas/constraints podem não existir em ambientes mais antigos
+      RAISE NOTICE 'P5-C1 migration: % (continuando)', SQLERRM;
+    END $$;
   `);
 
   console.log('✅ Migrations aplicadas');

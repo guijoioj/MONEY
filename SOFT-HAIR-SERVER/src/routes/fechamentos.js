@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { FechamentoService } = require('../services');
+const { logAction } = require('../utils/auditLog');
 
 const service = new FechamentoService();
 
@@ -75,27 +76,95 @@ router.post('/', authMiddleware, [
   }
 });
 
-router.put('/:id/reabrir', authMiddleware, async (req, res) => {
+// [P5-C5] requireAdmin + motivo obrigatório (B10) + audit log com before/after
+router.put('/:id/reabrir', authMiddleware, requireAdmin, async (req, res) => {
   try {
+    const { pool } = require('../config/database');
+    const motivo = (req.body?.motivo || '').toString().trim();
+    if (!motivo || motivo.length < 3) {
+      return res.status(400).json({ success: false, error: 'motivo de reabertura obrigatório (mín 3 chars)' });
+    }
+
+    // Snapshot before
+    const beforeRows = await pool.query(
+      'SELECT * FROM fechamentos WHERE id = $1 AND salao_id = $2',
+      [req.params.id, req.salaoId]
+    );
+    const before = beforeRows.rows[0] || null;
+
     const result = await service.reabrir(req.params.id, req.salaoId);
-    if (result.success) res.json({ success: true, data: result.data });
-    else res.status(404).json({ success: false, error: result.error });
+    if (result.success) {
+      // Persist motivo + auditor
+      try {
+        await pool.query(
+          `UPDATE fechamentos SET motivo_reabertura = $1, reaberto_por = $2, reaberto_em = NOW()
+           WHERE id = $3 AND salao_id = $4`,
+          [motivo, req.user?.userId || req.user?.id || null, req.params.id, req.salaoId]
+        );
+      } catch (_) { /* coluna pode não existir em ambiente antigo */ }
+
+      await logAction({
+        req,
+        action: 'fechamento.reabrir',
+        entityType: 'fechamento',
+        entityId: Number(req.params.id),
+        before,
+        after: { ...result.data, motivo_reabertura: motivo },
+      });
+      res.json({ success: true, data: result.data });
+    } else {
+      res.status(404).json({ success: false, error: result.error });
+    }
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+// [P5-C5] requireAdmin + soft-delete + motivo obrigatório + audit log
+router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { pool } = require('../config/database');
-    const { rows } = await pool.query(
-      'SELECT id FROM fechamentos WHERE id = $1 AND salao_id = $2',
+    const motivo = (req.body?.motivo || req.query?.motivo || '').toString().trim();
+    if (!motivo || motivo.length < 3) {
+      return res.status(400).json({ success: false, error: 'motivo de exclusão obrigatório (mín 3 chars)' });
+    }
+
+    const beforeRows = await pool.query(
+      'SELECT * FROM fechamentos WHERE id = $1 AND salao_id = $2',
       [req.params.id, req.salaoId]
     );
-    if (rows.length === 0) {
+    if (beforeRows.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Fechamento não encontrado' });
     }
-    await pool.query('DELETE FROM fechamentos WHERE id = $1 AND salao_id = $2', [req.params.id, req.salaoId]);
+    const before = beforeRows.rows[0];
+
+    // Soft delete (preserve histórico)
+    let softOk = false;
+    try {
+      const upd = await pool.query(
+        `UPDATE fechamentos
+            SET deleted_at = NOW(), deleted_by = $1, motivo_delete = $2
+          WHERE id = $3 AND salao_id = $4 AND deleted_at IS NULL
+          RETURNING id`,
+        [req.user?.userId || req.user?.id || null, motivo, req.params.id, req.salaoId]
+      );
+      softOk = upd.rowCount > 0;
+    } catch (_) { /* coluna pode não existir em ambiente antigo */ }
+
+    if (!softOk) {
+      // Fallback (não deveria ocorrer após migrations). NÃO faz hard-delete sem audit.
+      await pool.query('DELETE FROM fechamentos WHERE id = $1 AND salao_id = $2', [req.params.id, req.salaoId]);
+    }
+
+    await logAction({
+      req,
+      action: softOk ? 'fechamento.soft_delete' : 'fechamento.hard_delete',
+      entityType: 'fechamento',
+      entityId: Number(req.params.id),
+      before,
+      after: { motivo_delete: motivo },
+    });
+
     res.json({ success: true, data: { id: req.params.id } });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);

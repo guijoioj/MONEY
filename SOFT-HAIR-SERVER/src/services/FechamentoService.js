@@ -3,7 +3,9 @@ const { query, queryOne, withTransaction } = require('../config/database');
 class FechamentoService {
   async listar(salaoId, filtros = {}) {
     try {
-      let sql = 'SELECT * FROM fechamentos WHERE salao_id = $1';
+      // [P5-C5] Filtra soft-deleted (deleted_at IS NULL) por padrão.
+      // Coluna pode não existir em ambiente antigo — tratamos no catch.
+      let sql = 'SELECT * FROM fechamentos WHERE salao_id = $1 AND (deleted_at IS NULL OR deleted_at IS NULL)';
       const params = [salaoId];
       let paramCount = 2;
 
@@ -17,7 +19,14 @@ class FechamentoService {
       }
 
       sql += ' ORDER BY data_fim DESC';
-      const data = await query(sql, params);
+      let data;
+      try {
+        data = await query(sql, params);
+      } catch (e) {
+        // fallback sem deleted_at se coluna não existir ainda
+        const fallbackSql = sql.replace(' AND (deleted_at IS NULL OR deleted_at IS NULL)', '');
+        data = await query(fallbackSql, params);
+      }
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
