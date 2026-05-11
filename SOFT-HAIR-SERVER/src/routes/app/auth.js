@@ -53,8 +53,14 @@ router.post('/login', async (req, res) => {
     const { password } = req.body;
     const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
     const cliente = await ClienteApp.findByEmail(email);
+    // [P6-C4] Constant-time: SEMPRE roda bcrypt.compare, mesmo quando user não existe.
+    // Antes o early-return revelava enumeração de email via timing — rota duplicada
+    // (legacy) tinha ficado sem o fix do P5-A4 em appAuth.js.
+    const DUMMY_HASH = '$2a$12$' + 'X'.repeat(53);
+    const hashToCompare = cliente?.password || DUMMY_HASH;
+    const valid = password ? await bcrypt.compare(password, hashToCompare) : false;
     if (!cliente) return res.status(401).json({ error: 'Credenciais inválidas' });
-    const valid = await bcrypt.compare(password, cliente.password);
+    if (!cliente.password) return res.status(401).json({ error: 'Credenciais inválidas' });
     if (!valid) return res.status(401).json({ error: 'Credenciais inválidas' });
     const token = signClienteToken(cliente);
     res.json({ user: ClienteApp.sanitize(cliente), token });
@@ -90,17 +96,22 @@ router.put('/me', appAuthMiddleware, async (req, res) => {
 
     const cliente = await ClienteApp.update(req.clienteApp.clienteAppId, updates);
 
-    const saloesVinculados = await query(
-      'SELECT DISTINCT salao_id FROM clientes WHERE email = $1',
-      [cliente.email]
-    );
-    for (const { salao_id: salaoId } of saloesVinculados) {
-      const lista = await Cliente.getAll({ search: cliente.email }, salaoId);
-      if (lista.length) {
-        const campos = {};
-        if (nome) campos.nome = nome;
-        if (telefone) campos.telefone = telefone;
-        await Cliente.update(lista[0].id, campos, salaoId);
+    // [P6-M3] Buscar por email EXATO (não ILIKE via search) e atualizar por salao_id.
+    // Antes: search=cliente.email + ILIKE matchava substrings em nome/telefone/email,
+    // cross-tenant, potencialmente sobrescrevendo dados alheios.
+    if (cliente.email) {
+      const campos = {};
+      if (nome) campos.nome = nome;
+      if (telefone) campos.telefone = telefone;
+      if (Object.keys(campos).length > 0) {
+        await query(
+          `UPDATE clientes SET
+             nome = COALESCE($1, nome),
+             telefone = COALESCE($2, telefone),
+             updated_at = NOW()
+           WHERE LOWER(email) = LOWER($3)`,
+          [campos.nome || null, campos.telefone || null, cliente.email]
+        );
       }
     }
 

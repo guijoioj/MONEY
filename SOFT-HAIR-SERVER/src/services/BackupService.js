@@ -47,10 +47,19 @@ function decryptBackupPayload(envelope) {
   return JSON.parse(decrypted.toString('utf8'));
 }
 
+// [P6-M5] BACKUP_TABLES expandido — cobre tabelas tenant-scoped relevantes para DR.
+// audit_log INTENCIONALMENTE excluído — é trilha forense imutável (P6-C2 hash chain).
+// Restore não deve recriar audit_log; backup separado/imutável fica fora deste fluxo.
 const BACKUP_TABLES = [
   'clientes', 'profissionais', 'servicos', 'produtos',
   'agendamentos', 'vendas', 'venda_itens', 'comissoes',
-  'fechamentos', 'creditos_cliente', 'notificacoes'
+  'fechamentos', 'creditos_cliente', 'notificacoes',
+  // P6-M5 additions
+  'atendimentos', 'historico_cliente', 'registros_ponto',
+  'despesas', 'bloqueios_horario', 'metas_profissional',
+  'pontos_fidelidade', 'configuracoes', 'produtos_utilizados',
+  'pedidos_agendamento', 'pedidos_loja', 'pedido_loja_itens',
+  'comissoes_pagamentos'
 ];
 
 // [P3-A2] Whitelist EXPLÍCITA de colunas permitidas por tabela durante restore.
@@ -85,29 +94,89 @@ const ALLOWED_COLUMNS = {
     'duracao_minutos'
   ],
   vendas: [
-    'cliente_id', 'profissional_id', 'tipo', 'status', 'valor_total', 'desconto',
-    'valor_final', 'forma_pagamento', 'observacoes', 'created_at', 'updated_at', 'salao_id'
+    // [P6-C1] REMOVIDOS: 'status', 'valor_final' — restore não pode marcar venda como
+    // finalizada nem alterar valor_final (que afeta comissões/fechamento). Force
+    // status='pendente' e valor_final será re-derivado de valor_total - desconto.
+    'cliente_id', 'profissional_id', 'tipo', 'valor_total', 'desconto',
+    'forma_pagamento', 'observacoes', 'created_at', 'updated_at', 'salao_id'
   ],
   venda_itens: [
     'venda_id', 'produto_id', 'servico_id', 'tipo', 'item_id', 'quantidade',
     'preco_unitario', 'valor_total', 'subtotal', 'created_at'
   ],
   comissoes: [
+    // [P6-C1] REMOVIDOS: 'pago', 'data_pagamento', 'valor_comissao' — restore não pode
+    // marcar comissões como pagas nem alterar valor (burlaria P5-C3/P5-C4). Restore force-
+    // resetam pago=false e valor_comissao deve ser re-derivado de servico+percentual.
     'profissional_id', 'agendamento_id', 'atendimento_id', 'venda_id', 'servico_id',
-    'valor_servico', 'percentual', 'valor_comissao', 'pago', 'data_pagamento',
+    'valor_servico', 'percentual',
     'observacoes', 'created_at', 'updated_at', 'salao_id'
   ],
   fechamentos: [
-    'data_inicio', 'data_fim', 'tipo', 'status', 'total_servicos', 'total_produtos',
+    // [P6-C1] REMOVIDO: 'status' — restore não pode reabrir fechamento via backup
+    // adulterado (burlaria P5-C5). Force status='aberto' no insert.
+    'data_inicio', 'data_fim', 'tipo', 'total_servicos', 'total_produtos',
     'total_comissoes', 'total_liquido', 'observacoes', 'created_at', 'updated_at', 'salao_id'
   ],
   creditos_cliente: [
-    'cliente_id', 'tipo', 'valor', 'saldo_anterior', 'saldo_novo', 'observacoes',
+    // [P6-C1] REMOVIDOS: 'saldo_anterior', 'saldo_novo' — restore só re-cria movimentações
+    // (tipo + valor); saldos finais derivam de re-soma. Backup adulterado não pode
+    // injetar saldo arbitrário.
+    'cliente_id', 'tipo', 'valor', 'observacoes',
     'created_at'
   ],
   notificacoes: [
     'salao_id', 'cliente_id', 'usuario_id', 'tipo', 'titulo', 'mensagem', 'lida',
     'created_at', 'updated_at'
+  ],
+  // [P6-M5] whitelists para tabelas adicionais
+  atendimentos: [
+    'agendamento_id', 'cliente_id', 'profissional_id', 'servico_id',
+    'data_atendimento', 'status', 'observacoes', 'valor', 'created_at', 'updated_at', 'salao_id'
+  ],
+  historico_cliente: [
+    'cliente_id', 'tipo', 'descricao', 'entidade_id', 'data', 'created_at', 'salao_id'
+  ],
+  registros_ponto: [
+    'profissional_id', 'tipo', 'created_at', 'salao_id'
+  ],
+  despesas: [
+    'descricao', 'valor', 'categoria', 'data', 'recorrente', 'observacoes', 'created_at', 'salao_id'
+  ],
+  bloqueios_horario: [
+    'profissional_id', 'data_inicio', 'data_fim', 'motivo', 'dia_inteiro', 'created_at', 'salao_id'
+  ],
+  metas_profissional: [
+    'profissional_id', 'mes', 'ano', 'meta_valor', 'meta_atendimentos', 'salao_id'
+  ],
+  pontos_fidelidade: [
+    'cliente_id', 'pontos', 'tipo', 'descricao', 'referencia_id', 'referencia_tipo',
+    'created_at', 'salao_id'
+  ],
+  configuracoes: [
+    'chave', 'valor', 'created_at', 'updated_at', 'salao_id'
+  ],
+  produtos_utilizados: [
+    'profissional_id', 'agendamento_id', 'produto_id', 'cliente_id', 'cliente_nome',
+    'marca', 'coloracao', 'quantidade', 'observacoes', 'created_at', 'salao_id'
+  ],
+  pedidos_agendamento: [
+    'cliente_app_id', 'servico_id', 'profissional_id', 'data_desejada',
+    'horario_desejado', 'horario_alternativo', 'observacoes', 'status',
+    'agendamento_id', 'atendido_por', 'motivo_rejeicao',
+    'created_at', 'updated_at', 'salao_id'
+  ],
+  pedidos_loja: [
+    'cliente_app_id', 'status', 'total', 'endereco_entrega', 'forma_pagamento',
+    'observacoes', 'created_at', 'updated_at', 'salao_id'
+  ],
+  pedido_loja_itens: [
+    'pedido_id', 'produto_id', 'quantidade', 'preco_unitario', 'subtotal'
+  ],
+  comissoes_pagamentos: [
+    // [P6-C1 spirit] NÃO inclui 'status' editável — força default no insert
+    'profissional_id', 'valor', 'data_pagamento', 'observacoes',
+    'motivo_estorno', 'created_at', 'salao_id'
   ],
 };
 
@@ -142,12 +211,18 @@ class BackupService {
       };
 
       for (const table of BACKUP_TABLES) {
-        // venda_itens não tem salao_id direto, precisa join
+        // venda_itens / pedido_loja_itens não têm salao_id direto, precisam join
         if (table === 'venda_itens') {
           backup.data[table] = await query(`
             SELECT vi.* FROM venda_itens vi
             JOIN vendas v ON v.id = vi.venda_id
             WHERE v.salao_id = $1
+          `, [salaoId]);
+        } else if (table === 'pedido_loja_itens') {
+          backup.data[table] = await query(`
+            SELECT pli.* FROM pedido_loja_itens pli
+            JOIN pedidos_loja pl ON pl.id = pli.pedido_id
+            WHERE pl.salao_id = $1
           `, [salaoId]);
         } else {
           backup.data[table] = await query(
@@ -158,14 +233,21 @@ class BackupService {
       }
 
       // [P5-A2] Criptografar se chave disponível. Mantém metadata clara mas envelopa data.
+      // [P6-M1] Em produção, FALHA explícita quando chave ausente (fail-fast) — não
+      // mais retorna silenciosamente plaintext. Em dev, ainda permite com warning.
       const envelope = encryptBackupPayload(JSON.stringify(backup.data));
       if (envelope) {
         backup.encrypted_data = envelope;
         backup.metadata.encrypted = true;
         delete backup.data;
+      } else if (process.env.NODE_ENV === 'production') {
+        return {
+          success: false,
+          error: 'BACKUP_ENCRYPTION_KEY ausente — backup em plaintext bloqueado em produção'
+        };
       } else {
         backup.metadata.encrypted = false;
-        backup.metadata.warning = 'BACKUP_ENCRYPTION_KEY não configurada — backup em plaintext';
+        backup.metadata.warning = 'BACKUP_ENCRYPTION_KEY não configurada — backup em plaintext (apenas dev)';
       }
       return { success: true, data: backup };
     } catch (error) {
@@ -198,7 +280,13 @@ class BackupService {
         const stats = {};
 
         // Limpar tabelas na ordem correta (respeitar foreign keys)
+        // [P6-M5] Inclui tabelas novas — filhas antes das mães
         const deleteOrder = [
+          'pedido_loja_itens', 'pedidos_loja', 'pedidos_agendamento',
+          'produtos_utilizados', 'pontos_fidelidade', 'metas_profissional',
+          'bloqueios_horario', 'despesas', 'registros_ponto',
+          'historico_cliente', 'atendimentos', 'configuracoes',
+          'comissoes_pagamentos',
           'notificacoes', 'creditos_cliente', 'comissoes', 'venda_itens',
           'fechamentos', 'vendas', 'agendamentos', 'produtos', 'servicos',
           'profissionais', 'clientes'
@@ -210,16 +298,27 @@ class BackupService {
               DELETE FROM venda_itens WHERE venda_id IN (
                 SELECT id FROM vendas WHERE salao_id = $1
               )`, [salaoId]);
+          } else if (table === 'pedido_loja_itens') {
+            await client.query(`
+              DELETE FROM pedido_loja_itens WHERE pedido_id IN (
+                SELECT id FROM pedidos_loja WHERE salao_id = $1
+              )`, [salaoId]);
           } else {
             await client.query(`DELETE FROM ${table} WHERE salao_id = $1`, [salaoId]);
           }
         }
 
         // Inserir dados na ordem correta (dependências primeiro)
+        // [P6-M5] Inclui tabelas novas — mães antes das filhas
         const insertOrder = [
           'clientes', 'profissionais', 'servicos', 'produtos',
           'agendamentos', 'vendas', 'venda_itens', 'comissoes',
-          'fechamentos', 'creditos_cliente', 'notificacoes'
+          'fechamentos', 'creditos_cliente', 'notificacoes',
+          'atendimentos', 'historico_cliente', 'registros_ponto',
+          'despesas', 'bloqueios_horario', 'metas_profissional',
+          'pontos_fidelidade', 'configuracoes', 'produtos_utilizados',
+          'pedidos_agendamento', 'pedidos_loja', 'pedido_loja_itens',
+          'comissoes_pagamentos'
         ];
 
         for (const table of insertOrder) {
@@ -240,8 +339,34 @@ class BackupService {
             // Auto-gerados / inválidos
             delete filteredRow.id;
 
-            if (table !== 'venda_itens') {
+            // [P6-M5] tabelas sem coluna salao_id direta (filhas com FK)
+            const TABLES_WITHOUT_SALAO_ID = ['venda_itens', 'pedido_loja_itens'];
+            if (!TABLES_WITHOUT_SALAO_ID.includes(table)) {
               filteredRow.salao_id = salaoId; // força tenant correto
+            }
+
+            // [P6-C1] Force-reset campos financeiros sensíveis no restore.
+            // Mesmo que estejam no whitelist por engano, sobrescreve aqui.
+            if (table === 'comissoes') {
+              filteredRow.pago = false;
+              filteredRow.data_pagamento = null;
+            }
+            if (table === 'vendas') {
+              filteredRow.status = 'pendente';
+              // valor_final será recalculado por trigger/aplicação posterior.
+              // Se desconto não veio, força 0; valor_final = valor_total - desconto.
+              const vt = parseFloat(filteredRow.valor_total) || 0;
+              const desc = parseFloat(filteredRow.desconto) || 0;
+              filteredRow.valor_final = Math.max(0, vt - desc);
+            }
+            if (table === 'fechamentos') {
+              filteredRow.status = 'aberto';
+            }
+            if (table === 'creditos_cliente') {
+              // saldo_anterior/saldo_novo serão recalculados via append-only.
+              // Aqui apenas garantimos que não vieram do backup.
+              delete filteredRow.saldo_anterior;
+              delete filteredRow.saldo_novo;
             }
 
             // [P5-M7] Validar FKs cross-tenant em notificacoes: descarta linha se ref não bate.

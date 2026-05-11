@@ -412,6 +412,7 @@ async function createTables() {
     );
 
     -- [P5-C2] Audit log persistente — forense queryable de ações sensíveis
+    -- [P6-C2] Append-only + hash chain (previous_hash, current_hash) para detectar tampering
     CREATE TABLE IF NOT EXISTS audit_log (
       id SERIAL PRIMARY KEY,
       salao_id INTEGER,
@@ -424,6 +425,8 @@ async function createTables() {
       after_data JSONB,
       ip VARCHAR(45),
       user_agent TEXT,
+      previous_hash VARCHAR(64),
+      current_hash VARCHAR(64),
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS idx_audit_log_salao_created ON audit_log(salao_id, created_at DESC);
@@ -440,6 +443,21 @@ async function createTables() {
         EXCEPTION WHEN unique_violation OR duplicate_object THEN NULL;
         END;
       END IF;
+    END $$;
+
+    -- [P6-C3] UNIQUE em clientes(salao_id, LOWER(email)) — appAuth.js insere aqui,
+    -- não em clientes_app. P5-A3 estava aplicado na tabela errada.
+    -- 1) Deduplicar: manter o mais antigo por (salao_id, LOWER(email))
+    DO $$
+    BEGIN
+      DELETE FROM clientes a USING clientes b
+        WHERE a.id > b.id
+          AND a.email IS NOT NULL
+          AND b.email IS NOT NULL
+          AND LOWER(a.email) = LOWER(b.email)
+          AND COALESCE(a.salao_id, 0) = COALESCE(b.salao_id, 0);
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C3 dedup clientes: % (continuando)', SQLERRM;
     END $$;
   `;
 
@@ -537,6 +555,11 @@ async function runMigrations() {
     ALTER TABLE clientes ADD COLUMN IF NOT EXISTS push_token TEXT;
     ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS push_token TEXT;
     ALTER TABLE servicos ADD COLUMN IF NOT EXISTS cor VARCHAR(7) DEFAULT '#6366f1';
+    -- [P6-M2] token_version: incrementado a cada troca de senha. Middleware compara
+    -- com decoded.tokenVersion no JWT — se divergir, token é considerado revogado.
+    ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0;
+    ALTER TABLE clientes ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0;
+    ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0;
   `);
 
   // Caixa diário
@@ -608,6 +631,117 @@ async function runMigrations() {
     ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS reaberto_por INTEGER;
     ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS reaberto_em TIMESTAMPTZ;
     ALTER TABLE comissoes ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP;
+  `);
+
+  // [P6-C3] UNIQUE clientes(salao_id, LOWER(email)) WHERE email IS NOT NULL
+  await query(`
+    DO $$
+    BEGIN
+      -- Dedup defensiva caso ainda haja duplicatas no DB live
+      DELETE FROM clientes a USING clientes b
+        WHERE a.id > b.id
+          AND a.email IS NOT NULL
+          AND b.email IS NOT NULL
+          AND LOWER(a.email) = LOWER(b.email)
+          AND COALESCE(a.salao_id, 0) = COALESCE(b.salao_id, 0);
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C3 dedup clientes runtime: % (continuando)', SQLERRM;
+    END $$;
+  `);
+  await query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS unq_clientes_salao_email
+      ON clientes(salao_id, LOWER(email)) WHERE email IS NOT NULL;
+  `).catch((e) => {
+    console.warn('[P6-C3] unique index falhou (provavelmente duplicatas restantes):', e.message);
+  });
+
+  // [P6-C2] Audit log append-only + hash chain
+  // - Adiciona colunas previous_hash/current_hash (idempotente)
+  // - Cria trigger BEFORE UPDATE/DELETE que RAISE EXCEPTION
+  // - Trigger BEFORE INSERT que calcula current_hash = sha256(prev || canonical_row)
+  await query(`
+    ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS previous_hash VARCHAR(64);
+    ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS current_hash VARCHAR(64);
+  `);
+  await query(`
+    DO $$
+    BEGIN
+      -- Função que bloqueia UPDATE/DELETE
+      CREATE OR REPLACE FUNCTION audit_log_immutable() RETURNS TRIGGER AS $f$
+      BEGIN
+        RAISE EXCEPTION 'audit_log é append-only — UPDATE/DELETE proibido';
+      END;
+      $f$ LANGUAGE plpgsql;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C2 immutable function: % (continuando)', SQLERRM;
+    END $$;
+  `);
+  await query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_audit_log_no_update') THEN
+        CREATE TRIGGER trg_audit_log_no_update BEFORE UPDATE ON audit_log
+          FOR EACH ROW EXECUTE FUNCTION audit_log_immutable();
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_audit_log_no_delete') THEN
+        CREATE TRIGGER trg_audit_log_no_delete BEFORE DELETE ON audit_log
+          FOR EACH ROW EXECUTE FUNCTION audit_log_immutable();
+      END IF;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C2 triggers: % (continuando)', SQLERRM;
+    END $$;
+  `);
+  // Hash chain trigger BEFORE INSERT
+  await query(`
+    DO $$
+    BEGIN
+      CREATE OR REPLACE FUNCTION audit_log_hash_chain() RETURNS TRIGGER AS $f$
+      DECLARE
+        prev_hash TEXT;
+        canonical TEXT;
+      BEGIN
+        SELECT current_hash INTO prev_hash
+          FROM audit_log
+          ORDER BY id DESC LIMIT 1;
+        NEW.previous_hash := COALESCE(prev_hash, '');
+        canonical := COALESCE(NEW.previous_hash, '') || '|' ||
+                     COALESCE(NEW.salao_id::TEXT, '') || '|' ||
+                     COALESCE(NEW.actor_id::TEXT, '') || '|' ||
+                     COALESCE(NEW.actor_type, '') || '|' ||
+                     COALESCE(NEW.action, '') || '|' ||
+                     COALESCE(NEW.entity_type, '') || '|' ||
+                     COALESCE(NEW.entity_id::TEXT, '') || '|' ||
+                     COALESCE(NEW.before_data::TEXT, '') || '|' ||
+                     COALESCE(NEW.after_data::TEXT, '') || '|' ||
+                     COALESCE(NEW.ip, '') || '|' ||
+                     COALESCE(NEW.user_agent, '');
+        NEW.current_hash := encode(digest(canonical, 'sha256'), 'hex');
+        RETURN NEW;
+      END;
+      $f$ LANGUAGE plpgsql;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C2 hash chain function: % (continuando)', SQLERRM;
+    END $$;
+  `);
+  // pgcrypto extension may be required for digest()
+  await query(`
+    DO $$
+    BEGIN
+      CREATE EXTENSION IF NOT EXISTS pgcrypto;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'pgcrypto extension: % (continuando)', SQLERRM;
+    END $$;
+  `);
+  await query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_audit_log_hash_chain') THEN
+        CREATE TRIGGER trg_audit_log_hash_chain BEFORE INSERT ON audit_log
+          FOR EACH ROW EXECUTE FUNCTION audit_log_hash_chain();
+      END IF;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C2 hash chain trigger: % (continuando)', SQLERRM;
+    END $$;
   `);
 
   // [P5-C1] Trocar CASCADE → RESTRICT/SET NULL em FKs financeiras (preserva histórico)

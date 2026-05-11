@@ -220,6 +220,17 @@ router.delete('/me/delete-data', clienteAuthMiddleware, async (req, res) => {
       });
     } catch (_) { /* não bloqueia */ }
 
+    // [P6-A5] Revogar JWT atual — adiciona jti à blacklist para que o token
+    // não consiga mais autenticar até expirar naturalmente.
+    try {
+      const authHeader = req.headers.authorization || '';
+      const [, token] = authHeader.split(' ');
+      if (token) {
+        const AuthService = require('../services/authService');
+        await AuthService.revokeToken(token);
+      }
+    } catch (_) { /* não bloqueia */ }
+
     res.json({
       success: true,
       message: 'Dados pessoais anonimizados. Histórico fiscal preservado por exigência legal.'
