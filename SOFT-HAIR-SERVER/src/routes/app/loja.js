@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const PedidoLoja = require('../../models/PedidoLoja');
 const Produto = require('../../models/Produto');
 const Venda = require('../../models/Venda');
@@ -8,7 +9,16 @@ const ClienteApp = require('../../models/ClienteApp');
 const { appAuthMiddleware } = require('../../middleware/appAuth');
 const { authMiddleware } = require('../../middleware/auth');
 const ws = require('../../services/websocketService');
-const { queryOne } = require('../../config/database');
+const { queryOne, pool } = require('../../config/database');
+
+// [P2-C3] Rate-limit dedicado para enumeração pública de produtos.
+const publicProdutosLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: { error: 'Muitas requisições. Tente novamente em alguns minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 async function resolverOuCriarCliente(clienteAppId, salonId) {
   const clienteApp = await ClienteApp.findById(clienteAppId);
@@ -24,10 +34,22 @@ async function resolverOuCriarCliente(clienteAppId, salonId) {
   return novo?.id ?? null;
 }
 
-router.get('/saloes/:salonId/produtos', async (req, res) => {
+// [P2-C3] Endpoint público (cliente do app PODE listar sem login p/ onboarding),
+// MAS: rate-limited e campos sensíveis (preco_custo, quantidade_estoque exata) NÃO são expostos.
+router.get('/saloes/:salonId/produtos', publicProdutosLimiter, async (req, res) => {
   try {
     const produtos = await Produto.getAll({ ativo: true, ...req.query }, req.params.salonId);
-    res.json({ data: produtos });
+    const publicProdutos = produtos.map(p => ({
+      id: p.id,
+      nome: p.nome,
+      descricao: p.descricao,
+      preco_venda: p.preco_venda,
+      foto_url: p.foto_url,
+      categoria: p.categoria,
+      em_estoque: (p.quantidade_estoque || 0) > 0,
+      ativo: p.ativo,
+    }));
+    res.json({ data: publicProdutos });
   } catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
@@ -36,11 +58,24 @@ router.post('/pedido', appAuthMiddleware, async (req, res) => {
     const { salonId, itens, enderecoEntrega, formaPagamento, observacoes } = req.body;
     if (!salonId || !itens?.length) return res.status(400).json({ error: 'salonId e itens são obrigatórios' });
 
-    // Compute total server-side from DB prices to prevent client-side manipulation
+    // [P2-M4] Validar quantidade — inteiro positivo. Bloqueia subtotal negativo.
+    for (const item of itens) {
+      const qtd = Number(item.quantidade);
+      if (!Number.isInteger(qtd) || qtd <= 0) {
+        return res.status(400).json({ error: `Quantidade inválida para produto ${item.produtoId}` });
+      }
+      item.quantidade = qtd;
+    }
+
+    // [P2-C2] Server-side pricing FILTRADO por salao_id — impede cross-tenant pricing.
+    // Cliente não pode mais usar produto de outro salão para forjar preço.
     let total = 0;
     for (const item of itens) {
-      const produto = await queryOne('SELECT preco_venda FROM produtos WHERE id = $1', [item.produtoId]);
-      if (!produto) return res.status(400).json({ error: `Produto ${item.produtoId} não encontrado` });
+      const produto = await queryOne(
+        'SELECT preco_venda FROM produtos WHERE id = $1 AND salao_id = $2 AND ativo = true',
+        [item.produtoId, salonId]
+      );
+      if (!produto) return res.status(400).json({ error: `Produto ${item.produtoId} não encontrado neste salão` });
       const precoUnitario = Number(produto.preco_venda);
       item.precoUnitario = precoUnitario;
       item.subtotal = precoUnitario * item.quantidade;

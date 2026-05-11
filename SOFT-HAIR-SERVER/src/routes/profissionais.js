@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { ProfissionalService } = require('../services');
 
 const service = new ProfissionalService();
@@ -46,8 +46,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Criar profissional
-router.post('/', authMiddleware, [
+// [P2-C4] Criar profissional — exige admin (não-admins não podem criar/setar senha_app)
+router.post('/', authMiddleware, requireAdmin, [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
   body('email').optional().isEmail().withMessage('Email inválido'),
   body('comissao_percentual').optional().isFloat({ min: 0, max: 100 }).withMessage('Comissão deve ser entre 0 e 100'),
@@ -75,8 +75,8 @@ router.post('/', authMiddleware, [
   }
 });
 
-// Atualizar
-router.put('/:id', authMiddleware, [
+// [P2-C4] Atualizar — exige admin (impede reset de senha_app por outros usuários)
+router.put('/:id', authMiddleware, requireAdmin, [
   body('nome').optional().isLength({ min: 2 }).withMessage('Nome deve ter pelo menos 2 caracteres'),
   body('email').optional().isEmail().withMessage('Email inválido'),
 ], async (req, res) => {
@@ -103,8 +103,8 @@ router.put('/:id', authMiddleware, [
   }
 });
 
-// Desativar (soft delete)
-router.delete('/:id', authMiddleware, async (req, res) => {
+// [P2-C4] Desativar — exige admin
+router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const result = await service.deletar(req.params.id, req.salaoId);
     if (result.success) {
