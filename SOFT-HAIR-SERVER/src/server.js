@@ -187,9 +187,10 @@ async function accountLockout(req, res, next) {
     if (fails >= maxFails && lastFail) {
       const unlockAt = new Date(new Date(lastFail).getTime() + lockoutMin * 60_000);
       if (unlockAt > new Date()) {
+        // [P2-B6] Não vazar timestamp exato de desbloqueio (calibra retry do atacante).
         return res.status(429).json({
           success: false,
-          error: `Conta bloqueada por ${lockoutMin}min após ${maxFails} tentativas falhas. Tente novamente após ${unlockAt.toISOString()}.`
+          error: `Conta bloqueada por ${lockoutMin}min após ${maxFails} tentativas falhas. Tente novamente mais tarde.`
         });
       }
     }
@@ -204,7 +205,8 @@ async function accountLockout(req, res, next) {
 // Registra tentativa de login (sucesso/falha) — chamado após auth resolver
 async function recordLoginAttempt(email, sucesso, ip) {
   try {
-    if (!email) return;
+    // [P2-B9] skipar email vazio/inválido (não grava noise).
+    if (!email || typeof email !== 'string' || !email.trim()) return;
     await _authPool.query(
       `INSERT INTO login_attempts (email, ip, sucesso) VALUES ($1, $2, $3)`,
       [email.toLowerCase().trim(), ip || null, !!sucesso]
@@ -223,8 +225,8 @@ function loginAttemptLogger(req, res, next) {
   let statusCode = 200;
   res.status = (code) => { statusCode = code; return origStatus(code); };
   res.on('finish', () => {
-    // Apenas registra POSTs /login (resto pode ignorar)
-    if (req.method === 'POST' && /\/login\b/.test(req.originalUrl || '')) {
+    // [P2-B8] Registra POSTs /login E /register (este último pode ser usado p/ enumerar emails).
+    if (req.method === 'POST' && /\/(login|register)\b/.test(req.originalUrl || '')) {
       recordLoginAttempt(email, statusCode >= 200 && statusCode < 300, ip);
     }
   });

@@ -95,8 +95,9 @@ router.post('/', authMiddleware, [
       const agendamento = result.data;
       if (agendamento && agendamento.cliente_id) {
         const clienteRow = await pool.query(
-          'SELECT push_token FROM clientes WHERE id = $1 AND push_token IS NOT NULL LIMIT 1',
-          [agendamento.cliente_id]
+          // [P2-M7] Filtrar por salao_id (defesa em profundidade)
+          'SELECT push_token FROM clientes WHERE id = $1 AND salao_id = $2 AND push_token IS NOT NULL LIMIT 1',
+          [agendamento.cliente_id, req.salaoId]
         );
         if (clienteRow.rows[0]?.push_token) {
           await sendPush(
@@ -136,8 +137,9 @@ router.put('/:id', authMiddleware, async (req, res) => {
       // Notificar cliente via push quando status muda
       if (agendamento && agendamento.cliente_id && status) {
         const clienteRow = await pool.query(
-          'SELECT push_token FROM clientes WHERE id = $1 AND push_token IS NOT NULL LIMIT 1',
-          [agendamento.cliente_id]
+          // [P2-M7] Filtrar por salao_id (defesa em profundidade)
+          'SELECT push_token FROM clientes WHERE id = $1 AND salao_id = $2 AND push_token IS NOT NULL LIMIT 1',
+          [agendamento.cliente_id, req.salaoId]
         );
         if (clienteRow.rows[0]?.push_token) {
           const msgs = {

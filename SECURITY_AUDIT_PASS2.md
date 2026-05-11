@@ -5,6 +5,64 @@
 **Escopo:** SOFT-HAIR-SERVER, SoftHair/frontend, softhair-mobile
 **Tipo:** Defensiva — análise estática
 
+## Status de remediação (2026-05-11, ciclo de fixes pós-audit)
+
+### Regressões — todas fechadas
+- C2 ✅ FIXADO — `requireClienteVinculado` agora protege todas as rotas `/api/app/cliente/:salonId` (exceto `/perfil` p/ onboarding).
+- A2 ✅ FIXADO — `isTokenRevoked` aplicado em `clienteAuth`, `profissionalAuth`, `appAuth.appAuthMiddleware`, `appAuth.profissionalAppMiddleware`.
+- A7 ✅ FIXADO — mobile `authStore.ts` não cai mais para `AsyncStorage` quando SecureStore falha; sessão fica só em memória.
+- A8 ✅ FIXADO — WS handshake exige token; auth-via-mensagem descontinuado.
+- M1 ✅ FIXADO — todas as rotas e service relevantes migrados para `sendError`/sanitização (60+ catch blocks); `sync.push` também sanitiza em prod.
+
+### Novos críticos — todos fechados
+- P2-C1 ✅ FIXADO — `handleChatMessage` agora usa `salaoId`/`remetenteId`/`remetenteTipo` do JWT verificado; valida `destinatarioId` cross-tenant.
+- P2-C2 ✅ FIXADO — `/api/app/loja/pedido` valida `produto.salao_id = salonId` antes de calcular preço.
+- P2-C3 ✅ FIXADO — `/api/app/loja/saloes/:id/produtos` rate-limited (30/min) + retorna apenas campos públicos (`preco_custo`/`quantidade_estoque` exata removidos).
+- P2-C4 ✅ FIXADO — POST/PUT/DELETE `/api/profissionais/*` exigem `requireAdmin`.
+
+### Novos altos — todos fechados
+- P2-A1 ✅ FIXADO — `/api/app/pedidos/saloes` rate-limited + campos sanitizados (sem email/cnpj).
+- P2-A2 ✅ FIXADO — `/saloes/:id/servicos` e `/saloes/:id/profissionais` rate-limited; campos sensíveis removidos.
+- P2-A3 ✅ FIXADO — `POST /caixa/abrir` agora usa `INSERT ... WHERE NOT EXISTS`, atômico; `saldo_inicial` validado (>=0); `aberto_por` corrigido (`req.user.userId`).
+- P2-A4 ✅ FIXADO — `produtos-utilizados` agora envolve UPDATE condicional + INSERT em transação; falha atomicamente se estoque < qtd.
+- P2-A5 ✅ FIXADO — coberto pelo fix A2 (blacklist nos 3 middlewares).
+- P2-A6 ✅ FIXADO — `sync.push` valida `cliente_id`/`profissional_id`/`servico_id`/`produto_id`/`agendamento_id`/`venda_id`/`auxiliar_id` contra `salao_id` antes de INSERT/UPDATE.
+- P2-A7 ✅ FIXADO — `AgendamentoService.criar` valida cliente/profissional/servico/auxiliar pertencem ao `salaoId`.
+
+### Novos médios
+- P2-M1 ✅ FIXADO — coberto pelo fix M1.
+- P2-M2 ✅ FIXADO — WS handshake agora exige token, sem fallback legacy.
+- P2-M3 ✅ FIXADO — `saldo_inicial` valida `>= 0`.
+- P2-M4 ✅ FIXADO — loja `/pedido` valida `quantidade` como inteiro positivo.
+- P2-M5 ⏳ PARCIAL — flow duplicado mantido por compatibilidade com testes; deprecação requer migração de schema (fora de escopo desta pass).
+- P2-M6 ✅ FIXADO — `/api/app/pedidos` POST valida `servicoId`/`profissionalId` pertencem ao `salonId`.
+- P2-M7 ✅ FIXADO — `agendamentos.js` push-token lookup filtra por `salao_id`.
+- P2-M8 ✅ FIXADO — coberto pelo fix A7 (sem fallback inseguro no mobile).
+- P2-M9 ⏳ PENDENTE — requer major upgrade do Expo SDK (49 → 51+); planejado próximo sprint.
+- P2-M10 ⏳ PENDENTE — `vite@latest` é dev-only; não afeta prod build; planejado.
+
+### Novos baixos
+- P2-B1 ✅ FIXADO — `requireClienteVinculado` agora é usado.
+- P2-B2 ⏳ PENDENTE — limpar duplicação `profissionalAuthMiddleware` (refactor cosmético).
+- P2-B3 ⏳ PENDENTE — remover endpoint legacy 410 quando garantido que nenhum app < v2 está em uso.
+- P2-B4 ✅ FIXADO — `Salao.getAll` resultado agora sanitizado em endpoints públicos.
+- P2-B5 ✅ FIXADO — `clientes.js` aplica `Math.min(limit, 200)`.
+- P2-B6 ✅ FIXADO — mensagem de lockout não vaza timestamp exato.
+- P2-B7 ✅ FIXADO — `caixa.aberto_por` agora usa `req.user.userId`.
+- P2-B8 ✅ FIXADO — `loginAttemptLogger` cobre `/login` E `/register`.
+- P2-B9 ✅ FIXADO — `recordLoginAttempt` valida string não-vazia.
+- P2-B10 ⏳ PENDENTE — `hsts.preload` permanece (submissão manual a hstspreload.org).
+
+### Testes
+- Jest smoke: **3/3 PASS** após cada wave (regressions, criticals, highs, mediums).
+
+### Commits
+- `security(pass2-regressions): fix A2/A7/A8/C2/M1 regressions`
+- `security(pass2-criticals): fix WS tenant, loja preço, auth produtos, requireAdmin profissionais`
+- `security(pass2-high): fix race conditions e tenant validation`
+- `security(pass2-medium): demais fixes`
+
+
 ---
 
 ## Regressões dos fixes anteriores

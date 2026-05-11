@@ -9,15 +9,17 @@ const clienteService = new ClienteService();
 // Listar clientes
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { search, ativo, page = 1, limit = 500 } = req.query;
+    const { search, ativo, page = 1 } = req.query;
     const salaoId = req.salaoId;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    // [P2-B5] Cap superior em 200 para evitar exfiltração massiva.
+    const limit = Math.min(parseInt(req.query.limit) || 100, 200);
+    const offset = (parseInt(page) - 1) * limit;
 
     let filtros = {};
     if (ativo !== undefined) filtros.ativo = ativo === 'true';
     if (search) filtros._search = search;
 
-    const result = await clienteService.listar(salaoId, filtros, { limit: parseInt(limit), offset });
+    const result = await clienteService.listar(salaoId, filtros, { limit, offset });
     
     if (result.success) {
       res.json({ success: true, data: result.data });
