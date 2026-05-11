@@ -38,7 +38,9 @@
         }
       ],
       "expo-image-picker",
-      "expo-asset"
+      "expo-asset",
+      "@react-native-community/datetimepicker",
+      "expo-secure-store"
     ],
     "scheme": "softhair",
     "experiments": {
