@@ -15,6 +15,87 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// Comissões pagas
+router.get('/pagas', authMiddleware, async (req, res) => {
+  try {
+    const { pool } = require('../config/database');
+    const { rows } = await pool.query(
+      `SELECT cp.*, p.nome AS profissional_nome
+       FROM comissoes_pagas cp
+       LEFT JOIN profissionais p ON p.id = cp.profissional_id
+       WHERE cp.salao_id = $1
+       ORDER BY cp.created_at DESC`,
+      [req.salaoId]
+    );
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    // tabela pode não existir — devolve lista vazia em vez de 500
+    res.json({ success: true, data: [] });
+  }
+});
+
+// Comissões estornadas
+router.get('/estornos', authMiddleware, async (req, res) => {
+  try {
+    const { pool } = require('../config/database');
+    const { rows } = await pool.query(
+      `SELECT ce.*, p.nome AS profissional_nome
+       FROM comissoes_estornos ce
+       LEFT JOIN profissionais p ON p.id = ce.profissional_id
+       WHERE ce.salao_id = $1
+       ORDER BY ce.created_at DESC`,
+      [req.salaoId]
+    );
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    res.json({ success: true, data: [] });
+  }
+});
+
+// Pagar comissões (em lote)
+router.post('/pagar', authMiddleware, async (req, res) => {
+  try {
+    const { pool } = require('../config/database');
+    const { profissional_id, profissionalId, valor, observacoes, comissoes } = req.body;
+    const pid = profissional_id || profissionalId;
+    if (!pid || !valor) {
+      return res.status(400).json({ success: false, error: 'profissional_id e valor obrigatórios' });
+    }
+    const { rows } = await pool.query(
+      `INSERT INTO comissoes_pagas (salao_id, profissional_id, valor, observacoes, comissoes_ids)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [req.salaoId, pid, valor, observacoes || null, comissoes || null]
+    );
+    if (Array.isArray(comissoes) && comissoes.length > 0) {
+      await pool.query(
+        `UPDATE comissoes SET pago = true WHERE id = ANY($1::int[]) AND salao_id = $2`,
+        [comissoes, req.salaoId]
+      );
+    }
+    res.status(201).json({ success: true, data: rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Estornar comissão
+router.post('/estornar', authMiddleware, async (req, res) => {
+  try {
+    const { pool } = require('../config/database');
+    const { fechamento_id, fechamentoId, motivo, valor, profissional_id, profissionalId } = req.body;
+    const fid = fechamento_id || fechamentoId;
+    const pid = profissional_id || profissionalId;
+    const { rows } = await pool.query(
+      `INSERT INTO comissoes_estornos (salao_id, fechamento_id, profissional_id, valor, motivo)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [req.salaoId, fid || null, pid || null, valor || 0, motivo || null]
+    );
+    res.status(201).json({ success: true, data: rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get('/resumo/:profissionalId', authMiddleware, async (req, res) => {
   try {
     const { data_inicio, data_fim } = req.query;

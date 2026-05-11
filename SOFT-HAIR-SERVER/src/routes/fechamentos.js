@@ -16,6 +16,38 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// Fechamentos em aberto: lista atendimentos finalizados ainda não fechados (agrupados por cliente)
+router.get('/em-aberto', authMiddleware, async (req, res) => {
+  try {
+    const { pool } = require('../config/database');
+    const { profissionalId, clienteId } = req.query;
+
+    const params = [req.salaoId];
+    let where = `a.salao_id = $1 AND a.status = 'finalizado' AND NOT EXISTS (
+      SELECT 1 FROM fechamentos f WHERE f.salao_id = a.salao_id
+        AND f.cliente_id = a.cliente_id
+        AND a.created_at::date BETWEEN f.data_inicio AND f.data_fim
+    )`;
+    let p = 2;
+    if (profissionalId) { where += ` AND a.profissional_id = $${p++}`; params.push(profissionalId); }
+    if (clienteId) { where += ` AND a.cliente_id = $${p++}`; params.push(clienteId); }
+
+    const { rows } = await pool.query(`
+      SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome, s.nome as servico_nome
+      FROM atendimentos a
+      LEFT JOIN clientes c ON c.id = a.cliente_id
+      LEFT JOIN profissionais p ON p.id = a.profissional_id
+      LEFT JOIN servicos s ON s.id = a.servico_id
+      WHERE ${where}
+      ORDER BY a.created_at DESC
+    `, params);
+
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const result = await service.buscarPorId(req.params.id, req.salaoId);

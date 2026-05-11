@@ -25,6 +25,32 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// Agendamentos pendentes (status = 'pendente')
+router.get('/pendentes', authMiddleware, async (req, res) => {
+  try {
+    const result = await service.listar(req.salaoId, { status: 'pendente' });
+    res.json({ success: result.success, data: result.data || [] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Próximos N dias
+router.get('/proximos', authMiddleware, async (req, res) => {
+  try {
+    const dias = parseInt(req.query.dias || '7', 10);
+    const hoje = new Date();
+    const fim = new Date();
+    fim.setDate(hoje.getDate() + dias);
+    const dataInicio = hoje.toISOString().split('T')[0];
+    const dataFim = fim.toISOString().split('T')[0];
+    const result = await service.listar(req.salaoId, { data_inicio: dataInicio, data_fim: dataFim });
+    res.json({ success: result.success, data: result.data || [] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Horários disponíveis
 router.get('/disponiveis/:profissionalId', authMiddleware, async (req, res) => {
   try {
