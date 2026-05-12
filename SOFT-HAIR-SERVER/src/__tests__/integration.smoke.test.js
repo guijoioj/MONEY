@@ -338,9 +338,14 @@ describe('SoftHair API smoke integration', () => {
     await request('notificacoes marcar todas', 'PUT', '/notificacoes/marcar-todas-lidas');
     await request('notificacao delete', 'DELETE', `/notificacoes/${notificacaoId}`);
 
+    // [P9-M2] data_fim deve ser <= hoje. Usar período passado realista (30 dias atrás → ontem).
+    const _hoje = new Date();
+    const _ontem = new Date(_hoje.getTime() - 24 * 60 * 60 * 1000);
+    const _trintaDias = new Date(_hoje.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const _fmt = (d) => d.toISOString().slice(0, 10);
     const fechamento = await request('fechamento create', 'POST', '/fechamentos', {
-      data_inicio: '2099-01-01',
-      data_fim: '2099-01-31',
+      data_inicio: _fmt(_trintaDias),
+      data_fim: _fmt(_ontem),
       tipo: 'mensal'
     }, { expect: [201] });
     const fechamentoId = fechamento.data.id;

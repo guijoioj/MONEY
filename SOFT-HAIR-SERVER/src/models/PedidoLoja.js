@@ -1,5 +1,23 @@
 const { query, queryOne, withTransaction } = require('../config/database');
 
+// [P9-M1] State machine de status de pedido_loja — transições válidas:
+//   pendente   → confirmado | cancelado
+//   confirmado → preparando | cancelado
+//   preparando → enviado | cancelado
+//   enviado    → entregue (não pode voltar nem cancelar — já saiu)
+//   entregue   → ∅ (terminal)
+//   cancelado  → ∅ (terminal)
+const PEDIDO_STATUS_TRANSITIONS = {
+  pendente: ['confirmado', 'cancelado'],
+  confirmado: ['preparando', 'cancelado'],
+  preparando: ['enviado', 'cancelado'],
+  enviado: ['entregue'],
+  entregue: [],
+  cancelado: [],
+};
+
+const PEDIDO_STATUS_VALIDOS = ['pendente', 'confirmado', 'preparando', 'enviado', 'entregue', 'cancelado'];
+
 function toShape(row) {
   if (!row) return null;
   return {
@@ -113,12 +131,44 @@ class PedidoLoja {
   }
 
   static async atualizarStatus(id, salaoId, status) {
+    // [P9-M1] State machine enforcement. Lê estado atual e valida transição.
+    const existing = await queryOne(
+      'SELECT id, status FROM pedidos_loja WHERE id = $1 AND salao_id = $2',
+      [id, salaoId]
+    );
+    if (!existing) {
+      const err = new Error('Pedido não encontrado');
+      err.code = 'NOT_FOUND';
+      throw err;
+    }
+
+    if (!PEDIDO_STATUS_VALIDOS.includes(status)) {
+      const err = new Error(`Status inválido: ${status}`);
+      err.code = 'INVALID_STATUS';
+      throw err;
+    }
+
+    if (status !== existing.status) {
+      const allowed = PEDIDO_STATUS_TRANSITIONS[existing.status] || [];
+      if (!allowed.includes(status)) {
+        const err = new Error(`Transição inválida: ${existing.status} → ${status}`);
+        err.code = 'INVALID_TRANSITION';
+        err.before = existing.status;
+        err.after = status;
+        throw err;
+      }
+    }
+
     await query(`
       UPDATE pedidos_loja
       SET status = $1, updated_at = NOW()
       WHERE id = $2 AND salao_id = $3
     `, [status, id, salaoId]);
-    return this.findById(id);
+
+    const updated = await this.findById(id);
+    // Anexar before para que o route possa registrar audit log
+    if (updated) updated._previousStatus = existing.status;
+    return updated;
   }
 }
 

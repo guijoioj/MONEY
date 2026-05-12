@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, query: queryValidator, validationResult } = require('express-validator');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { AgendamentoService } = require('../services');
 const { sendPush } = require('../services/pushService');
 const { pool } = require('../config/database');
@@ -128,9 +128,19 @@ router.post('/', authMiddleware, [
 });
 
 // Atualizar agendamento
-router.put('/:id', authMiddleware, async (req, res) => {
+// [P9-A1] requireAdmin + validator isIn + state machine (service-level)
+router.put('/:id', authMiddleware, requireAdmin, [
+  body('status').optional().isIn(['agendado', 'confirmado', 'cancelado', 'concluido', 'no_show'])
+    .withMessage('Status inválido (use: agendado, confirmado, cancelado, concluido, no_show)'),
+  body('observacoes').optional().isString().isLength({ max: 1000 }),
+  body('data_hora').optional().isISO8601().withMessage('data_hora deve ser ISO 8601'),
+], async (req, res) => {
   try {
-    const result = await service.atualizar(req.params.id, req.body, req.salaoId);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+    const result = await service.atualizar(req.params.id, req.body, req.salaoId, { req });
     if (result.success) {
       res.json({ success: true, data: result.data });
       // Broadcast WebSocket para todos conectados ao salão
@@ -168,7 +178,9 @@ router.put('/:id', authMiddleware, async (req, res) => {
         }
       }
     } else {
-      res.status(404).json({ success: false, error: result.error });
+      // [P9-A1] Transição inválida / Status inválido / horário ocupado → 400; não encontrado → 404
+      const code = /Transição inválida|Status inválido|ocupado|não pertence/i.test(result.error || '') ? 400 : 404;
+      res.status(code).json({ success: false, error: result.error });
     }
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);

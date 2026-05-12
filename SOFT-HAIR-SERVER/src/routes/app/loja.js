@@ -10,6 +10,7 @@ const { appAuthMiddleware } = require('../../middleware/appAuth');
 const { authMiddleware } = require('../../middleware/auth');
 const ws = require('../../services/websocketService');
 const { queryOne, pool } = require('../../config/database');
+const { logAction } = require('../../utils/auditLog');
 
 // [P2-C3] Rate-limit dedicado para enumeração pública de produtos.
 const publicProdutosLimiter = rateLimit({
@@ -134,8 +135,34 @@ router.put('/pedidos/:id/status', authMiddleware, async (req, res) => {
     const { status } = req.body;
     const statusValidos = ['pendente', 'confirmado', 'preparando', 'enviado', 'entregue', 'cancelado'];
     if (!statusValidos.includes(status)) return res.status(400).json({ error: `Status inválido. Use: ${statusValidos.join(', ')}` });
-    const pedido = await PedidoLoja.atualizarStatus(req.params.id, req.salaoId, status);
+
+    let pedido;
+    try {
+      pedido = await PedidoLoja.atualizarStatus(req.params.id, req.salaoId, status);
+    } catch (err) {
+      // [P9-M1] State machine errors → 400; not found → 404
+      if (err.code === 'NOT_FOUND') return res.status(404).json({ error: err.message });
+      if (err.code === 'INVALID_TRANSITION' || err.code === 'INVALID_STATUS') {
+        return res.status(400).json({ error: err.message });
+      }
+      throw err;
+    }
     if (!pedido) return res.status(404).json({ error: 'Pedido não encontrado' });
+
+    // [P9-M1] Audit log se status mudou
+    const previousStatus = pedido._previousStatus;
+    if (previousStatus && previousStatus !== status) {
+      await logAction({
+        req,
+        action: 'pedido_loja.status_change',
+        entityType: 'pedido_loja',
+        entityId: pedido.id,
+        before: { status: previousStatus },
+        after: { status },
+        salaoId: req.salaoId,
+      }).catch(() => {});
+    }
+    delete pedido._previousStatus;
 
     ws.notificarCliente(pedido.clienteAppId, {
       tipo: 'status_pedido_loja',

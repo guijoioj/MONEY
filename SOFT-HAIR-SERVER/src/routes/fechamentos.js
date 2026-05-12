@@ -63,6 +63,30 @@ router.post('/', authMiddleware, [
   body('data_inicio').isDate().withMessage('data_inicio obrigatória (YYYY-MM-DD)'),
   body('data_fim').isDate().withMessage('data_fim obrigatória (YYYY-MM-DD)'),
   body('tipo').optional().isIn(['diario', 'semanal', 'mensal']),
+  // [P9-M2] Validar bounds do período: data_inicio < data_fim, máx 365 dias,
+  // datas não no futuro (data_fim <= hoje).
+  body('data_fim').custom((v, { req }) => {
+    const di = new Date(req.body.data_inicio);
+    const df = new Date(v);
+    if (Number.isNaN(di.getTime()) || Number.isNaN(df.getTime())) {
+      throw new Error('Datas inválidas');
+    }
+    if (df < di) {
+      throw new Error('data_fim deve ser >= data_inicio');
+    }
+    const diffDays = (df.getTime() - di.getTime()) / (1000 * 60 * 60 * 24);
+    if (diffDays > 365) {
+      throw new Error('Período máximo: 365 dias');
+    }
+    // Não permitir data_fim no futuro (fechamentos só fazem sentido sobre período passado).
+    // Tolerância: fim do dia atual (UTC) — clock skew de timezone.
+    const hoje = new Date();
+    hoje.setUTCHours(23, 59, 59, 999);
+    if (df.getTime() > hoje.getTime()) {
+      throw new Error('data_fim não pode estar no futuro');
+    }
+    return true;
+  }),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);

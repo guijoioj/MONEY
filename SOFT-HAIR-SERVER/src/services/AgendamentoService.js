@@ -1,4 +1,21 @@
 const Agendamento = require('../models/Agendamento');
+const { logAction } = require('../utils/auditLog');
+
+// [P9-A1] State machine de status de agendamento — transições válidas:
+//   agendado    → confirmado | cancelado | concluido | no_show
+//   confirmado  → concluido | cancelado | no_show
+//   concluido   → ∅ (terminal)
+//   cancelado   → agendado (re-agendar — re-checa overlap)
+//   no_show     → ∅ (terminal)
+const AGEND_STATUS_TRANSITIONS = {
+  agendado: ['confirmado', 'cancelado', 'concluido', 'no_show'],
+  confirmado: ['concluido', 'cancelado', 'no_show'],
+  concluido: [],
+  cancelado: ['agendado'],
+  no_show: [],
+};
+
+const AGEND_STATUS_VALIDOS = ['agendado', 'confirmado', 'cancelado', 'concluido', 'no_show'];
 
 class AgendamentoService {
   async listar(salaoId, filtros = {}) {
@@ -143,9 +160,34 @@ class AgendamentoService {
     }
   }
 
-  async atualizar(id, data, salaoId) {
+  async atualizar(id, data, salaoId, opts = {}) {
     try {
-      const { queryOne } = require('../config/database');
+      const { queryOne, query } = require('../config/database');
+
+      // [P9-A1] Recupera estado atual — necessário para validar transição,
+      // detectar mudança de slot (data_hora/profissional_id) e gerar audit log.
+      const existing = await queryOne(
+        'SELECT id, status, data_hora, profissional_id, servico_id FROM agendamentos WHERE id = $1 AND salao_id = $2',
+        [id, salaoId]
+      );
+      if (!existing) {
+        return { success: false, error: 'Agendamento não encontrado' };
+      }
+
+      // [P9-A1] State machine de status. Bloqueia transições inválidas
+      // (`concluido → qualquer`, `no_show → qualquer`, etc.)
+      if (data.status && data.status !== existing.status) {
+        if (!AGEND_STATUS_VALIDOS.includes(data.status)) {
+          return { success: false, error: `Status inválido: ${data.status}` };
+        }
+        const allowed = AGEND_STATUS_TRANSITIONS[existing.status] || [];
+        if (!allowed.includes(data.status)) {
+          return {
+            success: false,
+            error: `Transição inválida: ${existing.status} → ${data.status}`,
+          };
+        }
+      }
 
       // [P3-A1] Validar tenancy das FKs no UPDATE (mesma proteção do criar/[P2-A7])
       const checks = [
@@ -159,6 +201,28 @@ class AgendamentoService {
         const ok = await queryOne(`SELECT 1 FROM ${table} WHERE id = $1 AND salao_id = $2`, [fk, salaoId]);
         if (!ok) {
           return { success: false, error: `${label} não pertence ao salão` };
+        }
+      }
+
+      // [P9-A1] Re-validar overlap se data_hora ou profissional_id mudaram
+      // (ou se status está saindo de 'cancelado' → 'agendado' — re-ativando slot).
+      const novoProf = data.profissional_id || existing.profissional_id;
+      const novaData = data.data_hora || existing.data_hora;
+      const mudouSlot = (data.profissional_id && data.profissional_id !== existing.profissional_id)
+        || (data.data_hora && new Date(data.data_hora).getTime() !== new Date(existing.data_hora).getTime());
+      const reativando = data.status === 'agendado' && existing.status === 'cancelado';
+
+      if ((mudouSlot || reativando) && novoProf && novaData) {
+        // Checa se há OUTRO agendamento ativo no mesmo slot (excluindo este id e cancelados/no_show)
+        const conflito = await queryOne(
+          `SELECT id FROM agendamentos
+           WHERE salao_id = $1 AND profissional_id = $2 AND id != $3
+             AND status NOT IN ('cancelado', 'no_show')
+             AND data_hora = $4`,
+          [salaoId, novoProf, id, novaData]
+        );
+        if (conflito) {
+          return { success: false, error: 'Horário já está ocupado para este profissional' };
         }
       }
 
@@ -193,6 +257,19 @@ class AgendamentoService {
           success: false,
           error: 'Agendamento não encontrado'
         };
+      }
+
+      // [P9-A1] Audit log de mudança de status
+      if (data.status && data.status !== existing.status) {
+        await logAction({
+          req: opts.req,
+          action: 'agendamento.status_change',
+          entityType: 'agendamento',
+          entityId: id,
+          before: { status: existing.status, data_hora: existing.data_hora, profissional_id: existing.profissional_id },
+          after: { status: data.status, data_hora: result.data_hora, profissional_id: result.profissional_id },
+          salaoId,
+        }).catch(() => {});
       }
 
       return {
