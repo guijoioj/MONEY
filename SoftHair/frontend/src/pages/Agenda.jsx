@@ -439,17 +439,54 @@ export default function Agenda() {
     }
   };
 
-  const converterMutation = useMutation({
-    mutationFn: () => Promise.resolve({ data: { resultados: [] } }),
+  const converterUmMutation = useMutation({
+    mutationFn: async ({ id }) => {
+      // Busca o agendamento para pegar dados
+      const ag = await agendamentosAPI.getById(id);
+      const data = ag?.data?.data;
+      if (!data) throw new Error('Agendamento não encontrado');
+
+      // Cria atendimento a partir do agendamento
+      const atend = await atendimentosAPI.create({
+        cliente_id: data.clienteId || data.cliente_id,
+        profissional_id: data.profissionalId || data.profissional_id,
+        servico_id: data.servicoId || data.servico_id,
+        agendamento_id: id,
+        valor: data.valor || 0,
+        status: 'em_andamento',
+      });
+
+      // Atualiza status do agendamento
+      await agendamentosAPI.update(id, { status: 'em_andamento' });
+      return atend;
+    },
     onSuccess: () => {
-      setNotificacao({ tipo: 'info', mensagem: 'Conversão automática não disponível neste servidor.' });
+      queryClient.invalidateQueries(['agendamentos']);
+      queryClient.invalidateQueries(['atendimentos']);
+      setNotificacao({ tipo: 'success', mensagem: 'Agendamento convertido em atendimento.' });
+    },
+    onError: (err) => {
+      setNotificacao({ tipo: 'error', mensagem: err.response?.data?.error || err.message || 'Erro ao converter agendamento.' });
     },
   });
 
-  const converterUmMutation = useMutation({
-    mutationFn: () => Promise.resolve({}),
-    onSuccess: () => {
-      setNotificacao({ tipo: 'info', mensagem: 'Conversão para atendimento não disponível neste servidor.' });
+  const converterMutation = useMutation({
+    mutationFn: async () => {
+      const pendentes = (data?.data?.data || []).filter(a => a.status === 'agendado' || a.status === 'confirmado');
+      const resultados = [];
+      for (const a of pendentes) {
+        try {
+          await converterUmMutation.mutateAsync({ id: a.id });
+          resultados.push({ id: a.id, ok: true });
+        } catch (e) {
+          resultados.push({ id: a.id, ok: false, error: e.message });
+        }
+      }
+      return { resultados };
+    },
+    onSuccess: (res) => {
+      const ok = res.resultados.filter(r => r.ok).length;
+      setNotificacao({ tipo: 'success', mensagem: `${ok} agendamento(s) convertido(s).` });
     },
   });
 
@@ -1226,10 +1263,10 @@ export default function Agenda() {
                         const isHovered = hoveredAgendamento === agend.id;
 
                         const statusStyle = isCancelled
-                          ? { bg: 'bg-red-100', border: 'border-red-400', text: 'text-red-700', opacity: 'opacity-70', label: null }
+                          ? { bg: 'bg-red-100 dark:bg-red-900/40', border: 'border-red-400 dark:border-red-600', text: 'text-red-700 dark:text-red-300', opacity: 'opacity-70', label: null }
                           : isConfirmed
-                          ? { bg: 'bg-green-100', border: 'border-green-500', text: 'text-green-800', opacity: '', label: null }
-                          : { bg: 'bg-yellow-100', border: 'border-yellow-500', text: 'text-yellow-800', opacity: '', label: null };
+                          ? { bg: 'bg-green-100 dark:bg-green-900/40', border: 'border-green-500 dark:border-green-600', text: 'text-green-800 dark:text-green-200', opacity: '', label: null }
+                          : { bg: 'bg-yellow-100 dark:bg-yellow-900/40', border: 'border-yellow-500 dark:border-yellow-600', text: 'text-yellow-800 dark:text-yellow-200', opacity: '', label: null };
 
                         return (
                           <div
