@@ -101,7 +101,7 @@ export default function Servicos() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} />
             <input
               type="text"
               placeholder="Buscar serviços..."
@@ -124,11 +124,11 @@ export default function Servicos() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data?.data?.data?.length === 0 ? (
-            <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+            <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">
               Nenhum serviço encontrado
             </div>
           ) : (
@@ -137,15 +137,15 @@ export default function Servicos() {
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">{servico.nome}</h3>
                   <div className="flex gap-1">
-                    <button onClick={() => openModal(servico)} className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+                    <button onClick={() => openModal(servico)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
                       <Edit2 size={16} />
                     </button>
-                    <button onClick={() => handleDeleteClick(servico)} className="p-2 text-red-600 hover:bg-red-50 rounded">
+                    <button onClick={() => handleDeleteClick(servico)} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded">
                       <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
-                {servico.descricao && <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">{servico.descricao}</p>}
+                {servico.descricao && <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm mb-3">{servico.descricao}</p>}
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-1 text-gray-600 dark:text-gray-300">
                     <Clock size={16} />
@@ -172,7 +172,7 @@ export default function Servicos() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">{editingServico ? 'Editar Serviço' : 'Novo Serviço'}</h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+              <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>

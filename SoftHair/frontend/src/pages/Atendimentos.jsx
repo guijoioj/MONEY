@@ -372,7 +372,7 @@ export default function Atendimentos() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4 items-end">
           <div>
-            <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Data</label>
+            <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-1">Data</label>
             <input
               type="date"
               value={filtroData}
@@ -384,25 +384,25 @@ export default function Atendimentos() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</div>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Profissional</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cliente</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produtos</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Serviços</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Cliente</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Produtos</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Serviços</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Total</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {atendimentos?.data?.data?.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="7" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">
                     Nenhum atendimento encontrado
                   </td>
                 </tr>
@@ -417,13 +417,13 @@ export default function Atendimentos() {
                     <td className="px-6 py-4 font-medium text-indigo-600">{formatCurrency(atendimento.totalGeral)}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button onClick={() => viewDetails(atendimento)} className="p-2 text-blue-600 hover:bg-blue-50 rounded" title="Ver detalhes">
+                        <button onClick={() => viewDetails(atendimento)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded" title="Ver detalhes">
                           <Eye size={18} />
                         </button>
-                        <button onClick={() => loadAtendimentoForEdit(atendimento.id)} className="p-2 text-green-600 hover:bg-green-50 rounded" title="Editar">
+                        <button onClick={() => loadAtendimentoForEdit(atendimento.id)} className="p-2 text-green-600 hover:bg-green-50 dark:bg-green-900/30 rounded" title="Editar">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => handleDelete(atendimento.id)} className="p-2 text-red-600 hover:bg-red-50 rounded" title="Excluir">
+                        <button onClick={() => handleDelete(atendimento.id)} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded" title="Excluir">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -445,7 +445,7 @@ export default function Atendimentos() {
                 <Clock className="text-indigo-600" />
                 {editingAtendimento ? 'Editar Atendimento' : 'Novo Atendimento'}
               </h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+              <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
@@ -539,7 +539,7 @@ export default function Atendimentos() {
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-3">
                   <div className="col-span-2">
-                    <label className="block text-sm text-gray-500 dark:text-gray-400 mb-2">Selecionar Produto</label>
+                    <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Selecionar Produto</label>
                     <div className="max-h-32 overflow-y-auto border rounded-lg p-2">
                       {produtosData?.data?.data?.filter(p => p.ativo && p.estoque > 0).map((produto) => (
                         <button
@@ -592,7 +592,7 @@ export default function Atendimentos() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center py-4 text-gray-400 border rounded-lg">Nenhum produto adicionado</p>
+                  <p className="text-center py-4 text-gray-400 dark:text-gray-500 border rounded-lg">Nenhum produto adicionado</p>
                 )}
               </div>
 
@@ -604,7 +604,7 @@ export default function Atendimentos() {
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-3">
                   <div className="col-span-2">
-                    <label className="block text-sm text-gray-500 dark:text-gray-400 mb-2">Selecionar Serviço</label>
+                    <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Selecionar Serviço</label>
                     <div className="max-h-32 overflow-y-auto border rounded-lg p-2">
                       {servicosData?.data?.data?.filter(s => s.ativo).map((servico) => (
                         <button
@@ -660,7 +660,7 @@ export default function Atendimentos() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center py-4 text-gray-400 border rounded-lg">Nenhum serviço adicionado</p>
+                  <p className="text-center py-4 text-gray-400 dark:text-gray-500 border rounded-lg">Nenhum serviço adicionado</p>
                 )}
               </div>
 
@@ -743,33 +743,33 @@ export default function Atendimentos() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">Detalhes do Atendimento</h2>
-              <button onClick={() => setViewAtendimento(null)} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+              <button onClick={() => setViewAtendimento(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Profissional</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Profissional</p>
                   <p className="font-medium flex items-center gap-2">
-                    <User size={16} className="text-gray-400" />
+                    <User size={16} className="text-gray-400 dark:text-gray-500" />
                     {viewAtendimento.profissionalNome || 'Não definido'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Cliente</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Cliente</p>
                   <p className="font-medium">{viewAtendimento.clienteNome || 'Sem cliente'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Data</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Data</p>
                   <p className="font-medium">{formatDate(viewAtendimento.data)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Horário</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Horário</p>
                   <p className="font-medium">{formatTime(viewAtendimento.horaInicio)} - {formatTime(viewAtendimento.horaFim)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Desconto</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Desconto</p>
                   <p className="font-medium">{formatCurrency(viewAtendimento.desconto)}</p>
                 </div>
               </div>
@@ -782,7 +782,7 @@ export default function Atendimentos() {
                       <div key={i} className="p-3 flex justify-between">
                         <div>
                           <p className="font-medium">{p.produtoNome}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{p.quantidadeUsada} {p.unidade}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{p.quantidadeUsada} {p.unidade}</p>
                         </div>
                         <p className="font-medium">{formatCurrency(p.subtotal)}</p>
                       </div>
@@ -802,7 +802,7 @@ export default function Atendimentos() {
                       <div key={i} className="p-3 flex justify-between">
                         <div>
                           <p className="font-medium">{s.servicoNome}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{s.horaInicio} - {s.horaFim} ({s.duracao}min)</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{s.horaInicio} - {s.horaFim} ({s.duracao}min)</p>
                         </div>
                         <p className="font-medium">{formatCurrency(s.preco)}</p>
                       </div>
@@ -831,7 +831,7 @@ export default function Atendimentos() {
 
               {viewAtendimento.observacoes && (
                 <div className="mt-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Observações</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Observações</p>
                   <p className="text-gray-700 dark:text-gray-200">{viewAtendimento.observacoes}</p>
                 </div>
               )}

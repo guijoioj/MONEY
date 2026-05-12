@@ -113,7 +113,7 @@ export default function Agendamentos() {
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex items-center gap-4">
-          <CalendarIcon className="text-gray-400" size={20} />
+          <CalendarIcon className="text-gray-400 dark:text-gray-500" size={20} />
           <input
             type="date"
             value={filtroData}
@@ -124,11 +124,11 @@ export default function Agendamentos() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</div>
       ) : (
         <div className="space-y-4">
           {agendamentos?.data?.data?.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center text-gray-500 dark:text-gray-400">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">
               Nenhum agendamento para esta data
             </div>
           ) : (
@@ -137,12 +137,12 @@ export default function Agendamentos() {
                 <div className="flex flex-col sm:flex-row justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-indigo-50 rounded-lg">
+                      <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
                         <User className="text-indigo-600" size={20} />
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">{agendamento.clienteNome}</h3>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">{agendamento.clienteTelefone}</p>
+                        <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm">{agendamento.clienteTelefone}</p>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm">
@@ -150,22 +150,22 @@ export default function Agendamentos() {
                         <Clock size={16} />
                         {formatTime(agendamento.dataHora)} - {agendamento.servicoNome}
                       </div>
-                      <span className="px-2 py-1 rounded text-xs font-medium bg-indigo-50 text-indigo-700">
+                      <span className="px-2 py-1 rounded text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700">
                         R$ {agendamento.servicoPreco?.toFixed(2)}
                       </span>
                     </div>
                     {agendamento.observacoes && (
-                      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{agendamento.observacoes}</p>
+                      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{agendamento.observacoes}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(agendamento.status)}`}>
                       {agendamento.status}
                     </span>
-                    <button onClick={() => openModal(agendamento)} className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+                    <button onClick={() => openModal(agendamento)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
                       <Edit2 size={18} />
                     </button>
-                    <button onClick={() => handleDelete(agendamento.id)} className="p-2 text-red-600 hover:bg-red-50 rounded">
+                    <button onClick={() => handleDelete(agendamento.id)} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded">
                       <Trash2 size={18} />
                     </button>
                   </div>
@@ -181,7 +181,7 @@ export default function Agendamentos() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">{editingAgendamento ? 'Editar Agendamento' : 'Novo Agendamento'}</h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+              <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>

@@ -31,15 +31,15 @@ export default function Login() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-50 rounded-lg mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg mb-4">
             <Scissors className="text-indigo-600" size={28} />
           </div>
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Salão de Beleza</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Sistema de Administração</p>
+          <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1 text-sm">Sistema de Administração</p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2.5 rounded-md text-sm">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-600 px-4 py-2.5 rounded-md text-sm">
             {error}
           </div>
         )}
@@ -71,7 +71,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -93,7 +93,7 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-gray-500 dark:text-gray-400 text-sm">
+        <p className="mt-6 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm">
           Não tem uma conta?{' '}
           <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-medium">
             Cadastre-se

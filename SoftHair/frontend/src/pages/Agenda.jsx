@@ -14,9 +14,9 @@ const PROFISSIONAL_COLORS = [
   { bg: 'bg-rose-100', border: 'border-rose-400', text: 'text-rose-800', accent: '#f43f5e' },
   { bg: 'bg-fuchsia-100', border: 'border-fuchsia-400', text: 'text-fuchsia-800', accent: '#d946ef' },
   { bg: 'bg-violet-100', border: 'border-violet-400', text: 'text-violet-800', accent: '#8b5cf6' },
-  { bg: 'bg-pink-50', border: 'border-pink-300', text: 'text-pink-700', accent: '#f472b6' },
+  { bg: 'bg-pink-50 dark:bg-pink-900/30', border: 'border-pink-300', text: 'text-pink-700', accent: '#f472b6' },
   { bg: 'bg-rose-50', border: 'border-rose-300', text: 'text-rose-700', accent: '#fb7185' },
-  { bg: 'bg-purple-50', border: 'border-purple-300', text: 'text-purple-700', accent: '#c084fc' },
+  { bg: 'bg-purple-50 dark:bg-purple-900/30', border: 'border-purple-300', text: 'text-purple-700', accent: '#c084fc' },
 ];
 
 const HORARIOS = [];
@@ -128,7 +128,7 @@ function SearchSelect({ value, onChange, options, placeholder, disabled, renderL
           {filtered.map(o => (
             <div
               key={o.id}
-              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 text-sm ${o.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
+              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 dark:bg-indigo-900/30 text-sm ${o.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
               onMouseDown={(e) => {
                 e.preventDefault();
                 onChange(o.id);
@@ -143,7 +143,7 @@ function SearchSelect({ value, onChange, options, placeholder, disabled, renderL
         </div>
       )}
       {open && search.length > 0 && filtered.length === 0 && (
-        <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg mt-1 px-3 py-2 text-sm text-gray-400">
+        <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg mt-1 px-3 py-2 text-sm text-gray-400 dark:text-gray-500">
           Nenhum resultado
         </div>
       )}
@@ -205,17 +205,17 @@ function ClienteSearchSelect({ value, onChange, selectedCliente, disabled }) {
       />
       {open && (
         <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
-          {loading && <div className="px-3 py-2 text-sm text-gray-400">Buscando...</div>}
+          {loading && <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Buscando...</div>}
           {!loading && results.length === 0 && search.length > 0 && (
-            <div className="px-3 py-2 text-sm text-gray-400">Nenhum resultado</div>
+            <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Nenhum resultado</div>
           )}
           {!loading && results.length === 0 && search.length === 0 && (
-            <div className="px-3 py-2 text-sm text-gray-400">Digite para buscar</div>
+            <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Digite para buscar</div>
           )}
           {results.map(c => (
             <div
               key={c.id}
-              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 text-sm ${c.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
+              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 dark:bg-indigo-900/30 text-sm ${c.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
               onMouseDown={(e) => {
                 e.preventDefault();
                 onChange(c.id, c);
@@ -289,12 +289,12 @@ function ServicoSearchSelect({ value, onChange, selectedServico, disabled }) {
       />
       {open && (
         <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
-          {loading && <div className="px-3 py-2 text-sm text-gray-400">Buscando...</div>}
-          {!loading && results.length === 0 && <div className="px-3 py-2 text-sm text-gray-400">Nenhum resultado</div>}
+          {loading && <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Buscando...</div>}
+          {!loading && results.length === 0 && <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Nenhum resultado</div>}
           {results.map(s => (
             <div
               key={s.id}
-              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 text-sm ${s.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
+              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 dark:bg-indigo-900/30 text-sm ${s.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
               onMouseDown={(e) => {
                 e.preventDefault();
                 onChange(s.id, s);
@@ -868,7 +868,7 @@ export default function Agenda() {
     <div className="space-y-4">
       {notificacao && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg flex items-center gap-3 max-w-md animate-pulse ${
-          notificacao.tipo === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'
+          notificacao.tipo === 'success' ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 text-green-800' : 'bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-800'
         }`}>
           {notificacao.tipo === 'success' ? (
             <Check size={20} className="text-green-600" />
@@ -876,14 +876,14 @@ export default function Agenda() {
             <AlertCircle size={20} className="text-red-600" />
           )}
           <span className="flex-1">{notificacao.mensagem}</span>
-          <button onClick={() => setNotificacao(null)} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+          <button onClick={() => setNotificacao(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
             <X size={18} />
           </button>
         </div>
       )}
 
       {pendentesData?.data?.data?.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 rounded-xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Clock className="text-yellow-600" size={20} />
             <span className="text-yellow-800 font-medium">
@@ -902,7 +902,7 @@ export default function Agenda() {
       )}
 
       {agendamentosConvertidos.length > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+        <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 rounded-xl p-4">
           <p className="text-green-800 font-medium flex items-center gap-2">
             <Check size={18} />
             {agendamentosConvertidos.length} atendimento(s) criado(s) automaticamente dos agendamentos
@@ -931,20 +931,20 @@ export default function Agenda() {
         <div className="w-72 flex-shrink-0">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
             <div className="flex items-center justify-between mb-4">
-              <button onClick={prevMonth} className="p-2 hover:bg-pink-50 rounded-lg transition-colors">
+              <button onClick={prevMonth} className="p-2 hover:bg-pink-50 dark:bg-pink-900/30 rounded-lg transition-colors">
                 <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
               </button>
               <h3 className="font-semibold text-gray-800 dark:text-gray-100">
                 {MESES[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h3>
-              <button onClick={nextMonth} className="p-2 hover:bg-pink-50 rounded-lg transition-colors">
+              <button onClick={nextMonth} className="p-2 hover:bg-pink-50 dark:bg-pink-900/30 rounded-lg transition-colors">
                 <ChevronRight size={20} className="text-gray-600 dark:text-gray-300" />
               </button>
             </div>
 
             <div className="grid grid-cols-7 gap-1 text-center mb-2">
               {DIAS_SEMANA.map(d => (
-                <div key={d} className="text-xs font-medium text-gray-500 dark:text-gray-400 py-1">{d}</div>
+                <div key={d} className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 py-1">{d}</div>
               ))}
             </div>
 
@@ -957,7 +957,7 @@ export default function Agenda() {
                     onClick={() => handleDateSelect(date)}
                     className={`
                       relative p-2 text-sm rounded-lg transition-all
-                      ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 dark:text-gray-200 hover:bg-pink-50'}
+                      ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 dark:text-gray-200 hover:bg-pink-50 dark:bg-pink-900/30'}
                       ${isToday(date) ? 'bg-pink-100 text-pink-700 font-semibold' : ''}
                       ${isSelected(date) ? 'bg-indigo-600 text-white hover:bg-indigo-700' : ''}
                     `}
@@ -974,12 +974,12 @@ export default function Agenda() {
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mt-4">
             <div className="flex items-center gap-2 mb-3">
-              <Filter size={16} className="text-gray-500 dark:text-gray-400" />
+              <Filter size={16} className="text-gray-500 dark:text-gray-400 dark:text-gray-500" />
               <h3 className="font-semibold text-gray-800 dark:text-gray-100">Filtros</h3>
             </div>
 
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2 block">Tipo</label>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-2 block">Tipo</label>
               <div className="space-y-1">
                 {[
                   { value: 'todos', label: 'Todos' },
@@ -1002,7 +1002,7 @@ export default function Agenda() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2 block">Profissionais</label>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-2 block">Profissionais</label>
               <div className="space-y-1">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -1038,7 +1038,7 @@ export default function Agenda() {
             </div>
 
             <div className="mt-4">
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2 block">Status</label>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-2 block">Status</label>
               <div className="space-y-1">
                 {[
                   { value: 'todos', label: 'Todos', color: 'bg-gray-400' },
@@ -1166,7 +1166,7 @@ export default function Agenda() {
                       {sortedProfissionais.map((profissional) => (
                         <div
                           key={profissional.id}
-                          className="min-w-[96px] w-[96px] relative cursor-pointer agenda-cell"
+                          className="min-w-[96px] w-[96px] relative cursor-pointer agenda-cell hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
                           style={{
                             borderRight: '1px solid rgba(0,0,0,0.04)',
                             background: isHour && Math.floor(horaIdx / 4) % 2 === 0
@@ -1313,7 +1313,7 @@ export default function Agenda() {
                       return (
                         <div
                           key={`aux-agend-${agend.id}`}
-                          className="absolute bg-yellow-50 border-yellow-400 border-l-4 p-1.5 rounded-r-lg text-xs cursor-pointer transition-all overflow-hidden z-20 hover:brightness-95"
+                          className="absolute bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400 border-l-4 p-1.5 rounded-r-lg text-xs cursor-pointer transition-all overflow-hidden z-20 hover:brightness-95"
                           style={{ top: `${top}px`, left: `${left}px`, width: `${COL_WIDTH}px`, height: `${height}px` }}
                           onClick={(e) => { e.stopPropagation(); openModal(agend); }}
                         >
@@ -1465,7 +1465,7 @@ export default function Agenda() {
               <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">
                 {editingAgendamento?.isAtendimento ? 'Visualizar Atendimento' : (editingAgendamento ? 'Editar Agendamento' : 'Novo Agendamento')}
               </h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+              <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
@@ -1568,7 +1568,7 @@ export default function Agenda() {
 
               {aviso.mensagem && (
                 <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
-                  aviso.tipo === 'erro' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                  aviso.tipo === 'erro' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 border border-red-200' : 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 border border-yellow-200'
                 }`}>
                   <AlertCircle size={18} />
                   {aviso.mensagem}
@@ -1580,7 +1580,7 @@ export default function Agenda() {
                   <button
                     type="button"
                     onClick={() => handleDelete(editingAgendamento.id)}
-                    className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"
+                    className="px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 rounded-lg hover:bg-red-100"
                   >
                     Excluir
                   </button>
@@ -1595,7 +1595,7 @@ export default function Agenda() {
                       }
                     }}
                     disabled={converterUmMutation.isPending}
-                    className="px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 disabled:opacity-50"
+                    className="px-4 py-2 bg-green-50 dark:bg-green-900/30 text-green-600 rounded-lg hover:bg-green-100 disabled:opacity-50"
                   >
                     {converterUmMutation.isPending ? 'Convertendo...' : 'Converter p/ Atendimento'}
                   </button>

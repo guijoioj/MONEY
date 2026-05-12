@@ -40,7 +40,7 @@ function AbaDRE({ mes, ano, setMes, setAno }) {
 
   const chart6 = projecaoData?.historico?.slice(-6) || [];
 
-  if (isLoading) return <div className="text-center py-12 text-gray-400">Carregando...</div>;
+  if (isLoading) return <div className="text-center py-12 text-gray-400 dark:text-gray-500">Carregando...</div>;
 
   return (
     <div className="space-y-6">
@@ -80,7 +80,7 @@ function AbaDRE({ mes, ano, setMes, setAno }) {
           positive={(data?.lucroLiquido || 0) >= 0} />
 
         <div className="flex justify-between items-center pt-2 pl-6">
-          <span className="text-sm text-gray-500 dark:text-gray-400">Margem</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Margem</span>
           <span className={`text-sm font-bold ${parseFloat(data?.margem || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {data?.margem}%
           </span>
@@ -114,7 +114,7 @@ function AbaProjecao() {
     queryFn: () => financeiroAPI.getProjecao().then(r => r.data.data),
   });
 
-  if (isLoading) return <div className="text-center py-12 text-gray-400">Carregando...</div>;
+  if (isLoading) return <div className="text-center py-12 text-gray-400 dark:text-gray-500">Carregando...</div>;
 
   const historico = data?.historico || [];
   const chartData = [
@@ -131,7 +131,7 @@ function AbaProjecao() {
         <div className="bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-blue-100 p-2 rounded-lg"><DollarSign className="w-5 h-5 text-blue-600" /></div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Média 3 meses</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 font-medium">Média 3 meses</p>
           </div>
           <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{fmt(data?.mediaUltimos3)}</p>
         </div>
@@ -143,7 +143,7 @@ function AbaProjecao() {
                 ? <TrendingUp className="w-5 h-5 text-green-600" />
                 : <TrendingDown className="w-5 h-5 text-red-600" />}
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Tendência</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 font-medium">Tendência</p>
           </div>
           <p className={`text-2xl font-bold ${tendenciaPositiva ? 'text-green-600' : 'text-red-600'}`}>
             {tendenciaPositiva ? '+' : ''}{data?.tendencia}%
@@ -153,10 +153,10 @@ function AbaProjecao() {
         <div className="bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-purple-100 p-2 rounded-lg"><BarChart2 className="w-5 h-5 text-purple-600" /></div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Projeção próximo mês</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 font-medium">Projeção próximo mês</p>
           </div>
           <p className="text-2xl font-bold text-purple-700">{fmt(data?.projecao)}</p>
-          <p className="text-xs text-gray-400 mt-1">{data?.projecaoLabel}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{data?.projecaoLabel}</p>
         </div>
       </div>
 
@@ -205,7 +205,7 @@ export default function Financeiro() {
             className={`px-5 py-2 rounded-md text-sm font-medium transition-colors ${
               aba === a.id
                 ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
+                : 'text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:text-gray-200'
             }`}>
             {a.label}
             {a.id === 'despesas' && <Link className="inline w-3 h-3 ml-1 opacity-50" />}

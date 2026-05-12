@@ -95,7 +95,7 @@ export default function Produtos() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} />
             <input
               type="text"
               placeholder="Buscar produtos..."
@@ -116,7 +116,7 @@ export default function Produtos() {
           </select>
           <button
             onClick={() => setEstoqueBaixo(!estoqueBaixo)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${estoqueBaixo ? 'bg-yellow-50 border-yellow-400 text-yellow-700' : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${estoqueBaixo ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400 text-yellow-700' : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900'}`}
           >
             <AlertTriangle size={18} />
             Estoque Baixo
@@ -125,25 +125,25 @@ export default function Produtos() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</div>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produto</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Marca</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Categoria</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Custo</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Venda</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Estoque</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Produto</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Marca</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Categoria</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Custo</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Venda</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Estoque</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {data?.data?.data?.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="7" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">
                     Nenhum produto encontrado
                   </td>
                 </tr>
@@ -152,12 +152,12 @@ export default function Produtos() {
                   <tr key={produto.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 ${!produto.ativo ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-50 rounded-lg">
+                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
                           <Package className="text-indigo-600" size={20} />
                         </div>
                         <div>
                           <div className="font-medium text-gray-800 dark:text-gray-100">{produto.nome}</div>
-                          {produto.descricao && <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">{produto.descricao}</div>}
+                          {produto.descricao && <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 truncate max-w-xs">{produto.descricao}</div>}
                         </div>
                       </div>
                     </td>
@@ -173,10 +173,10 @@ export default function Produtos() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button onClick={() => openModal(produto)} className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+                        <button onClick={() => openModal(produto)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => handleDeleteClick(produto)} className="p-2 text-red-600 hover:bg-red-50 rounded">
+                        <button onClick={() => handleDeleteClick(produto)} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -194,7 +194,7 @@ export default function Produtos() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">{editingProduto ? 'Editar Produto' : 'Novo Produto'}</h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+              <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>

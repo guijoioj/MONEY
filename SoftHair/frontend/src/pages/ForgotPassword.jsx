@@ -9,7 +9,7 @@ export default function ForgotPassword() {
           <Mail className="text-indigo-600" size={32} />
         </div>
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Recuperação de Senha</h1>
-        <p className="text-gray-500 dark:text-gray-400 mb-6">
+        <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-6">
           Esta funcionalidade não está disponível. Entre em contato com o administrador do sistema.
         </p>
         <Link

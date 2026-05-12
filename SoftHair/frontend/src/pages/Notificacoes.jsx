@@ -36,7 +36,7 @@ export default function Notificacoes() {
       case 'agendamento': return <Calendar size={18} className="text-blue-500" />;
       case 'produto': return <Package size={18} className="text-purple-500" />;
       case 'alerta': return <AlertCircle size={18} className="text-red-500" />;
-      default: return <Bell size={18} className="text-gray-500 dark:text-gray-400" />;
+      default: return <Bell size={18} className="text-gray-500 dark:text-gray-400 dark:text-gray-500" />;
     }
   };
 
@@ -63,12 +63,12 @@ export default function Notificacoes() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">Carregando notificações...</div>
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando notificações...</div>
       ) : notificacoes.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center">
           <BellOff size={48} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">Nenhuma notificação</h3>
-          <p className="text-gray-400">
+          <p className="text-gray-400 dark:text-gray-500">
             {filtro === 'nao-lidas' ? 'Todas as notificações foram visualizadas' : 'Você está em dia com tudo!'}
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function Notificacoes() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="font-semibold text-gray-800 dark:text-gray-100">{notif.titulo}</h3>
-                    <span className="text-xs text-gray-400 flex-shrink-0">{formatDate(notif.createdAt)}</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">{formatDate(notif.createdAt)}</span>
                   </div>
                   <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">{notif.mensagem}</p>
                 </div>

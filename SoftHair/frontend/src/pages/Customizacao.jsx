@@ -215,21 +215,21 @@ export default function Customizacao() {
           <div className="flex gap-4 border-b mb-6">
             <button
               onClick={() => setActiveTab('colors')}
-              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'colors' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 dark:text-gray-400'}`}
+              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'colors' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
             >
               <Palette size={18} />
               Cores
             </button>
             <button
               onClick={() => setActiveTab('css')}
-              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'css' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 dark:text-gray-400'}`}
+              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'css' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
             >
               <Code size={18} />
               CSS Custom
             </button>
             <button
               onClick={() => setActiveTab('logo')}
-              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'logo' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 dark:text-gray-400'}`}
+              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'logo' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
             >
               <Upload size={18} />
               Logo
@@ -291,7 +291,7 @@ export default function Customizacao() {
           {activeTab === 'css' && (
             <div>
               <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3">CSS Personalizado</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
                 Adicione CSS customizado para personalizar ainda mais a aparência do sistema.
               </p>
               <textarea
@@ -300,7 +300,7 @@ export default function Customizacao() {
                 className="w-full h-96 p-4 font-mono text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder={`/* Exemplo de CSS customizado */\n\n.btn-special {\n  background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));\n  border-radius: 20px;\n}`}
               />
-              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 rounded-lg">
                 <h4 className="font-medium text-yellow-800 mb-2">Dicas de CSS</h4>
                 <ul className="text-sm text-yellow-700 space-y-1">
                   <li>• Use variáveis CSS: <code className="bg-yellow-100 px-1 rounded">var(--color-primary)</code></li>
@@ -322,12 +322,12 @@ export default function Customizacao() {
                     alt="Logo atual" 
                     className="max-h-20 mx-auto"
                   />
-                  <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">Logo atual</p>
+                  <p className="text-center text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-2">Logo atual</p>
                 </div>
               )}
 
               <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
-                <Upload className="mx-auto text-gray-400 mb-4" size={48} />
+                <Upload className="mx-auto text-gray-400 dark:text-gray-500 mb-4" size={48} />
                 <p className="text-gray-600 dark:text-gray-300 mb-4">Arraste uma imagem ou clique para selecionar</p>
                 <input
                   type="file"
@@ -342,13 +342,13 @@ export default function Customizacao() {
                 >
                   {uploading ? 'Enviando...' : 'Selecionar Imagem'}
                 </label>
-                <p className="text-sm text-gray-400 mt-4">PNG, JPG ou SVG. Máximo 2MB.</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-4">PNG, JPG ou SVG. Máximo 2MB.</p>
               </div>
 
               {theme.logoUrl && (
                 <button
                   onClick={() => setTheme({ ...theme, logoUrl: '' })}
-                  className="mt-4 w-full px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50"
+                  className="mt-4 w-full px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 dark:bg-red-900/30"
                 >
                   Remover Logo
                 </button>
@@ -401,11 +401,11 @@ export default function Customizacao() {
             </div>
 
             <div className="pt-4 border-t">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Logo:</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Logo:</p>
               {theme.logoUrl ? (
                 <img src={theme.logoUrl} alt="Logo" className="h-8 mx-auto" />
               ) : (
-                <p className="text-sm text-gray-400 text-center">Nenhum logo definido</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 text-center">Nenhum logo definido</p>
               )}
             </div>
           </div>
@@ -427,7 +427,7 @@ export default function Customizacao() {
           </button>
 
           <div className="mt-4">
-            <label className="block text-sm text-gray-500 dark:text-gray-400 mb-2">Importar Tema:</label>
+            <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Importar Tema:</label>
             <input
               type="file"
               accept=".json"

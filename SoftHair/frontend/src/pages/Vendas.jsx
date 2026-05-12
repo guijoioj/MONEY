@@ -176,18 +176,18 @@ export default function Vendas() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4 items-end">
           <div>
-            <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Data específica</label>
+            <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-1">Data específica</label>
             <input type="date" value={filtroData} onChange={(e) => { setFiltroData(e.target.value); setFiltroDataInicio(''); setFiltroDataFim(''); }}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500" />
           </div>
-          <span className="text-gray-400">ou</span>
+          <span className="text-gray-400 dark:text-gray-500">ou</span>
           <div>
-            <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">De</label>
+            <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-1">De</label>
             <input type="date" value={filtroDataInicio} onChange={(e) => { setFiltroDataInicio(e.target.value); setFiltroData(''); }}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500" />
           </div>
           <div>
-            <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Até</label>
+            <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-1">Até</label>
             <input type="date" value={filtroDataFim} onChange={(e) => { setFiltroDataFim(e.target.value); setFiltroData(''); }}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500" />
           </div>
@@ -196,24 +196,24 @@ export default function Vendas() {
 
       {/* Tabela */}
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</div>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cliente</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Vendedor</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Pagamento</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Cliente</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Vendedor</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Pagamento</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Total</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {vendas?.data?.data?.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Nenhuma venda encontrada</td>
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhuma venda encontrada</td>
                 </tr>
               ) : (
                 vendas?.data?.data?.map((venda) => (
@@ -224,13 +224,13 @@ export default function Vendas() {
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{FORMA_PAGAMENTO_LABEL[venda.formaPagamento] || '-'}</td>
                     <td className="px-6 py-4 font-medium text-indigo-600">{formatCurrency(venda.total)}</td>
                     <td className="px-6 py-4 flex items-center gap-1">
-                      <button onClick={() => viewVendaDetails(venda)} className="p-2 text-blue-600 hover:bg-blue-50 rounded" title="Ver detalhes">
+                      <button onClick={() => viewVendaDetails(venda)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded" title="Ver detalhes">
                         <Eye size={18} />
                       </button>
-                      <button onClick={() => openEditModal(venda)} className="p-2 text-yellow-600 hover:bg-yellow-50 rounded" title="Editar">
+                      <button onClick={() => openEditModal(venda)} className="p-2 text-yellow-600 hover:bg-yellow-50 dark:bg-yellow-900/30 rounded" title="Editar">
                         <Pencil size={18} />
                       </button>
-                      <button onClick={() => setDeleteConfirm(venda)} className="p-2 text-red-500 hover:bg-red-50 rounded" title="Excluir">
+                      <button onClick={() => setDeleteConfirm(venda)} className="p-2 text-red-500 hover:bg-red-50 dark:bg-red-900/30 rounded" title="Excluir">
                         <Trash2 size={18} />
                       </button>
                     </td>
@@ -251,7 +251,7 @@ export default function Vendas() {
                 <ShoppingCart className="text-indigo-600" />
                 {editingId ? 'Editar Venda' : 'Nova Venda'}
               </h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300"><X size={24} /></button>
+              <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300"><X size={24} /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6">
               <div className="grid grid-cols-2 gap-4 mb-6">
@@ -287,7 +287,7 @@ export default function Vendas() {
                 <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3">Adicionar Itens</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-gray-500 dark:text-gray-400 mb-2">Produtos</label>
+                    <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Produtos</label>
                     <div className="space-y-2 max-h-40 overflow-y-auto">
                       {produtosData?.data?.data?.filter(p => p.estoque > 0).map((produto) => (
                         <button key={produto.id} type="button" onClick={() => addItem('produto', produto)}
@@ -298,7 +298,7 @@ export default function Vendas() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-500 dark:text-gray-400 mb-2">Serviços</label>
+                    <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Serviços</label>
                     <div className="space-y-2 max-h-40 overflow-y-auto">
                       {servicosData?.data?.data?.map((servico) => (
                         <button key={servico.id} type="button" onClick={() => addItem('servico', servico)}
@@ -314,14 +314,14 @@ export default function Vendas() {
               <div className="mb-6">
                 <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3">Itens da Venda</h3>
                 {itens.length === 0 ? (
-                  <p className="text-center py-4 text-gray-400">Nenhum item adicionado</p>
+                  <p className="text-center py-4 text-gray-400 dark:text-gray-500">Nenhum item adicionado</p>
                 ) : (
                   <div className="border rounded-lg divide-y">
                     {itens.map((item, index) => (
                       <div key={index} className="flex items-center justify-between p-3">
                         <div className="flex-1">
                           <div className="font-medium text-gray-800 dark:text-gray-100">{item.itemNome}</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{formatCurrency(item.precoUnitario)} cada</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{formatCurrency(item.precoUnitario)} cada</div>
                         </div>
                         <div className="flex items-center gap-3">
                           <input type="number" min="1" value={item.quantidade}
@@ -367,15 +367,15 @@ export default function Vendas() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">Detalhes da Venda</h2>
-              <button onClick={() => setViewVenda(null)} className="text-gray-400 hover:text-gray-600 dark:text-gray-300"><X size={24} /></button>
+              <button onClick={() => setViewVenda(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300"><X size={24} /></button>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div><p className="text-sm text-gray-500 dark:text-gray-400">Data</p><p className="font-medium">{formatDate(viewVenda.data)}</p></div>
-                <div><p className="text-sm text-gray-500 dark:text-gray-400">Cliente</p><p className="font-medium">{viewVenda.clienteNome || 'Consumidor Final'}</p></div>
-                <div><p className="text-sm text-gray-500 dark:text-gray-400">Vendedor</p><p className="font-medium">{viewVenda.vendedorNome || '—'}</p></div>
-                <div><p className="text-sm text-gray-500 dark:text-gray-400">Forma de Pagamento</p><p className="font-medium">{FORMA_PAGAMENTO_LABEL[viewVenda.formaPagamento] || '—'}</p></div>
-                <div><p className="text-sm text-gray-500 dark:text-gray-400">Total</p><p className="font-bold text-xl text-indigo-600">{formatCurrency(viewVenda.total)}</p></div>
+                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Data</p><p className="font-medium">{formatDate(viewVenda.data)}</p></div>
+                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Cliente</p><p className="font-medium">{viewVenda.clienteNome || 'Consumidor Final'}</p></div>
+                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Vendedor</p><p className="font-medium">{viewVenda.vendedorNome || '—'}</p></div>
+                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Forma de Pagamento</p><p className="font-medium">{FORMA_PAGAMENTO_LABEL[viewVenda.formaPagamento] || '—'}</p></div>
+                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total</p><p className="font-bold text-xl text-indigo-600">{formatCurrency(viewVenda.total)}</p></div>
               </div>
               <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3">Itens</h3>
               <div className="border rounded-lg divide-y">
@@ -383,14 +383,14 @@ export default function Vendas() {
                   <div key={index} className="flex items-center justify-between p-3">
                     <div>
                       <p className="font-medium">{item.itemNome}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{item.quantidade}x {formatCurrency(item.precoUnitario)}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{item.quantidade}x {formatCurrency(item.precoUnitario)}</p>
                     </div>
                     <p className="font-medium">{formatCurrency(item.subtotal)}</p>
                   </div>
                 ))}
               </div>
               {viewVenda.observacoes && (
-                <div className="mt-4"><p className="text-sm text-gray-500 dark:text-gray-400">Observações</p><p className="text-gray-700 dark:text-gray-200">{viewVenda.observacoes}</p></div>
+                <div className="mt-4"><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Observações</p><p className="text-gray-700 dark:text-gray-200">{viewVenda.observacoes}</p></div>
               )}
             </div>
           </div>
@@ -406,7 +406,7 @@ export default function Vendas() {
               Venda de <span className="font-medium">{formatDate(deleteConfirm.data)}</span> —&nbsp;
               <span className="font-medium text-indigo-600">{formatCurrency(deleteConfirm.total)}</span>
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-6">
               O estoque dos produtos será restaurado automaticamente. Esta ação não pode ser desfeita.
             </p>
             <div className="flex gap-3">

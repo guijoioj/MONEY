@@ -237,7 +237,7 @@ export default function Dashboard() {
           <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{stat.label}</p>
                 <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stat.value}</p>
               </div>
               <div className={`${stat.color} p-3 rounded-lg`}>
@@ -249,7 +249,7 @@ export default function Dashboard() {
       </div>
 
       {stats.produtosEstoqueBaixo > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 rounded-lg p-4 flex items-center gap-3">
           <AlertTriangle className="text-red-500" size={24} />
           <div>
             <p className="font-semibold text-red-700">Atenção: {stats.produtosEstoqueBaixo} produto(s) com estoque baixo!</p>
@@ -416,7 +416,7 @@ export default function Dashboard() {
               )}
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-10">Nenhum produto cadastrado</p>
+            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 text-center py-10">Nenhum produto cadastrado</p>
           )}
         </div>
 
@@ -646,7 +646,7 @@ export default function Dashboard() {
             </table>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-gray-500 dark:text-gray-400">
+          <div className="flex flex-col items-center justify-center py-10 text-gray-500 dark:text-gray-400 dark:text-gray-500">
             <Package size={48} className="mb-3 opacity-50" />
             <p>Todos os produtos estão com estoque adequado!</p>
           </div>

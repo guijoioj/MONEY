@@ -20,7 +20,7 @@ export default function Administrativo() {
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Administrativo</h1>
-        <p className="text-gray-500 dark:text-gray-400">Gerenciamento financeiro e relatórios</p>
+        <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Gerenciamento financeiro e relatórios</p>
       </div>
 
       <div className="flex gap-6">
@@ -72,7 +72,7 @@ function MenuItem({ active, onClick, icon, title }) {
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
         active 
-          ? 'bg-indigo-50 text-indigo-700 font-medium' 
+          ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 font-medium' 
           : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900'
       }`}
     >
@@ -159,21 +159,21 @@ function CheckOutSection() {
             </div>
 
             <div className="grid grid-cols-4 gap-4 mb-6">
-              <div className="bg-green-50 rounded-lg p-4">
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
                 <p className="text-sm text-green-600 font-medium">Total do Dia</p>
                 <p className="text-2xl font-bold text-green-700">{formatCurrency(totalFechamentos)}</p>
               </div>
-              <div className="bg-blue-50 rounded-lg p-4">
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
                 <p className="text-sm text-blue-600 font-medium">Fechamentos</p>
                 <p className="text-2xl font-bold text-blue-700">{fechamentos.length}</p>
               </div>
-              <div className="bg-purple-50 rounded-lg p-4">
+              <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4">
                 <p className="text-sm text-purple-600 font-medium">Em Atendimentos</p>
                 <p className="text-2xl font-bold text-purple-700">
                   {formatCurrency(fechamentos.reduce((sum, f) => sum + (f.totalAtendimentos || 0), 0))}
                 </p>
               </div>
-              <div className="bg-orange-50 rounded-lg p-4">
+              <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
                 <p className="text-sm text-orange-600 font-medium">Em Vendas</p>
                 <p className="text-2xl font-bold text-orange-700">
                   {formatCurrency(fechamentos.reduce((sum, f) => sum + (f.totalVendas || 0), 0))}
@@ -185,23 +185,23 @@ function CheckOutSection() {
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cliente</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Profissional</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Atendimentos</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Vendas</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Cliente</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Atendimentos</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Vendas</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Total</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {isLoading ? (
                     <tr>
-                      <td colSpan="7" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Carregando...</td>
+                      <td colSpan="7" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</td>
                     </tr>
                   ) : fechamentos.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum fechamento encontrado</td>
+                      <td colSpan="7" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum fechamento encontrado</td>
                     </tr>
                   ) : (
                     fechamentos.map((f) => (
@@ -215,7 +215,7 @@ function CheckOutSection() {
                         <td className="px-4 py-3 text-center">
                           <button 
                             onClick={() => handleEstornar(f)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                            className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded-lg"
                             title="Estornar"
                           >
                             <X size={18} />
@@ -243,7 +243,7 @@ function CheckOutSection() {
               />
             </div>
 
-            <div className="bg-red-50 rounded-lg p-4 mb-6">
+            <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 mb-6">
               <p className="text-sm text-red-600 font-medium">Total Estornado</p>
               <p className="text-2xl font-bold text-red-700">
                 {formatCurrency(estornadosSession.reduce((sum, f) => sum + (f.totalGeral || 0), 0))}
@@ -251,7 +251,7 @@ function CheckOutSection() {
             </div>
 
             {estornadosSession.length === 0 ? (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 <X size={48} className="mx-auto mb-4 opacity-50" />
                 <p>Nenhum fechamento estornado</p>
               </div>
@@ -260,15 +260,15 @@ function CheckOutSection() {
                 <table className="w-full">
                   <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cliente</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Profissional</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Cliente</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Total</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {estornadosSession.map((f) => (
-                      <tr key={f.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 bg-red-50">
+                      <tr key={f.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 bg-red-50 dark:bg-red-900/30">
                         <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{f.clienteNome || 'Consumidor Final'}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(f.data)}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{f.profissionalNome || '-'}</td>
@@ -317,23 +317,23 @@ function EstornoModal({ fechamento, onClose, onSuccess }) {
       <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
         <div className="p-6 border-b flex items-center justify-between">
           <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Estornar Fechamento</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+          <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
             <X size={24} />
           </button>
         </div>
         
         <div className="p-6 space-y-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 rounded-lg p-4">
             <p className="text-red-700 font-medium">Atenção! Esta ação não pode ser desfeita.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Cliente</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Cliente</p>
               <p className="font-medium">{fechamento.clienteNome || 'Consumidor Final'}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total</p>
               <p className="font-bold text-red-600">{formatCurrency(fechamento.totalGeral)}</p>
             </div>
           </div>
@@ -491,19 +491,19 @@ function FaturamentoSection() {
         </div>
 
         <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-green-50 rounded-lg p-4">
+          <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
             <p className="text-sm text-green-600 font-medium">Total Faturado</p>
             <p className="text-2xl font-bold text-green-700">{formatCurrency(totalFaturamento)}</p>
           </div>
-          <div className="bg-blue-50 rounded-lg p-4">
+          <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
             <p className="text-sm text-blue-600 font-medium">Serviços</p>
             <p className="text-2xl font-bold text-blue-700">{formatCurrency(totalServicos)}</p>
           </div>
-          <div className="bg-orange-50 rounded-lg p-4">
+          <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
             <p className="text-sm text-orange-600 font-medium">Produtos</p>
             <p className="text-2xl font-bold text-orange-700">{formatCurrency(totalProdutos)}</p>
           </div>
-          <div className="bg-purple-50 rounded-lg p-4">
+          <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4">
             <p className="text-sm text-purple-600 font-medium">Fechamentos</p>
             <p className="text-2xl font-bold text-purple-700">{fechamentos.length}</p>
           </div>
@@ -514,17 +514,17 @@ function FaturamentoSection() {
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cliente</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Profissional</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Forma Pagamento</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Valor</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Cliente</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Forma Pagamento</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {fechamentos.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum registro encontrado</td>
+                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum registro encontrado</td>
                   </tr>
                 ) : (
                   fechamentos.map((f) => (
@@ -647,15 +647,15 @@ function CreditosNaCasaSection() {
         </button>
       </div>
 
-      <div className="bg-green-50 rounded-lg p-4 mb-6">
+      <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 mb-6">
         <p className="text-sm text-green-600 font-medium">Total de Créditos na Casa</p>
         <p className="text-2xl font-bold text-green-700">{formatCurrency(totalCreditos)}</p>
       </div>
 
       {isLoading ? (
-        <p className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</p>
+        <p className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</p>
       ) : clientesComSaldo.length === 0 ? (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">
           <Gift size={48} className="mx-auto mb-4 opacity-50" />
           <p>Nenhum crédito registrado</p>
         </div>
@@ -665,7 +665,7 @@ function CreditosNaCasaSection() {
             <div key={cliente.id} className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 flex items-center justify-between">
               <div>
                 <p className="font-medium text-gray-800 dark:text-gray-100">{cliente.nome}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{cliente.telefone}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{cliente.telefone}</p>
               </div>
               <div className="flex items-center gap-4">
                 <span className={`font-bold ${cliente.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -688,7 +688,7 @@ function CreditosNaCasaSection() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
             <div className="p-6 border-b flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Gerenciar Crédito</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+              <button onClick={() => setShowModal(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
@@ -985,15 +985,15 @@ function ComissoesSection() {
         {activeReport === 'realizadas' && (
           <>
             <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-yellow-50 rounded-lg p-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
                 <p className="text-sm text-yellow-600 font-medium">Total em Comissões</p>
                 <p className="text-2xl font-bold text-yellow-700">{formatCurrency(totalComissoes)}</p>
               </div>
-              <div className="bg-blue-50 rounded-lg p-4">
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
                 <p className="text-sm text-blue-600 font-medium">Profissionais</p>
                 <p className="text-2xl font-bold text-blue-700">{comissoesPorProfissional.length}</p>
               </div>
-              <div className="bg-green-50 rounded-lg p-4">
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
                 <p className="text-sm text-green-600 font-medium">Fechamentos</p>
                 <p className="text-2xl font-bold text-green-700">{fechamentos.length}</p>
               </div>
@@ -1003,16 +1003,16 @@ function ComissoesSection() {
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Profissional</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Comissão %</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total Vendido</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Valor Comissão</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Comissão %</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Total Vendido</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor Comissão</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {comissoesPorProfissional.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum registro encontrado</td>
+                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum registro encontrado</td>
                     </tr>
                   ) : (
                     comissoesPorProfissional.map((c) => (
@@ -1033,11 +1033,11 @@ function ComissoesSection() {
         {activeReport === 'pagar' && (
           <>
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-orange-50 rounded-lg p-4">
+              <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
                 <p className="text-sm text-orange-600 font-medium">Total a Pagar</p>
                 <p className="text-2xl font-bold text-orange-700">{formatCurrency(totalComissoes)}</p>
               </div>
-              <div className="bg-blue-50 rounded-lg p-4">
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
                 <p className="text-sm text-blue-600 font-medium">Profissionais</p>
                 <p className="text-2xl font-bold text-blue-700">{comissoesPorProfissional.length}</p>
               </div>
@@ -1047,15 +1047,15 @@ function ComissoesSection() {
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Profissional</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Valor Comissão</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor Comissão</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {comissoesPorProfissional.filter(c => !pagosSession.has(c.profissionalId)).length === 0 ? (
                     <tr>
-                      <td colSpan="3" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhuma comissão pendente</td>
+                      <td colSpan="3" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhuma comissão pendente</td>
                     </tr>
                   ) : (
                     comissoesPorProfissional
@@ -1084,11 +1084,11 @@ function ComissoesSection() {
         {activeReport === 'pagas' && (
           <>
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-green-50 rounded-lg p-4">
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
                 <p className="text-sm text-green-600 font-medium">Total Pago</p>
                 <p className="text-2xl font-bold text-green-700">{formatCurrency(totalPagas)}</p>
               </div>
-              <div className="bg-red-50 rounded-lg p-4">
+              <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4">
                 <p className="text-sm text-red-600 font-medium">Total Estornado</p>
                 <p className="text-2xl font-bold text-red-700">{formatCurrency(totalEstornos)}</p>
               </div>
@@ -1098,16 +1098,16 @@ function ComissoesSection() {
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Profissional</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Valor</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {comissoesPagas.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum pagamento registrado</td>
+                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum pagamento registrado</td>
                     </tr>
                   ) : (
                     comissoesPagas.map((c) => (
@@ -1135,7 +1135,7 @@ function ComissoesSection() {
 
         {activeReport === 'estornar' && (
           <>
-            <div className="bg-red-50 rounded-lg p-4 mb-6">
+            <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 mb-6">
               <p className="text-sm text-red-600 font-medium">Total Estornado</p>
               <p className="text-2xl font-bold text-red-700">{formatCurrency(totalEstornos)}</p>
             </div>
@@ -1144,16 +1144,16 @@ function ComissoesSection() {
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Profissional</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Valor</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Motivo</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Motivo</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {comissoesEstornos.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum estorno registrado</td>
+                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum estorno registrado</td>
                     </tr>
                   ) : (
                     comissoesEstornos.map((e) => (
@@ -1179,13 +1179,13 @@ function ComissoesSection() {
                   <Edit3 className="text-yellow-600" size={20} />
                   Editar Comissões dos Profissionais
                 </h3>
-                <button onClick={() => setShowEditarComissoes(false)} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+                <button onClick={() => setShowEditarComissoes(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                   <X size={24} />
                 </button>
               </div>
               
               <div className="flex-1 overflow-y-auto p-6">
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
                   Altere o percentual de comissão de cada profissional. Este valor é usado para calcular o valor de comissão a pagar.
                 </p>
                 
@@ -1194,7 +1194,7 @@ function ComissoesSection() {
                     <div key={prof.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                       <div>
                         <p className="font-medium text-gray-800 dark:text-gray-100">{prof.nome}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{prof.especialidade || 'Sem especialidade'}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{prof.especialidade || 'Sem especialidade'}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <input
@@ -1239,23 +1239,23 @@ function ComissoesSection() {
             <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
               <div className="p-6 border-b flex items-center justify-between">
                 <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Registrar Pagamento</h3>
-                <button onClick={() => setPagarModal(null)} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+                <button onClick={() => setPagarModal(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                   <X size={24} />
                 </button>
               </div>
               
               <div className="p-6 space-y-4">
-                <div className="bg-green-50 rounded-lg p-4">
+                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-300">Profissional</p>
                   <p className="font-bold text-gray-800 dark:text-gray-100">{pagarModal.nome}</p>
                 </div>
                 
-                <div className="bg-yellow-50 rounded-lg p-4">
+                <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-300">Valor da Comissão</p>
                   <p className="text-2xl font-bold text-yellow-600">{formatCurrency(pagarModal.totalComissao)}</p>
                 </div>
 
-                <div className="bg-blue-50 rounded-lg p-4">
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-300">Data do Pagamento</p>
                   <p className="font-medium text-gray-800 dark:text-gray-100">{formatDate(new Date().toISOString())}</p>
                 </div>
@@ -1287,22 +1287,22 @@ function ComissoesSection() {
                   <RotateCcw className="text-red-600" size={20} />
                   Estornar Pagamento
                 </h3>
-                <button onClick={() => setEstornoModal(null)} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
+                <button onClick={() => setEstornoModal(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                   <X size={24} />
                 </button>
               </div>
               
               <div className="p-6 space-y-4">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 rounded-lg p-4">
                   <p className="text-red-700 font-medium">Atenção! Esta ação não pode ser desfeita.</p>
                 </div>
 
-                <div className="bg-green-50 rounded-lg p-4">
+                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-300">Profissional</p>
                   <p className="font-bold text-gray-800 dark:text-gray-100">{estornoModal.profissionalNome}</p>
                 </div>
                 
-                <div className="bg-yellow-50 rounded-lg p-4">
+                <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-300">Valor a Estornar</p>
                   <p className="text-2xl font-bold text-red-600">{formatCurrency(estornoModal.valor)}</p>
                 </div>
@@ -1455,17 +1455,17 @@ function RelatoriosSection() {
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data/Hora</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cliente</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Serviço</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Profissional</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data/Hora</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Cliente</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Serviço</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {agendamentos.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum agendamento encontrado</td>
+                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum agendamento encontrado</td>
                   </tr>
                 ) : (
                   agendamentos.map((a) => (
@@ -1497,11 +1497,11 @@ function RelatoriosSection() {
           <div>
             <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">Aniversariantes de {MESES[mesAtual]}</h3>
             {aniversariantes.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-8">Nenhum aniversariante neste mês</p>
+              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 text-center py-8">Nenhum aniversariante neste mês</p>
             ) : (
               <div className="grid grid-cols-3 gap-4">
                 {aniversariantes.map((c) => (
-                  <div key={c.id} className="bg-pink-50 rounded-lg p-4">
+                  <div key={c.id} className="bg-pink-50 dark:bg-pink-900/30 rounded-lg p-4">
                     <p className="font-medium text-gray-800 dark:text-gray-100">{c.nome}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-300">{c.telefone}</p>
                     <p className="text-sm text-pink-600 mt-1">
@@ -1519,10 +1519,10 @@ function RelatoriosSection() {
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nome</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Telefone</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Especialidade</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Nome</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Telefone</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Email</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Especialidade</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -1543,24 +1543,24 @@ function RelatoriosSection() {
           <div>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-semibold text-gray-800 dark:text-gray-100">Produtos em Estoque</h3>
-              <span className="text-sm text-gray-500 dark:text-gray-400">{produtos.length} produtos</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{produtos.length} produtos</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produto</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Categoria</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Estoque</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Mínimo</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Produto</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Categoria</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Estoque</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Mínimo</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Preço</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {produtos.map((p) => {
                     const estoqueBaixo = p.estoque <= (p.estoqueMinimo || 0);
                     return (
-                      <tr key={p.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 ${estoqueBaixo ? 'bg-red-50' : ''}`}>
+                      <tr key={p.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 ${estoqueBaixo ? 'bg-red-50 dark:bg-red-900/30' : ''}`}>
                         <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{p.nome}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{p.categoria || '-'}</td>
                         <td className={`px-4 py-3 text-right ${estoqueBaixo ? 'text-red-600 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>
@@ -1581,7 +1581,7 @@ function RelatoriosSection() {
         )}
 
         {activeReport === 'movimentacoes' && (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">
             <Package size={48} className="mx-auto mb-4 opacity-50" />
             <p>Relatório de Movimentações em Desenvolvimento</p>
           </div>
@@ -1594,10 +1594,10 @@ function RelatoriosSection() {
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Serviço</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Categoria</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Duração</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Serviço</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Categoria</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Duração</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Preço</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -1612,7 +1612,7 @@ function RelatoriosSection() {
                     </tr>
                   )) || (
                     <tr>
-                      <td colSpan="4" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Nenhum serviço cadastrado</td>
+                      <td colSpan="4" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum serviço cadastrado</td>
                     </tr>
                   )}
                 </tbody>
@@ -1624,10 +1624,10 @@ function RelatoriosSection() {
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produto</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Marca</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Custo</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Venda</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Produto</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Marca</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Custo</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Venda</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">

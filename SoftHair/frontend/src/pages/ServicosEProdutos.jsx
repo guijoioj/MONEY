@@ -105,7 +105,7 @@ function AbaServicos() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} />
             <input
               type="text" placeholder="Buscar serviços..."
               value={search} onChange={(e) => setSearch(e.target.value)}
@@ -126,11 +126,11 @@ function AbaServicos() {
 
       {/* Lista */}
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data?.data?.data?.length === 0 ? (
-            <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">Nenhum serviço encontrado</div>
+            <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum serviço encontrado</div>
           ) : (
             [...(data?.data?.data || [])].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map((servico) => (
               <div key={servico.id} className={`bg-white dark:bg-gray-800 rounded-lg shadow p-5 ${!servico.ativo ? 'opacity-60' : ''}`}>
@@ -144,11 +144,11 @@ function AbaServicos() {
                     )}
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => openModal(servico)} className="p-2 text-blue-600 hover:bg-blue-50 rounded"><Edit2 size={16} /></button>
-                    <button onClick={() => setDeleteModal({ open: true, servico })} className="p-2 text-red-600 hover:bg-red-50 rounded"><Trash2 size={16} /></button>
+                    <button onClick={() => openModal(servico)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded"><Edit2 size={16} /></button>
+                    <button onClick={() => setDeleteModal({ open: true, servico })} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded"><Trash2 size={16} /></button>
                   </div>
                 </div>
-                {servico.descricao && <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">{servico.descricao}</p>}
+                {servico.descricao && <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm mb-3">{servico.descricao}</p>}
                 <div className="space-y-1 text-sm">
                   <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
                     <div className="flex items-center gap-1"><Clock size={14} />{formatDuration(servico.duracao)}</div>
@@ -157,7 +157,7 @@ function AbaServicos() {
                     </div>
                   </div>
                   {(servico.baseComissao > 0 || servico.comissaoPorcentagem > 0) && (
-                    <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
                       <span>Base: {formatCurrency(servico.baseComissao)} × {servico.comissaoPorcentagem}%</span>
                       <span className="font-medium text-green-700">= {formatCurrency(comissaoValor(servico))}</span>
                     </div>
@@ -175,7 +175,7 @@ function AbaServicos() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">{editingServico ? 'Editar Serviço' : 'Novo Serviço'}</h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300"><X size={24} /></button>
+              <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300"><X size={24} /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
@@ -244,7 +244,7 @@ function AbaServicos() {
                   className="w-4 h-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500" />
                 <label htmlFor="ativo-s" className="text-sm text-gray-700 dark:text-gray-200">Serviço ativo</label>
               </div>
-              {formError && <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{formError}</div>}
+              {formError && <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{formError}</div>}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">Cancelar</button>
                 <button type="submit" disabled={createMutation.isPending || updateMutation.isPending}
@@ -377,7 +377,7 @@ function AbaProdutos() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} />
             <input type="text" placeholder="Buscar produtos..."
               value={search} onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500" />
@@ -388,7 +388,7 @@ function AbaProdutos() {
             {data?.data?.categorias?.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
           </select>
           <button onClick={() => setEstoqueBaixo(!estoqueBaixo)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${estoqueBaixo ? 'bg-yellow-50 border-yellow-400 text-yellow-700' : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900'}`}>
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${estoqueBaixo ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400 text-yellow-700' : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900'}`}>
             <AlertTriangle size={18} /> Estoque Baixo
           </button>
           <button onClick={() => openModal()}
@@ -400,25 +400,25 @@ function AbaProdutos() {
 
       {/* Tabela */}
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</div>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produto</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Marca</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Categoria</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Valor Tabela</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Base Comissão</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">% / Valor</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Estoque</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Produto</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Marca</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Categoria</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor Tabela</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Base Comissão</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">% / Valor</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Estoque</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {data?.data?.data?.length === 0 ? (
-                <tr><td colSpan="8" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum produto encontrado</td></tr>
+                <tr><td colSpan="8" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum produto encontrado</td></tr>
               ) : (
                 [...(data?.data?.data || [])].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map((produto) => {
                   const comissaoValor = (parseFloat(produto.baseComissao) || 0) * (parseFloat(produto.comissaoPorcentagem) || 0) / 100;
@@ -426,10 +426,10 @@ function AbaProdutos() {
                     <tr key={produto.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 ${!produto.ativo ? 'opacity-60' : ''}`}>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-indigo-50 rounded-lg"><Package className="text-indigo-600" size={20} /></div>
+                          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg"><Package className="text-indigo-600" size={20} /></div>
                           <div>
                             <div className="font-medium text-gray-800 dark:text-gray-100">{produto.nome}</div>
-                            {produto.descricao && <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">{produto.descricao}</div>}
+                            {produto.descricao && <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 truncate max-w-xs">{produto.descricao}</div>}
                           </div>
                         </div>
                       </td>
@@ -448,8 +448,8 @@ function AbaProdutos() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
-                          <button onClick={() => openModal(produto)} className="p-2 text-blue-600 hover:bg-blue-50 rounded"><Edit2 size={18} /></button>
-                          <button onClick={() => setDeleteModal({ open: true, produto })} className="p-2 text-red-600 hover:bg-red-50 rounded"><Trash2 size={18} /></button>
+                          <button onClick={() => openModal(produto)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded"><Edit2 size={18} /></button>
+                          <button onClick={() => setDeleteModal({ open: true, produto })} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded"><Trash2 size={18} /></button>
                         </div>
                       </td>
                     </tr>
@@ -467,7 +467,7 @@ function AbaProdutos() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">{editingProduto ? 'Editar Produto' : 'Novo Produto'}</h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300"><X size={24} /></button>
+              <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300"><X size={24} /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
@@ -560,7 +560,7 @@ function AbaProdutos() {
                   className="w-4 h-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500" />
                 <label htmlFor="ativo-p" className="text-sm text-gray-700 dark:text-gray-200">Produto ativo</label>
               </div>
-              {formError && <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{formError}</div>}
+              {formError && <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{formError}</div>}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">Cancelar</button>
                 <button type="submit" disabled={createMutation.isPending || updateMutation.isPending}
@@ -621,7 +621,7 @@ export default function ServicosEProdutos() {
           className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
             aba === 'servicos'
               ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
+              : 'border-transparent text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:text-gray-200'
           }`}
         >
           <Scissors size={16} /> Serviços
@@ -631,7 +631,7 @@ export default function ServicosEProdutos() {
           className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
             aba === 'produtos'
               ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
+              : 'border-transparent text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:text-gray-200'
           }`}
         >
           <Package size={16} /> Produtos

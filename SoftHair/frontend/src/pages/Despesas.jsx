@@ -146,7 +146,7 @@ export default function Despesas() {
       </div>
 
       {/* Resumo total */}
-      <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-4">
+      <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 rounded-xl p-4 flex items-center gap-4">
         <div className="bg-red-100 rounded-full p-3">
           <DollarSign className="w-6 h-6 text-red-600" />
         </div>
@@ -161,13 +161,13 @@ export default function Despesas() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {resumoData.categorias.map(c => (
             <div key={c.categoria} className="bg-white dark:bg-gray-800 border rounded-xl p-4 shadow-sm">
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">{c.categoria}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">{c.categoria}</p>
               <p className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-1">{formatCurrency(c.total)}</p>
               <div className="mt-2 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div className="h-full bg-red-400 rounded-full"
                   style={{ width: resumoData.total > 0 ? `${(c.total / resumoData.total * 100).toFixed(0)}%` : '0%' }} />
               </div>
-              <p className="text-xs text-gray-400 mt-1">{c.quantidade} registro(s)</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{c.quantidade} registro(s)</p>
             </div>
           ))}
         </div>
@@ -187,13 +187,13 @@ export default function Despesas() {
           </thead>
           <tbody className="divide-y divide-gray-50">
             {(listData || []).length === 0 ? (
-              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Nenhuma despesa encontrada</td></tr>
+              <tr><td colSpan={5} className="text-center py-8 text-gray-400 dark:text-gray-500">Nenhuma despesa encontrada</td></tr>
             ) : (listData || []).map(d => (
               <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                 <td className="px-4 py-3">
                   <p className="font-medium text-gray-800 dark:text-gray-100">{d.descricao}</p>
                   {d.recorrente && <span className="text-xs text-blue-500">Recorrente</span>}
-                  {d.observacoes && <p className="text-xs text-gray-400 mt-0.5">{d.observacoes}</p>}
+                  {d.observacoes && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{d.observacoes}</p>}
                 </td>
                 <td className="px-4 py-3">
                   <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2 py-0.5 rounded-full text-xs">{d.categoria}</span>
@@ -204,11 +204,11 @@ export default function Despesas() {
                 <td className="px-4 py-3 text-right font-semibold text-red-600">{formatCurrency(d.valor)}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-center gap-2">
-                    <button onClick={() => setModal(d)} className="text-gray-400 hover:text-blue-600 p-1 rounded">
+                    <button onClick={() => setModal(d)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 p-1 rounded">
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button onClick={() => { if (confirm('Excluir despesa?')) deleteMut.mutate(d.id); }}
-                      className="text-gray-400 hover:text-red-600 p-1 rounded">
+                      className="text-gray-400 dark:text-gray-500 hover:text-red-600 p-1 rounded">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

@@ -95,7 +95,7 @@ export default function Caixa() {
         </button>
       </div>
 
-      {erro && <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4">{erro}</div>}
+      {erro && <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-700 rounded-lg p-4">{erro}</div>}
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="flex items-center gap-3 mb-6">
@@ -109,23 +109,23 @@ export default function Caixa() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Saldo Inicial</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Saldo Inicial</p>
                 <p className="text-xl font-bold text-gray-800 dark:text-gray-100">{formatCurrency(status.caixa.saldoInicial)}</p>
               </div>
-              <div className="bg-green-50 rounded-lg p-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Vendas</p>
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total Vendas</p>
                 <p className="text-xl font-bold text-green-700">{formatCurrency(status.totalVendas)}</p>
               </div>
-              <div className="bg-red-50 rounded-lg p-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Despesas</p>
+              <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total Despesas</p>
                 <p className="text-xl font-bold text-red-700">{formatCurrency(status.totalDespesas)}</p>
               </div>
-              <div className="bg-blue-50 rounded-lg p-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Saldo Estimado</p>
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Saldo Estimado</p>
                 <p className="text-xl font-bold text-blue-700">{formatCurrency(status.saldoEstimado)}</p>
               </div>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Aberto em: {formatDatetime(status.caixa.abertoEm)}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Aberto em: {formatDatetime(status.caixa.abertoEm)}</p>
             <div className="border-t pt-4 mt-4 space-y-3">
               <h3 className="font-medium text-gray-700 dark:text-gray-200">Fechar Caixa</h3>
               <div className="flex gap-3 flex-wrap">
@@ -215,7 +215,7 @@ export default function Caixa() {
             </table>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-gray-500 dark:text-gray-400">
+          <div className="flex flex-col items-center justify-center py-10 text-gray-500 dark:text-gray-400 dark:text-gray-500">
             <DollarSign size={48} className="mb-3 opacity-50" />
             <p>Nenhum registro de caixa nos últimos 30 dias.</p>
           </div>
