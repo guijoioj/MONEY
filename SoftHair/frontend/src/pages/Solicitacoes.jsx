@@ -20,7 +20,7 @@ function StatusBadge({ status }) {
     pendente:   { label: 'Pendente',  bg: 'bg-yellow-100', text: 'text-yellow-800' },
     confirmado: { label: 'Aprovado',  bg: 'bg-green-100',  text: 'text-green-800'  },
     cancelado:  { label: 'Rejeitado', bg: 'bg-red-100',    text: 'text-red-800'    },
-  }[status] || { label: status, bg: 'bg-gray-100', text: 'text-gray-700' };
+  }[status] || { label: status, bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-700 dark:text-gray-200' };
   return (
     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
       {cfg.label}

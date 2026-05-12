@@ -24,13 +24,17 @@ import {
   CalendarPlus,
   DollarSign,
   Target,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../services/api';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  const { theme, toggle: toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState('');
@@ -198,6 +202,14 @@ export default function Layout() {
         </div>
 
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+            className="p-2 rounded-xl hover:bg-black hover:bg-opacity-5 dark:hover:bg-white dark:bg-gray-800 dark:hover:bg-opacity-10"
+            style={{ color: 'rgba(60,60,80,0.6)' }}
+          >
+            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
           <button onClick={() => navigate('/notificacoes')} className="relative p-2 rounded-xl hover:bg-black hover:bg-opacity-5" style={{ color: 'rgba(60,60,80,0.6)' }}>
             <Bell size={17} />
             {notifCount > 0 && <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-bold">{notifCount > 9 ? '9+' : notifCount}</span>}

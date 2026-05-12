@@ -15,9 +15,9 @@ const today = new Date();
 
 function DRERow({ label, value, indent = false, bold = false, separator = false, positive = true, big = false }) {
   return (
-    <div className={`flex justify-between items-center py-2 ${separator ? 'border-t border-b border-gray-200 my-1' : ''} ${indent ? 'pl-6' : ''}`}>
-      <span className={`text-sm ${bold ? 'font-bold text-gray-900' : 'text-gray-600'} ${big ? 'text-base' : ''}`}>{label}</span>
-      <span className={`text-sm font-semibold ${big ? 'text-base' : ''} ${bold ? 'font-bold' : ''} ${positive ? 'text-gray-800' : 'text-red-600'}`}>
+    <div className={`flex justify-between items-center py-2 ${separator ? 'border-t border-b border-gray-200 dark:border-gray-700 my-1' : ''} ${indent ? 'pl-6' : ''}`}>
+      <span className={`text-sm ${bold ? 'font-bold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-300'} ${big ? 'text-base' : ''}`}>{label}</span>
+      <span className={`text-sm font-semibold ${big ? 'text-base' : ''} ${bold ? 'font-bold' : ''} ${positive ? 'text-gray-800 dark:text-gray-100' : 'text-red-600'}`}>
         {value}
       </span>
     </div>
@@ -55,8 +55,8 @@ function AbaDRE({ mes, ano, setMes, setAno }) {
       </div>
 
       {/* Extrato DRE */}
-      <div className="bg-white border rounded-xl shadow-sm p-6 max-w-xl">
-        <h3 className="font-bold text-gray-800 mb-4 text-base">
+      <div className="bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-6 max-w-xl">
+        <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-4 text-base">
           Demonstrativo de Resultado — {meses[mes-1]}/{ano}
         </h3>
 
@@ -80,7 +80,7 @@ function AbaDRE({ mes, ano, setMes, setAno }) {
           positive={(data?.lucroLiquido || 0) >= 0} />
 
         <div className="flex justify-between items-center pt-2 pl-6">
-          <span className="text-sm text-gray-500">Margem</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">Margem</span>
           <span className={`text-sm font-bold ${parseFloat(data?.margem || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {data?.margem}%
           </span>
@@ -89,8 +89,8 @@ function AbaDRE({ mes, ano, setMes, setAno }) {
 
       {/* Gráfico receita vs despesa 6 meses */}
       {chart6.length > 0 && (
-        <div className="bg-white border rounded-xl shadow-sm p-6">
-          <h3 className="font-semibold text-gray-700 mb-4">Receita vs Despesa — últimos 6 meses</h3>
+        <div className="bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-6">
+          <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-4">Receita vs Despesa — últimos 6 meses</h3>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={chart6} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -128,32 +128,32 @@ function AbaProjecao() {
     <div className="space-y-6">
       {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white border rounded-xl shadow-sm p-5">
+        <div className="bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-blue-100 p-2 rounded-lg"><DollarSign className="w-5 h-5 text-blue-600" /></div>
-            <p className="text-sm text-gray-500 font-medium">Média 3 meses</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Média 3 meses</p>
           </div>
-          <p className="text-2xl font-bold text-gray-800">{fmt(data?.mediaUltimos3)}</p>
+          <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{fmt(data?.mediaUltimos3)}</p>
         </div>
 
-        <div className="bg-white border rounded-xl shadow-sm p-5">
+        <div className="bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-3 mb-2">
             <div className={`p-2 rounded-lg ${tendenciaPositiva ? 'bg-green-100' : 'bg-red-100'}`}>
               {tendenciaPositiva
                 ? <TrendingUp className="w-5 h-5 text-green-600" />
                 : <TrendingDown className="w-5 h-5 text-red-600" />}
             </div>
-            <p className="text-sm text-gray-500 font-medium">Tendência</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Tendência</p>
           </div>
           <p className={`text-2xl font-bold ${tendenciaPositiva ? 'text-green-600' : 'text-red-600'}`}>
             {tendenciaPositiva ? '+' : ''}{data?.tendencia}%
           </p>
         </div>
 
-        <div className="bg-white border rounded-xl shadow-sm p-5">
+        <div className="bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-purple-100 p-2 rounded-lg"><BarChart2 className="w-5 h-5 text-purple-600" /></div>
-            <p className="text-sm text-gray-500 font-medium">Projeção próximo mês</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Projeção próximo mês</p>
           </div>
           <p className="text-2xl font-bold text-purple-700">{fmt(data?.projecao)}</p>
           <p className="text-xs text-gray-400 mt-1">{data?.projecaoLabel}</p>
@@ -161,8 +161,8 @@ function AbaProjecao() {
       </div>
 
       {/* Gráfico de linha */}
-      <div className="bg-white border rounded-xl shadow-sm p-6">
-        <h3 className="font-semibold text-gray-700 mb-4">Histórico 12 meses + Projeção</h3>
+      <div className="bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-6">
+        <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-4">Histórico 12 meses + Projeção</h3>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -195,17 +195,17 @@ export default function Financeiro() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Financeiro</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Financeiro</h1>
 
       {/* Abas */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
+      <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg w-fit">
         {abas.map(a => (
           <button key={a.id}
             onClick={() => a.id === 'despesas' ? navigate('/despesas') : setAba(a.id)}
             className={`px-5 py-2 rounded-md text-sm font-medium transition-colors ${
               aba === a.id
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
             }`}>
             {a.label}
             {a.id === 'despesas' && <Link className="inline w-3 h-3 ml-1 opacity-50" />}

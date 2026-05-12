@@ -4,8 +4,8 @@ export default function Backup() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <Database size={24} className="text-gray-600" />
-        <h1 className="text-2xl font-bold text-gray-800">Backup e Restauração</h1>
+        <Database size={24} className="text-gray-600 dark:text-gray-300" />
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Backup e Restauração</h1>
       </div>
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center">

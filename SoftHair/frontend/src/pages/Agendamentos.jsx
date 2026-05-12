@@ -95,45 +95,45 @@ export default function Agendamentos() {
     const colors = {
       agendado: 'bg-blue-100 text-blue-700',
       confirmado: 'bg-green-100 text-green-700',
-      concluido: 'bg-gray-100 text-gray-700',
+      concluido: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200',
       cancelado: 'bg-red-100 text-red-700',
     };
-    return colors[status] || 'bg-gray-100 text-gray-700';
+    return colors[status] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200';
   };
 
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Agendamentos</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Agendamentos</h1>
         <button onClick={() => openModal()} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
           <Plus size={20} />
           Novo Agendamento
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex items-center gap-4">
           <CalendarIcon className="text-gray-400" size={20} />
           <input
             type="date"
             value={filtroData}
             onChange={(e) => setFiltroData(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
           />
         </div>
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500">Carregando...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</div>
       ) : (
         <div className="space-y-4">
           {agendamentos?.data?.data?.length === 0 ? (
-            <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center text-gray-500 dark:text-gray-400">
               Nenhum agendamento para esta data
             </div>
           ) : (
             agendamentos?.data?.data?.map((agendamento) => (
-              <div key={agendamento.id} className="bg-white rounded-lg shadow p-5">
+              <div key={agendamento.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-5">
                 <div className="flex flex-col sm:flex-row justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
@@ -141,12 +141,12 @@ export default function Agendamentos() {
                         <User className="text-indigo-600" size={20} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg text-gray-800">{agendamento.clienteNome}</h3>
-                        <p className="text-gray-500 text-sm">{agendamento.clienteTelefone}</p>
+                        <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">{agendamento.clienteNome}</h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">{agendamento.clienteTelefone}</p>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm">
-                      <div className="flex items-center gap-1 text-gray-600">
+                      <div className="flex items-center gap-1 text-gray-600 dark:text-gray-300">
                         <Clock size={16} />
                         {formatTime(agendamento.dataHora)} - {agendamento.servicoNome}
                       </div>
@@ -155,7 +155,7 @@ export default function Agendamentos() {
                       </span>
                     </div>
                     {agendamento.observacoes && (
-                      <p className="mt-2 text-sm text-gray-500">{agendamento.observacoes}</p>
+                      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{agendamento.observacoes}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-3">
@@ -178,20 +178,20 @@ export default function Agendamentos() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-lg">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">{editingAgendamento ? 'Editar Agendamento' : 'Novo Agendamento'}</h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Cliente *</label>
                 <select
                   value={formData.clienteId}
                   onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
                 >
                   <option value="">Selecione um cliente</option>
@@ -201,11 +201,11 @@ export default function Agendamentos() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Serviço *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Serviço *</label>
                 <select
                   value={formData.servicoId}
                   onChange={(e) => setFormData({ ...formData, servicoId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
                 >
                   <option value="">Selecione um serviço</option>
@@ -215,26 +215,26 @@ export default function Agendamentos() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data e Hora *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data e Hora *</label>
                 <input
                   type="datetime-local"
                   value={formData.dataHora}
                   onChange={(e) => setFormData({ ...formData, dataHora: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Observações</label>
                 <textarea
                   value={formData.observacoes}
                   onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   rows={3}
                 />
               </div>
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                   Cancelar
                 </button>
                 <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">

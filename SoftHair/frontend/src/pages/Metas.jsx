@@ -83,7 +83,7 @@ export default function Metas() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-gray-800">Metas por Profissional</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Metas por Profissional</h1>
         <div className="flex items-center gap-3">
           <select
             value={mes}
@@ -99,7 +99,7 @@ export default function Metas() {
           >
             {[ano - 1, ano, ano + 1].map(a => <option key={a} value={a}>{a}</option>)}
           </select>
-          <button onClick={load} className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors">
+          <button onClick={load} className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 rounded-lg text-gray-600 dark:text-gray-300 transition-colors">
             <RefreshCw size={18} />
           </button>
         </div>
@@ -110,7 +110,7 @@ export default function Metas() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       ) : progresso.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+        <div className="flex flex-col items-center justify-center py-20 text-gray-500 dark:text-gray-400">
           <Target size={48} className="mb-3 opacity-50" />
           <p>Nenhum profissional ativo encontrado.</p>
         </div>
@@ -120,7 +120,7 @@ export default function Metas() {
             const pctValor = prof.metaValor > 0 ? (prof.realizadoValor / prof.metaValor) * 100 : 0;
             const pctAtend = prof.metaAtendimentos > 0 ? (prof.realizadoAtendimentos / prof.metaAtendimentos) * 100 : 0;
             return (
-              <div key={prof.id} className="bg-white rounded-lg shadow p-6 space-y-4">
+              <div key={prof.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {prof.foto ? (
@@ -130,7 +130,7 @@ export default function Metas() {
                         {prof.nome.charAt(0)}
                       </div>
                     )}
-                    <h3 className="font-semibold text-gray-800">{prof.nome}</h3>
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-100">{prof.nome}</h3>
                   </div>
                   <button
                     onClick={() => openModal(prof)}
@@ -143,23 +143,23 @@ export default function Metas() {
                 <div className="space-y-3">
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Receita</span>
+                      <span className="text-gray-600 dark:text-gray-300">Receita</span>
                       <span className="font-medium">
                         {formatCurrency(prof.realizadoValor)} / {formatCurrency(prof.metaValor)}
                       </span>
                     </div>
                     <ProgressBar percent={pctValor} color={getColor(pctValor)} />
-                    <p className="text-xs text-right text-gray-500 mt-1">{pctValor.toFixed(0)}%</p>
+                    <p className="text-xs text-right text-gray-500 dark:text-gray-400 mt-1">{pctValor.toFixed(0)}%</p>
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Atendimentos</span>
+                      <span className="text-gray-600 dark:text-gray-300">Atendimentos</span>
                       <span className="font-medium">
                         {prof.realizadoAtendimentos} / {prof.metaAtendimentos}
                       </span>
                     </div>
                     <ProgressBar percent={pctAtend} color={getColor(pctAtend)} />
-                    <p className="text-xs text-right text-gray-500 mt-1">{pctAtend.toFixed(0)}%</p>
+                    <p className="text-xs text-right text-gray-500 dark:text-gray-400 mt-1">{pctAtend.toFixed(0)}%</p>
                   </div>
                 </div>
               </div>
@@ -170,17 +170,17 @@ export default function Metas() {
 
       {modal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Meta — {modal.nome}</h3>
-              <button onClick={() => setModal(null)} className="text-gray-400 hover:text-gray-600">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Meta — {modal.nome}</h3>
+              <button onClick={() => setModal(null)} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
                 <X size={20} />
               </button>
             </div>
             {erro && <div className="mb-3 text-sm text-red-600 bg-red-50 rounded p-2">{erro}</div>}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Meta de Receita (R$)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Meta de Receita (R$)</label>
                 <input
                   type="number"
                   value={metaValor}
@@ -190,7 +190,7 @@ export default function Metas() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Meta de Atendimentos</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Meta de Atendimentos</label>
                 <input
                   type="number"
                   value={metaAtend}
@@ -200,7 +200,7 @@ export default function Metas() {
                 />
               </div>
               <div className="flex gap-3 justify-end">
-                <button onClick={() => setModal(null)} className="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+                <button onClick={() => setModal(null)} className="px-4 py-2 border rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                   Cancelar
                 </button>
                 <button onClick={saveMeta} disabled={saving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm disabled:opacity-50">

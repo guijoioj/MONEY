@@ -47,11 +47,11 @@ function fmtDate(dateStr) {
 function PeriodSelect({ label, value, onChange, options }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-gray-500">{label}:</span>
+      <span className="text-sm text-gray-500 dark:text-gray-400">{label}:</span>
       <select
         value={value}
         onChange={e => onChange(Number(e.target.value))}
-        className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300"
       >
         {options.map(o => (
           <option key={o.value} value={o.value}>{o.label}</option>
@@ -83,7 +83,7 @@ function TabServicos() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-semibold text-gray-800">Serviços Mais Vendidos</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Serviços Mais Vendidos</h2>
         <PeriodSelect
           label="Período"
           value={dias}
@@ -101,7 +101,7 @@ function TabServicos() {
         <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" /></div>
       ) : !data?.length ? <EmptyState /> : (
         <>
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 shadow-sm">
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -115,22 +115,22 @@ function TabServicos() {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
+              <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100">
                 <tr>
-                  <th className="text-left px-5 py-3 font-medium text-gray-600">#</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-600">Serviço</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Atendimentos</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Receita Total</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-600 dark:text-gray-300">#</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Serviço</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Atendimentos</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Receita Total</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {data.map((row, i) => (
-                  <tr key={row.nome} className="hover:bg-gray-50 transition-colors">
+                  <tr key={row.nome} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 transition-colors">
                     <td className="px-5 py-3 text-gray-400 font-mono">{i + 1}</td>
-                    <td className="px-5 py-3 font-medium text-gray-800">{row.nome}</td>
-                    <td className="px-5 py-3 text-right text-gray-700">{fmtNum(row.total)}</td>
+                    <td className="px-5 py-3 font-medium text-gray-800 dark:text-gray-100">{row.nome}</td>
+                    <td className="px-5 py-3 text-right text-gray-700 dark:text-gray-200">{fmtNum(row.total)}</td>
                     <td className="px-5 py-3 text-right font-medium text-indigo-600">{fmt(row.receita)}</td>
                   </tr>
                 ))}
@@ -162,7 +162,7 @@ function TabPico() {
   });
 
   function intensity(val) {
-    if (!maxVal || !val) return 'bg-gray-100';
+    if (!maxVal || !val) return 'bg-gray-100 dark:bg-gray-700';
     const ratio = val / maxVal;
     if (ratio >= 0.8) return 'bg-indigo-600 text-white';
     if (ratio >= 0.6) return 'bg-indigo-400 text-white';
@@ -174,7 +174,7 @@ function TabPico() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-semibold text-gray-800">Horários de Pico</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Horários de Pico</h2>
         <PeriodSelect
           label="Período"
           value={semanas}
@@ -191,7 +191,7 @@ function TabPico() {
       {isLoading ? (
         <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" /></div>
       ) : !data?.length ? <EmptyState /> : (
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm overflow-x-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 shadow-sm overflow-x-auto">
           <p className="text-xs text-gray-400 mb-4">Intensidade de agendamentos por dia da semana e hora do dia</p>
           <div className="min-w-[640px]">
             {/* Header: horas */}
@@ -206,7 +206,7 @@ function TabPico() {
             {/* Rows: dias da semana */}
             {DIAS_SEMANA.map((dia, dIdx) => (
               <div key={dia} className="flex items-center mb-1">
-                <div className="w-12 flex-shrink-0 text-xs font-medium text-gray-500 pr-2 text-right">{dia}</div>
+                <div className="w-12 flex-shrink-0 text-xs font-medium text-gray-500 dark:text-gray-400 pr-2 text-right">{dia}</div>
                 {HORAS.map(h => {
                   const val = grid[`${dIdx}-${h}`] || 0;
                   return (
@@ -247,7 +247,7 @@ function TabCancelamentos() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-semibold text-gray-800">Cancelamentos por Profissional</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Cancelamentos por Profissional</h2>
         <PeriodSelect
           label="Período"
           value={dias}
@@ -265,7 +265,7 @@ function TabCancelamentos() {
         <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" /></div>
       ) : !data?.length ? <EmptyState /> : (
         <>
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 shadow-sm">
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -279,23 +279,23 @@ function TabCancelamentos() {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
+              <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100">
                 <tr>
-                  <th className="text-left px-5 py-3 font-medium text-gray-600">Profissional</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Total</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Cancelados</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Taxa</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Profissional</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Total</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Cancelados</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Taxa</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {data.map(row => {
                   const taxa = parseFloat(row.taxa || 0);
                   return (
-                    <tr key={row.profissional} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-3 font-medium text-gray-800">{row.profissional}</td>
-                      <td className="px-5 py-3 text-right text-gray-600">{fmtNum(row.total)}</td>
+                    <tr key={row.profissional} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 transition-colors">
+                      <td className="px-5 py-3 font-medium text-gray-800 dark:text-gray-100">{row.profissional}</td>
+                      <td className="px-5 py-3 text-right text-gray-600 dark:text-gray-300">{fmtNum(row.total)}</td>
                       <td className="px-5 py-3 text-right text-red-600 font-medium">{fmtNum(row.cancelados)}</td>
                       <td className="px-5 py-3 text-right">
                         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${taxa >= 30 ? 'bg-red-100 text-red-700' : taxa >= 15 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>
@@ -338,7 +338,7 @@ function TabInativos() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-semibold text-gray-800">Clientes Inativos</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Clientes Inativos</h2>
         <div className="flex items-center gap-3 flex-wrap">
           <PeriodSelect
             label="Sem visita há"
@@ -365,31 +365,31 @@ function TabInativos() {
       {isLoading ? (
         <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" /></div>
       ) : !data?.length ? <EmptyState /> : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-5 py-3 bg-amber-50 border-b border-amber-100 flex items-center gap-2">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" className="text-amber-500"><path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             <span className="text-xs text-amber-700 font-medium">{data.length} clientes sem visita há {dias}+ dias</span>
           </div>
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100">
               <tr>
-                <th className="text-left px-5 py-3 font-medium text-gray-600">Cliente</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-600">Telefone</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-600">E-mail</th>
-                <th className="text-right px-5 py-3 font-medium text-gray-600">Última Visita</th>
+                <th className="text-left px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Cliente</th>
+                <th className="text-left px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Telefone</th>
+                <th className="text-left px-5 py-3 font-medium text-gray-600 dark:text-gray-300">E-mail</th>
+                <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Última Visita</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {data.map(row => (
-                <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-5 py-3 font-medium text-gray-800">{row.nome}</td>
-                  <td className="px-5 py-3 text-gray-600">{row.telefone || '—'}</td>
-                  <td className="px-5 py-3 text-gray-600">
+                <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 transition-colors">
+                  <td className="px-5 py-3 font-medium text-gray-800 dark:text-gray-100">{row.nome}</td>
+                  <td className="px-5 py-3 text-gray-600 dark:text-gray-300">{row.telefone || '—'}</td>
+                  <td className="px-5 py-3 text-gray-600 dark:text-gray-300">
                     {row.email ? (
                       <a href={`mailto:${row.email}`} className="text-indigo-600 hover:underline">{row.email}</a>
                     ) : '—'}
                   </td>
-                  <td className="px-5 py-3 text-right text-gray-500">
+                  <td className="px-5 py-3 text-right text-gray-500 dark:text-gray-400">
                     {row.ultimoAgendamento ? fmtDate(row.ultimoAgendamento) : <span className="text-red-400 text-xs">Nunca agendou</span>}
                   </td>
                 </tr>
@@ -420,7 +420,7 @@ function TabMensal() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-semibold text-gray-800">Comparativo Mensal de Agendamentos</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Comparativo Mensal de Agendamentos</h2>
         <PeriodSelect
           label="Período"
           value={meses}
@@ -437,7 +437,7 @@ function TabMensal() {
         <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" /></div>
       ) : !data?.length ? <EmptyState /> : (
         <>
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 shadow-sm">
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -452,15 +452,15 @@ function TabMensal() {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
+              <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100">
                 <tr>
-                  <th className="text-left px-5 py-3 font-medium text-gray-600">Mês</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Total</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Confirmados</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Cancelados</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Taxa Cancela.</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Mês</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Total</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Confirmados</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Cancelados</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Taxa Cancela.</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -469,13 +469,13 @@ function TabMensal() {
                   const cancelados = parseInt(row.cancelados || 0);
                   const taxa = total > 0 ? ((cancelados / total) * 100).toFixed(1) : '0.0';
                   return (
-                    <tr key={row.mes} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-3 font-medium text-gray-800">{row.mes}</td>
-                      <td className="px-5 py-3 text-right text-gray-700">{fmtNum(total)}</td>
+                    <tr key={row.mes} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 transition-colors">
+                      <td className="px-5 py-3 font-medium text-gray-800 dark:text-gray-100">{row.mes}</td>
+                      <td className="px-5 py-3 text-right text-gray-700 dark:text-gray-200">{fmtNum(total)}</td>
                       <td className="px-5 py-3 text-right text-green-600 font-medium">{fmtNum(row.confirmados)}</td>
                       <td className="px-5 py-3 text-right text-red-500">{fmtNum(cancelados)}</td>
                       <td className="px-5 py-3 text-right">
-                        <span className={`text-xs font-semibold ${parseFloat(taxa) >= 20 ? 'text-red-600' : 'text-gray-500'}`}>{taxa}%</span>
+                        <span className={`text-xs font-semibold ${parseFloat(taxa) >= 20 ? 'text-red-600' : 'text-gray-500 dark:text-gray-400'}`}>{taxa}%</span>
                       </td>
                     </tr>
                   );
@@ -500,7 +500,7 @@ function TabTicket() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-semibold text-gray-800">Ticket Médio por Cliente</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Ticket Médio por Cliente</h2>
         <PeriodSelect
           label="Período"
           value={dias}
@@ -518,7 +518,7 @@ function TabTicket() {
         <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" /></div>
       ) : !data?.length ? <EmptyState /> : (
         <>
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 shadow-sm">
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={data.slice(0, 10)} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -532,25 +532,25 @@ function TabTicket() {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
+              <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100">
                 <tr>
-                  <th className="text-left px-5 py-3 font-medium text-gray-600">#</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-600">Cliente</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-600">Telefone</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Visitas</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Total Gasto</th>
-                  <th className="text-right px-5 py-3 font-medium text-gray-600">Ticket Médio</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-600 dark:text-gray-300">#</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Cliente</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Telefone</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Visitas</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Total Gasto</th>
+                  <th className="text-right px-5 py-3 font-medium text-gray-600 dark:text-gray-300">Ticket Médio</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {data.map((row, i) => (
-                  <tr key={row.nome + i} className="hover:bg-gray-50 transition-colors">
+                  <tr key={row.nome + i} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 transition-colors">
                     <td className="px-5 py-3 text-gray-400 font-mono">{i + 1}</td>
-                    <td className="px-5 py-3 font-medium text-gray-800">{row.nome}</td>
-                    <td className="px-5 py-3 text-gray-600">{row.telefone || '—'}</td>
-                    <td className="px-5 py-3 text-right text-gray-700">{fmtNum(row.visitas)}</td>
+                    <td className="px-5 py-3 font-medium text-gray-800 dark:text-gray-100">{row.nome}</td>
+                    <td className="px-5 py-3 text-gray-600 dark:text-gray-300">{row.telefone || '—'}</td>
+                    <td className="px-5 py-3 text-right text-gray-700 dark:text-gray-200">{fmtNum(row.visitas)}</td>
                     <td className="px-5 py-3 text-right font-medium text-indigo-600">{fmt(row.totalGasto)}</td>
                     <td className="px-5 py-3 text-right font-semibold text-indigo-700">{fmt(row.ticketMedio)}</td>
                   </tr>
@@ -585,12 +585,12 @@ export default function Relatorios() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Relatórios</h1>
-        <p className="text-sm text-gray-500 mt-1">Análises detalhadas sobre o desempenho do salão</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Relatórios</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Análises detalhadas sobre o desempenho do salão</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 flex-wrap border-b border-gray-200 pb-0">
+      <div className="flex gap-1 flex-wrap border-b border-gray-200 dark:border-gray-700 pb-0">
         {TABS.map(tab => (
           <button
             key={tab.id}
@@ -598,7 +598,7 @@ export default function Relatorios() {
             className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-all border-b-2 -mb-px ${
               activeTab === tab.id
                 ? 'border-indigo-500 text-indigo-600 bg-indigo-50'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:border-gray-600'
             }`}
           >
             {tab.label}

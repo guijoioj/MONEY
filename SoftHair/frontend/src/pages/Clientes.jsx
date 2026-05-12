@@ -150,14 +150,14 @@ export default function Clientes() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Clientes</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Clientes</h1>
         <button onClick={() => openModal()} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
           <Plus size={20} />
           Novo Cliente
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <form onSubmit={handleSearchSubmit} className="relative flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -166,7 +166,7 @@ export default function Clientes() {
               placeholder="Buscar por nome, telefone ou email..."
               value={searchInput}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
           <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
@@ -181,32 +181,32 @@ export default function Clientes() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500">Carregando...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</div>
       ) : (
         <>
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nome</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Telefone</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {allClientes.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="4" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                     Nenhum cliente encontrado
                   </td>
                 </tr>
               ) : (
                 allClientes.map((cliente) => (
-                  <tr key={cliente.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-800">{cliente.nome}</td>
-                    <td className="px-6 py-4 text-gray-600">{cliente.telefone}</td>
-                    <td className="px-6 py-4 text-gray-600">{cliente.email || '-'}</td>
+                  <tr key={cliente.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                    <td className="px-6 py-4 font-medium text-gray-800 dark:text-gray-100">{cliente.nome}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{cliente.telefone}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{cliente.email || '-'}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         <button onClick={() => openProfile(cliente)} className="p-2 text-indigo-600 hover:bg-indigo-50 rounded" title="Ver perfil">
@@ -240,69 +240,69 @@ export default function Clientes() {
       {/* Modal Criar/Editar */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">{editingCliente ? 'Editar Cliente' : 'Novo Cliente'}</h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nome *</label>
                 <input
                   type="text"
                   value={formData.nome}
                   onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Telefone *</label>
                 <input
                   type="text"
                   value={formData.telefone}
                   onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Email</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">CPF</label>
                   <input
                     type="text"
                     value={formData.cpf}
                     onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nascimento</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nascimento</label>
                   <input
                     type="date"
                     value={formData.dataNascimento}
                     onChange={(e) => setFormData({ ...formData, dataNascimento: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Observações</label>
                 <textarea
                   value={formData.observacoes}
                   onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   rows={3}
                 />
               </div>
@@ -312,7 +312,7 @@ export default function Clientes() {
                 </div>
               )}
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                   Cancelar
                 </button>
                 <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
@@ -327,20 +327,20 @@ export default function Clientes() {
       {/* Modal Confirmação Exclusão */}
       {deleteModal.open && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-md">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
             <div className="p-6">
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mx-auto mb-4">
                 <AlertCircle className="text-red-600" size={32} />
               </div>
-              <h2 className="text-xl font-bold text-gray-800 text-center mb-2">Confirmar Exclusão</h2>
-              <p className="text-gray-600 text-center mb-6">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center mb-2">Confirmar Exclusão</h2>
+              <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
                 Tem certeza que deseja excluir o cliente <strong>{deleteModal.cliente?.nome}</strong>?<br/>
                 <span className="text-sm text-red-500">Esta ação não pode ser desfeita.</span>
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteModal({ open: false, cliente: null })}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+                  className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 font-medium"
                 >
                   Cancelar
                 </button>
@@ -360,18 +360,18 @@ export default function Clientes() {
       {/* Modal Perfil */}
       {profileModal.open && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
                   <User className="text-indigo-600" size={24} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-800">{profileModal.cliente?.nome}</h2>
-                  <p className="text-gray-500 text-sm">{profileModal.cliente?.telefone}</p>
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">{profileModal.cliente?.nome}</h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">{profileModal.cliente?.telefone}</p>
                 </div>
               </div>
-              <button onClick={() => setProfileModal({ open: false, cliente: null })} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setProfileModal({ open: false, cliente: null })} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
@@ -383,38 +383,38 @@ export default function Clientes() {
                     <Gift size={16} />
                     <span className="text-sm font-medium">Crédito</span>
                   </div>
-                  <p className="text-lg font-bold text-gray-800">{formatCurrency(profileModal.cliente?.credito || 0)}</p>
+                  <p className="text-lg font-bold text-gray-800 dark:text-gray-100">{formatCurrency(profileModal.cliente?.credito || 0)}</p>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-blue-600 mb-1">
                     <Clock size={16} />
                     <span className="text-sm font-medium">Fechamentos</span>
                   </div>
-                  <p className="text-2xl font-bold text-gray-800">{fechamentos.length}</p>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{fechamentos.length}</p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-green-600 mb-1">
                     <DollarSign size={16} />
                     <span className="text-sm font-medium">Total Gasto</span>
                   </div>
-                  <p className="text-lg font-bold text-gray-800">
+                  <p className="text-lg font-bold text-gray-800 dark:text-gray-100">
                     {formatCurrency(fechamentos.reduce((sum, f) => sum + (f.totalGeral || f.total || 0), 0))}
                   </p>
                 </div>
               </div>
 
               <div>
-                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
                   <Clock className="text-blue-500" size={18} />
                   Últimos Fechamentos
                 </h3>
                 {fechamentos.length > 0 ? (
                   <div className="space-y-2">
                     {fechamentos.slice(0, 10).map((fech) => (
-                      <div key={fech.id} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
+                      <div key={fech.id} className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-gray-800">{formatDate(fech.data)}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="font-medium text-gray-800 dark:text-gray-100">{formatDate(fech.data)}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             {fech.profissionalNome || 'Profissional não informado'}
                           </p>
                         </div>
@@ -434,18 +434,18 @@ export default function Clientes() {
       {/* Modal Compras */}
       {comprasModal.open && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                   <ShoppingBag className="text-green-600" size={20} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-800">Histórico de Compras</h2>
-                  <p className="text-gray-500 text-sm">{comprasModal.cliente?.nome}</p>
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Histórico de Compras</h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">{comprasModal.cliente?.nome}</p>
                 </div>
               </div>
-              <button onClick={() => setComprasModal({ open: false, cliente: null })} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setComprasModal({ open: false, cliente: null })} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
@@ -455,18 +455,18 @@ export default function Clientes() {
                 const vraw = vendasClienteData?.data?.data;
                 const vendas = Array.isArray(vraw) ? vraw : (Array.isArray(vraw?.data) ? vraw.data : []);
                 return !vendas.length ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <ShoppingBag size={48} className="mx-auto mb-4 opacity-50" />
                   <p>Nenhuma compra registrada para este cliente</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {vendas.map((venda) => (
-                    <div key={venda.id} className="bg-gray-50 rounded-lg p-4">
+                    <div key={venda.id} className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <p className="font-semibold text-gray-800">Venda #{venda.id?.slice(0, 8) || venda.id}</p>
-                          <p className="text-sm text-gray-500">{formatDate(venda.data)}</p>
+                          <p className="font-semibold text-gray-800 dark:text-gray-100">Venda #{venda.id?.slice(0, 8) || venda.id}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{formatDate(venda.data)}</p>
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-green-600">{formatCurrency(venda.total)}</p>
@@ -480,12 +480,12 @@ export default function Clientes() {
 
                       {venda.itens && venda.itens.length > 0 && (
                         <div className="border-t pt-3">
-                          <p className="text-sm font-medium text-gray-600 mb-2">Produtos:</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Produtos:</p>
                           <div className="space-y-1">
                             {venda.itens.filter(i => i.tipo === 'produto').map((item, idx) => (
                               <div key={idx} className="flex justify-between text-sm">
-                                <span className="text-gray-700">{item.produtoNome || item.itemNome || 'Produto'}</span>
-                                <span className="text-gray-600">{item.quantidade}x {formatCurrency(item.precoUnitario)}</span>
+                                <span className="text-gray-700 dark:text-gray-200">{item.produtoNome || item.itemNome || 'Produto'}</span>
+                                <span className="text-gray-600 dark:text-gray-300">{item.quantidade}x {formatCurrency(item.precoUnitario)}</span>
                               </div>
                             ))}
                           </div>
@@ -496,7 +496,7 @@ export default function Clientes() {
 
                   <div className="bg-green-50 rounded-lg p-4 mt-4">
                     <div className="flex justify-between items-center">
-                      <span className="font-semibold text-gray-800">Total Gasto em Produtos:</span>
+                      <span className="font-semibold text-gray-800 dark:text-gray-100">Total Gasto em Produtos:</span>
                       <span className="font-bold text-green-600 text-lg">
                         {formatCurrency(vendas.reduce((sum, v) => sum + (v.total || 0), 0))}
                       </span>

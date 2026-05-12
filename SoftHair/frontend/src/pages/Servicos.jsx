@@ -91,14 +91,14 @@ export default function Servicos() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Serviços</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Serviços</h1>
         <button onClick={() => openModal()} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
           <Plus size={20} />
           Novo Serviço
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -107,13 +107,13 @@ export default function Servicos() {
               placeholder="Buscar serviços..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <select
             value={categoria}
             onChange={(e) => setCategoria(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">Todas categorias</option>
             {data?.data?.categorias?.map((cat) => (
@@ -124,18 +124,18 @@ export default function Servicos() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500">Carregando...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Carregando...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data?.data?.data?.length === 0 ? (
-            <div className="col-span-full text-center py-8 text-gray-500">
+            <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
               Nenhum serviço encontrado
             </div>
           ) : (
             data?.data?.data?.map((servico) => (
-              <div key={servico.id} className={`bg-white rounded-lg shadow p-5 ${!servico.ativo ? 'opacity-60' : ''}`}>
+              <div key={servico.id} className={`bg-white dark:bg-gray-800 rounded-lg shadow p-5 ${!servico.ativo ? 'opacity-60' : ''}`}>
                 <div className="flex justify-between items-start mb-3">
-                  <h3 className="font-semibold text-lg text-gray-800">{servico.nome}</h3>
+                  <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">{servico.nome}</h3>
                   <div className="flex gap-1">
                     <button onClick={() => openModal(servico)} className="p-2 text-blue-600 hover:bg-blue-50 rounded">
                       <Edit2 size={16} />
@@ -145,9 +145,9 @@ export default function Servicos() {
                     </button>
                   </div>
                 </div>
-                {servico.descricao && <p className="text-gray-500 text-sm mb-3">{servico.descricao}</p>}
+                {servico.descricao && <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">{servico.descricao}</p>}
                 <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-1 text-gray-600">
+                  <div className="flex items-center gap-1 text-gray-600 dark:text-gray-300">
                     <Clock size={16} />
                     {formatDuration(servico.duracao)}
                   </div>
@@ -157,7 +157,7 @@ export default function Servicos() {
                   </div>
                 </div>
                 {servico.categoria && (
-                  <span className="inline-block mt-3 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                  <span className="inline-block mt-3 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs rounded">
                     {servico.categoria}
                   </span>
                 )}
@@ -169,65 +169,65 @@ export default function Servicos() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-lg">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">{editingServico ? 'Editar Serviço' : 'Novo Serviço'}</h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nome *</label>
                 <input
                   type="text"
                   value={formData.nome}
                   onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Descrição</label>
                 <textarea
                   value={formData.descricao}
                   onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   rows={2}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Duração (minutos) *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Duração (minutos) *</label>
                   <input
                     type="number"
                     min="1"
                     value={formData.duracao}
                     onChange={(e) => setFormData({ ...formData, duracao: parseInt(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Preço *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Preço *</label>
                   <input
                     type="number"
                     step="0.01"
                     min="0"
                     value={formData.preco}
                     onChange={(e) => setFormData({ ...formData, preco: parseFloat(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                     required
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Categoria</label>
                 <input
                   type="text"
                   value={formData.categoria}
                   onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="Ex: Cabelo, Unhas, Estética"
                 />
               </div>
@@ -237,12 +237,12 @@ export default function Servicos() {
                   id="ativo"
                   checked={formData.ativo}
                   onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  className="w-4 h-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
                 />
-                <label htmlFor="ativo" className="text-sm text-gray-700">Serviço ativo</label>
+                <label htmlFor="ativo" className="text-sm text-gray-700 dark:text-gray-200">Serviço ativo</label>
               </div>
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                   Cancelar
                 </button>
                 <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
@@ -256,20 +256,20 @@ export default function Servicos() {
 
       {deleteModal.open && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-md">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
             <div className="p-6">
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mx-auto mb-4">
                 <AlertCircle className="text-red-600" size={32} />
               </div>
-              <h2 className="text-xl font-bold text-gray-800 text-center mb-2">Confirmar Exclusão</h2>
-              <p className="text-gray-600 text-center mb-6">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center mb-2">Confirmar Exclusão</h2>
+              <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
                 Tem certeza que deseja excluir o serviço <strong>{deleteModal.servico?.nome}</strong>?<br/>
                 <span className="text-sm text-red-500">Esta ação não pode ser desfeita.</span>
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteModal({ open: false, servico: null })}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+                  className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 font-medium"
                 >
                   Cancelar
                 </button>

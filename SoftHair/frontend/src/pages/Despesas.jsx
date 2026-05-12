@@ -22,7 +22,7 @@ function Modal({ despesa, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">{despesa?.id ? 'Editar Despesa' : 'Nova Despesa'}</h2>
           <button onClick={onClose}><X className="w-5 h-5" /></button>
@@ -30,31 +30,31 @@ function Modal({ despesa, onClose, onSave }) {
 
         <div className="space-y-3">
           <div>
-            <label className="text-sm font-medium text-gray-700">Descrição *</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Descrição *</label>
             <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={form.descricao} onChange={e => set('descricao', e.target.value)} placeholder="Ex: Aluguel do salão" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium text-gray-700">Valor *</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Valor *</label>
               <input type="number" min="0" step="0.01" className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={form.valor} onChange={e => set('valor', e.target.value)} placeholder="0,00" />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">Data</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Data</label>
               <input type="date" className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={form.data} onChange={e => set('data', e.target.value)} />
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700">Categoria</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Categoria</label>
             <select className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={form.categoria} onChange={e => set('categoria', e.target.value)}>
               {CATEGORIAS.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700">Observações</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Observações</label>
             <textarea className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
               value={form.observacoes} onChange={e => set('observacoes', e.target.value)} />
           </div>
@@ -65,7 +65,7 @@ function Modal({ despesa, onClose, onSave }) {
         </div>
 
         <div className="flex gap-2 mt-5 justify-end">
-          <button onClick={onClose} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Cancelar</button>
+          <button onClick={onClose} className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">Cancelar</button>
           <button onClick={() => onSave(form)} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             {despesa?.id ? 'Salvar' : 'Criar'}
           </button>
@@ -124,7 +124,7 @@ export default function Despesas() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Controle de Despesas</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Controle de Despesas</h1>
         <button onClick={() => setModal('new')}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
           <Plus className="w-4 h-4" /> Nova Despesa
@@ -160,10 +160,10 @@ export default function Despesas() {
       {resumoData?.categorias?.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {resumoData.categorias.map(c => (
-            <div key={c.categoria} className="bg-white border rounded-xl p-4 shadow-sm">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{c.categoria}</p>
-              <p className="text-lg font-bold text-gray-800 mt-1">{formatCurrency(c.total)}</p>
-              <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div key={c.categoria} className="bg-white dark:bg-gray-800 border rounded-xl p-4 shadow-sm">
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">{c.categoria}</p>
+              <p className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-1">{formatCurrency(c.total)}</p>
+              <div className="mt-2 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div className="h-full bg-red-400 rounded-full"
                   style={{ width: resumoData.total > 0 ? `${(c.total / resumoData.total * 100).toFixed(0)}%` : '0%' }} />
               </div>
@@ -174,31 +174,31 @@ export default function Despesas() {
       )}
 
       {/* Tabela */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border shadow-sm overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-gray-50 dark:bg-gray-900 border-b">
             <tr>
-              <th className="text-left px-4 py-3 text-gray-600 font-medium">Descrição</th>
-              <th className="text-left px-4 py-3 text-gray-600 font-medium">Categoria</th>
-              <th className="text-left px-4 py-3 text-gray-600 font-medium">Data</th>
-              <th className="text-right px-4 py-3 text-gray-600 font-medium">Valor</th>
-              <th className="text-center px-4 py-3 text-gray-600 font-medium">Ações</th>
+              <th className="text-left px-4 py-3 text-gray-600 dark:text-gray-300 font-medium">Descrição</th>
+              <th className="text-left px-4 py-3 text-gray-600 dark:text-gray-300 font-medium">Categoria</th>
+              <th className="text-left px-4 py-3 text-gray-600 dark:text-gray-300 font-medium">Data</th>
+              <th className="text-right px-4 py-3 text-gray-600 dark:text-gray-300 font-medium">Valor</th>
+              <th className="text-center px-4 py-3 text-gray-600 dark:text-gray-300 font-medium">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {(listData || []).length === 0 ? (
               <tr><td colSpan={5} className="text-center py-8 text-gray-400">Nenhuma despesa encontrada</td></tr>
             ) : (listData || []).map(d => (
-              <tr key={d.id} className="hover:bg-gray-50">
+              <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                 <td className="px-4 py-3">
-                  <p className="font-medium text-gray-800">{d.descricao}</p>
+                  <p className="font-medium text-gray-800 dark:text-gray-100">{d.descricao}</p>
                   {d.recorrente && <span className="text-xs text-blue-500">Recorrente</span>}
                   {d.observacoes && <p className="text-xs text-gray-400 mt-0.5">{d.observacoes}</p>}
                 </td>
                 <td className="px-4 py-3">
-                  <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">{d.categoria}</span>
+                  <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2 py-0.5 rounded-full text-xs">{d.categoria}</span>
                 </td>
-                <td className="px-4 py-3 text-gray-600">
+                <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                   {new Date(d.data + 'T00:00:00').toLocaleDateString('pt-BR')}
                 </td>
                 <td className="px-4 py-3 text-right font-semibold text-red-600">{formatCurrency(d.valor)}</td>

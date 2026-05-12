@@ -31,7 +31,7 @@ export default function Configuracoes() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Configurações</h1>
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Configurações</h1>
 
       {message && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700">
@@ -39,21 +39,21 @@ export default function Configuracoes() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-3 bg-indigo-100 rounded-lg"><User className="text-indigo-600" size={24} /></div>
-          <div><h2 className="text-lg font-semibold">Perfil</h2><p className="text-sm text-gray-500">Suas informações pessoais</p></div>
+          <div><h2 className="text-lg font-semibold">Perfil</h2><p className="text-sm text-gray-500 dark:text-gray-400">Suas informações pessoais</p></div>
         </div>
-        <div className="space-y-2 text-sm text-gray-700">
+        <div className="space-y-2 text-sm text-gray-700 dark:text-gray-200">
           <p><span className="font-medium">Nome:</span> {user?.nome || user?.name || '—'}</p>
           <p><span className="font-medium">Email:</span> {user?.email || '—'}</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-3 bg-purple-100 rounded-lg"><Keyboard className="text-purple-600" size={24} /></div>
-          <div><h2 className="text-lg font-semibold">Atalho do Launcher</h2><p className="text-sm text-gray-500">Tecla para abrir o Raycast (⌘K)</p></div>
+          <div><h2 className="text-lg font-semibold">Atalho do Launcher</h2><p className="text-sm text-gray-500 dark:text-gray-400">Tecla para abrir o Raycast (⌘K)</p></div>
         </div>
         <div className="flex items-center gap-4">
           <kbd className="px-4 py-2 rounded-xl text-lg font-mono font-bold border-2" style={{ borderColor: recording ? '#5e6ad2' : '#e5e7eb', background: recording ? 'rgba(94,106,210,0.08)' : '#f9fafb', color: '#1a1a2e', minWidth: 80, textAlign: 'center' }}>
@@ -67,7 +67,7 @@ export default function Configuracoes() {
             {recording ? 'Pressione uma tecla…' : 'Alterar atalho'}
           </button>
           <button onClick={() => { setBind(DEFAULT_BIND); saveBind(DEFAULT_BIND); setMessage('Resetado!'); setTimeout(() => setMessage(''), 1500); }}
-            className="text-xs text-gray-400 hover:text-gray-600 underline">resetar</button>
+            className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-300 underline">resetar</button>
         </div>
       </div>
     </div>

@@ -221,10 +221,10 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Dashboard</h1>
         <button
           onClick={loadDashboardData}
-          className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 rounded-lg text-gray-600 dark:text-gray-300 transition-colors"
           title="Atualizar dados"
         >
           <RefreshCw size={18} />
@@ -234,11 +234,11 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
         {statCards.map((stat, index) => (
-          <div key={index} className="bg-white rounded-lg shadow p-6">
+          <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stat.value}</p>
               </div>
               <div className={`${stat.color} p-3 rounded-lg`}>
                 <stat.icon className="text-white" size={24} />
@@ -416,7 +416,7 @@ export default function Dashboard() {
               )}
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-500 text-center py-10">Nenhum produto cadastrado</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center py-10">Nenhum produto cadastrado</p>
           )}
         </div>
 
@@ -603,18 +603,18 @@ export default function Dashboard() {
         {/* Gráfico — order:2 aparece depois da mini-agenda */}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Produtos com Reposição Necessária</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Produtos com Reposição Necessária</h2>
         {produtosEstoqueBaixo.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-600">Produto</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-600">Categoria</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-600">Estoque Atual</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-600">Estoque Mínimo</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-600">Faltam</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Produto</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Categoria</th>
+                  <th className="text-center py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Estoque Atual</th>
+                  <th className="text-center py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Estoque Mínimo</th>
+                  <th className="text-center py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Faltam</th>
                 </tr>
               </thead>
               <tbody>
@@ -623,9 +623,9 @@ export default function Dashboard() {
                   const estoqueMin = produto.estoqueMinimo || 0;
                   const falta = Math.max(0, estoqueMin - estoqueAtual);
                   return (
-                    <tr key={produto.id} className="border-b hover:bg-gray-50">
+                    <tr key={produto.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                       <td className="py-3 px-4">{produto.nome}</td>
-                      <td className="py-3 px-4 text-gray-600">{produto.categoria || '-'}</td>
+                      <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{produto.categoria || '-'}</td>
                       <td className="py-3 px-4 text-center">
                         <span className={`px-2 py-1 rounded-full text-sm ${
                           estoqueAtual === 0 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
@@ -633,7 +633,7 @@ export default function Dashboard() {
                           {estoqueAtual} {produto.unidade || 'un'}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center text-gray-600">{estoqueMin} {produto.unidade || 'un'}</td>
+                      <td className="py-3 px-4 text-center text-gray-600 dark:text-gray-300">{estoqueMin} {produto.unidade || 'un'}</td>
                       <td className="py-3 px-4 text-center">
                         <span className="px-2 py-1 rounded-full text-sm bg-red-100 text-red-700 font-semibold">
                           {falta} {produto.unidade || 'un'}
@@ -646,25 +646,25 @@ export default function Dashboard() {
             </table>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+          <div className="flex flex-col items-center justify-center py-10 text-gray-500 dark:text-gray-400">
             <Package size={48} className="mb-3 opacity-50" />
             <p>Todos os produtos estão com estoque adequado!</p>
           </div>
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Visão Geral do Estoque</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Visão Geral do Estoque</h2>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b bg-gray-50">
-                <th className="text-left py-3 px-4 font-semibold text-gray-600">Produto</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-600">Categoria</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-600">Estoque</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-600">Preço Unit.</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-600">Valor Total</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-600">Status</th>
+              <tr className="border-b bg-gray-50 dark:bg-gray-900">
+                <th className="text-left py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Produto</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Categoria</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Estoque</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Preço Unit.</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Valor Total</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -674,9 +674,9 @@ export default function Dashboard() {
                 const statusEstoque = estoqueAtual === 0 ? 'Esgotado' : 
                   estoqueAtual <= (produto.estoqueMinimo || 0) ? 'Baixo' : 'Normal';
                 return (
-                  <tr key={produto.id} className="border-b hover:bg-gray-50">
+                  <tr key={produto.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                     <td className="py-3 px-4 font-medium">{produto.nome}</td>
-                    <td className="py-3 px-4 text-gray-600">{produto.categoria || '-'}</td>
+                    <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{produto.categoria || '-'}</td>
                     <td className="py-3 px-4 text-center">
                       <span className={`px-2 py-1 rounded-full text-sm ${
                         estoqueAtual === 0 ? 'bg-red-100 text-red-700' : 

@@ -120,15 +120,15 @@ function SearchSelect({ value, onChange, options, placeholder, disabled, renderL
         onFocus={() => { setFocused(true); setOpen(true); setSearch(''); }}
         placeholder={selected ? renderLabel(selected) : placeholder}
         disabled={disabled}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
         autoComplete="off"
       />
       {open && filtered.length > 0 && (
-        <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
+        <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
           {filtered.map(o => (
             <div
               key={o.id}
-              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 text-sm ${o.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800'}`}
+              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 text-sm ${o.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
               onMouseDown={(e) => {
                 e.preventDefault();
                 onChange(o.id);
@@ -143,7 +143,7 @@ function SearchSelect({ value, onChange, options, placeholder, disabled, renderL
         </div>
       )}
       {open && search.length > 0 && filtered.length === 0 && (
-        <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 px-3 py-2 text-sm text-gray-400">
+        <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg mt-1 px-3 py-2 text-sm text-gray-400">
           Nenhum resultado
         </div>
       )}
@@ -200,11 +200,11 @@ function ClienteSearchSelect({ value, onChange, selectedCliente, disabled }) {
         onFocus={() => { setFocused(true); setOpen(true); setSearch(''); setResults([]); }}
         placeholder={selectedCliente ? displayLabel(selectedCliente) : 'Buscar cliente por nome...'}
         disabled={disabled}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
         autoComplete="off"
       />
       {open && (
-        <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
+        <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
           {loading && <div className="px-3 py-2 text-sm text-gray-400">Buscando...</div>}
           {!loading && results.length === 0 && search.length > 0 && (
             <div className="px-3 py-2 text-sm text-gray-400">Nenhum resultado</div>
@@ -215,7 +215,7 @@ function ClienteSearchSelect({ value, onChange, selectedCliente, disabled }) {
           {results.map(c => (
             <div
               key={c.id}
-              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 text-sm ${c.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800'}`}
+              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 text-sm ${c.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
               onMouseDown={(e) => {
                 e.preventDefault();
                 onChange(c.id, c);
@@ -284,17 +284,17 @@ function ServicoSearchSelect({ value, onChange, selectedServico, disabled }) {
         onFocus={() => { setFocused(true); setOpen(true); setSearch(''); doSearch(''); }}
         placeholder={selectedServico ? displayLabel(selectedServico) : 'Buscar serviço por nome...'}
         disabled={disabled}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
         autoComplete="off"
       />
       {open && (
-        <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
+        <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
           {loading && <div className="px-3 py-2 text-sm text-gray-400">Buscando...</div>}
           {!loading && results.length === 0 && <div className="px-3 py-2 text-sm text-gray-400">Nenhum resultado</div>}
           {results.map(s => (
             <div
               key={s.id}
-              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 text-sm ${s.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800'}`}
+              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 text-sm ${s.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
               onMouseDown={(e) => {
                 e.preventDefault();
                 onChange(s.id, s);
@@ -876,7 +876,7 @@ export default function Agenda() {
             <AlertCircle size={20} className="text-red-600" />
           )}
           <span className="flex-1">{notificacao.mensagem}</span>
-          <button onClick={() => setNotificacao(null)} className="text-gray-400 hover:text-gray-600">
+          <button onClick={() => setNotificacao(null)} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
             <X size={18} />
           </button>
         </div>
@@ -917,7 +917,7 @@ export default function Agenda() {
       )}
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">Agenda</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Agenda</h1>
         <button 
           onClick={() => openModal(null, selectedDate)}
           className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
@@ -929,22 +929,22 @@ export default function Agenda() {
 
       <div className="flex gap-4">
         <div className="w-72 flex-shrink-0">
-          <div className="bg-white rounded-xl shadow p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
             <div className="flex items-center justify-between mb-4">
               <button onClick={prevMonth} className="p-2 hover:bg-pink-50 rounded-lg transition-colors">
-                <ChevronLeft size={20} className="text-gray-600" />
+                <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
               </button>
-              <h3 className="font-semibold text-gray-800">
+              <h3 className="font-semibold text-gray-800 dark:text-gray-100">
                 {MESES[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h3>
               <button onClick={nextMonth} className="p-2 hover:bg-pink-50 rounded-lg transition-colors">
-                <ChevronRight size={20} className="text-gray-600" />
+                <ChevronRight size={20} className="text-gray-600 dark:text-gray-300" />
               </button>
             </div>
 
             <div className="grid grid-cols-7 gap-1 text-center mb-2">
               {DIAS_SEMANA.map(d => (
-                <div key={d} className="text-xs font-medium text-gray-500 py-1">{d}</div>
+                <div key={d} className="text-xs font-medium text-gray-500 dark:text-gray-400 py-1">{d}</div>
               ))}
             </div>
 
@@ -957,14 +957,14 @@ export default function Agenda() {
                     onClick={() => handleDateSelect(date)}
                     className={`
                       relative p-2 text-sm rounded-lg transition-all
-                      ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 hover:bg-pink-50'}
+                      ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 dark:text-gray-200 hover:bg-pink-50'}
                       ${isToday(date) ? 'bg-pink-100 text-pink-700 font-semibold' : ''}
                       ${isSelected(date) ? 'bg-indigo-600 text-white hover:bg-indigo-700' : ''}
                     `}
                   >
                     {date.getDate()}
                     {count > 0 && isCurrentMonth && (
-                      <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${isSelected(date) || isToday(date) ? 'bg-white' : 'bg-indigo-500'}`} />
+                      <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${isSelected(date) || isToday(date) ? 'bg-white dark:bg-gray-800' : 'bg-indigo-500'}`} />
                     )}
                   </button>
                 );
@@ -972,14 +972,14 @@ export default function Agenda() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow p-4 mt-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mt-4">
             <div className="flex items-center gap-2 mb-3">
-              <Filter size={16} className="text-gray-500" />
-              <h3 className="font-semibold text-gray-800">Filtros</h3>
+              <Filter size={16} className="text-gray-500 dark:text-gray-400" />
+              <h3 className="font-semibold text-gray-800 dark:text-gray-100">Filtros</h3>
             </div>
 
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-500 uppercase mb-2 block">Tipo</label>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2 block">Tipo</label>
               <div className="space-y-1">
                 {[
                   { value: 'todos', label: 'Todos' },
@@ -995,14 +995,14 @@ export default function Agenda() {
                       onChange={(e) => setFiltroTipo(e.target.value)}
                       className="text-indigo-600 focus:ring-indigo-500"
                     />
-                    <span className="text-sm text-gray-700">{opt.label}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-200">{opt.label}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-medium text-gray-500 uppercase mb-2 block">Profissionais</label>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2 block">Profissionais</label>
               <div className="space-y-1">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -1011,7 +1011,7 @@ export default function Agenda() {
                     onChange={() => setSelectedProfissionais([])}
                     className="rounded text-indigo-600 focus:ring-indigo-500"
                   />
-                  <span className="text-sm text-gray-700">Todos</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-200">Todos</span>
                 </label>
                 {profissionais.map((p, idx) => {
                   const color = PROFISSIONAL_COLORS[idx % PROFISSIONAL_COLORS.length];
@@ -1030,7 +1030,7 @@ export default function Agenda() {
                         className="rounded text-indigo-600 focus:ring-indigo-500"
                       />
                       <span className={`w-3 h-3 rounded-full ${color.bg}`} style={{ borderLeft: `3px solid ${color.accent}` }} />
-                      <span className="text-sm text-gray-700">{p.nome}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-200">{p.nome}</span>
                     </label>
                   );
                 })}
@@ -1038,7 +1038,7 @@ export default function Agenda() {
             </div>
 
             <div className="mt-4">
-              <label className="text-xs font-medium text-gray-500 uppercase mb-2 block">Status</label>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2 block">Status</label>
               <div className="space-y-1">
                 {[
                   { value: 'todos', label: 'Todos', color: 'bg-gray-400' },
@@ -1055,7 +1055,7 @@ export default function Agenda() {
                       className="rounded text-indigo-600 focus:ring-indigo-500"
                     />
                     <span className={`w-3 h-3 rounded-full ${opt.color}`} />
-                    <span className="text-sm text-gray-700">{opt.label}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-200">{opt.label}</span>
                   </label>
                 ))}
               </div>
@@ -1460,19 +1460,19 @@ export default function Agenda() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
-              <h2 className="text-lg font-bold text-gray-800">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">
                 {editingAgendamento?.isAtendimento ? 'Visualizar Atendimento' : (editingAgendamento ? 'Editar Agendamento' : 'Novo Agendamento')}
               </h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
             
             <form onSubmit={handleSubmit} className="p-4 space-y-3 overflow-y-auto flex-1">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Cliente *</label>
                 <ClienteSearchSelect
                   value={formData.clienteId}
                   onChange={(id, obj) => { setFormData({ ...formData, clienteId: id }); setSelectedClienteObj(obj); }}
@@ -1482,7 +1482,7 @@ export default function Agenda() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Serviço *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Serviço *</label>
                 <ServicoSearchSelect
                   value={formData.servicoId}
                   onChange={(id, obj) => { setFormData({ ...formData, servicoId: id }); setSelectedServicoObj(obj); }}
@@ -1492,11 +1492,11 @@ export default function Agenda() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Profissional *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Profissional *</label>
                 <select
                   value={formData.profissionalId}
                   onChange={(e) => setFormData({ ...formData, profissionalId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   disabled={editingAgendamento?.isAtendimento}
                   required
                 >
@@ -1508,11 +1508,11 @@ export default function Agenda() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Auxiliar</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Auxiliar</label>
                 <select
                   value={formData.auxiliarId}
                   onChange={(e) => setFormData({ ...formData, auxiliarId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   disabled={editingAgendamento?.isAtendimento}
                 >
                   <option value="">Sem auxiliar</option>
@@ -1529,23 +1529,23 @@ export default function Agenda() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data e Hora *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data e Hora *</label>
                 <input
                   type="datetime-local"
                   value={formData.dataHora}
                   onChange={(e) => setFormData({ ...formData, dataHora: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   disabled={editingAgendamento?.isAtendimento}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   disabled={editingAgendamento?.isAtendimento}
                 >
                   <option value="agendado">Agendado</option>
@@ -1555,11 +1555,11 @@ export default function Agenda() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Observações</label>
                 <textarea
                   value={formData.observacoes}
                   onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   rows={3}
                   placeholder="Observações sobre o agendamento..."
                   disabled={editingAgendamento?.isAtendimento}
@@ -1603,7 +1603,7 @@ export default function Agenda() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
                 >
                   Cancelar
                 </button>
