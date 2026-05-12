@@ -1064,7 +1064,7 @@ export default function Agenda() {
         </div>
 
         <div
-          className="flex-1 flex flex-col min-h-0 rounded-2xl overflow-hidden"
+          className="agenda-grid-wrapper flex-1 flex flex-col min-h-0 rounded-2xl overflow-hidden"
           style={{
             minWidth: 0,
             background: 'rgba(255,255,255,0.65)',
@@ -1143,7 +1143,7 @@ export default function Agenda() {
                   return (
                     <div
                       key={hora}
-                      className="flex"
+                      className="agenda-row flex"
                       style={{
                         height: SLOT_HEIGHT,
                         borderBottom: isHour
@@ -1154,7 +1154,7 @@ export default function Agenda() {
                       }}
                     >
                       <div
-                        className="w-20 flex-shrink-0 flex items-start justify-end pr-3 pt-0.5"
+                        className="agenda-time-col w-20 flex-shrink-0 flex items-start justify-end pr-3 pt-0.5"
                         style={{ borderRight: '1px solid rgba(0,0,0,0.05)', background: 'rgba(248,248,252,0.6)' }}
                       >
                         {isHour ? (

@@ -487,3 +487,97 @@ html.dark .react-datepicker {
   background-color: rgb(31 41 55);
   color: rgb(243 244 246);
 }
+
+/* =====================================================
+   AGENDA GRID — dark mode overrides para inline styles
+   ===================================================== */
+
+/* Cell base: a Agenda usa inline `background: rgba(255,255,255,...)` etc.
+   Forçamos override em dark para tom escuro. Usa shorthand `background`
+   (não `background-color`) para vencer specificity da inline `background`. */
+html.dark .agenda-cell {
+  background: rgb(31 41 55) !important; /* gray-800 */
+  border-color: rgb(75 85 99) !important;
+}
+
+/* Linhas alternadas: usamos :nth-of-type para alternar visualmente
+   independente da regra inline (toda 4ª linha tem hour mark) */
+html.dark .agenda-cell:nth-child(odd) {
+  background: rgb(17 24 39) !important; /* gray-900 */
+}
+html.dark .agenda-cell:nth-child(even) {
+  background: rgb(31 41 55) !important; /* gray-800 */
+}
+
+/* Container da agenda (rounded card que envolve a grid) — busca por
+   elementos com background rgba(255,255,255,...) inline.
+   Como não dá pra atacar inline diretamente, usamos uma classe wrapper. */
+html.dark .agenda-grid-wrapper,
+html.dark .mini-agenda-wrapper,
+html.dark .chart-card {
+  background: rgb(17 24 39) !important; /* gray-900 */
+  border-color: rgb(55 65 81) !important;
+}
+
+/* Header sticky da agenda (linha de cargos + linha de profissionais) */
+html.dark .agenda-grid-wrapper > div > div > .sticky,
+html.dark .mini-agenda-wrapper .sticky {
+  background: rgb(31 41 55) !important; /* gray-800 */
+  border-bottom-color: rgb(75 85 99) !important;
+}
+
+/* Coluna de hora (lateral esquerda com timestamps) */
+html.dark .agenda-time-col {
+  background: rgb(17 24 39) !important;
+  border-right-color: rgb(55 65 81) !important;
+  color: rgb(209 213 219) !important;
+}
+
+/* Texto dos timestamps */
+html.dark .agenda-time-col span {
+  color: rgb(209 213 219) !important;
+}
+
+/* Linhas horizontais entre slots: dar contraste em dark */
+html.dark .agenda-row {
+  border-bottom-color: rgb(55 65 81) !important;
+}
+
+/* =====================================================
+   RECHARTS — dark mode
+   ===================================================== */
+html.dark .recharts-wrapper {
+  background-color: transparent !important;
+}
+html.dark .recharts-surface {
+  background-color: transparent !important;
+}
+html.dark .recharts-cartesian-grid line,
+html.dark .recharts-cartesian-axis-line,
+html.dark .recharts-polar-grid-angle line,
+html.dark .recharts-polar-grid-concentric circle,
+html.dark .recharts-polar-grid-concentric polygon {
+  stroke: rgb(75 85 99) !important; /* gray-600 */
+}
+html.dark .recharts-text,
+html.dark .recharts-cartesian-axis-tick-value,
+html.dark .recharts-polar-angle-axis-tick-value,
+html.dark .recharts-polar-radius-axis-tick-value,
+html.dark .recharts-legend-item-text {
+  fill: rgb(209 213 219) !important; /* gray-300 */
+  color: rgb(209 213 219) !important;
+}
+html.dark .recharts-tooltip-wrapper {
+  filter: invert(0);
+}
+html.dark .recharts-default-tooltip {
+  background-color: rgb(31 41 55) !important; /* gray-800 */
+  border-color: rgb(75 85 99) !important;
+  color: rgb(243 244 246) !important;
+}
+html.dark .recharts-tooltip-item,
+html.dark .recharts-tooltip-label,
+html.dark .recharts-tooltip-item-name,
+html.dark .recharts-tooltip-item-value {
+  color: rgb(243 244 246) !important;
+}

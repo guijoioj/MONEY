@@ -260,7 +260,7 @@ export default function Dashboard() {
 
       <div className="flex flex-col gap-6">
         <div
-          className="rounded-2xl p-6"
+          className="chart-card rounded-2xl p-6 dark:bg-gray-800"
           style={{
             background: 'rgba(255,255,255,0.7)',
             backdropFilter: 'blur(24px) saturate(180%)',
@@ -461,7 +461,7 @@ export default function Dashboard() {
 
           return (
           <div
-            className={`rounded-2xl overflow-hidden ${miniExpanding ? 'mini-agenda-expanding' : ''}`}
+            className={`mini-agenda-wrapper rounded-2xl overflow-hidden ${miniExpanding ? 'mini-agenda-expanding' : ''}`}
             style={{
               background: 'rgba(255,255,255,0.65)',
               backdropFilter: 'blur(24px) saturate(180%)',
