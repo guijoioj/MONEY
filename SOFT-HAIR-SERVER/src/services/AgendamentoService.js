@@ -1,21 +1,26 @@
 const Agendamento = require('../models/Agendamento');
 const { logAction } = require('../utils/auditLog');
 
-// [P9-A1] State machine de status de agendamento — transições válidas:
-//   agendado    → confirmado | cancelado | concluido | no_show
-//   confirmado  → concluido | cancelado | no_show
-//   concluido   → ∅ (terminal)
-//   cancelado   → agendado (re-agendar — re-checa overlap)
-//   no_show     → ∅ (terminal)
+// [P9-A1 / P10-M1] State machine de status de agendamento — vocabulário canônico
+// reconciliado em Pass 10. Inclui `em_andamento` (atendimento começou) entre
+// `confirmado` e `concluido`. Atendimento tem seu próprio ciclo (em_andamento →
+// finalizado/cancelado, ver AtendimentoService). Transições válidas:
+//   agendado     → confirmado | em_andamento | cancelado
+//   confirmado   → em_andamento | cancelado | no_show
+//   em_andamento → concluido | cancelado
+//   concluido    → ∅ (terminal)
+//   cancelado    → ∅ (terminal — re-agendar exige novo agendamento)
+//   no_show      → ∅ (terminal)
 const AGEND_STATUS_TRANSITIONS = {
-  agendado: ['confirmado', 'cancelado', 'concluido', 'no_show'],
-  confirmado: ['concluido', 'cancelado', 'no_show'],
+  agendado: ['confirmado', 'em_andamento', 'cancelado'],
+  confirmado: ['em_andamento', 'cancelado', 'no_show'],
+  em_andamento: ['concluido', 'cancelado'],
   concluido: [],
-  cancelado: ['agendado'],
+  cancelado: [],
   no_show: [],
 };
 
-const AGEND_STATUS_VALIDOS = ['agendado', 'confirmado', 'cancelado', 'concluido', 'no_show'];
+const AGEND_STATUS_VALIDOS = ['agendado', 'confirmado', 'em_andamento', 'concluido', 'cancelado', 'no_show'];
 
 class AgendamentoService {
   async listar(salaoId, filtros = {}) {
@@ -204,15 +209,14 @@ class AgendamentoService {
         }
       }
 
-      // [P9-A1] Re-validar overlap se data_hora ou profissional_id mudaram
-      // (ou se status está saindo de 'cancelado' → 'agendado' — re-ativando slot).
+      // [P9-A1] Re-validar overlap se data_hora ou profissional_id mudaram.
+      // (P10-M1: re-ativação de cancelado removida — cancelado virou terminal.)
       const novoProf = data.profissional_id || existing.profissional_id;
       const novaData = data.data_hora || existing.data_hora;
       const mudouSlot = (data.profissional_id && data.profissional_id !== existing.profissional_id)
         || (data.data_hora && new Date(data.data_hora).getTime() !== new Date(existing.data_hora).getTime());
-      const reativando = data.status === 'agendado' && existing.status === 'cancelado';
 
-      if ((mudouSlot || reativando) && novoProf && novaData) {
+      if (mudouSlot && novoProf && novaData) {
         // Checa se há OUTRO agendamento ativo no mesmo slot (excluindo este id e cancelados/no_show)
         const conflito = await queryOne(
           `SELECT id FROM agendamentos

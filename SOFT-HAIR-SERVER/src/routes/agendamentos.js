@@ -130,8 +130,8 @@ router.post('/', authMiddleware, [
 // Atualizar agendamento
 // [P9-A1] requireAdmin + validator isIn + state machine (service-level)
 router.put('/:id', authMiddleware, requireAdmin, [
-  body('status').optional().isIn(['agendado', 'confirmado', 'cancelado', 'concluido', 'no_show'])
-    .withMessage('Status inválido (use: agendado, confirmado, cancelado, concluido, no_show)'),
+  body('status').optional().isIn(['agendado', 'confirmado', 'em_andamento', 'cancelado', 'concluido', 'no_show'])
+    .withMessage('Status inválido (use: agendado, confirmado, em_andamento, cancelado, concluido, no_show)'),
   body('observacoes').optional().isString().isLength({ max: 1000 }),
   body('data_hora').optional().isISO8601().withMessage('data_hora deve ser ISO 8601'),
 ], async (req, res) => {

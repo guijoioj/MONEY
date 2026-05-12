@@ -4,6 +4,11 @@ const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const { pool } = require('../config/database');
 const { sendPush } = require('../services/pushService');
+const { AgendamentoService, AtendimentoService } = require('../services');
+const { logAction } = require('../utils/auditLog');
+
+const agendamentoService = new AgendamentoService();
+const atendimentoService = new AtendimentoService();
 
 // [P5-M3] Rate limit por profissional+IP: 10 pontos/min — bloqueia double-clicks e abuse.
 const pontoLimiter = rateLimit({
@@ -225,37 +230,99 @@ router.get('/atendimentos-hoje', async (req, res) => {
 });
 
 // POST /atendimentos/:id/iniciar
-// [P5-M4] Idempotente: UPDATE só altera se status != 'em_andamento'.
-// Apenas insere registro de ponto se UPDATE efetivamente mudou o status.
+// [P10-M1] Refatorado para atravessar AgendamentoService.atualizar (state machine P9-A1):
+//   - Valida ownership (agendamento pertence ao salão + profissional do JWT).
+//   - Valida transição via state machine (somente agendado/confirmado → em_andamento).
+//   - Cria atendimento associado via AtendimentoService.criar (com valor server-side de servico.preco).
+//   - Audit log explícito ('agendamento.iniciar').
+// [P5-M4] Idempotência: se agendamento já está 'em_andamento', retorna 200 sem duplicar
+//   ponto, atendimento ou audit log.
 router.post('/atendimentos/:id/iniciar', async (req, res) => {
   try {
-    const { rows } = await pool.query(
-      `UPDATE agendamentos SET status = 'em_andamento', updated_at = NOW()
-       WHERE id = $1 AND profissional_id = $2 AND salao_id = $3
-         AND status <> 'em_andamento'
-       RETURNING *, (SELECT nome FROM clientes WHERE id = agendamentos.cliente_id) as cliente_nome`,
+    // 1) Carregar agendamento e validar tenancy estrita (salão + profissional do JWT)
+    const agendRow = await pool.query(
+      `SELECT * FROM agendamentos WHERE id = $1 AND profissional_id = $2 AND salao_id = $3`,
       [req.params.id, req.profissionalId, req.salaoId]
     );
+    if (!agendRow.rows.length) {
+      return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
+    }
+    const ag = agendRow.rows[0];
 
-    if (!rows.length) {
-      // Verifica se já estava em andamento (idempotência) ou se não existe.
-      const check = await pool.query(
-        `SELECT * FROM agendamentos WHERE id = $1 AND profissional_id = $2 AND salao_id = $3`,
-        [req.params.id, req.profissionalId, req.salaoId]
+    // 2) Idempotência — se já em_andamento, retorna sem efeitos colaterais.
+    if (ag.status === 'em_andamento') {
+      const existing = await pool.query(
+        `SELECT * FROM atendimentos WHERE agendamento_id = $1 AND profissional_id = $2 AND salao_id = $3 LIMIT 1`,
+        [ag.id, req.profissionalId, req.salaoId]
       );
-      if (!check.rows.length) {
-        return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
-      }
-      // Já em_andamento — retorna 200 sem duplicar ponto.
-      return res.json({ success: true, data: check.rows[0], message: 'já em andamento' });
+      return res.json({
+        success: true,
+        data: existing.rows[0] || ag,
+        message: 'já em andamento',
+      });
     }
 
-    // Só agora insere ponto, pois UPDATE realmente mudou o status.
+    // 3) Bloquear transição inválida explicitamente (defesa em profundidade — o service
+    //    também valida). Apenas agendado/confirmado podem iniciar.
+    if (!['agendado', 'confirmado'].includes(ag.status)) {
+      return res.status(400).json({
+        success: false,
+        error: `Não é possível iniciar atendimento com status '${ag.status}'`,
+      });
+    }
+
+    // 4) Transição via state machine
+    const updResult = await agendamentoService.atualizar(
+      ag.id,
+      { status: 'em_andamento' },
+      req.salaoId,
+      { req }
+    );
+    if (!updResult.success) {
+      return res.status(400).json({ success: false, error: updResult.error });
+    }
+
+    // 5) Cria atendimento associado (idempotente — verifica se já existe)
+    let atendimento;
+    const existing = await pool.query(
+      `SELECT * FROM atendimentos WHERE agendamento_id = $1 AND profissional_id = $2 AND salao_id = $3 LIMIT 1`,
+      [ag.id, req.profissionalId, req.salaoId]
+    );
+    if (existing.rows.length) {
+      atendimento = existing.rows[0];
+    } else {
+      const atendResult = await atendimentoService.criar({
+        cliente_id: ag.cliente_id,
+        profissional_id: req.profissionalId,
+        servico_id: ag.servico_id,
+        agendamento_id: ag.id,
+        status: 'em_andamento',
+        observacoes: req.body?.observacoes || null,
+      }, req.salaoId);
+      if (!atendResult.success) {
+        return res.status(400).json({ success: false, error: atendResult.error });
+      }
+      atendimento = atendResult.data;
+    }
+
+    // 6) Insere registro de ponto
     await pool.query(
       `INSERT INTO registros_ponto (profissional_id, salao_id, tipo) VALUES ($1, $2, 'inicio_atendimento')`,
       [req.profissionalId, req.salaoId]
     );
-    res.json({ success: true, data: rows[0] });
+
+    // 7) Audit log
+    await logAction({
+      req,
+      action: 'agendamento.iniciar',
+      entityType: 'agendamento',
+      entityId: ag.id,
+      before: { status: ag.status },
+      after: { status: 'em_andamento', atendimento_id: atendimento.id },
+      salaoId: req.salaoId,
+    }).catch(() => {});
+
+    res.json({ success: true, data: { ...updResult.data, atendimento } });
   } catch (error) {
     console.error('Erro ao iniciar atendimento:', error);
     sendErr(res, 500, 'Erro ao iniciar atendimento', error);
@@ -332,51 +399,153 @@ router.post('/aviso-atraso', [
 });
 
 // POST /atendimentos/:id/finalizar
+// [P10-M1] Refatorado para atravessar state machine de ambas as entidades:
+//   - Atendimento: em_andamento → finalizado (AtendimentoService.atualizar, P8-A2).
+//   - Agendamento: em_andamento → concluido (AgendamentoService.atualizar, P9-A1).
+//   - Comissão calculada server-side (servico.preco × profissional.comissao_percentual).
+//   - Audit log explícito ('agendamento.finalizar').
+// [P5-M4] Idempotência: se atendimento já está 'finalizado', retorna 200 sem efeitos colaterais.
 router.post('/atendimentos/:id/finalizar', async (req, res) => {
   try {
-    const agend = await pool.query(
+    // 1) Carregar agendamento e validar tenancy (salão + profissional do JWT)
+    const agendRow = await pool.query(
       'SELECT * FROM agendamentos WHERE id = $1 AND profissional_id = $2 AND salao_id = $3',
       [req.params.id, req.profissionalId, req.salaoId]
     );
-    if (!agend.rows.length)
+    if (!agendRow.rows.length) {
       return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
+    }
+    const ag = agendRow.rows[0];
 
-    const ag = agend.rows[0];
-
-    let atend = await pool.query(
-      `SELECT * FROM atendimentos WHERE agendamento_id = $1 AND profissional_id = $2 AND salao_id = $3`,
+    // 2) Buscar atendimento associado (criado em /iniciar)
+    const atendRow = await pool.query(
+      `SELECT * FROM atendimentos WHERE agendamento_id = $1 AND profissional_id = $2 AND salao_id = $3 LIMIT 1`,
       [ag.id, req.profissionalId, req.salaoId]
     );
 
-    if (atend.rows.length) {
-      atend = await pool.query(`
-        UPDATE atendimentos
-        SET status = 'finalizado', observacoes = COALESCE($3, observacoes), updated_at = NOW()
-        WHERE agendamento_id = $1 AND profissional_id = $2 AND salao_id = $4
-        RETURNING *
-      `, [ag.id, req.profissionalId, req.body.observacoes || null, req.salaoId]);
+    // 3) Idempotência — se atendimento já finalizado, retorna sem efeitos colaterais.
+    if (atendRow.rows.length && atendRow.rows[0].status === 'finalizado') {
+      return res.json({
+        success: true,
+        data: atendRow.rows[0],
+        message: 'atendimento já finalizado',
+      });
+    }
+
+    // 4) Pré-condição: agendamento deve estar em_andamento.
+    //    (Bloqueia finalizar de agendamento cancelado/concluido/no_show.)
+    if (ag.status !== 'em_andamento') {
+      return res.status(400).json({
+        success: false,
+        error: `Não é possível finalizar: agendamento está com status '${ag.status}' (esperado: em_andamento)`,
+      });
+    }
+
+    // 5) Garantir que existe atendimento associado (se /iniciar nunca foi chamado,
+    //    cria agora com status em_andamento — preserva fluxos legados antes de finalizar).
+    let atendimento;
+    if (atendRow.rows.length) {
+      atendimento = atendRow.rows[0];
     } else {
-      atend = await pool.query(`
-        INSERT INTO atendimentos (agendamento_id, cliente_id, profissional_id, salao_id, servico_id, data_atendimento, status, observacoes, valor)
-        VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, 'finalizado', $6, $7)
-        RETURNING *
-      `, [ag.id, ag.cliente_id, req.profissionalId, req.salaoId, ag.servico_id, req.body.observacoes || null, ag.valor || null]);
+      const criar = await atendimentoService.criar({
+        cliente_id: ag.cliente_id,
+        profissional_id: req.profissionalId,
+        servico_id: ag.servico_id,
+        agendamento_id: ag.id,
+        status: 'em_andamento',
+        observacoes: req.body?.observacoes || null,
+      }, req.salaoId);
+      if (!criar.success) {
+        return res.status(400).json({ success: false, error: criar.error });
+      }
+      atendimento = criar.data;
     }
 
-    // [P5-M4] Idempotente: só insere fim_atendimento se realmente mudou status.
-    const updFinal = await pool.query(
-      `UPDATE agendamentos SET status = 'finalizado', updated_at = NOW()
-       WHERE id = $1 AND salao_id = $2 AND status <> 'finalizado' RETURNING id`,
-      [req.params.id, req.salaoId]
+    // 6) Validar transição atendimento atual
+    if (atendimento.status !== 'em_andamento') {
+      return res.status(400).json({
+        success: false,
+        error: `Atendimento está em '${atendimento.status}' (esperado: em_andamento)`,
+      });
+    }
+
+    // 7) Finalizar atendimento via state machine (em_andamento → finalizado)
+    const atendUpd = await atendimentoService.atualizar(
+      atendimento.id,
+      { status: 'finalizado', observacoes: req.body?.observacoes || undefined },
+      req.salaoId,
+      { req }
     );
-    if (updFinal.rowCount > 0) {
-      await pool.query(
-        `INSERT INTO registros_ponto (profissional_id, salao_id, tipo) VALUES ($1, $2, 'fim_atendimento')`,
-        [req.profissionalId, req.salaoId]
-      );
+    if (!atendUpd.success) {
+      return res.status(400).json({ success: false, error: atendUpd.error });
     }
 
-    res.json({ success: true, data: atend.rows[0] });
+    // 8) Concluir agendamento via state machine (em_andamento → concluido)
+    const agendUpd = await agendamentoService.atualizar(
+      ag.id,
+      { status: 'concluido' },
+      req.salaoId,
+      { req }
+    );
+    if (!agendUpd.success) {
+      return res.status(400).json({ success: false, error: agendUpd.error });
+    }
+
+    // 9) Calcular comissão server-side a partir de servico.preco × profissional.comissao_percentual.
+    //    Valor autoritativo — payload do cliente NÃO pode inflacionar comissão.
+    let comissaoRow = null;
+    try {
+      const srv = ag.servico_id
+        ? (await pool.query('SELECT preco FROM servicos WHERE id = $1 AND salao_id = $2', [ag.servico_id, req.salaoId])).rows[0]
+        : null;
+      const prof = (await pool.query('SELECT comissao_percentual FROM profissionais WHERE id = $1 AND salao_id = $2', [req.profissionalId, req.salaoId])).rows[0];
+      const preco = Number(srv?.preco) || Number(atendimento.valor) || 0;
+      const percentual = Number(prof?.comissao_percentual) || 0;
+      if (preco > 0 && percentual > 0) {
+        const valorComissao = Math.round(preco * percentual) / 100;
+        const ins = await pool.query(
+          `INSERT INTO comissoes (profissional_id, venda_id, valor_total, percentual, valor_comissao, salao_id)
+           VALUES ($1, NULL, $2, $3, $4, $5) RETURNING *`,
+          [req.profissionalId, preco, percentual, valorComissao, req.salaoId]
+        );
+        comissaoRow = ins.rows[0];
+      }
+    } catch (comErr) {
+      // Comissão não deve abortar o finalizar — apenas loga.
+      console.error('Erro ao calcular comissão:', comErr.message);
+    }
+
+    // 10) Registrar ponto fim_atendimento
+    await pool.query(
+      `INSERT INTO registros_ponto (profissional_id, salao_id, tipo) VALUES ($1, $2, 'fim_atendimento')`,
+      [req.profissionalId, req.salaoId]
+    );
+
+    // 11) Audit log explícito
+    await logAction({
+      req,
+      action: 'agendamento.finalizar',
+      entityType: 'agendamento',
+      entityId: ag.id,
+      before: { agendamento_status: ag.status, atendimento_status: atendimento.status },
+      after: {
+        agendamento_status: 'concluido',
+        atendimento_status: 'finalizado',
+        atendimento_id: atendimento.id,
+        comissao_id: comissaoRow?.id || null,
+        comissao_valor: comissaoRow?.valor_comissao || null,
+      },
+      salaoId: req.salaoId,
+    }).catch(() => {});
+
+    res.json({
+      success: true,
+      data: {
+        atendimento: atendUpd.data,
+        agendamento: agendUpd.data,
+        comissao: comissaoRow,
+      },
+    });
   } catch (error) {
     console.error('Erro ao finalizar atendimento:', error);
     sendErr(res, 500, 'Erro ao finalizar atendimento', error);
