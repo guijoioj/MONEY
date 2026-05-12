@@ -868,7 +868,7 @@ export default function Agenda() {
     <div className="space-y-4">
       {notificacao && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg flex items-center gap-3 max-w-md animate-pulse ${
-          notificacao.tipo === 'success' ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 text-green-800' : 'bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-800'
+          notificacao.tipo === 'success' ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-800 dark:text-green-200' : 'bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200'
         }`}>
           {notificacao.tipo === 'success' ? (
             <Check size={20} className="text-green-600 dark:text-green-400" />
