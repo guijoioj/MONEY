@@ -581,7 +581,7 @@ async function runMigrations() {
   // Fecha a janela de race em READ COMMITTED do INSERT...WHERE NOT EXISTS em /caixa/abrir.
   await query(`
     CREATE UNIQUE INDEX IF NOT EXISTS unq_caixa_salao_dia_aberto
-      ON caixa(salao_id, (DATE(aberto_em)))
+      ON caixa(salao_id, ((aberto_em AT TIME ZONE 'UTC')::date))
       WHERE fechado_em IS NULL;
   `).catch((e) => {
     console.warn('[P8-M1] unique index caixa falhou (provavelmente duplicatas restantes):', e.message);
