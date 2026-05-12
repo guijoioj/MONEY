@@ -452,3 +452,38 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .electron-app button.md\:hidden {
   display: none !important;
 }
+
+/* =====================================================
+   DARK MODE — fallback global para elementos sem className
+   ===================================================== */
+html.dark select,
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+html.dark textarea {
+  background-color: rgb(55 65 81);
+  color: rgb(243 244 246);
+  border-color: rgb(75 85 99);
+}
+
+html.dark select option {
+  background-color: rgb(31 41 55);
+  color: rgb(243 244 246);
+}
+
+/* DatePickers nativos */
+html.dark input[type="date"],
+html.dark input[type="datetime-local"],
+html.dark input[type="time"] {
+  color-scheme: dark;
+}
+
+/* Modais e overlays */
+html.dark .bg-white {
+  background-color: rgb(31 41 55);
+}
+
+/* Datepicker calendar (MUI ou similar se usado) */
+html.dark .rdp,
+html.dark .react-datepicker {
+  background-color: rgb(31 41 55);
+  color: rgb(243 244 246);
+}
