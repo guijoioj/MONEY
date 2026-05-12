@@ -1163,7 +1163,7 @@ export default function Agenda() {
                           >
                             <User size={14} style={{ color: roleColor.bg }} />
                           </div>
-                          <span style={{ fontSize: 11, fontWeight: 500, color: 'rgba(40,40,60,0.75)', letterSpacing: '-0.01em' }}>
+                          <span className="text-gray-700 dark:text-gray-200" style={{ fontSize: 11, fontWeight: 500, letterSpacing: '-0.01em' }}>
                             {profissional.nome?.split(' ')[0]}
                           </span>
                         </div>
