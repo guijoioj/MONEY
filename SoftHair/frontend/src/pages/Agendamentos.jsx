@@ -138,7 +138,7 @@ export default function Agendamentos() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                        <User className="text-indigo-600" size={20} />
+                        <User className="text-indigo-600 dark:text-indigo-400" size={20} />
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">{agendamento.clienteNome}</h3>
@@ -162,10 +162,10 @@ export default function Agendamentos() {
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(agendamento.status)}`}>
                       {agendamento.status}
                     </span>
-                    <button onClick={() => openModal(agendamento)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
+                    <button onClick={() => openModal(agendamento)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
                       <Edit2 size={18} />
                     </button>
-                    <button onClick={() => handleDelete(agendamento.id)} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded">
+                    <button onClick={() => handleDelete(agendamento.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded">
                       <Trash2 size={18} />
                     </button>
                   </div>

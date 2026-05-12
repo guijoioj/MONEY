@@ -196,7 +196,7 @@ export default function Fechamento() {
             )}
             <div className="flex justify-between font-bold text-xl border-t pt-3">
               <span>Total Pago:</span>
-              <span className="text-indigo-600">{formatCurrency(sucesso.totalGeral)}</span>
+              <span className="text-indigo-600 dark:text-indigo-400">{formatCurrency(sucesso.totalGeral)}</span>
             </div>
             <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 pt-2 border-t">
               <span>Forma de Pagamento:</span>
@@ -356,7 +356,7 @@ export default function Fechamento() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-indigo-600">{formatCurrency(cliente.totalGeral)}</p>
+                    <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{formatCurrency(cliente.totalGeral)}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total em aberto</p>
                   </div>
                   {expandedBox === cliente.clienteId ? (
@@ -374,7 +374,7 @@ export default function Fechamento() {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Scissors size={16} className="text-blue-600" />
+                            <Scissors size={16} className="text-blue-600 dark:text-blue-400" />
                           </div>
                           <div>
                             <p className="font-semibold text-gray-800 dark:text-gray-100">Atendimento #{idx + 1}</p>
@@ -384,7 +384,7 @@ export default function Fechamento() {
                             </p>
                           </div>
                         </div>
-                        <span className="text-lg font-bold text-blue-600">{formatCurrency(atendimento.totalGeral)}</span>
+                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{formatCurrency(atendimento.totalGeral)}</span>
                       </div>
                       
                       {atendimento.servicos?.length > 0 && (
@@ -427,7 +427,7 @@ export default function Fechamento() {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                            <ShoppingBag size={16} className="text-green-600" />
+                            <ShoppingBag size={16} className="text-green-600 dark:text-green-400" />
                           </div>
                           <div>
                             <p className="font-semibold text-gray-800 dark:text-gray-100">Venda #{idx + 1}</p>
@@ -436,7 +436,7 @@ export default function Fechamento() {
                             </p>
                           </div>
                         </div>
-                        <span className="text-lg font-bold text-green-600">{formatCurrency(venda.total)}</span>
+                        <span className="text-lg font-bold text-green-600 dark:text-green-400">{formatCurrency(venda.total)}</span>
                       </div>
                       
                       <div>
@@ -506,7 +506,7 @@ export default function Fechamento() {
                 <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 rounded-xl p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Gift className="text-yellow-600" size={20} />
+                      <Gift className="text-yellow-600 dark:text-yellow-400" size={20} />
                       <span className="font-medium text-gray-700 dark:text-gray-200">Crédito disponível:</span>
                     </div>
                     <span className="text-lg font-bold text-yellow-700">{formatCurrency(creditoDisponivel)}</span>
@@ -517,7 +517,7 @@ export default function Fechamento() {
                       id="usarCredito"
                       checked={pagamentoModal.usarCredito || false}
                       onChange={(e) => setPagamentoModal({ ...pagamentoModal, usarCredito: e.target.checked })}
-                      className="w-4 h-4 text-indigo-600 rounded"
+                      className="w-4 h-4 text-indigo-600 dark:text-indigo-400 rounded"
                     />
                     <label htmlFor="usarCredito" className="text-sm text-gray-600 dark:text-gray-300">
                       Usar crédito como desconto
@@ -571,7 +571,7 @@ export default function Fechamento() {
                         Copiar
                       </button>
                     </div>
-                    <p className="text-xs text-purple-600 mt-2">Copie e cole no app do banco para pagar</p>
+                    <p className="text-xs text-purple-600 dark:text-purple-400 mt-2">Copie e cole no app do banco para pagar</p>
                   </div>
                 )}
               </div>
@@ -590,7 +590,7 @@ export default function Fechamento() {
               <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-4">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-medium text-gray-700 dark:text-gray-200">Total a Pagar:</span>
-                  <span className="text-2xl font-bold text-indigo-600">
+                  <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                     {formatCurrency(
                       Math.max(0, 
                         (pagamentoModal.atendimentos?.reduce((s, a) => s + (a.totalGeral || 0), 0) || 0) +

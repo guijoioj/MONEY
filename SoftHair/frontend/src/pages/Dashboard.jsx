@@ -253,7 +253,7 @@ export default function Dashboard() {
           <AlertTriangle className="text-red-500" size={24} />
           <div>
             <p className="font-semibold text-red-700">Atenção: {stats.produtosEstoqueBaixo} produto(s) com estoque baixo!</p>
-            <p className="text-sm text-red-600">Verifique a aba de Produtos para repor o estoque.</p>
+            <p className="text-sm text-red-600 dark:text-red-400">Verifique a aba de Produtos para repor o estoque.</p>
           </div>
         </div>
       )}
@@ -532,7 +532,7 @@ export default function Dashboard() {
               <div className="relative" style={{ minHeight: HORARIOS_AGENDA.length * 44, minWidth: 56 + profs.length * colW }}>
                 {HORARIOS_AGENDA.map((hora, horaIdx) => (
                   <div key={hora} className="flex" style={{ height: 44, borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                    <div className="flex-shrink-0 flex items-start justify-end pr-2 pt-1" style={{ width: 56, background: 'rgba(248,248,252,0.6)', borderRight: '1px solid rgba(0,0,0,0.04)' }}>
+                    <div className="mini-agenda-time-col flex-shrink-0 flex items-start justify-end pr-2 pt-1" style={{ width: 56, background: 'rgba(248,248,252,0.6)', borderRight: '1px solid rgba(0,0,0,0.04)' }}>
                       <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(50,50,80,0.45)' }}>{hora}</span>
                     </div>
                     {profs.map((profissional) => (

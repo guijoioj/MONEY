@@ -414,16 +414,16 @@ export default function Atendimentos() {
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{atendimento.clienteNome || 'Sem cliente'}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{formatCurrency(atendimento.totalProdutos)}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{formatCurrency(atendimento.totalServicos)}</td>
-                    <td className="px-6 py-4 font-medium text-indigo-600">{formatCurrency(atendimento.totalGeral)}</td>
+                    <td className="px-6 py-4 font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(atendimento.totalGeral)}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button onClick={() => viewDetails(atendimento)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded" title="Ver detalhes">
+                        <button onClick={() => viewDetails(atendimento)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded" title="Ver detalhes">
                           <Eye size={18} />
                         </button>
-                        <button onClick={() => loadAtendimentoForEdit(atendimento.id)} className="p-2 text-green-600 hover:bg-green-50 dark:bg-green-900/30 rounded" title="Editar">
+                        <button onClick={() => loadAtendimentoForEdit(atendimento.id)} className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:bg-green-900/30 rounded" title="Editar">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => handleDelete(atendimento.id)} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded" title="Excluir">
+                        <button onClick={() => handleDelete(atendimento.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded" title="Excluir">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -442,7 +442,7 @@ export default function Atendimentos() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold flex items-center gap-2">
-                <Clock className="text-indigo-600" />
+                <Clock className="text-indigo-600 dark:text-indigo-400" />
                 {editingAtendimento ? 'Editar Atendimento' : 'Novo Atendimento'}
               </h2>
               <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
@@ -582,7 +582,7 @@ export default function Atendimentos() {
                           </select>
                         </div>
                         <div className="col-span-2 text-sm">{formatCurrency(item.precoUnitario)}</div>
-                        <div className="col-span-2 font-medium text-indigo-600">{formatCurrency(item.subtotal)}</div>
+                        <div className="col-span-2 font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(item.subtotal)}</div>
                         <div className="col-span-1">
                           <button type="button" onClick={() => removeProduto(index)} className="text-red-500 hover:text-red-700">
                             <Trash2 size={16} />
@@ -650,7 +650,7 @@ export default function Atendimentos() {
                           />
                         </div>
                         <div className="col-span-2 text-sm">{item.duracao}min</div>
-                        <div className="col-span-2 font-medium text-indigo-600">{formatCurrency(item.preco)}</div>
+                        <div className="col-span-2 font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(item.preco)}</div>
                         <div className="col-span-1">
                           <button type="button" onClick={() => removeServico(index)} className="text-red-500 hover:text-red-700">
                             <Trash2 size={16} />
@@ -696,7 +696,7 @@ export default function Atendimentos() {
                     </div>
                     <div className="flex justify-between items-center text-xl font-bold border-t pt-3 mt-3">
                       <span>Total Geral:</span>
-                      <span className="text-indigo-600">{formatCurrency(totalGeral)}</span>
+                      <span className="text-indigo-600 dark:text-indigo-400">{formatCurrency(totalGeral)}</span>
                     </div>
                   </div>
                 </div>
@@ -825,7 +825,7 @@ export default function Atendimentos() {
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Total:</span>
-                  <span className="text-indigo-600">{formatCurrency(viewAtendimento.totalGeral)}</span>
+                  <span className="text-indigo-600 dark:text-indigo-400">{formatCurrency(viewAtendimento.totalGeral)}</span>
                 </div>
               </div>
 
@@ -845,7 +845,7 @@ export default function Atendimentos() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
             <div className="p-6">
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mx-auto mb-4">
-                <AlertCircle className="text-red-600" size={32} />
+                <AlertCircle className="text-red-600 dark:text-red-400" size={32} />
               </div>
               <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center mb-2">Confirmar Exclusão</h2>
               <p className="text-gray-600 dark:text-gray-300 text-center mb-6">

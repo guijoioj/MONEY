@@ -215,21 +215,21 @@ export default function Customizacao() {
           <div className="flex gap-4 border-b mb-6">
             <button
               onClick={() => setActiveTab('colors')}
-              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'colors' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
+              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'colors' ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
             >
               <Palette size={18} />
               Cores
             </button>
             <button
               onClick={() => setActiveTab('css')}
-              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'css' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
+              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'css' ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
             >
               <Code size={18} />
               CSS Custom
             </button>
             <button
               onClick={() => setActiveTab('logo')}
-              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'logo' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
+              className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'logo' ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
             >
               <Upload size={18} />
               Logo
@@ -348,7 +348,7 @@ export default function Customizacao() {
               {theme.logoUrl && (
                 <button
                   onClick={() => setTheme({ ...theme, logoUrl: '' })}
-                  className="mt-4 w-full px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 dark:bg-red-900/30"
+                  className="mt-4 w-full px-4 py-2 border border-red-300 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:bg-red-900/30"
                 >
                   Remover Logo
                 </button>

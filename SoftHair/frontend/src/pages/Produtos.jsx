@@ -153,7 +153,7 @@ export default function Produtos() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                          <Package className="text-indigo-600" size={20} />
+                          <Package className="text-indigo-600 dark:text-indigo-400" size={20} />
                         </div>
                         <div>
                           <div className="font-medium text-gray-800 dark:text-gray-100">{produto.nome}</div>
@@ -164,7 +164,7 @@ export default function Produtos() {
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{produto.marca || '-'}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{produto.categoria || '-'}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{formatCurrency(produto.precoCusto)}</td>
-                    <td className="px-6 py-4 font-medium text-indigo-600">{formatCurrency(produto.precoVenda)}</td>
+                    <td className="px-6 py-4 font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(produto.precoVenda)}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded ${produto.estoque <= produto.estoqueMinimo ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                         {produto.estoque <= produto.estoqueMinimo && <AlertTriangle size={14} />}
@@ -173,10 +173,10 @@ export default function Produtos() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button onClick={() => openModal(produto)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
+                        <button onClick={() => openModal(produto)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => handleDeleteClick(produto)} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded">
+                        <button onClick={() => handleDeleteClick(produto)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -309,7 +309,7 @@ export default function Produtos() {
                   id="ativo"
                   checked={formData.ativo}
                   onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
+                  className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
                 />
                 <label htmlFor="ativo" className="text-sm text-gray-700 dark:text-gray-200">Produto ativo</label>
               </div>
@@ -331,7 +331,7 @@ export default function Produtos() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
             <div className="p-6">
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mx-auto mb-4">
-                <AlertCircle className="text-red-600" size={32} />
+                <AlertCircle className="text-red-600 dark:text-red-400" size={32} />
               </div>
               <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center mb-2">Confirmar Exclusão</h2>
               <p className="text-gray-600 dark:text-gray-300 text-center mb-6">

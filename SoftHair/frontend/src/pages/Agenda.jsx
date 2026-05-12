@@ -871,9 +871,9 @@ export default function Agenda() {
           notificacao.tipo === 'success' ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 text-green-800' : 'bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-800'
         }`}>
           {notificacao.tipo === 'success' ? (
-            <Check size={20} className="text-green-600" />
+            <Check size={20} className="text-green-600 dark:text-green-400" />
           ) : (
-            <AlertCircle size={20} className="text-red-600" />
+            <AlertCircle size={20} className="text-red-600 dark:text-red-400" />
           )}
           <span className="flex-1">{notificacao.mensagem}</span>
           <button onClick={() => setNotificacao(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
@@ -885,7 +885,7 @@ export default function Agenda() {
       {pendentesData?.data?.data?.length > 0 && (
         <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 rounded-xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Clock className="text-yellow-600" size={20} />
+            <Clock className="text-yellow-600 dark:text-yellow-400" size={20} />
             <span className="text-yellow-800 font-medium">
               {pendentesData.data.data.length} agendamento(s) aguardando conversão
             </span>
@@ -909,7 +909,7 @@ export default function Agenda() {
           </p>
           <button 
             onClick={() => setAgendamentosConvertidos([])}
-            className="text-sm text-green-600 hover:text-green-700 mt-1"
+            className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 mt-1"
           >
             Ocultar mensagem
           </button>
@@ -993,7 +993,7 @@ export default function Agenda() {
                       value={opt.value}
                       checked={filtroTipo === opt.value}
                       onChange={(e) => setFiltroTipo(e.target.value)}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="text-indigo-600 dark:text-indigo-400 focus:ring-indigo-500"
                     />
                     <span className="text-sm text-gray-700 dark:text-gray-200">{opt.label}</span>
                   </label>
@@ -1009,7 +1009,7 @@ export default function Agenda() {
                     type="checkbox"
                     checked={selectedProfissionais.length === 0}
                     onChange={() => setSelectedProfissionais([])}
-                    className="rounded text-indigo-600 focus:ring-indigo-500"
+                    className="rounded text-indigo-600 dark:text-indigo-400 focus:ring-indigo-500"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-200">Todos</span>
                 </label>
@@ -1027,7 +1027,7 @@ export default function Agenda() {
                             setSelectedProfissionais(selectedProfissionais.filter(id => id !== p.id));
                           }
                         }}
-                        className="rounded text-indigo-600 focus:ring-indigo-500"
+                        className="rounded text-indigo-600 dark:text-indigo-400 focus:ring-indigo-500"
                       />
                       <span className={`w-3 h-3 rounded-full ${color.bg}`} style={{ borderLeft: `3px solid ${color.accent}` }} />
                       <span className="text-sm text-gray-700 dark:text-gray-200">{p.nome}</span>
@@ -1052,7 +1052,7 @@ export default function Agenda() {
                       type="checkbox"
                       checked={statusFilter === opt.value}
                       onChange={() => setStatusFilter(opt.value)}
-                      className="rounded text-indigo-600 focus:ring-indigo-500"
+                      className="rounded text-indigo-600 dark:text-indigo-400 focus:ring-indigo-500"
                     />
                     <span className={`w-3 h-3 rounded-full ${opt.color}`} />
                     <span className="text-sm text-gray-700 dark:text-gray-200">{opt.label}</span>
@@ -1270,7 +1270,7 @@ export default function Agenda() {
                                       deleteMutation.mutate(agend.id);
                                     }
                                   }}
-                                  className="ml-1 p-1 bg-red-100 hover:bg-red-200 rounded text-red-600 flex-shrink-0"
+                                  className="ml-1 p-1 bg-red-100 hover:bg-red-200 rounded text-red-600 dark:text-red-400 flex-shrink-0"
                                   title="Excluir agendamento"
                                 >
                                   <Trash2 size={12} />
@@ -1324,7 +1324,7 @@ export default function Agenda() {
                             <div className="text-yellow-700 opacity-75 truncate text-[10px]">
                               {agend.servicoNome || getServicoNome(agend.servicoId)}
                             </div>
-                            <div className="text-yellow-600 text-[9px] mt-0.5">
+                            <div className="text-yellow-600 dark:text-yellow-400 text-[9px] mt-0.5">
                               aux: {getProfissionalNome(agend.profissionalId)}
                             </div>
                           </div>
@@ -1382,7 +1382,7 @@ export default function Agenda() {
                                 {atend.servicos?.length || 0} serviço(s)
                               </div>
                               {atend.auxiliarId && (
-                                <div className="text-purple-600 opacity-60 truncate text-[9px]">
+                                <div className="text-purple-600 dark:text-purple-400 opacity-60 truncate text-[9px]">
                                   + Auxiliar
                                 </div>
                               )}
@@ -1580,7 +1580,7 @@ export default function Agenda() {
                   <button
                     type="button"
                     onClick={() => handleDelete(editingAgendamento.id)}
-                    className="px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 rounded-lg hover:bg-red-100"
+                    className="px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100"
                   >
                     Excluir
                   </button>
@@ -1595,7 +1595,7 @@ export default function Agenda() {
                       }
                     }}
                     disabled={converterUmMutation.isPending}
-                    className="px-4 py-2 bg-green-50 dark:bg-green-900/30 text-green-600 rounded-lg hover:bg-green-100 disabled:opacity-50"
+                    className="px-4 py-2 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-100 disabled:opacity-50"
                   >
                     {converterUmMutation.isPending ? 'Convertendo...' : 'Converter p/ Atendimento'}
                   </button>

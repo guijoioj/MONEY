@@ -126,7 +126,7 @@ export default function Metas() {
                     {prof.foto ? (
                       <img src={prof.foto} alt={prof.nome} className="w-10 h-10 rounded-full object-cover" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-semibold">
                         {prof.nome.charAt(0)}
                       </div>
                     )}
@@ -134,7 +134,7 @@ export default function Metas() {
                   </div>
                   <button
                     onClick={() => openModal(prof)}
-                    className="text-xs px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 text-indigo-600 rounded-lg transition-colors"
+                    className="text-xs px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 rounded-lg transition-colors"
                   >
                     Editar Meta
                   </button>
@@ -177,7 +177,7 @@ export default function Metas() {
                 <X size={20} />
               </button>
             </div>
-            {erro && <div className="mb-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/30 rounded p-2">{erro}</div>}
+            {erro && <div className="mb-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded p-2">{erro}</div>}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Meta de Receita (R$)</label>

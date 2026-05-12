@@ -113,7 +113,7 @@ function PedidoCard({ pedido, onAtualizado }) {
 
       {isPendente && (
         <div className="border-t pt-4 space-y-3" style={{ borderColor: 'var(--color-border)' }}>
-          {erro && <p className="text-xs text-red-600">{erro}</p>}
+          {erro && <p className="text-xs text-red-600 dark:text-red-400">{erro}</p>}
 
           <button
             onClick={aceitar}
@@ -169,14 +169,14 @@ function PedidoCard({ pedido, onAtualizado }) {
 
       {pedido.status === 'confirmado' && (
         <div className="border-t pt-3 mt-3" style={{ borderColor: 'var(--color-border)' }}>
-          <p className="text-xs text-green-600 flex items-center gap-1">
+          <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
             <CheckCircle size={13} /> Agendamento confirmado
           </p>
         </div>
       )}
       {pedido.status === 'cancelado' && pedido.observacoes && (
         <div className="border-t pt-3 mt-3" style={{ borderColor: 'var(--color-border)' }}>
-          <p className="text-xs text-red-600">Motivo: {pedido.observacoes}</p>
+          <p className="text-xs text-red-600 dark:text-red-400">Motivo: {pedido.observacoes}</p>
         </div>
       )}
     </div>

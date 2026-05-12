@@ -144,15 +144,15 @@ function AbaServicos() {
                     )}
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => openModal(servico)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded"><Edit2 size={16} /></button>
-                    <button onClick={() => setDeleteModal({ open: true, servico })} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded"><Trash2 size={16} /></button>
+                    <button onClick={() => openModal(servico)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded"><Edit2 size={16} /></button>
+                    <button onClick={() => setDeleteModal({ open: true, servico })} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded"><Trash2 size={16} /></button>
                   </div>
                 </div>
                 {servico.descricao && <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm mb-3">{servico.descricao}</p>}
                 <div className="space-y-1 text-sm">
                   <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
                     <div className="flex items-center gap-1"><Clock size={14} />{formatDuration(servico.duracao)}</div>
-                    <div className="flex items-center gap-1 font-semibold text-indigo-600">
+                    <div className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400">
                       <DollarSign size={14} />{formatCurrency(servico.preco)}
                     </div>
                   </div>
@@ -241,7 +241,7 @@ function AbaServicos() {
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="ativo-s" checked={formData.ativo}
                   onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500" />
+                  className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500" />
                 <label htmlFor="ativo-s" className="text-sm text-gray-700 dark:text-gray-200">Serviço ativo</label>
               </div>
               {formError && <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{formError}</div>}
@@ -262,7 +262,7 @@ function AbaServicos() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md p-6">
             <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mx-auto mb-4">
-              <AlertCircle className="text-red-600" size={32} />
+              <AlertCircle className="text-red-600 dark:text-red-400" size={32} />
             </div>
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center mb-2">Confirmar Exclusão</h2>
             <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
@@ -426,7 +426,7 @@ function AbaProdutos() {
                     <tr key={produto.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 ${!produto.ativo ? 'opacity-60' : ''}`}>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg"><Package className="text-indigo-600" size={20} /></div>
+                          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg"><Package className="text-indigo-600 dark:text-indigo-400" size={20} /></div>
                           <div>
                             <div className="font-medium text-gray-800 dark:text-gray-100">{produto.nome}</div>
                             {produto.descricao && <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 truncate max-w-xs">{produto.descricao}</div>}
@@ -435,7 +435,7 @@ function AbaProdutos() {
                       </td>
                       <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{produto.marca || '-'}</td>
                       <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{produto.categoria || '-'}</td>
-                      <td className="px-6 py-4 font-medium text-indigo-600">{formatCurrency(produto.preco_venda ?? produto.precoVenda)}</td>
+                      <td className="px-6 py-4 font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(produto.preco_venda ?? produto.precoVenda)}</td>
                       <td className="px-6 py-4 text-gray-600 dark:text-gray-300">-</td>
                       <td className="px-6 py-4 text-sm">-</td>
                       <td className="px-6 py-4">
@@ -448,8 +448,8 @@ function AbaProdutos() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
-                          <button onClick={() => openModal(produto)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded"><Edit2 size={18} /></button>
-                          <button onClick={() => setDeleteModal({ open: true, produto })} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded"><Trash2 size={18} /></button>
+                          <button onClick={() => openModal(produto)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded"><Edit2 size={18} /></button>
+                          <button onClick={() => setDeleteModal({ open: true, produto })} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded"><Trash2 size={18} /></button>
                         </div>
                       </td>
                     </tr>
@@ -557,7 +557,7 @@ function AbaProdutos() {
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="ativo-p" checked={formData.ativo}
                   onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500" />
+                  className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500" />
                 <label htmlFor="ativo-p" className="text-sm text-gray-700 dark:text-gray-200">Produto ativo</label>
               </div>
               {formError && <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{formError}</div>}
@@ -578,7 +578,7 @@ function AbaProdutos() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md p-6">
             <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mx-auto mb-4">
-              <AlertCircle className="text-red-600" size={32} />
+              <AlertCircle className="text-red-600 dark:text-red-400" size={32} />
             </div>
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center mb-2">Confirmar Exclusão</h2>
             <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
@@ -620,7 +620,7 @@ export default function ServicosEProdutos() {
           onClick={() => setAba('servicos')}
           className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
             aba === 'servicos'
-              ? 'border-indigo-600 text-indigo-600'
+              ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
               : 'border-transparent text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:text-gray-200'
           }`}
         >
@@ -630,7 +630,7 @@ export default function ServicosEProdutos() {
           onClick={() => setAba('produtos')}
           className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
             aba === 'produtos'
-              ? 'border-indigo-600 text-indigo-600'
+              ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
               : 'border-transparent text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:text-gray-200'
           }`}
         >

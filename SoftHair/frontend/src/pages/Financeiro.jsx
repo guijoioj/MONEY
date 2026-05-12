@@ -17,7 +17,7 @@ function DRERow({ label, value, indent = false, bold = false, separator = false,
   return (
     <div className={`flex justify-between items-center py-2 ${separator ? 'border-t border-b border-gray-200 dark:border-gray-700 my-1' : ''} ${indent ? 'pl-6' : ''}`}>
       <span className={`text-sm ${bold ? 'font-bold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-300'} ${big ? 'text-base' : ''}`}>{label}</span>
-      <span className={`text-sm font-semibold ${big ? 'text-base' : ''} ${bold ? 'font-bold' : ''} ${positive ? 'text-gray-800 dark:text-gray-100' : 'text-red-600'}`}>
+      <span className={`text-sm font-semibold ${big ? 'text-base' : ''} ${bold ? 'font-bold' : ''} ${positive ? 'text-gray-800 dark:text-gray-100' : 'text-red-600 dark:text-red-400'}`}>
         {value}
       </span>
     </div>
@@ -81,7 +81,7 @@ function AbaDRE({ mes, ano, setMes, setAno }) {
 
         <div className="flex justify-between items-center pt-2 pl-6">
           <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Margem</span>
-          <span className={`text-sm font-bold ${parseFloat(data?.margem || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <span className={`text-sm font-bold ${parseFloat(data?.margem || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
             {data?.margem}%
           </span>
         </div>
@@ -130,7 +130,7 @@ function AbaProjecao() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-3 mb-2">
-            <div className="bg-blue-100 p-2 rounded-lg"><DollarSign className="w-5 h-5 text-blue-600" /></div>
+            <div className="bg-blue-100 p-2 rounded-lg"><DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" /></div>
             <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 font-medium">Média 3 meses</p>
           </div>
           <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{fmt(data?.mediaUltimos3)}</p>
@@ -140,19 +140,19 @@ function AbaProjecao() {
           <div className="flex items-center gap-3 mb-2">
             <div className={`p-2 rounded-lg ${tendenciaPositiva ? 'bg-green-100' : 'bg-red-100'}`}>
               {tendenciaPositiva
-                ? <TrendingUp className="w-5 h-5 text-green-600" />
-                : <TrendingDown className="w-5 h-5 text-red-600" />}
+                ? <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+                : <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />}
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 font-medium">Tendência</p>
           </div>
-          <p className={`text-2xl font-bold ${tendenciaPositiva ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`text-2xl font-bold ${tendenciaPositiva ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
             {tendenciaPositiva ? '+' : ''}{data?.tendencia}%
           </p>
         </div>
 
         <div className="bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-3 mb-2">
-            <div className="bg-purple-100 p-2 rounded-lg"><BarChart2 className="w-5 h-5 text-purple-600" /></div>
+            <div className="bg-purple-100 p-2 rounded-lg"><BarChart2 className="w-5 h-5 text-purple-600 dark:text-purple-400" /></div>
             <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 font-medium">Projeção próximo mês</p>
           </div>
           <p className="text-2xl font-bold text-purple-700">{fmt(data?.projecao)}</p>

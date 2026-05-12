@@ -222,12 +222,12 @@ export default function Vendas() {
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{venda.clienteNome || 'Consumidor Final'}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{venda.vendedorNome || '-'}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{FORMA_PAGAMENTO_LABEL[venda.formaPagamento] || '-'}</td>
-                    <td className="px-6 py-4 font-medium text-indigo-600">{formatCurrency(venda.total)}</td>
+                    <td className="px-6 py-4 font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(venda.total)}</td>
                     <td className="px-6 py-4 flex items-center gap-1">
-                      <button onClick={() => viewVendaDetails(venda)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded" title="Ver detalhes">
+                      <button onClick={() => viewVendaDetails(venda)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded" title="Ver detalhes">
                         <Eye size={18} />
                       </button>
-                      <button onClick={() => openEditModal(venda)} className="p-2 text-yellow-600 hover:bg-yellow-50 dark:bg-yellow-900/30 rounded" title="Editar">
+                      <button onClick={() => openEditModal(venda)} className="p-2 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:bg-yellow-900/30 rounded" title="Editar">
                         <Pencil size={18} />
                       </button>
                       <button onClick={() => setDeleteConfirm(venda)} className="p-2 text-red-500 hover:bg-red-50 dark:bg-red-900/30 rounded" title="Excluir">
@@ -248,7 +248,7 @@ export default function Vendas() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold flex items-center gap-2">
-                <ShoppingCart className="text-indigo-600" />
+                <ShoppingCart className="text-indigo-600 dark:text-indigo-400" />
                 {editingId ? 'Editar Venda' : 'Nova Venda'}
               </h2>
               <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300"><X size={24} /></button>
@@ -341,7 +341,7 @@ export default function Vendas() {
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-xl font-bold mb-4">
                   <span>Total:</span>
-                  <span className="text-indigo-600">{formatCurrency(total)}</span>
+                  <span className="text-indigo-600 dark:text-indigo-400">{formatCurrency(total)}</span>
                 </div>
                 <div className="flex gap-3">
                   <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
@@ -375,7 +375,7 @@ export default function Vendas() {
                 <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Cliente</p><p className="font-medium">{viewVenda.clienteNome || 'Consumidor Final'}</p></div>
                 <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Vendedor</p><p className="font-medium">{viewVenda.vendedorNome || '—'}</p></div>
                 <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Forma de Pagamento</p><p className="font-medium">{FORMA_PAGAMENTO_LABEL[viewVenda.formaPagamento] || '—'}</p></div>
-                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total</p><p className="font-bold text-xl text-indigo-600">{formatCurrency(viewVenda.total)}</p></div>
+                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total</p><p className="font-bold text-xl text-indigo-600 dark:text-indigo-400">{formatCurrency(viewVenda.total)}</p></div>
               </div>
               <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3">Itens</h3>
               <div className="border rounded-lg divide-y">
@@ -404,7 +404,7 @@ export default function Vendas() {
             <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">Excluir Venda</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-1">
               Venda de <span className="font-medium">{formatDate(deleteConfirm.data)}</span> —&nbsp;
-              <span className="font-medium text-indigo-600">{formatCurrency(deleteConfirm.total)}</span>
+              <span className="font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(deleteConfirm.total)}</span>
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-6">
               O estoque dos produtos será restaurado automaticamente. Esta ação não pode ser desfeita.

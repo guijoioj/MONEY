@@ -137,10 +137,10 @@ export default function Servicos() {
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">{servico.nome}</h3>
                   <div className="flex gap-1">
-                    <button onClick={() => openModal(servico)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
+                    <button onClick={() => openModal(servico)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
                       <Edit2 size={16} />
                     </button>
-                    <button onClick={() => handleDeleteClick(servico)} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded">
+                    <button onClick={() => handleDeleteClick(servico)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded">
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -151,7 +151,7 @@ export default function Servicos() {
                     <Clock size={16} />
                     {formatDuration(servico.duracao)}
                   </div>
-                  <div className="flex items-center gap-1 font-semibold text-indigo-600">
+                  <div className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400">
                     <DollarSign size={16} />
                     {formatCurrency(servico.preco)}
                   </div>
@@ -237,7 +237,7 @@ export default function Servicos() {
                   id="ativo"
                   checked={formData.ativo}
                   onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
+                  className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
                 />
                 <label htmlFor="ativo" className="text-sm text-gray-700 dark:text-gray-200">Serviço ativo</label>
               </div>
@@ -259,7 +259,7 @@ export default function Servicos() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
             <div className="p-6">
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mx-auto mb-4">
-                <AlertCircle className="text-red-600" size={32} />
+                <AlertCircle className="text-red-600 dark:text-red-400" size={32} />
               </div>
               <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center mb-2">Confirmar Exclusão</h2>
               <p className="text-gray-600 dark:text-gray-300 text-center mb-6">

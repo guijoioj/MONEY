@@ -148,10 +148,10 @@ export default function Despesas() {
       {/* Resumo total */}
       <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 rounded-xl p-4 flex items-center gap-4">
         <div className="bg-red-100 rounded-full p-3">
-          <DollarSign className="w-6 h-6 text-red-600" />
+          <DollarSign className="w-6 h-6 text-red-600 dark:text-red-400" />
         </div>
         <div>
-          <p className="text-sm text-red-600 font-medium">Total do mês</p>
+          <p className="text-sm text-red-600 dark:text-red-400 font-medium">Total do mês</p>
           <p className="text-2xl font-bold text-red-700">{formatCurrency(resumoData?.total)}</p>
         </div>
       </div>
@@ -201,14 +201,14 @@ export default function Despesas() {
                 <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                   {new Date(d.data + 'T00:00:00').toLocaleDateString('pt-BR')}
                 </td>
-                <td className="px-4 py-3 text-right font-semibold text-red-600">{formatCurrency(d.valor)}</td>
+                <td className="px-4 py-3 text-right font-semibold text-red-600 dark:text-red-400">{formatCurrency(d.valor)}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-center gap-2">
-                    <button onClick={() => setModal(d)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 p-1 rounded">
+                    <button onClick={() => setModal(d)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:text-blue-400 p-1 rounded">
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button onClick={() => { if (confirm('Excluir despesa?')) deleteMut.mutate(d.id); }}
-                      className="text-gray-400 dark:text-gray-500 hover:text-red-600 p-1 rounded">
+                      className="text-gray-400 dark:text-gray-500 hover:text-red-600 dark:text-red-400 p-1 rounded">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

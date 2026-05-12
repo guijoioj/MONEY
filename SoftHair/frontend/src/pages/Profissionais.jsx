@@ -139,7 +139,7 @@ export default function Profissionais() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                      <User className="text-indigo-600" size={24} />
+                      <User className="text-indigo-600 dark:text-indigo-400" size={24} />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-800 dark:text-gray-100">{profissional.nome}</h3>
@@ -149,10 +149,10 @@ export default function Profissionais() {
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => openModal(profissional)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded" title="Editar">
+                    <button onClick={() => openModal(profissional)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded" title="Editar">
                       <Edit2 size={18} />
                     </button>
-                    <button onClick={() => handleDeleteClick(profissional)} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded" title="Excluir">
+                    <button onClick={() => handleDeleteClick(profissional)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded" title="Excluir">
                       <Trash2 size={18} />
                     </button>
                   </div>
@@ -183,7 +183,7 @@ export default function Profissionais() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold flex items-center gap-2">
-                <User className="text-indigo-600" />
+                <User className="text-indigo-600 dark:text-indigo-400" />
                 {editingProfissional ? 'Editar Profissional' : 'Novo Profissional'}
               </h2>
               <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
@@ -252,7 +252,7 @@ export default function Profissionais() {
                   id="ativo"
                   checked={formData.ativo}
                   onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
+                  className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
                 />
                 <label htmlFor="ativo" className="text-sm text-gray-700 dark:text-gray-200">Profissional ativo</label>
               </div>
@@ -280,7 +280,7 @@ export default function Profissionais() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
             <div className="p-6">
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mx-auto mb-4">
-                <AlertCircle className="text-red-600" size={32} />
+                <AlertCircle className="text-red-600 dark:text-red-400" size={32} />
               </div>
               <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center mb-2">Confirmar Exclusão</h2>
               <p className="text-gray-600 dark:text-gray-300 text-center mb-6">

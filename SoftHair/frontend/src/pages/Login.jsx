@@ -32,14 +32,14 @@ export default function Login() {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg mb-4">
-            <Scissors className="text-indigo-600" size={28} />
+            <Scissors className="text-indigo-600 dark:text-indigo-400" size={28} />
           </div>
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Salão de Beleza</h1>
           <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1 text-sm">Sistema de Administração</p>
         </div>
 
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-600 px-4 py-2.5 rounded-md text-sm">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-600 dark:text-red-400 px-4 py-2.5 rounded-md text-sm">
             {error}
           </div>
         )}
@@ -79,7 +79,7 @@ export default function Login() {
           </div>
 
           <div className="flex items-center justify-end">
-            <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-700">
+            <Link to="/forgot-password" className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">
               Esqueceu a senha?
             </Link>
           </div>
@@ -95,7 +95,7 @@ export default function Login() {
 
         <p className="mt-6 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm">
           Não tem uma conta?{' '}
-          <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link to="/register" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-medium">
             Cadastre-se
           </Link>
         </p>

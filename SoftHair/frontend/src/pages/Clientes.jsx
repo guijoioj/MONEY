@@ -209,16 +209,16 @@ export default function Clientes() {
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{cliente.email || '-'}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button onClick={() => openProfile(cliente)} className="p-2 text-indigo-600 hover:bg-indigo-50 dark:bg-indigo-900/30 rounded" title="Ver perfil">
+                        <button onClick={() => openProfile(cliente)} className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:bg-indigo-900/30 rounded" title="Ver perfil">
                           <User size={18} />
                         </button>
-                        <button onClick={() => setComprasModal({ open: true, cliente })} className="p-2 text-green-600 hover:bg-green-50 dark:bg-green-900/30 rounded" title="Histórico de Compras">
+                        <button onClick={() => setComprasModal({ open: true, cliente })} className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:bg-green-900/30 rounded" title="Histórico de Compras">
                           <ShoppingBag size={18} />
                         </button>
-                        <button onClick={() => openModal(cliente)} className="p-2 text-blue-600 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
+                        <button onClick={() => openModal(cliente)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => setDeleteModal({ open: true, cliente })} className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded">
+                        <button onClick={() => setDeleteModal({ open: true, cliente })} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -330,7 +330,7 @@ export default function Clientes() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
             <div className="p-6">
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mx-auto mb-4">
-                <AlertCircle className="text-red-600" size={32} />
+                <AlertCircle className="text-red-600 dark:text-red-400" size={32} />
               </div>
               <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center mb-2">Confirmar Exclusão</h2>
               <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
@@ -364,7 +364,7 @@ export default function Clientes() {
             <div className="p-6 border-b flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <User className="text-indigo-600" size={24} />
+                  <User className="text-indigo-600 dark:text-indigo-400" size={24} />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">{profileModal.cliente?.nome}</h2>
@@ -379,21 +379,21 @@ export default function Clientes() {
             <div className="flex-1 overflow-y-auto p-6">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-yellow-600 mb-1">
+                  <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 mb-1">
                     <Gift size={16} />
                     <span className="text-sm font-medium">Crédito</span>
                   </div>
                   <p className="text-lg font-bold text-gray-800 dark:text-gray-100">{formatCurrency(profileModal.cliente?.credito || 0)}</p>
                 </div>
                 <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-blue-600 mb-1">
+                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-1">
                     <Clock size={16} />
                     <span className="text-sm font-medium">Fechamentos</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{fechamentos.length}</p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-green-600 mb-1">
+                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mb-1">
                     <DollarSign size={16} />
                     <span className="text-sm font-medium">Total Gasto</span>
                   </div>
@@ -418,7 +418,7 @@ export default function Clientes() {
                             {fech.profissionalNome || 'Profissional não informado'}
                           </p>
                         </div>
-                        <p className="font-bold text-green-600">{formatCurrency(fech.totalGeral || fech.total || 0)}</p>
+                        <p className="font-bold text-green-600 dark:text-green-400">{formatCurrency(fech.totalGeral || fech.total || 0)}</p>
                       </div>
                     ))}
                   </div>
@@ -438,7 +438,7 @@ export default function Clientes() {
             <div className="p-6 border-b flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <ShoppingBag className="text-green-600" size={20} />
+                  <ShoppingBag className="text-green-600 dark:text-green-400" size={20} />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Histórico de Compras</h2>
@@ -469,7 +469,7 @@ export default function Clientes() {
                           <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{formatDate(venda.data)}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-green-600">{formatCurrency(venda.total)}</p>
+                          <p className="font-bold text-green-600 dark:text-green-400">{formatCurrency(venda.total)}</p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${
                             venda.status === 'fechado' ? 'bg-purple-100 text-purple-700' : 'bg-yellow-100 text-yellow-700'
                           }`}>
@@ -497,7 +497,7 @@ export default function Clientes() {
                   <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 mt-4">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-gray-800 dark:text-gray-100">Total Gasto em Produtos:</span>
-                      <span className="font-bold text-green-600 text-lg">
+                      <span className="font-bold text-green-600 dark:text-green-400 text-lg">
                         {formatCurrency(vendas.reduce((sum, v) => sum + (v.total || 0), 0))}
                       </span>
                     </div>

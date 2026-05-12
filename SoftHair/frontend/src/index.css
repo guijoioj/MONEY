@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  font-size: 70%; /* default 16px → 11.2px, tudo escala via rem */
+}
+
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -580,4 +584,62 @@ html.dark .recharts-tooltip-label,
 html.dark .recharts-tooltip-item-name,
 html.dark .recharts-tooltip-item-value {
   color: rgb(243 244 246) !important;
+}
+
+/* =====================================================
+   FINAL DARK MODE POLISH — agenda borders, checkboxes,
+   chart hover, button selection, mini-agenda time col
+   ===================================================== */
+
+/* Agenda cell borders — make them visible in dark */
+html.dark .agenda-cell {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .agenda-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .agenda-cell + .agenda-cell {
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Checkboxes in dark mode */
+html.dark input[type="checkbox"] {
+  background-color: rgb(55 65 81);
+  border-color: rgb(75 85 99);
+  color-scheme: dark;
+}
+html.dark input[type="checkbox"]:checked {
+  background-color: rgb(99 102 241);
+  border-color: rgb(99 102 241);
+}
+html.dark input[type="radio"] {
+  color-scheme: dark;
+}
+
+/* Mini-agenda time column in Dashboard */
+html.dark .mini-agenda-wrapper .agenda-time-col,
+html.dark .mini-agenda-time-col {
+  background-color: rgb(17 24 39) !important;
+  color: rgb(209 213 219) !important;
+}
+
+/* Recharts hover overlay (cursor / active bar) */
+html.dark .recharts-rectangle.recharts-tooltip-cursor,
+html.dark .recharts-tooltip-cursor {
+  fill: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .recharts-active-bar {
+  filter: brightness(1.2);
+}
+
+/* Selected chart-type button in chart-card */
+html.dark .chart-card button[aria-pressed="true"],
+html.dark .chart-card button.bg-indigo-100 {
+  background-color: rgb(67 56 202) !important;
+  color: white !important;
 }

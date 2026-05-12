@@ -121,7 +121,7 @@ function CheckOutSection() {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <DollarSign className="text-green-600" size={24} />
+            <DollarSign className="text-green-600 dark:text-green-400" size={24} />
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Controle de Caixas</h2>
           </div>
           <button onClick={() => refetch()} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 rounded-lg">
@@ -160,21 +160,21 @@ function CheckOutSection() {
 
             <div className="grid grid-cols-4 gap-4 mb-6">
               <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
-                <p className="text-sm text-green-600 font-medium">Total do Dia</p>
+                <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total do Dia</p>
                 <p className="text-2xl font-bold text-green-700">{formatCurrency(totalFechamentos)}</p>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
-                <p className="text-sm text-blue-600 font-medium">Fechamentos</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Fechamentos</p>
                 <p className="text-2xl font-bold text-blue-700">{fechamentos.length}</p>
               </div>
               <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4">
-                <p className="text-sm text-purple-600 font-medium">Em Atendimentos</p>
+                <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Em Atendimentos</p>
                 <p className="text-2xl font-bold text-purple-700">
                   {formatCurrency(fechamentos.reduce((sum, f) => sum + (f.totalAtendimentos || 0), 0))}
                 </p>
               </div>
               <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
-                <p className="text-sm text-orange-600 font-medium">Em Vendas</p>
+                <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">Em Vendas</p>
                 <p className="text-2xl font-bold text-orange-700">
                   {formatCurrency(fechamentos.reduce((sum, f) => sum + (f.totalVendas || 0), 0))}
                 </p>
@@ -211,11 +211,11 @@ function CheckOutSection() {
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{f.profissionalNome || '-'}</td>
                         <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">{formatCurrency(f.totalAtendimentos)}</td>
                         <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">{formatCurrency(f.totalVendas)}</td>
-                        <td className="px-4 py-3 text-right font-bold text-green-600">{formatCurrency(f.totalGeral)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">{formatCurrency(f.totalGeral)}</td>
                         <td className="px-4 py-3 text-center">
                           <button 
                             onClick={() => handleEstornar(f)}
-                            className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-900/30 rounded-lg"
+                            className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded-lg"
                             title="Estornar"
                           >
                             <X size={18} />
@@ -244,7 +244,7 @@ function CheckOutSection() {
             </div>
 
             <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 mb-6">
-              <p className="text-sm text-red-600 font-medium">Total Estornado</p>
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">Total Estornado</p>
               <p className="text-2xl font-bold text-red-700">
                 {formatCurrency(estornadosSession.reduce((sum, f) => sum + (f.totalGeral || 0), 0))}
               </p>
@@ -272,7 +272,7 @@ function CheckOutSection() {
                         <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{f.clienteNome || 'Consumidor Final'}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(f.data)}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{f.profissionalNome || '-'}</td>
-                        <td className="px-4 py-3 text-right font-bold text-red-600">{formatCurrency(f.totalGeral)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-red-600 dark:text-red-400">{formatCurrency(f.totalGeral)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -334,7 +334,7 @@ function EstornoModal({ fechamento, onClose, onSuccess }) {
             </div>
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total</p>
-              <p className="font-bold text-red-600">{formatCurrency(fechamento.totalGeral)}</p>
+              <p className="font-bold text-red-600 dark:text-red-400">{formatCurrency(fechamento.totalGeral)}</p>
             </div>
           </div>
 
@@ -438,7 +438,7 @@ function FaturamentoSection() {
     <div className="space-y-6">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
         <div className="flex items-center gap-3 mb-6">
-          <TrendingUp className="text-purple-600" size={24} />
+          <TrendingUp className="text-purple-600 dark:text-purple-400" size={24} />
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Faturamento</h2>
         </div>
 
@@ -492,19 +492,19 @@ function FaturamentoSection() {
 
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
-            <p className="text-sm text-green-600 font-medium">Total Faturado</p>
+            <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total Faturado</p>
             <p className="text-2xl font-bold text-green-700">{formatCurrency(totalFaturamento)}</p>
           </div>
           <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
-            <p className="text-sm text-blue-600 font-medium">Serviços</p>
+            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Serviços</p>
             <p className="text-2xl font-bold text-blue-700">{formatCurrency(totalServicos)}</p>
           </div>
           <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
-            <p className="text-sm text-orange-600 font-medium">Produtos</p>
+            <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">Produtos</p>
             <p className="text-2xl font-bold text-orange-700">{formatCurrency(totalProdutos)}</p>
           </div>
           <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4">
-            <p className="text-sm text-purple-600 font-medium">Fechamentos</p>
+            <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Fechamentos</p>
             <p className="text-2xl font-bold text-purple-700">{fechamentos.length}</p>
           </div>
         </div>
@@ -533,7 +533,7 @@ function FaturamentoSection() {
                       <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{f.clienteNome || 'Consumidor Final'}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{f.profissionalNome || '-'}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300 capitalize">{f.formaPagamento?.replace('_', ' ') || '-'}</td>
-                      <td className="px-4 py-3 text-right font-bold text-green-600">{formatCurrency(f.totalGeral)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">{formatCurrency(f.totalGeral)}</td>
                     </tr>
                   ))
                 )}
@@ -547,7 +547,7 @@ function FaturamentoSection() {
             {Object.entries(porProfissional).map(([nome, valor]) => (
               <div key={nome} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                 <span className="font-medium text-gray-800 dark:text-gray-100">{nome}</span>
-                <span className="font-bold text-indigo-600">{formatCurrency(valor)}</span>
+                <span className="font-bold text-indigo-600 dark:text-indigo-400">{formatCurrency(valor)}</span>
               </div>
             ))}
           </div>
@@ -558,7 +558,7 @@ function FaturamentoSection() {
             {Object.entries(porFormaPagamento).map(([forma, valor]) => (
               <div key={forma} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                 <span className="font-medium text-gray-800 dark:text-gray-100 capitalize">{forma.replace('_', ' ')}</span>
-                <span className="font-bold text-green-600">{formatCurrency(valor)}</span>
+                <span className="font-bold text-green-600 dark:text-green-400">{formatCurrency(valor)}</span>
               </div>
             ))}
           </div>
@@ -648,7 +648,7 @@ function CreditosNaCasaSection() {
       </div>
 
       <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 mb-6">
-        <p className="text-sm text-green-600 font-medium">Total de Créditos na Casa</p>
+        <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total de Créditos na Casa</p>
         <p className="text-2xl font-bold text-green-700">{formatCurrency(totalCreditos)}</p>
       </div>
 
@@ -668,7 +668,7 @@ function CreditosNaCasaSection() {
                 <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{cliente.telefone}</p>
               </div>
               <div className="flex items-center gap-4">
-                <span className={`font-bold ${cliente.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`font-bold ${cliente.saldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                   {formatCurrency(cliente.saldo)}
                 </span>
                 <button
@@ -931,7 +931,7 @@ function ComissoesSection() {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Coins className="text-yellow-600" size={24} />
+            <Coins className="text-yellow-600 dark:text-yellow-400" size={24} />
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Comissões</h2>
           </div>
           <button
@@ -986,15 +986,15 @@ function ComissoesSection() {
           <>
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
-                <p className="text-sm text-yellow-600 font-medium">Total em Comissões</p>
+                <p className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">Total em Comissões</p>
                 <p className="text-2xl font-bold text-yellow-700">{formatCurrency(totalComissoes)}</p>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
-                <p className="text-sm text-blue-600 font-medium">Profissionais</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Profissionais</p>
                 <p className="text-2xl font-bold text-blue-700">{comissoesPorProfissional.length}</p>
               </div>
               <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
-                <p className="text-sm text-green-600 font-medium">Fechamentos</p>
+                <p className="text-sm text-green-600 dark:text-green-400 font-medium">Fechamentos</p>
                 <p className="text-2xl font-bold text-green-700">{fechamentos.length}</p>
               </div>
             </div>
@@ -1020,7 +1020,7 @@ function ComissoesSection() {
                         <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{c.nome}</td>
                         <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">{c.comissao}%</td>
                         <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">{formatCurrency(c.totalVendido)}</td>
-                        <td className="px-4 py-3 text-right font-bold text-yellow-600">{formatCurrency(c.totalComissao)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-yellow-600 dark:text-yellow-400">{formatCurrency(c.totalComissao)}</td>
                       </tr>
                     ))
                   )}
@@ -1034,11 +1034,11 @@ function ComissoesSection() {
           <>
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
-                <p className="text-sm text-orange-600 font-medium">Total a Pagar</p>
+                <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">Total a Pagar</p>
                 <p className="text-2xl font-bold text-orange-700">{formatCurrency(totalComissoes)}</p>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
-                <p className="text-sm text-blue-600 font-medium">Profissionais</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Profissionais</p>
                 <p className="text-2xl font-bold text-blue-700">{comissoesPorProfissional.length}</p>
               </div>
             </div>
@@ -1063,7 +1063,7 @@ function ComissoesSection() {
                       .map((c) => (
                         <tr key={c.profissionalId} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                           <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{c.nome}</td>
-                          <td className="px-4 py-3 text-right font-bold text-yellow-600">{formatCurrency(c.totalComissao)}</td>
+                          <td className="px-4 py-3 text-right font-bold text-yellow-600 dark:text-yellow-400">{formatCurrency(c.totalComissao)}</td>
                           <td className="px-4 py-3 text-center">
                             <button 
                               onClick={() => handlePagar(c)}
@@ -1085,11 +1085,11 @@ function ComissoesSection() {
           <>
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
-                <p className="text-sm text-green-600 font-medium">Total Pago</p>
+                <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total Pago</p>
                 <p className="text-2xl font-bold text-green-700">{formatCurrency(totalPagas)}</p>
               </div>
               <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4">
-                <p className="text-sm text-red-600 font-medium">Total Estornado</p>
+                <p className="text-sm text-red-600 dark:text-red-400 font-medium">Total Estornado</p>
                 <p className="text-2xl font-bold text-red-700">{formatCurrency(totalEstornos)}</p>
               </div>
             </div>
@@ -1114,7 +1114,7 @@ function ComissoesSection() {
                       <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                         <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{c.profissionalNome}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(c.dataPagamento)}</td>
-                        <td className="px-4 py-3 text-right font-bold text-green-600">{formatCurrency(c.valor)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">{formatCurrency(c.valor)}</td>
                         <td className="px-4 py-3 text-center">
                           <button 
                             onClick={() => handleEstornar(c)}
@@ -1136,7 +1136,7 @@ function ComissoesSection() {
         {activeReport === 'estornar' && (
           <>
             <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 mb-6">
-              <p className="text-sm text-red-600 font-medium">Total Estornado</p>
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">Total Estornado</p>
               <p className="text-2xl font-bold text-red-700">{formatCurrency(totalEstornos)}</p>
             </div>
 
@@ -1160,7 +1160,7 @@ function ComissoesSection() {
                       <tr key={e.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                         <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{e.profissionalNome}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(e.createdAt)}</td>
-                        <td className="px-4 py-3 text-right font-bold text-red-600">{formatCurrency(e.valor)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-red-600 dark:text-red-400">{formatCurrency(e.valor)}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{e.motivo}</td>
                       </tr>
                     ))
@@ -1176,7 +1176,7 @@ function ComissoesSection() {
             <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
               <div className="p-6 border-b flex items-center justify-between">
                 <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                  <Edit3 className="text-yellow-600" size={20} />
+                  <Edit3 className="text-yellow-600 dark:text-yellow-400" size={20} />
                   Editar Comissões dos Profissionais
                 </h3>
                 <button onClick={() => setShowEditarComissoes(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
@@ -1252,7 +1252,7 @@ function ComissoesSection() {
                 
                 <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-300">Valor da Comissão</p>
-                  <p className="text-2xl font-bold text-yellow-600">{formatCurrency(pagarModal.totalComissao)}</p>
+                  <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{formatCurrency(pagarModal.totalComissao)}</p>
                 </div>
 
                 <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
@@ -1284,7 +1284,7 @@ function ComissoesSection() {
             <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
               <div className="p-6 border-b flex items-center justify-between">
                 <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                  <RotateCcw className="text-red-600" size={20} />
+                  <RotateCcw className="text-red-600 dark:text-red-400" size={20} />
                   Estornar Pagamento
                 </h3>
                 <button onClick={() => setEstornoModal(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
@@ -1304,7 +1304,7 @@ function ComissoesSection() {
                 
                 <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-300">Valor a Estornar</p>
-                  <p className="text-2xl font-bold text-red-600">{formatCurrency(estornoModal.valor)}</p>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">{formatCurrency(estornoModal.valor)}</p>
                 </div>
 
                 <div>
@@ -1395,7 +1395,7 @@ function RelatoriosSection() {
     <div className="space-y-6">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
         <div className="flex items-center gap-3 mb-6">
-          <BarChart3 className="text-blue-600" size={24} />
+          <BarChart3 className="text-blue-600 dark:text-blue-400" size={24} />
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Relatórios Gerais</h2>
         </div>
 
@@ -1504,7 +1504,7 @@ function RelatoriosSection() {
                   <div key={c.id} className="bg-pink-50 dark:bg-pink-900/30 rounded-lg p-4">
                     <p className="font-medium text-gray-800 dark:text-gray-100">{c.nome}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-300">{c.telefone}</p>
-                    <p className="text-sm text-pink-600 mt-1">
+                    <p className="text-sm text-pink-600 dark:text-pink-400 mt-1">
                       {new Date(c.dataNascimento).getDate()} de {MESES[new Date(c.dataNascimento).getMonth()]}
                     </p>
                   </div>
@@ -1563,7 +1563,7 @@ function RelatoriosSection() {
                       <tr key={p.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 ${estoqueBaixo ? 'bg-red-50 dark:bg-red-900/30' : ''}`}>
                         <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{p.nome}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{p.categoria || '-'}</td>
-                        <td className={`px-4 py-3 text-right ${estoqueBaixo ? 'text-red-600 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>
+                        <td className={`px-4 py-3 text-right ${estoqueBaixo ? 'text-red-600 dark:text-red-400 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>
                           {p.estoque}
                           {estoqueBaixo && ' ⚠️'}
                         </td>
@@ -1606,7 +1606,7 @@ function RelatoriosSection() {
                       <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{s.nome}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{s.categoria || '-'}</td>
                       <td className="px-4 py-3 text-center text-gray-600 dark:text-gray-300">{s.duracao || 30} min</td>
-                      <td className="px-4 py-3 text-right font-bold text-green-600">
+                      <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(s.preco)}
                       </td>
                     </tr>
@@ -1638,7 +1638,7 @@ function RelatoriosSection() {
                       <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.precoCusto || 0)}
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-green-600">
+                      <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.precoVenda)}
                       </td>
                     </tr>
