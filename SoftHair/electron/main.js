@@ -654,10 +654,13 @@ function createWindow() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
-// Crash handler — E21
+// Crash handler — E21 + P5-M6: tenta SIGTERM no backend antes do SIGKILL
+// para dar tempo do SQLite fechar handle (WAL checkpoint, sem .wal pendente).
 process.on('uncaughtException', (err) => {
   console.error('[Electron] uncaughtException:', err);
   appendLog(`[main] uncaughtException: ${err.stack || err.message}`);
+  // P5-M6: graceful backend shutdown em crash do main process
+  try { shutdownBackend(); } catch (_) { /* noop */ }
 });
 process.on('unhandledRejection', (reason) => {
   console.error('[Electron] unhandledRejection:', reason);
@@ -685,24 +688,39 @@ if (app.isPackaged) {
   }
 }
 
-// P4-A2: limpa crash dumps antigos (> 30 dias). Dumps de Chromium podem ter
-// 50-500MB cada. Sem cleanup, crescem indefinidamente.
+// P4-A2 + P5-M3: limpa crash dumps antigos (> 30 dias) e mantém no máximo
+// 5 mais recentes. Dumps de Chromium podem ter 50-500MB cada. Sem cleanup,
+// crescem indefinidamente.
 function purgeOldCrashDumps() {
   try {
     const dir = app.getPath('crashDumps');
     if (!fs.existsSync(dir)) return;
     const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const allDumpFiles = [];
     const walk = (d) => {
       for (const entry of fs.readdirSync(d)) {
         const full = path.join(d, entry);
         try {
           const st = fs.statSync(full);
           if (st.isDirectory()) { walk(full); continue; }
-          if (st.mtimeMs < cutoff) fs.unlinkSync(full);
+          if (st.mtimeMs < cutoff) {
+            fs.unlinkSync(full);
+            continue;
+          }
+          allDumpFiles.push({ path: full, mtime: st.mtimeMs });
         } catch (_) { /* skip */ }
       }
     };
     walk(dir);
+    // P5-M3: cap em 5 dumps mais recentes
+    if (allDumpFiles.length > 5) {
+      allDumpFiles.sort((a, b) => b.mtime - a.mtime);
+      const toDelete = allDumpFiles.slice(5);
+      for (const file of toDelete) {
+        try { fs.unlinkSync(file.path); } catch (_) { /* skip */ }
+      }
+      console.log(`[Electron] Crash dumps: removidos ${toDelete.length}, mantidos 5 mais recentes`);
+    }
   } catch (_) { /* não-fatal */ }
 }
 
@@ -757,27 +775,26 @@ app.whenReady().then(() => {
   });
 });
 
+// P5-M6: shutdown gracioso do backend.
+// SIGTERM aciona o handler do server.js (close server + close SQLite handle).
+// Timeout SIGKILL aumentado de 2s para 5s para dar tempo do WAL checkpoint.
+function shutdownBackend() {
+  if (!backendProcess) return;
+  try {
+    backendProcess.kill('SIGTERM');
+    setTimeout(() => {
+      try { backendProcess.kill('SIGKILL'); } catch (_) { /* já morto */ }
+    }, 5000);
+  } catch (_) { /* noop */ }
+}
+
 app.on('window-all-closed', () => {
   isQuitting = true;
-  if (backendProcess) {
-    try {
-      backendProcess.kill('SIGTERM');
-      setTimeout(() => {
-        try { backendProcess.kill('SIGKILL'); } catch (_) { /* já morto */ }
-      }, 2000);
-    } catch (_) { /* noop */ }
-  }
+  shutdownBackend();
   if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('before-quit', () => {
   isQuitting = true;
-  if (backendProcess) {
-    try {
-      backendProcess.kill('SIGTERM');
-      setTimeout(() => {
-        try { backendProcess.kill('SIGKILL'); } catch (_) { /* já morto */ }
-      }, 2000);
-    } catch (_) { /* noop */ }
-  }
+  shutdownBackend();
 });

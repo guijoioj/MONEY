@@ -113,6 +113,25 @@ router.post('/create', authMiddleware, async (req, res) => {
   }
 });
 
+// P5-M2: download de backup específico para externalização (pendrive, cloud manual).
+router.get('/download/:filename', authMiddleware, (req, res) => {
+  try {
+    const filename = safeFilename(req.params.filename);
+    if (!filename) {
+      return res.status(400).json({ success: false, error: 'Nome de arquivo inválido' });
+    }
+    const src = path.join(BACKUPS_DIR, filename);
+    if (!fs.existsSync(src)) {
+      return res.status(404).json({ success: false, error: 'Backup não encontrado' });
+    }
+    res.download(src, filename, (err) => {
+      if (err) console.warn('[backup] download error:', err.message);
+    });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 router.get('/local', authMiddleware, (req, res) => {
   try {
     ensureBackupsDir();

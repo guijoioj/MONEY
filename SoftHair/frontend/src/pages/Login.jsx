@@ -27,6 +27,8 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  // P5-M1: rate-limit (429) — desabilita form até timestamp limite.
+  const [lockedUntil, setLockedUntil] = useState(0);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -57,13 +59,26 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    // P5-M1: bloquear submissão se ainda dentro do lockout
+    if (lockedUntil > Date.now()) {
+      const sec = Math.ceil((lockedUntil - Date.now()) / 1000);
+      setError(`Aguarde ${sec}s antes de tentar novamente.`);
+      return;
+    }
     setLoading(true);
 
     try {
       await login(email, password);
       navigate('/clientes');
     } catch (err) {
-      setError(err.response?.data?.error || 'Erro ao fazer login');
+      // P5-M1: HTTP 429 do rate-limiter — fixar lockout de 15 min
+      if (err?.response?.status === 429) {
+        const until = Date.now() + 15 * 60 * 1000;
+        setLockedUntil(until);
+        setError(err.response?.data?.error || 'Muitas tentativas. Tente novamente em 15 minutos.');
+      } else {
+        setError(err.response?.data?.error || 'Erro ao fazer login');
+      }
     } finally {
       setLoading(false);
     }

@@ -201,6 +201,11 @@ class SyncService {
     this._localSalaoIdAt = 0;
     this.knownFingerprint = null; // P2-C6: TOFU fingerprint do cert
 
+    // P5-M4: ids recém-aplicados via pull. Evita re-push imediato na próxima
+    // iteração de _doSync (já que applyRemoteChanges seta updated_at = now).
+    // Mantido no formato `${table}#${id}` → expira após 2 iterações.
+    this._recentlyPulled = new Map(); // key → ttlCount
+
     this.loadConfig();
   }
 
@@ -528,6 +533,11 @@ class SyncService {
    */
   async collectLocalChanges(since) {
     const out = [];
+    // P5-M4: decrementa TTL e remove expirados antes de coletar.
+    for (const [key, ttl] of this._recentlyPulled) {
+      if (ttl <= 0) this._recentlyPulled.delete(key);
+      else this._recentlyPulled.set(key, ttl - 1);
+    }
     for (const t of SYNC_TABLES) {
       try {
         // E4: SELECT explícito por allowlist (em vez de SELECT *)
@@ -539,6 +549,10 @@ class SyncService {
         for (const row of rows) {
           const data = sanitizeRow(t, row);
           if (!data) continue;
+          // P5-M4: skip se foi recém-aplicado via pull (evita loop push-pull).
+          if (data.id && this._recentlyPulled.has(`${t}#${data.id}`)) {
+            continue;
+          }
           const isNew = !row.updated_at || row.created_at === row.updated_at;
           const operation = isNew && row.created_at > since ? 'INSERT' : 'UPDATE';
           // E16: normalizar boolean
@@ -582,6 +596,11 @@ class SyncService {
             sanitized.salao_id = localSalaoId;
           }
           await this.upsertRow(table, sanitized);
+          // P5-M4: marca ids recém-aplicados para evitar re-push imediato.
+          // TTL=2 cobre uma iteração completa (collect e push antes do TTL chegar a 0).
+          if (sanitized.id) {
+            this._recentlyPulled.set(`${table}#${sanitized.id}`, 2);
+          }
           total++;
         } catch (e) {
           console.error(`[SyncService] Erro ao aplicar ${table}#${row?.id}:`, e.message);
