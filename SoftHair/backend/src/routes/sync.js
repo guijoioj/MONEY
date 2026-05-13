@@ -9,13 +9,24 @@ router.get('/status', authMiddleware, (req, res) => {
 
 router.post('/configure', authMiddleware, (req, res) => {
   const { cloudUrl, token, enabled } = req.body;
-  syncService.configure({ cloudUrl, token, enabled });
-  res.json({ success: true, data: syncService.getStatus() });
+  try {
+    syncService.configure({ cloudUrl, token, enabled });
+    res.json({ success: true, data: syncService.getStatus() });
+  } catch (e) {
+    // E3: configure pode lançar INVALID_CLOUD_URL
+    return res.status(400).json({ success: false, error: e.message });
+  }
 });
 
 router.post('/now', authMiddleware, async (req, res) => {
   const result = await syncService.syncNow();
   res.json({ success: result.success !== false, data: { ...result, ...syncService.getStatus() } });
+});
+
+// E9: disconnect endpoint — limpa cloudUrl, token, lastSync
+router.post('/disconnect', authMiddleware, (req, res) => {
+  syncService.disconnect();
+  res.json({ success: true, data: syncService.getStatus() });
 });
 
 router.post('/login-cloud', authMiddleware, async (req, res) => {
@@ -24,12 +35,28 @@ router.post('/login-cloud', authMiddleware, async (req, res) => {
   if (!cloudUrl || !email || !senha) {
     return res.status(400).json({ success: false, error: 'cloudUrl, email e senha obrigatórios' });
   }
+  // E3: validar HTTPS antes de tentar login
+  if (!syncService.constructor && !require('../services/syncService').isValidCloudUrl) {
+    // fallback se import falhar — não bloqueia mas registra
+  }
+  const isValid = require('../services/syncService').isValidCloudUrl;
+  if (isValid && !isValid(cloudUrl)) {
+    return res.status(400).json({
+      success: false,
+      error: 'cloudUrl deve usar HTTPS (ou loopback em dev)',
+    });
+  }
   try {
     const axios = require('axios');
+    const https = require('https');
     const r = await axios.post(
       `${cloudUrl}/auth/login`,
       { email, senha },
-      { timeout: 15000 }
+      {
+        timeout: 15000,
+        // E3: rejeitar certs inválidos
+        httpsAgent: new https.Agent({ rejectUnauthorized: true }),
+      }
     );
     const token = r.data?.data?.token;
     if (!token) {

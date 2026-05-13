@@ -193,26 +193,34 @@ function initDb() {
   console.log('[initDb] Schema SQLite pronto.');
 
   // Seed: salão default + admin se não existir
+  // E4: NÃO criamos mais admin/admin123 default. Em vez disso:
+  //   - se BOOTSTRAP_ADMIN_EMAIL + BOOTSTRAP_ADMIN_PASSWORD estão setados, usamos
+  //   - senão, criamos apenas o salão. O frontend deve oferecer setup wizard
+  //     que cria o primeiro admin com senha forte do usuário (POST /api/auth/bootstrap-admin).
   const bcrypt = require('bcryptjs');
   const existing = db.prepare('SELECT COUNT(*) as n FROM saloes').get() || { n: 0 };
   if ((existing.n || 0) === 0) {
     const info = db.prepare(
       `INSERT INTO saloes (nome, email, ativo) VALUES (?, ?, 1)`
-    ).run('Meu Salão', 'admin@salao.com');
+    ).run('Meu Salão', null);
     const salaoId = info.lastInsertRowid;
 
-    const adminEmail = process.env.SOFTHAIR_DEFAULT_ADMIN_EMAIL || 'admin@salao.com';
-    const adminSenha = process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD || 'admin123';
-    const adminNome = 'Administrador';
-    const senhaHash = bcrypt.hashSync(adminSenha, 10);
-
-    db.prepare(
-      `INSERT INTO usuarios (email, senha_hash, nome, tipo, salao_id, ativo)
-       VALUES (?, ?, ?, 'admin', ?, 1)`
-    ).run(adminEmail, senhaHash, adminNome, salaoId);
-
     console.log(`[initDb] Salão default criado (id=${salaoId})`);
-    console.log(`[initDb] Admin default: ${adminEmail} / ${adminSenha}`);
+
+    const bootstrapEmail = process.env.BOOTSTRAP_ADMIN_EMAIL;
+    const bootstrapPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+
+    if (bootstrapEmail && bootstrapPassword && bootstrapPassword.length >= 8) {
+      const senhaHash = bcrypt.hashSync(bootstrapPassword, 10);
+      db.prepare(
+        `INSERT INTO usuarios (email, senha_hash, nome, tipo, salao_id, ativo)
+         VALUES (?, ?, ?, 'admin', ?, 1)`
+      ).run(bootstrapEmail, senhaHash, 'Administrador', salaoId);
+      // E22/E20: nunca logar senha em plaintext, mesmo bootstrap.
+      console.log(`[initDb] Admin bootstrap criado: ${bootstrapEmail}`);
+    } else {
+      console.log('[initDb] Nenhum admin criado — use o setup wizard na UI para criar o primeiro admin.');
+    }
   }
 }
 
