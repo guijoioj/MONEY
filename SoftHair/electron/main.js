@@ -328,14 +328,23 @@ function appendLog(line) {
     try {
       const st = fs.statSync(logPath);
       if (st.size > 10 * 1024 * 1024) {
-        fs.renameSync(logPath, logPath + '.' + Date.now() + '.old');
+        const rotatedPath = logPath + '.' + Date.now() + '.old';
+        fs.renameSync(logPath, rotatedPath);
+        // P5-B4: gzip do log rotacionado para economizar disco.
+        try {
+          const zlib = require('zlib');
+          const raw = fs.readFileSync(rotatedPath);
+          const gz = zlib.gzipSync(raw);
+          fs.writeFileSync(rotatedPath + '.gz', gz);
+          fs.unlinkSync(rotatedPath);
+        } catch (_) { /* gzip falhou, mantém .old plaintext */ }
       }
     } catch (_) { /* arquivo ainda não existe */ }
     fs.appendFileSync(logPath, `[${new Date().toISOString()}] ${line}\n`);
   } catch (_) { /* não-fatal */ }
 }
 
-// P2-M8: limpa arquivos `.old` com mais de 30 dias.
+// P2-M8 + P5-B4: limpa arquivos `.old` e `.old.gz` com mais de 30 dias.
 function purgeOldLogs() {
   try {
     const logPath = getLogPath();
@@ -344,7 +353,7 @@ function purgeOldLogs() {
     if (!fs.existsSync(dir)) return;
     const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 dias
     for (const file of fs.readdirSync(dir)) {
-      if (!file.endsWith('.old')) continue;
+      if (!file.endsWith('.old') && !file.endsWith('.old.gz')) continue;
       const full = path.join(dir, file);
       try {
         const st = fs.statSync(full);

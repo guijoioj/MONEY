@@ -210,13 +210,46 @@ UPDATE dispositivos SET ativo = false WHERE usuario_id = ?;
 4. Auditar acessos
 5. Notificar autoridades (LGPD)
 
+## 🖥️ Desktop App (Electron) — Segurança Específica
+
+### safeStorage (P5-C1)
+- `secrets.json` (JWT secret) é criptografado via `electron.safeStorage` em
+  produção, ligando a chave ao user account + machine (DPAPI/Keychain/libsecret).
+- Migração de instalações legacy é automática no primeiro boot pós-Pass 5.
+
+### Auto-update (P5-C2)
+- `electron-updater` checa GitHub Releases 30s após boot.
+- SHA256 verification do `latest.yml` protege contra MitM em transit.
+- Code signing está pendente (roadmap) — distribuição via canal oficial é
+  obrigatória até signing estar implementado.
+
+### LGPD / Privacy (P5-A2)
+- Endpoint `POST /api/auth/me/delete-account-data` cumpre LGPD art. 18
+  (recurso de "esquecimento"). Purga tabelas + secrets + sync-config +
+  backups + logs.
+- Logs locais nunca contêm body de POST (verificado em audit).
+- crashReporter `uploadToServer: false` — dumps ficam locais.
+
+### DevTools / Sandbox
+- F12, Ctrl+Shift+I/J/C, right-click "Inspect" bloqueados em produção.
+- Flags perigosas (`--no-sandbox`, `--disable-web-security`,
+  `--allow-running-insecure-content`) abortam o boot.
+- BrowserWindow com `sandbox: true`, `contextIsolation: true`,
+  `nodeIntegration: false`.
+
+### Conflict resolution em sync (P5-C4)
+- Edits concorrentes não sobrescrevem silenciosamente. Tabela
+  `sync_conflicts` registra divergências para revisão humana via
+  `GET /api/sync/conflicts`.
+
 ## 📞 Contato de Segurança
 
 Para reportar vulnerabilidades ou incidentes de segurança:
 - Email: security@softhair.com
 - PGP Key: [disponível em request]
+- **Disclosure timeline**: 90 dias entre reporte privado e divulgação pública.
 
 ---
 
-**Última atualização**: 2026-04-23
+**Última atualização**: 2026-05-13 (Pass 5)
 **Versão**: 3.0.0-secure

@@ -178,6 +178,52 @@ Auto-update (electron-updater) **exige** signing para verificar autenticidade
 dos updates. Até signing estar disponível, instalações devem ser distribuídas
 apenas via canal oficial.
 
+## Auto-update (P5-C2)
+
+A partir de Pass 5, o app verifica updates via `electron-updater` no canal
+GitHub Releases:
+
+- 30s após boot, faz `checkForUpdatesAndNotify()` (silencioso se não há update).
+- Update é baixado em background.
+- Dialog "Reiniciar agora / Depois" aparece quando download termina.
+- Se user escolhe "Depois", update é instalado no próximo `app.quit`.
+- Sem code signing ativo, electron-updater verifica SHA256 do `latest.yml`
+  do GitHub Release — protege contra MitM em transit mas não contra publisher
+  malicioso. Ativar code signing fecha o gap.
+
+Publicar nova versão:
+
+```bash
+# Após bumpar version em package.json:
+GH_TOKEN=<token> npx electron-builder --publish always
+```
+
+O electron-builder cria o release no GitHub e publica `latest.yml` + binários.
+
+## Privacidade & LGPD (P5-A2)
+
+A versão desktop guarda os dados localmente. Para excluir todos os dados de
+um salão (recurso de "esquecimento" LGPD art. 18):
+
+1. Abra **Configurações** → "Apagar todos os dados deste salão (irreversível)".
+2. Confirme a senha do administrador.
+3. O app purga tabelas (clientes, vendas, agendamentos...), `secrets.json`,
+   `sync-config.json`, backups e logs.
+4. O app reinicia em estado fresh — primeiro boot exibe setup wizard.
+
+Faça **backup local** (`/backup` no app) **antes** de executar essa operação
+se quiser recuperar dados depois.
+
+## safeStorage (P5-C1)
+
+Em Windows/macOS/Linux com keyring, o app criptografa `secrets.json` via
+`safeStorage` do Electron (DPAPI / Keychain / libsecret). A chave é vinculada
+ao user account + machine — outro user da mesma máquina ou outro PC NÃO
+consegue ler o secret.
+
+- Em Linux sem libsecret instalado, faz fallback para plaintext + chmod 0o600.
+- Migração de instalações legacy é automática no primeiro boot pós-Pass 5.
+
 Para usar PostgreSQL ao invés de SQLite (raro, geralmente só em dev):
 
 ```
