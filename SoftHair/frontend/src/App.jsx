@@ -4,11 +4,12 @@ import { useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 
 // Eager: auth pages (lightweight, first-paint critical)
+// P4-A4: Register e ResetPassword removidas — não há multi-signup público
+// no app desktop nem email server para reset. Login.jsx é o entry único.
 import Login from './pages/Login';
-import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-// Lazy: post-login pages (heavy deps like recharts, dexie, etc.)
+// Lazy: post-login pages (heavy deps like recharts, etc.)
+// P4-A1: `dexie` removida — não importada em nenhum lugar do source.
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Administrativo = lazy(() => import('./pages/Administrativo'));
 const Agenda = lazy(() => import('./pages/Agenda'));
@@ -102,9 +103,8 @@ export default function App() {
       <ElectronMenuBridge />
       <Routes>
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+      {/* P4-A4: /register e /reset-password removidas — desktop single-user sem email server */}
       <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
