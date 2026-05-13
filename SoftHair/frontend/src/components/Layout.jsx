@@ -32,6 +32,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../services/api';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useTheme } from '../context/ThemeContext';
+import StubGlobalBanner from './StubGlobalBanner';
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -381,6 +382,8 @@ export default function Layout() {
 
         <main className="flex-1 p-6 md:ml-20 pt-20"><Outlet /></main>
       </div>
+      {/* P5-C3: banner global escuta eventos stub do interceptor de axios */}
+      <StubGlobalBanner />
     </div>
   );
 }

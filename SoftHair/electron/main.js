@@ -18,7 +18,7 @@
  *   - E21: rotação básica de logs
  */
 
-const { app, BrowserWindow, shell, Menu, dialog, crashReporter, session } = require('electron');
+const { app, BrowserWindow, shell, Menu, dialog, crashReporter, session, safeStorage } = require('electron');
 const path = require('path');
 const { fork } = require('child_process');
 const fs = require('fs');
@@ -52,6 +52,164 @@ let backendProcess;
 let isQuitting = false;
 const isDev = process.argv.includes('--dev');
 const BACKEND_PORT = parseInt(process.env.SOFTHAIR_PORT, 10) || 3001;
+
+// P5-C1: safeStorage migration — usar DPAPI/Keychain/libsecret para encriptar
+// secrets sensíveis em disco. Vincula chave ao user + machine — malware em
+// outro user/máquina não decripta.
+//
+// Estratégia:
+//   1. Ao boot, antes de fork do backend, verifica se safeStorage está disponível.
+//   2. Lê secrets.json. Se contém `encryptedJwtSecret`, decripta. Senão (legacy),
+//      migra: criptografa o `jwtSecret` plaintext, regrava com novo formato.
+//   3. Expõe o JWT_SECRET decryptado via env para o backend fork.
+//
+// Em ambientes sem safeStorage (Linux sem libsecret, headless, CI), faz fallback
+// para o método antigo (plaintext + chmod 0o600). Não quebra instalações existentes.
+// P5-C2: auto-update via electron-updater (canal GitHub Releases).
+// - Em prod (app.isPackaged), checa por updates 30s após whenReady.
+// - Não intrusivo: download em background, dialog só quando pronto.
+// - User pode escolher "Reiniciar agora" ou "Depois" (instala no próximo close).
+// - Assinatura: electron-updater verifica SHA256 contra latest.yml do GitHub Release.
+//   Code signing do binary é roadmap (requer cert pago).
+function setupAutoUpdater() {
+  if (!app.isPackaged) return; // sem updater em dev
+  let autoUpdater;
+  try {
+    ({ autoUpdater } = require('electron-updater'));
+  } catch (e) {
+    console.warn('[Electron] electron-updater não instalado (dev/build sem deps):', e.message);
+    return;
+  }
+  try {
+    autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.allowDowngrade = false;
+
+    autoUpdater.on('error', (err) => {
+      console.warn('[AutoUpdater] erro:', err && err.message);
+      appendLog(`[autoUpdater] error: ${err && err.message}`);
+    });
+    autoUpdater.on('update-available', (info) => {
+      console.log('[AutoUpdater] versão disponível:', info && info.version);
+      appendLog(`[autoUpdater] update-available: ${info && info.version}`);
+    });
+    autoUpdater.on('update-not-available', () => {
+      appendLog('[autoUpdater] up-to-date');
+    });
+    autoUpdater.on('download-progress', (p) => {
+      const pct = Math.round((p && p.percent) || 0);
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        try { mainWindow.webContents.send('autoupdater:progress', { percent: pct }); } catch (_) { /* noop */ }
+      }
+    });
+    autoUpdater.on('update-downloaded', (info) => {
+      console.log('[AutoUpdater] update baixado:', info && info.version);
+      appendLog(`[autoUpdater] update-downloaded: ${info && info.version}`);
+      if (!mainWindow || mainWindow.isDestroyed()) return;
+      // Dialog não intrusiva — botão "Reiniciar agora" / "Depois"
+      try {
+        dialog.showMessageBox(mainWindow, {
+          type: 'info',
+          buttons: ['Reiniciar agora', 'Depois'],
+          defaultId: 1,
+          cancelId: 1,
+          title: 'SoftHair — atualização disponível',
+          message: `Versão ${info && info.version ? info.version : 'nova'} pronta para instalar.`,
+          detail: 'Clique em "Reiniciar agora" para aplicar imediatamente, ou escolha "Depois" para instalar quando fechar o app.',
+        }).then((res) => {
+          if (res.response === 0) {
+            try { autoUpdater.quitAndInstall(); } catch (e) {
+              console.error('[AutoUpdater] quitAndInstall falhou:', e.message);
+            }
+          }
+        }).catch(() => { /* user dismissed */ });
+      } catch (e) {
+        console.error('[AutoUpdater] dialog falhou:', e.message);
+      }
+    });
+
+    // checkForUpdatesAndNotify lida silenciosamente com erros (sem ruído ao user)
+    setTimeout(() => {
+      try {
+        autoUpdater.checkForUpdatesAndNotify().catch(() => { /* offline ou GitHub down — silencioso */ });
+      } catch (e) {
+        console.warn('[AutoUpdater] checkForUpdates falhou:', e.message);
+      }
+    }, 30000);
+  } catch (e) {
+    console.warn('[AutoUpdater] setup falhou:', e.message);
+  }
+}
+
+function migrateSecretsToSafeStorage(dataDir) {
+  try {
+    if (!safeStorage || typeof safeStorage.isEncryptionAvailable !== 'function') {
+      return null; // API ausente (testes/CI)
+    }
+    if (!safeStorage.isEncryptionAvailable()) {
+      console.warn('[Electron] safeStorage indisponível (Linux sem libsecret?) — usando fallback plaintext+chmod600');
+      return null;
+    }
+    const secretsFile = path.join(dataDir, 'secrets.json');
+    if (!fs.existsSync(secretsFile)) return null; // primeiro boot — backend gera
+
+    const raw = fs.readFileSync(secretsFile, 'utf-8');
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch { return null; }
+
+    // Caso 1: já migrado — decripta e retorna.
+    if (parsed && typeof parsed.encryptedJwtSecret === 'string') {
+      try {
+        const buf = Buffer.from(parsed.encryptedJwtSecret, 'base64');
+        const dec = safeStorage.decryptString(buf);
+        if (dec && dec.length >= 32) return dec;
+        console.error('[Electron] safeStorage decrypt OK mas secret < 32 chars — fallback');
+        return null;
+      } catch (e) {
+        // Decrypt falhou (user trocou de account/máquina, keyring corrompido).
+        // Forçar re-bootstrap apagando o arquivo é seguro porque sem secret
+        // o backend gera novo no whenReady; usuários precisarão re-logar.
+        console.error('[Electron] safeStorage decrypt falhou:', e.message);
+        try {
+          const backup = secretsFile + '.unmigrated.' + Date.now() + '.bak';
+          fs.renameSync(secretsFile, backup);
+          console.warn(`[Electron] secrets.json movido para ${backup} — backend regenerará`);
+        } catch (_) { /* noop */ }
+        return null;
+      }
+    }
+
+    // Caso 2: legacy plaintext — migra agora.
+    if (parsed && typeof parsed.jwtSecret === 'string' && parsed.jwtSecret.length >= 32) {
+      const plain = parsed.jwtSecret;
+      try {
+        const enc = safeStorage.encryptString(plain).toString('base64');
+        const tmp = secretsFile + '.' + process.pid + '.' + Date.now() + '.tmp';
+        const newPayload = {
+          encryptedJwtSecret: enc,
+          createdAt: parsed.createdAt || new Date().toISOString(),
+          migratedAt: new Date().toISOString(),
+          version: 2,
+        };
+        fs.writeFileSync(tmp, JSON.stringify(newPayload, null, 2), { mode: 0o600 });
+        try { fs.renameSync(tmp, secretsFile); } catch (_) {
+          try { fs.unlinkSync(secretsFile); } catch (_) { /* noop */ }
+          fs.renameSync(tmp, secretsFile);
+        }
+        try { fs.chmodSync(secretsFile, 0o600); } catch (_) { /* Windows */ }
+        console.log('[Electron] secrets.json migrado para safeStorage (DPAPI/Keychain/libsecret)');
+        return plain;
+      } catch (e) {
+        console.error('[Electron] Falha ao migrar secret para safeStorage:', e.message);
+        return plain; // entrega plaintext mesmo assim — não bloqueia boot
+      }
+    }
+    return null;
+  } catch (e) {
+    console.error('[Electron] migrateSecretsToSafeStorage erro:', e.message);
+    return null;
+  }
+}
 
 // E11: single instance lock — primeiro Electron pega, segundo encerra.
 const gotLock = app.requestSingleInstanceLock();
@@ -217,8 +375,20 @@ function startBackend() {
     return;
   }
 
-  // E1: jwt secret estável entre execuções (caso env não venha de fora).
-  const jwtSecret = process.env.JWT_SECRET || loadJwtSecret(dataDir);
+  // P5-C1: tentar migrar/decryptar secret via safeStorage primeiro. Em produção,
+  // isso vincula a chave de criptografia ao user account + machine (DPAPI no Windows,
+  // Keychain no macOS, libsecret no Linux). Em fallback (CI, Linux headless),
+  // cai para o método antigo (plaintext + chmod 0o600 via loadJwtSecret).
+  let jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    if (app.isPackaged) {
+      try { jwtSecret = migrateSecretsToSafeStorage(dataDir); } catch (_) { /* falha silenciosa, cai no fallback */ }
+    }
+    if (!jwtSecret) {
+      // E1: jwt secret estável entre execuções (fallback plaintext+chmod 0o600).
+      jwtSecret = loadJwtSecret(dataDir);
+    }
+  }
 
   backendProcess = fork(serverPath, [], {
     env: {
@@ -573,7 +743,11 @@ app.whenReady().then(() => {
 
   if (!isDev) {
     startBackend();
-    waitForBackend(60, 500, createWindow);
+    waitForBackend(60, 500, () => {
+      createWindow();
+      // P5-C2: dispara verificação de updates depois do app carregar.
+      setupAutoUpdater();
+    });
   } else {
     createWindow();
   }

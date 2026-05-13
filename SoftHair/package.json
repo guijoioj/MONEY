@@ -77,11 +77,22 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "SoftHair"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "guijoioj",
+        "repo": "SoftHair"
+      }
+    ]
   },
   "keywords": ["beauty", "salon", "management", "desktop", "electron", "sqlite"],
   "author": "SoftHair",
   "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
   "devDependencies": {
     "electron": "^40.10.0",
     "electron-builder": "^26.8.1"

@@ -42,8 +42,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// P5-C3 + P5-M5: interceptor detecta stub:true e emite CustomEvent global.
+// Componente <StubGlobalBanner> escuta e renderiza aviso "em desenvolvimento".
+// Mantém telas existentes intocadas — adição é puramente aditiva.
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    try {
+      const data = response?.data;
+      if (data && typeof data === 'object' && data.stub === true) {
+        const url = response?.config?.url || '';
+        const message = data.message || null;
+        if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+          window.dispatchEvent(new CustomEvent('softhair:stub-response', {
+            detail: { url, message, timestamp: Date.now() },
+          }));
+        }
+      }
+    } catch (_) { /* never break the response on telemetry */ }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       clearTokens();

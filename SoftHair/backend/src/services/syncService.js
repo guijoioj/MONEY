@@ -578,11 +578,59 @@ class SyncService {
     return total;
   }
 
-  // P2-B2: upsert atomic. Tenta INSERT ... ON CONFLICT(id) DO UPDATE,
-  // suportado tanto por SQLite quanto Postgres. Em fallback, SELECT + UPDATE/INSERT.
+  // P2-B2 + P5-C4: upsert atomic com detecção de conflito.
+  //
+  // Antes de sobrescrever, compara `updated_at` local vs remoto:
+  //   - local mais recente → registra em sync_conflicts e NÃO sobrescreve.
+  //   - remoto mais recente OU empate → aplica (comportamento histórico).
+  //   - row inexistente local → INSERT direto.
+  //
+  // Conflitos ficam pendentes em sync_conflicts para revisão humana via /sync.
   async upsertRow(table, row) {
     const cols = Object.keys(row);
     if (cols.length === 0) return;
+
+    // P5-C4: detecção de conflito apenas se row tem updated_at remoto E já existe local.
+    if (row.id && row.updated_at) {
+      try {
+        const existing = await queryOne(
+          `SELECT * FROM ${table} WHERE id = ?`,
+          [row.id]
+        );
+        if (existing && existing.updated_at) {
+          // Comparação ISO lexicográfica funciona para strings ISO 8601.
+          const localTs = String(existing.updated_at);
+          const remoteTs = String(row.updated_at);
+          if (localTs > remoteTs) {
+            // Conflito: local mais recente. Registra e abortar overwrite.
+            try {
+              await queryRun(
+                `INSERT INTO sync_conflicts (tabela, registro_id, local_updated_at, remote_updated_at, local_data, remote_data, resolved)
+                 VALUES (?, ?, ?, ?, ?, ?, 0)`,
+                [
+                  table,
+                  Number(row.id),
+                  localTs,
+                  remoteTs,
+                  JSON.stringify(existing),
+                  JSON.stringify(row),
+                ]
+              );
+              console.warn(
+                `[SyncService] CONFLITO em ${table}#${row.id} — local=${localTs} > remoto=${remoteTs}. Mantido local.`
+              );
+            } catch (e) {
+              console.error('[SyncService] Falha ao registrar conflito:', e.message);
+            }
+            return; // não sobrescreve
+          }
+        }
+      } catch (e) {
+        // Falha na detecção é não-fatal; cai no caminho histórico para não bloquear sync.
+        console.warn(`[SyncService] Falha ao checar conflito ${table}#${row.id}: ${e.message}`);
+      }
+    }
+
     const placeholders = cols.map(() => '?').join(', ');
     const values = cols.map((c) => row[c]);
     const updates = cols
@@ -616,6 +664,37 @@ class SyncService {
           values
         );
       }
+    }
+  }
+
+  // P5-C4: força aplicação do payload remoto bypassando o check de conflito.
+  // Usado pela rota /sync/conflicts/:id/resolve quando user opta por "remote".
+  async upsertRowForce(table, row) {
+    if (!SYNC_TABLES.includes(table)) {
+      throw new Error(`Tabela não permitida no sync: ${table}`);
+    }
+    const sanitized = sanitizeRow(table, row);
+    if (!sanitized || !sanitized.id) {
+      throw new Error('Row inválida (sem id ou colunas)');
+    }
+    const cols = Object.keys(sanitized);
+    const placeholders = cols.map(() => '?').join(', ');
+    const values = cols.map((c) => sanitized[c]);
+    const updates = cols
+      .filter((c) => c !== 'id')
+      .map((c) => `${c} = excluded.${c}`)
+      .join(', ');
+    if (updates) {
+      await queryRun(
+        `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${placeholders})
+         ON CONFLICT(id) DO UPDATE SET ${updates}`,
+        values
+      );
+    } else {
+      await queryRun(
+        `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${placeholders})`,
+        values
+      );
     }
   }
 

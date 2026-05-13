@@ -179,6 +179,27 @@ function initDb() {
       synced INTEGER DEFAULT 0
     );
 
+    -- P5-C4: detecção de conflitos last-write-wins em sync.
+    --   tabela/registro_id identifica a row em conflito.
+    --   local_updated_at: timestamp do estado local antes do conflito.
+    --   remote_updated_at: timestamp do payload remoto.
+    --   local_data / remote_data: snapshot JSON em conflito.
+    --   resolved: 0=pendente, 1=mantida_local, 2=aplicada_remota, 3=mescla_manual.
+    -- UI nova em /sync mostra contador + lista de conflitos para revisão humana.
+    CREATE TABLE IF NOT EXISTS sync_conflicts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tabela TEXT NOT NULL,
+      registro_id INTEGER NOT NULL,
+      local_updated_at TEXT,
+      remote_updated_at TEXT,
+      local_data TEXT,
+      remote_data TEXT,
+      resolved INTEGER DEFAULT 0,
+      detected_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      resolved_at TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_sync_conflicts_resolved ON sync_conflicts(resolved);
+
     CREATE INDEX IF NOT EXISTS idx_clientes_salao ON clientes(salao_id);
     CREATE INDEX IF NOT EXISTS idx_profissionais_salao ON profissionais(salao_id);
     CREATE INDEX IF NOT EXISTS idx_servicos_salao ON servicos(salao_id);
