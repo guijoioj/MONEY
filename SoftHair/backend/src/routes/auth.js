@@ -32,7 +32,10 @@ const setupLimiter = rateLimit({
 // P3-C2: setupLimiter — 10/min para evitar enumeration.
 router.get('/needs-setup', setupLimiter, async (req, res) => {
   try {
-    const row = await queryOne(`SELECT COUNT(*) as n FROM usuarios WHERE ativo = 1`);
+    // P4-A7: contar TODOS os usuários (ativo=1 OU ativo=0) — coerente com
+    // re-check em /bootstrap-admin. Banco que já teve admin não permite
+    // re-bootstrap mesmo se admin foi soft-deleted.
+    const row = await queryOne(`SELECT COUNT(*) as n FROM usuarios`);
     res.json({ success: true, data: { needsSetup: !row || (row.n || 0) === 0 } });
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
@@ -61,9 +64,12 @@ router.post('/bootstrap-admin', setupLimiter, [
 
     // P2-A7: bootstrap atomic — usa transação para garantir que apenas UM admin
     // possa ser criado mesmo em concorrência. Re-checa dentro da transação.
+    // P4-A7: contar TODOS os usuários (mesmo ativo=0). Senão, atacante que
+    // consegue UPDATE usuarios SET ativo=0 (ou recover usuário antigo) consegue
+    // re-bootstrap e criar admin novo. Bootstrap só roda em banco truly fresh.
     const result = await withTransaction(async (client) => {
       const checkRes = await client.query(
-        `SELECT COUNT(*) as n FROM usuarios WHERE ativo = 1`,
+        `SELECT COUNT(*) as n FROM usuarios`,
         []
       );
       // PG retorna { rows: [{n}] }; SQLite wrap retorna { rows: [{n}] }

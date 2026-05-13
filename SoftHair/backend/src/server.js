@@ -26,7 +26,12 @@ const { authMiddleware } = require('./middleware/auth');
 const app = express();
 
 // ── Security ──
-// E13: CSP básica para defesa em profundidade
+// E13 + P4-C5 + P4-M1: CSP defesa em profundidade.
+//   - removido wildcard `https://*.onrender.com` em connectSrc (era amplificador
+//     de XSS exfil — qualquer subdomain onrender.com hospedaria payload)
+//   - adicionado `frame-ancestors 'none'` para mitigar clickjacking
+//   - backend embarcado só serve JSON API; renderer Electron tem CSP própria
+//     em frontend/index.html
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -35,8 +40,9 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", 'data:', 'https:'],
-        connectSrc: ["'self'", 'http://127.0.0.1:*', 'https://*.onrender.com'],
+        connectSrc: ["'self'", 'http://127.0.0.1:*'],
         fontSrc: ["'self'", 'data:'],
+        frameAncestors: ["'none'"],
       },
     },
     crossOriginEmbedderPolicy: false,
@@ -112,10 +118,14 @@ app.use('/api/agendamentos', require('./routes/agendamentos'));
 app.use('/api/atendimentos', require('./routes/atendimentos'));
 app.use('/api/vendas', require('./routes/vendas'));
 app.use('/api/sync', require('./routes/sync'));
+// P4-C6: backup local implementado (mínimo: create / list / restore SQLite).
+app.use('/api/backup', require('./routes/backup'));
 
 // Stub para endpoints ainda não portados.
-// E23: requer auth e devolve 501 Not Implemented em vez de 200 silencioso.
-['notificacoes', 'fechamentos', 'comissoes', 'creditos', 'historico', 'saloes', 'backup'].forEach((rota) => {
+// E23 + P4-M6: stubs sinalizam `stub: true` para UI mostrar banner "em desenvolvimento"
+// em vez de "lista vazia". Apenas exceções (notificacoes/count, saloes/me) retornam
+// dados reais para não quebrar componentes que dependem deles.
+['notificacoes', 'fechamentos', 'comissoes', 'creditos', 'historico', 'saloes'].forEach((rota) => {
   app.use(`/api/${rota}`, authMiddleware, (req, res) => {
     if (req.method === 'GET') {
       if (rota === 'notificacoes' && req.path === '/count') {
@@ -124,7 +134,8 @@ app.use('/api/sync', require('./routes/sync'));
       if (rota === 'saloes' && req.path === '/me') {
         return res.json({ success: true, data: { id: 1, nome: 'Meu Salão' } });
       }
-      return res.json({ success: true, data: [] });
+      // P4-M6: flag stub para UI mostrar aviso "em desenvolvimento"
+      return res.json({ success: true, data: [], stub: true, message: `Funcionalidade ${rota} em desenvolvimento na versão desktop` });
     }
     return res
       .status(501)

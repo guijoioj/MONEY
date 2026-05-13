@@ -187,10 +187,36 @@ function initDb() {
     CREATE INDEX IF NOT EXISTS idx_agendamentos_data ON agendamentos(data_hora);
     CREATE INDEX IF NOT EXISTS idx_vendas_salao ON vendas(salao_id);
     CREATE INDEX IF NOT EXISTS idx_atendimentos_salao ON atendimentos(salao_id);
+
+    -- P4-C7: schema versioning + migrations infra
+    -- Cada migration aplicada via migrations/<NNN>_descricao.sql é registrada aqui.
+    -- Migration 0 = schema inicial (este DDL). Migrations futuras incrementam.
+    CREATE TABLE IF NOT EXISTS schema_versions (
+      version INTEGER PRIMARY KEY,
+      description TEXT,
+      applied_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+    );
   `;
 
   db.exec(ddl);
+
+  // P4-C7: garantir migration 0 (schema inicial) registrada
+  try {
+    db.prepare(`INSERT OR IGNORE INTO schema_versions (version, description) VALUES (0, 'schema inicial')`).run();
+  } catch (_) { /* OK em DB já populado */ }
+
   console.log('[initDb] Schema SQLite pronto.');
+
+  // P4-C7: aplica migrations pendentes (se diretório existir).
+  // Cada migration em backend/src/migrations/NNN_descricao.sql é executada
+  // dentro de transação, e o número da versão é registrado em schema_versions.
+  // Antes de aplicar, faz backup automático do DB para .pre-migration-NNN.
+  try {
+    runPendingMigrations(db);
+  } catch (e) {
+    console.error('[initDb] Falha ao aplicar migrations pendentes:', e.message);
+    // Não fail-fast: o app boota com schema antigo.
+  }
 
   // Seed: salão default + admin se não existir
   // E4: NÃO criamos mais admin/admin123 default. Em vez disso:
@@ -235,4 +261,70 @@ function initDb() {
   }
 }
 
-module.exports = { initDb };
+/**
+ * P4-C7: aplica migrations SQL pendentes em ordem.
+ *
+ * Convenção:
+ *   - Arquivos em backend/src/migrations/<NNN>_descricao.sql
+ *   - NNN = inteiro 1+, zero-padded para sort estável (001, 002, ...)
+ *   - Schema inicial registrado como version=0 em schema_versions.
+ *
+ * Antes de aplicar, faz cópia do DB para `local.db.pre-migration-<NNN>` para
+ * rollback manual em caso de problema.
+ */
+function runPendingMigrations(db) {
+  const path = require('path');
+  const fs = require('fs');
+  const migrationsDir = path.join(__dirname, '..', 'migrations');
+  if (!fs.existsSync(migrationsDir)) return; // nenhuma migration definida
+
+  const files = fs.readdirSync(migrationsDir)
+    .filter((f) => /^\d{3,}_.+\.sql$/.test(f))
+    .sort();
+
+  if (files.length === 0) return;
+
+  // Versões já aplicadas
+  const appliedRows = db.prepare(`SELECT version FROM schema_versions`).all();
+  const applied = new Set(appliedRows.map((r) => Number(r.version)));
+
+  for (const file of files) {
+    const match = /^(\d{3,})_(.+)\.sql$/.exec(file);
+    if (!match) continue;
+    const version = Number(match[1]);
+    const description = match[2].replace(/_/g, ' ');
+    if (applied.has(version)) continue;
+
+    console.log(`[initDb] Aplicando migration ${file}...`);
+
+    // Backup pré-migration
+    try {
+      const dataDir = process.env.SOFTHAIR_DATA_DIR ||
+        path.join(__dirname, '..', '..', 'database');
+      const src = path.join(dataDir, 'local.db');
+      const dest = path.join(dataDir, `local.db.pre-migration-${match[1]}`);
+      if (fs.existsSync(src) && !fs.existsSync(dest)) {
+        fs.copyFileSync(src, dest);
+        console.log(`[initDb] Backup pré-migration salvo em ${dest}`);
+      }
+    } catch (e) {
+      console.warn('[initDb] Falha ao salvar backup pré-migration:', e.message);
+      // Não aborta: prefere aplicar migration mesmo sem backup
+    }
+
+    const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
+    const txn = db.transaction(() => {
+      db.exec(sql);
+      db.prepare(`INSERT INTO schema_versions (version, description) VALUES (?, ?)`).run(version, description);
+    });
+    try {
+      txn();
+      console.log(`[initDb] Migration ${version} aplicada: ${description}`);
+    } catch (e) {
+      console.error(`[initDb] FALHA na migration ${version}: ${e.message}`);
+      throw e;
+    }
+  }
+}
+
+module.exports = { initDb, runPendingMigrations };

@@ -295,6 +295,11 @@ function createWindow() {
       // P3-A3: spell check enviava palavras para servidor de tradução em algumas
       // versões. Desativado por privacidade — app processa CPF/email.
       spellcheck: false,
+      // P4-M2: defensive — flags deprecadas explicitamente desligadas para clareza.
+      // Em Electron 40 já são false por default, mas declarar evita regression em
+      // forks/forks-of-config.
+      enableRemoteModule: false,
+      navigateOnDragDrop: false,
       preload: path.join(__dirname, 'preload.js'),
     },
     show: false,
@@ -305,6 +310,46 @@ function createWindow() {
   // O renderer já está protegido por will-navigate (linha abaixo), mas vale
   // explicitamente deny will-attach-webview e drop event.
   mainWindow.webContents.on('will-attach-webview', (e) => e.preventDefault());
+
+  // P4-C2: em produção, bloquear DevTools (F12 / Ctrl+Shift+I / Ctrl+Shift+J / Cmd+Opt+I).
+  // Razão: usuário com acesso físico ao PC ou malware que controla clipboard pode
+  // executar JS arbitrário via console (bypass de CSP, leak de token em localStorage).
+  // P4-C4: bloquear também Ctrl+R / Cmd+R (reload) em prod — venda em progresso
+  // não pode ser perdida por acidente.
+  // P4-A3: bloquear context menu (right-click "Inspecionar elemento").
+  if (!isDev && app.isPackaged) {
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      const k = String(input.key || '').toLowerCase();
+      // F12
+      if (k === 'f12') { event.preventDefault(); return; }
+      // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (DevTools / inspect element)
+      if (input.control && input.shift && (k === 'i' || k === 'j' || k === 'c')) {
+        event.preventDefault();
+        return;
+      }
+      // macOS: Cmd+Option+I, Cmd+Option+J
+      if (input.meta && input.alt && (k === 'i' || k === 'j')) {
+        event.preventDefault();
+        return;
+      }
+      // Ctrl+R / Cmd+R (reload — pode perder state)
+      if ((input.control || input.meta) && k === 'r' && !input.shift) {
+        event.preventDefault();
+        return;
+      }
+      // Ctrl+Shift+R (force reload)
+      if ((input.control || input.meta) && input.shift && k === 'r') {
+        event.preventDefault();
+        return;
+      }
+    });
+    // P4-A3: bloquear context menu nativo (Chromium expõe "Inspecionar elemento")
+    mainWindow.webContents.on('context-menu', (e) => e.preventDefault());
+    // P4-C2: defesa em profundidade — se algo conseguir abrir DevTools, fecha imediato
+    mainWindow.webContents.on('devtools-opened', () => {
+      try { mainWindow.webContents.closeDevTools(); } catch (_) { /* noop */ }
+    });
+  }
 
   mainWindow.once('ready-to-show', () => mainWindow.show());
 
@@ -416,7 +461,12 @@ function createWindow() {
     },
     {
       label: 'Visualizar',
-      submenu: [{ role: 'reload' }, { role: 'togglefullscreen' }, { role: 'zoomIn' }, { role: 'zoomOut' }, { role: 'resetZoom' }],
+      // P4-C4: em produção, NÃO incluir `reload` no menu — usuário pode perder
+      // estado in-memory (venda em progresso, agendamento sendo editado).
+      // Reload continua disponível em dev.
+      submenu: (isDev || !app.isPackaged)
+        ? [{ role: 'reload' }, { role: 'togglefullscreen' }, { role: 'zoomIn' }, { role: 'zoomOut' }, { role: 'resetZoom' }]
+        : [{ role: 'togglefullscreen' }, { role: 'zoomIn' }, { role: 'zoomOut' }, { role: 'resetZoom' }],
     },
     {
       label: 'Ajuda',
@@ -444,15 +494,62 @@ process.on('unhandledRejection', (reason) => {
   appendLog(`[main] unhandledRejection: ${reason && reason.stack ? reason.stack : reason}`);
 });
 
+// P4-M3: bloquear flags como --no-sandbox vindas via injection externa.
+// Algumas extensões/AV injetam flags Chromium para "compatibilidade", desativando
+// sandbox. Em produção, recusar inicialização.
+if (app.isPackaged) {
+  const dangerousFlags = ['--no-sandbox', '--disable-web-security', '--allow-running-insecure-content'];
+  const argv = process.argv || [];
+  for (const flag of dangerousFlags) {
+    if (argv.includes(flag)) {
+      console.error(`[Electron] Flag perigosa detectada: ${flag}. Abortando.`);
+      // Tenta avisar visualmente; se não conseguir, exit silencioso.
+      try {
+        require('electron').dialog.showErrorBox(
+          'SoftHair',
+          `Inicialização abortada: flag não permitida (${flag}). Reinstale o aplicativo de fonte oficial.`
+        );
+      } catch (_) { /* noop */ }
+      process.exit(1);
+    }
+  }
+}
+
+// P4-A2: limpa crash dumps antigos (> 30 dias). Dumps de Chromium podem ter
+// 50-500MB cada. Sem cleanup, crescem indefinidamente.
+function purgeOldCrashDumps() {
+  try {
+    const dir = app.getPath('crashDumps');
+    if (!fs.existsSync(dir)) return;
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const walk = (d) => {
+      for (const entry of fs.readdirSync(d)) {
+        const full = path.join(d, entry);
+        try {
+          const st = fs.statSync(full);
+          if (st.isDirectory()) { walk(full); continue; }
+          if (st.mtimeMs < cutoff) fs.unlinkSync(full);
+        } catch (_) { /* skip */ }
+      }
+    };
+    walk(dir);
+  } catch (_) { /* não-fatal */ }
+}
+
 app.whenReady().then(() => {
   // P2-A1: expor isPackaged via env para o preload (process.env.ELECTRON_IS_PACKAGED).
   process.env.ELECTRON_IS_PACKAGED = String(!!app.isPackaged);
 
   // P2-M8 + P3-M7: limpar logs antigos no boot (deferido para não bloquear startup).
-  setTimeout(() => purgeOldLogs(), 5000);
+  // P4-A2: junto, limpa crash dumps antigos.
+  setTimeout(() => {
+    purgeOldLogs();
+    purgeOldCrashDumps();
+  }, 5000);
 
   // P3-A4: webRequest filter — bloqueia tudo que não seja loopback ou file://.
   // Defesa em profundidade junto com CSP. Combinado com BrowserWindow webSecurity:true.
+  // P4-M7: permite font https externa (caso CSS futuro use Google Fonts).
   try {
     session.defaultSession.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
       const url = details.url || '';
@@ -465,7 +562,9 @@ app.whenReady().then(() => {
         url.startsWith('data:') ||
         url.startsWith('blob:') ||
         // imgs externas (https) — CSP já filtra mas webRequest libera para img-src
-        (details.resourceType === 'image' && url.startsWith('https://'));
+        (details.resourceType === 'image' && url.startsWith('https://')) ||
+        // P4-M7: fonts externas via https (defesa em profundidade contra CSP futura)
+        (details.resourceType === 'font' && url.startsWith('https://'));
       callback({ cancel: !ok });
     });
   } catch (e) {

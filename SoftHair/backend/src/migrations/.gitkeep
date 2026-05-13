@@ -1,0 +1,19 @@
+# P4-C7: SoftHair backend migrations (SQLite).
+#
+# Convenção:
+#   - Arquivos: NNN_descricao.sql (NNN = inteiro 3-digit zero-padded)
+#   - Aplicados em ordem pelo runner em config/initDb.js#runPendingMigrations
+#   - Schema inicial é a version=0 (registrada automaticamente no boot)
+#   - Backup automático para local.db.pre-migration-NNN antes de aplicar
+#
+# Exemplo:
+#   001_add_cancelled_by.sql:
+#     ALTER TABLE agendamentos ADD COLUMN cancelled_by_user_id INTEGER;
+#
+# Cada arquivo é executado dentro de uma transação. Se falhar, ROLLBACK
+# e o boot interrompe (próxima inicialização tenta de novo).
+#
+# Restaurar de backup pre-migration:
+#   1. Pare o app.
+#   2. cp local.db.pre-migration-NNN local.db
+#   3. Reinicie.
