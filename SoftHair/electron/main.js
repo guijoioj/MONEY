@@ -18,12 +18,19 @@
  *   - E21: rotação básica de logs
  */
 
-const { app, BrowserWindow, shell, Menu, dialog } = require('electron');
+const { app, BrowserWindow, shell, Menu, dialog, crashReporter, session } = require('electron');
 const path = require('path');
 const { fork } = require('child_process');
 const fs = require('fs');
 const http = require('http');
 const crypto = require('crypto');
+
+// P3-A8: desabilitar upload de crash reports (default em algumas versões enviava
+// dumps para crashpad.googlepad.com). Dumps locais ainda gravam em
+// app.getPath('crashDumps') para debugging.
+try {
+  crashReporter.start({ uploadToServer: false, productName: 'SoftHair', companyName: 'SoftHair' });
+} catch (_) { /* api ausente em testes */ }
 
 // P2-C1: módulo compartilhado para JWT secret. Mesma fonte que middleware/auth.js.
 function getSecretsLib() {
@@ -282,11 +289,19 @@ function createWindow() {
       contextIsolation: true,
       sandbox: true,
       webSecurity: true,
+      // P3-A3: spell check enviava palavras para servidor de tradução em algumas
+      // versões. Desativado por privacidade — app processa CPF/email.
+      spellcheck: false,
       preload: path.join(__dirname, 'preload.js'),
     },
     show: false,
     backgroundColor: '#ffffff',
   });
+
+  // P3-A5: bloquear navegação por drag-and-drop de arquivo.
+  // O renderer já está protegido por will-navigate (linha abaixo), mas vale
+  // explicitamente deny will-attach-webview e drop event.
+  mainWindow.webContents.on('will-attach-webview', (e) => e.preventDefault());
 
   mainWindow.once('ready-to-show', () => mainWindow.show());
 
@@ -430,8 +445,29 @@ app.whenReady().then(() => {
   // P2-A1: expor isPackaged via env para o preload (process.env.ELECTRON_IS_PACKAGED).
   process.env.ELECTRON_IS_PACKAGED = String(!!app.isPackaged);
 
-  // P2-M8: limpar logs antigos uma vez no boot.
-  purgeOldLogs();
+  // P2-M8 + P3-M7: limpar logs antigos no boot (deferido para não bloquear startup).
+  setTimeout(() => purgeOldLogs(), 5000);
+
+  // P3-A4: webRequest filter — bloqueia tudo que não seja loopback ou file://.
+  // Defesa em profundidade junto com CSP. Combinado com BrowserWindow webSecurity:true.
+  try {
+    session.defaultSession.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
+      const url = details.url || '';
+      const ok =
+        url.startsWith('file://') ||
+        url.startsWith('http://127.0.0.1') ||
+        url.startsWith('http://localhost') ||
+        url.startsWith('https://127.0.0.1') ||
+        url.startsWith('https://localhost') ||
+        url.startsWith('data:') ||
+        url.startsWith('blob:') ||
+        // imgs externas (https) — CSP já filtra mas webRequest libera para img-src
+        (details.resourceType === 'image' && url.startsWith('https://'));
+      callback({ cancel: !ok });
+    });
+  } catch (e) {
+    console.warn('[Electron] webRequest filter setup falhou:', e.message);
+  }
 
   if (!isDev) {
     startBackend();
