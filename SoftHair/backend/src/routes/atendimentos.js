@@ -100,7 +100,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     }
     if (updates.length === 0) return res.json({ success: true, data: existing });
 
-    updates.push(`updated_at = datetime('now')`);
+    updates.push(`updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')`);
     params.push(req.params.id, req.salaoId);
 
     await queryRun(

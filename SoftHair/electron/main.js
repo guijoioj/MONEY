@@ -81,12 +81,11 @@ function loadJwtSecret(dataDir) {
     } catch (e) {
       console.error('[Electron] Falha ao resolver JWT secret via lib:', e.message);
       if (app.isPackaged) {
-        try {
-          dialog.showErrorBox(
-            'SoftHair',
-            'Não foi possível persistir credenciais de segurança. Verifique permissões do diretório userData.'
-          );
-        } catch (_) { /* noop */ }
+        // P2-M9: usa safeShowError pra não crashar headless.
+        safeShowError(
+          'SoftHair',
+          'Não foi possível persistir credenciais de segurança. Verifique permissões do diretório userData.'
+        );
         app.exit(1);
       }
       // Em dev, gera efêmero.
@@ -129,6 +128,19 @@ function sanitizeMessage(msg) {
   return s;
 }
 
+// P2-M9: showErrorBox cresha em ambiente sem display (CI/headless). Wrap.
+function safeShowError(title, msg) {
+  if (process.env.CI || process.env.HEADLESS || !app.isReady()) {
+    console.error(`[${title}] ${msg}`);
+    return;
+  }
+  try {
+    dialog.showErrorBox(title, msg);
+  } catch (e) {
+    console.error(`[${title}] (showErrorBox falhou) ${msg}`);
+  }
+}
+
 // E21: append a log file em userData/logs/softhair-YYYY-MM-DD.log com rotação por tamanho.
 function getLogPath() {
   try {
@@ -155,6 +167,27 @@ function appendLog(line) {
   } catch (_) { /* não-fatal */ }
 }
 
+// P2-M8: limpa arquivos `.old` com mais de 30 dias.
+function purgeOldLogs() {
+  try {
+    const logPath = getLogPath();
+    if (!logPath) return;
+    const dir = path.dirname(logPath);
+    if (!fs.existsSync(dir)) return;
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 dias
+    for (const file of fs.readdirSync(dir)) {
+      if (!file.endsWith('.old')) continue;
+      const full = path.join(dir, file);
+      try {
+        const st = fs.statSync(full);
+        if (st.mtimeMs < cutoff) {
+          fs.unlinkSync(full);
+        }
+      } catch (_) { /* skip */ }
+    }
+  } catch (_) { /* não-fatal */ }
+}
+
 function startBackend() {
   console.log('[Electron] Iniciando backend embarcado...');
 
@@ -170,7 +203,7 @@ function startBackend() {
 
   if (!fs.existsSync(serverPath)) {
     console.error('[Electron] Servidor não encontrado em:', serverPath);
-    dialog.showErrorBox('SoftHair', `Backend não encontrado em ${sanitizeMessage(serverPath)}`);
+    safeShowError('SoftHair', `Backend não encontrado em ${sanitizeMessage(serverPath)}`);
     return;
   }
 
@@ -197,7 +230,7 @@ function startBackend() {
     console.error('[Electron] Erro no backend:', err);
     appendLog(`[backend] error: ${err.message}`);
     if (!isQuitting) {
-      dialog.showErrorBox('SoftHair', `Falha ao iniciar backend: ${sanitizeMessage(err.message)}`);
+      safeShowError('SoftHair', `Falha ao iniciar backend: ${sanitizeMessage(err.message)}`);
     }
   });
 
@@ -220,7 +253,7 @@ function startBackend() {
     console.log('[Electron] Backend encerrou com código:', code);
     appendLog(`[backend] close code=${code}`);
     if (!isQuitting && code !== 0) {
-      dialog.showErrorBox('SoftHair', 'O backend encerrou inesperadamente. Verifique os logs.');
+      safeShowError('SoftHair', 'O backend encerrou inesperadamente. Verifique os logs.');
     }
   });
 }
@@ -277,7 +310,7 @@ function createWindow() {
   if (isDev) {
     const devURL = 'http://localhost:3000';
     mainWindow.loadURL(devURL).catch((err) => {
-      dialog.showErrorBox('SoftHair', `Erro ao carregar dev URL: ${sanitizeMessage(err.message)}`);
+      safeShowError('SoftHair', `Erro ao carregar dev URL: ${sanitizeMessage(err.message)}`);
     });
     mainWindow.webContents.openDevTools();
 
@@ -314,7 +347,7 @@ function createWindow() {
     });
 
     mainWindow.loadFile(indexPath).catch(() => {
-      dialog.showErrorBox('SoftHair', 'Não foi possível carregar a interface. Rode `npm run build:frontend`.');
+      safeShowError('SoftHair', 'Não foi possível carregar a interface. Rode `npm run build:frontend`.');
     });
   }
 
@@ -322,8 +355,12 @@ function createWindow() {
     mainWindow = null;
   });
 
+  // P2-M4: usa send/IPC em vez de executeJavaScript inline (evita injection
+  // surface se algum dia o `route` vier de input do usuário).
   const navigate = (route) => {
-    if (mainWindow) mainWindow.webContents.executeJavaScript(`window.location.hash = '#${route}'`);
+    if (mainWindow && typeof route === 'string' && /^[\/A-Za-z0-9_-]+$/.test(route)) {
+      mainWindow.webContents.send('navigate', route);
+    }
   };
 
   const template = [
@@ -392,6 +429,9 @@ process.on('unhandledRejection', (reason) => {
 app.whenReady().then(() => {
   // P2-A1: expor isPackaged via env para o preload (process.env.ELECTRON_IS_PACKAGED).
   process.env.ELECTRON_IS_PACKAGED = String(!!app.isPackaged);
+
+  // P2-M8: limpar logs antigos uma vez no boot.
+  purgeOldLogs();
 
   if (!isDev) {
     startBackend();

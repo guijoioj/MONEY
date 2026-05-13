@@ -32,6 +32,19 @@ function safeShowItemInFolder(filePath) {
   return shell.showItemInFolder(filePath);
 }
 
+// P2-M4: navegação via IPC vinda do menu da app. Expõe um subscribe seguro
+// (sem expor `on` direto pra evitar event-name spoofing). Só aceita 'navigate'.
+function onNavigate(callback) {
+  if (typeof callback !== 'function') return () => {};
+  const handler = (_event, route) => {
+    if (typeof route === 'string' && /^[\/A-Za-z0-9_-]+$/.test(route)) {
+      try { callback(route); } catch (_) { /* swallow */ }
+    }
+  };
+  ipcRenderer.on('navigate', handler);
+  return () => ipcRenderer.removeListener('navigate', handler);
+}
+
 contextBridge.exposeInMainWorld('electron', {
   openExternal: safeOpenExternal,
   // E26: não expor path absoluto. Apenas se está empacotado e a plataforma.
@@ -39,4 +52,6 @@ contextBridge.exposeInMainWorld('electron', {
   getPlatform: () => process.platform,
   openPath: safeOpenPath,
   showItemInFolder: safeShowItemInFolder,
+  // P2-M4: navegação a partir do menu da app.
+  onNavigate,
 });

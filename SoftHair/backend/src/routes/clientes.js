@@ -93,7 +93,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     }
     if (updates.length === 0) return res.json({ success: true, data: existing });
 
-    updates.push(`updated_at = datetime('now')`);
+    updates.push(`updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')`);
     params.push(req.params.id, req.salaoId);
 
     await queryRun(
@@ -110,7 +110,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const result = await queryRun(
-      `UPDATE clientes SET ativo = 0, updated_at = datetime('now') WHERE id = ? AND salao_id = ?`,
+      `UPDATE clientes SET ativo = 0, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND salao_id = ?`,
       [req.params.id, req.salaoId]
     );
     if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Cliente não encontrado' });

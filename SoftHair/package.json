@@ -9,14 +9,15 @@
     "dev": "electron . --dev",
     "backend:install": "cd backend && npm install",
     "backend:dev": "cd backend && npm run dev",
+    "backend:prune": "cd backend && npm prune --production",
     "frontend:install": "cd frontend && npm install",
     "frontend:dev": "cd frontend && npm run dev",
     "build:frontend": "cd frontend && npm run build",
-    "build:electron": "npm run build:frontend && electron-builder",
-    "build:win": "npm run build:frontend && electron-builder --win",
-    "build:linux": "npm run build:frontend && electron-builder --linux",
-    "build:mac": "npm run build:frontend && electron-builder --mac",
-    "dist": "npm run build:frontend && electron-builder --publish=never",
+    "build:electron": "npm run build:frontend && npm run backend:prune && electron-builder && cd backend && npm install",
+    "build:win": "npm run build:frontend && npm run backend:prune && electron-builder --win && cd backend && npm install",
+    "build:linux": "npm run build:frontend && npm run backend:prune && electron-builder --linux && cd backend && npm install",
+    "build:mac": "npm run build:frontend && npm run backend:prune && electron-builder --mac && cd backend && npm install",
+    "dist": "npm run build:frontend && npm run backend:prune && electron-builder --publish=never && cd backend && npm install",
     "postinstall": "npm run backend:install && npm run frontend:install"
   },
   "build": {
@@ -36,11 +37,26 @@
       {
         "from": "backend",
         "to": "backend",
-        "filter": ["**/*", "!node_modules/.cache/**"]
+        "filter": [
+          "**/*",
+          "!node_modules/.cache/**",
+          "!.env",
+          "!.env.*",
+          "!*.log",
+          "!node_modules/nodemon/**",
+          "!node_modules/.bin/nodemon*",
+          "!node_modules/jest/**",
+          "!node_modules/eslint/**",
+          "!**/test/**",
+          "!**/tests/**",
+          "!**/*.test.js",
+          "!**/*.spec.js"
+        ]
       }
     ],
     "asarUnpack": [
-      "**/node_modules/better-sqlite3/**"
+      "**/node_modules/better-sqlite3/**",
+      "**/*.node"
     ],
     "win": {
       "target": ["nsis"],

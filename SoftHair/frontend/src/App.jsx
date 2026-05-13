@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 
@@ -82,9 +82,25 @@ function PublicRoute({ children }) {
   return children;
 }
 
+function ElectronMenuBridge() {
+  // P2-M4: escuta o IPC `navigate` enviado pelo menu do Electron e roteia
+  // via react-router. Não precisa mais de `executeJavaScript` no main.
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.electron || typeof window.electron.onNavigate !== 'function') {
+      return undefined;
+    }
+    const off = window.electron.onNavigate((route) => navigate(route));
+    return () => { try { off && off(); } catch (_) { /* noop */ } };
+  }, [navigate]);
+  return null;
+}
+
 export default function App() {
   return (
-    <Routes>
+    <>
+      <ElectronMenuBridge />
+      <Routes>
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
       <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
@@ -117,6 +133,7 @@ export default function App() {
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }

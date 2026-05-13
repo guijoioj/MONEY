@@ -128,7 +128,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     }
     if (updates.length === 0) return res.json({ success: true, data: existing });
 
-    updates.push(`updated_at = datetime('now')`);
+    updates.push(`updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')`);
     params.push(req.params.id, req.salaoId);
 
     await queryRun(
@@ -146,7 +146,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const result = await withTransaction(async (client) => {
       const update = await client.query(
-        `UPDATE vendas SET status = 'cancelada', updated_at = datetime('now') WHERE id = ? AND salao_id = ? AND status != 'cancelada'`,
+        `UPDATE vendas SET status = 'cancelada', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND salao_id = ? AND status != 'cancelada'`,
         [req.params.id, req.salaoId]
       );
       if (update.rowCount === 0) return { canceled: false };

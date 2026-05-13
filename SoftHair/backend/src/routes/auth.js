@@ -133,7 +133,7 @@ router.post('/login', [
 
     // Atualizar último acesso
     try {
-      await query(`UPDATE usuarios SET ultimo_acesso = datetime('now') WHERE id = ?`, [user.id]);
+      await query(`UPDATE usuarios SET ultimo_acesso = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`, [user.id]);
     } catch {}
 
     const token = generateToken(user);

@@ -34,8 +34,8 @@ function initDb() {
       logo_url TEXT,
       ativo INTEGER DEFAULT 1,
       config TEXT DEFAULT '{}',
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS usuarios (
@@ -47,8 +47,8 @@ function initDb() {
       salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
       ativo INTEGER DEFAULT 1,
       ultimo_acesso TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS clientes (
@@ -64,8 +64,8 @@ function initDb() {
       foto_url TEXT,
       credito_disponivel REAL DEFAULT 0,
       ativo INTEGER DEFAULT 1,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS profissionais (
@@ -81,8 +81,8 @@ function initDb() {
       ativo INTEGER DEFAULT 1,
       senha_hash TEXT,
       app_ativo INTEGER DEFAULT 0,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS servicos (
@@ -95,8 +95,8 @@ function initDb() {
       comissao_percentual REAL DEFAULT 0,
       cor TEXT,
       ativo INTEGER DEFAULT 1,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS produtos (
@@ -111,8 +111,8 @@ function initDb() {
       categoria TEXT,
       codigo_barras TEXT,
       ativo INTEGER DEFAULT 1,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS agendamentos (
@@ -126,8 +126,8 @@ function initDb() {
       status TEXT DEFAULT 'agendado',
       observacoes TEXT,
       valor REAL,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS atendimentos (
@@ -140,8 +140,8 @@ function initDb() {
       valor REAL DEFAULT 0,
       status TEXT DEFAULT 'em_andamento',
       observacoes TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS vendas (
@@ -156,8 +156,8 @@ function initDb() {
       valor_final REAL NOT NULL,
       forma_pagamento TEXT,
       observacoes TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS venda_itens (
@@ -175,7 +175,7 @@ function initDb() {
       operacao TEXT NOT NULL,
       registro_id INTEGER NOT NULL,
       dados TEXT,
-      sync_timestamp TEXT DEFAULT (datetime('now')),
+      sync_timestamp TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
       synced INTEGER DEFAULT 0
     );
 

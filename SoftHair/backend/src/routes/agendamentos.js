@@ -120,7 +120,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     }
     if (updates.length === 0) return res.json({ success: true, data: existing });
 
-    updates.push(`updated_at = datetime('now')`);
+    updates.push(`updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')`);
     params.push(req.params.id, req.salaoId);
 
     await queryRun(
@@ -138,7 +138,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const motivo = req.body.motivo || 'Cancelado pelo usuário';
     const result = await queryRun(
-      `UPDATE agendamentos SET status = 'cancelado', observacoes = COALESCE(observacoes, '') || ' [Cancelado: ' || ? || ']', updated_at = datetime('now') WHERE id = ? AND salao_id = ?`,
+      `UPDATE agendamentos SET status = 'cancelado', observacoes = COALESCE(observacoes, '') || ' [Cancelado: ' || ? || ']', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND salao_id = ?`,
       [motivo, req.params.id, req.salaoId]
     );
     if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Agendamento não encontrado' });
