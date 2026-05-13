@@ -67,13 +67,14 @@ app.on('second-instance', () => {
 });
 
 function getResourcePath(relativePath) {
+  // P3-M9: normalize para evitar mistakes em filesystem case-insensitive (macOS).
   if (isDev) {
-    return path.join(__dirname, '..', relativePath);
+    return path.normalize(path.join(__dirname, '..', relativePath));
   }
   if (app.isPackaged) {
-    return path.join(process.resourcesPath, relativePath);
+    return path.normalize(path.join(process.resourcesPath, relativePath));
   }
-  return path.join(__dirname, '..', relativePath);
+  return path.normalize(path.join(__dirname, '..', relativePath));
 }
 
 // P2-C1/P2-C2/P2-B1/P2-B5: delega para o módulo compartilhado backend/src/lib/secrets.js
@@ -135,16 +136,18 @@ function sanitizeMessage(msg) {
   return s;
 }
 
-// P2-M9: showErrorBox cresha em ambiente sem display (CI/headless). Wrap.
+// P2-M9 + P3-M8: showErrorBox crasha em ambiente sem display (CI/headless).
+// Wrap robusto: tenta sempre, e fallback graceful para console.error.
 function safeShowError(title, msg) {
-  if (process.env.CI || process.env.HEADLESS || !app.isReady()) {
+  if (process.env.CI || process.env.HEADLESS) {
     console.error(`[${title}] ${msg}`);
     return;
   }
   try {
     dialog.showErrorBox(title, msg);
   } catch (e) {
-    console.error(`[${title}] (showErrorBox falhou) ${msg}`);
+    // P3-M8: app não pronto / display indisponível / qualquer outro problema.
+    console.error(`[${title}] (showErrorBox falhou: ${e.message}) ${msg}`);
   }
 }
 

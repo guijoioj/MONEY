@@ -348,7 +348,15 @@ class SyncService {
       try {
         fs.writeFileSync(CONFIG_FILE, '{}', { mode: 0o600 });
         try { fs.chmodSync(CONFIG_FILE, 0o600); } catch (_) { /* noop */ }
-      } catch (_) { /* noop */ }
+      } catch (e2) {
+        // P3-M3: último recurso — truncate para ficar vazio
+        try {
+          fs.truncateSync(CONFIG_FILE, 0);
+          console.warn('[SyncService] disconnect: truncate fallback aplicado');
+        } catch (_) {
+          console.error('[SyncService] disconnect: ALL FALLBACKS FAILED — credenciais podem persistir em disco.');
+        }
+      }
     }
   }
 
@@ -518,6 +526,10 @@ class SyncService {
    */
   async applyRemoteChanges(changes) {
     let total = 0;
+    // P3-M6: agregar drops por tabela em vez de logar cada salao_id individual.
+    // Isso reduz info leak via logs sincronizados (OneDrive etc.) e evita poluir
+    // o arquivo de log com IDs sensíveis.
+    const dropCounts = {};
     for (const [table, rows] of Object.entries(changes || {})) {
       if (!Array.isArray(rows) || !SYNC_TABLES.includes(table)) continue;
       for (const row of rows) {
@@ -529,13 +541,10 @@ class SyncService {
           const localSalaoId = this.getLocalSalaoId();
           if (sanitized.salao_id !== undefined && sanitized.salao_id !== null) {
             if (Number(sanitized.salao_id) !== Number(localSalaoId)) {
-              console.warn(
-                `[SyncService] DROP ${table}#${sanitized.id} — salao_id=${sanitized.salao_id} != local=${localSalaoId}`
-              );
+              dropCounts[table] = (dropCounts[table] || 0) + 1;
               continue;
             }
           } else {
-            // Forçar salao_id local se ausente
             sanitized.salao_id = localSalaoId;
           }
           await this.upsertRow(table, sanitized);
@@ -544,6 +553,12 @@ class SyncService {
           console.error(`[SyncService] Erro ao aplicar ${table}#${row?.id}:`, e.message);
         }
       }
+    }
+    // P3-M6: log agregado (counts), sem IDs individuais
+    const dropTotal = Object.values(dropCounts).reduce((a, b) => a + b, 0);
+    if (dropTotal > 0) {
+      const summary = Object.entries(dropCounts).map(([t, n]) => `${t}:${n}`).join(', ');
+      console.warn(`[SyncService] applyRemoteChanges: ${dropTotal} rows descartadas por tenant mismatch (${summary})`);
     }
     return total;
   }
