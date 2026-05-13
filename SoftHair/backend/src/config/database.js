@@ -7,6 +7,12 @@
  *
  * API unificada usa placeholders `?`. O adapter PostgreSQL converte
  * automaticamente para `$1, $2, ...` quando necessário.
+ *
+ * Pass 1 fixes:
+ *   - E3: default `rejectUnauthorized: true` para Postgres SSL; usuário
+ *         deve setar DATABASE_SSL=insecure para reverter.
+ *   - E10: regex de placeholders agora respeita string literals.
+ *   - E30: withTransaction SQLite usa callback síncrono.
  */
 
 const path = require('path');
@@ -16,17 +22,62 @@ const dbType = (process.env.DATABASE_TYPE || 'sqlite').toLowerCase();
 
 let query, queryOne, queryRun, withTransaction, pool, rawClient;
 
+// E10: converte `?` em `$N` para Postgres ignorando ? dentro de strings literais.
+// O parser percorre a string mantendo controle se estamos dentro de aspas simples
+// ou duplas. `'don''t'` é tratado pelo SQL como escape e funciona porque os ?
+// que importam estão fora dele.
 function convertPlaceholders(sql) {
-  // Converte `?` em `$1, $2, ...` para Postgres
+  let out = '';
   let count = 0;
-  return sql.replace(/\?/g, () => `$${++count}`);
+  let inSingle = false;
+  let inDouble = false;
+  let inLineComment = false;
+  let inBlockComment = false;
+  for (let i = 0; i < sql.length; i++) {
+    const ch = sql[i];
+    const next = sql[i + 1];
+    if (inLineComment) {
+      out += ch;
+      if (ch === '\n') inLineComment = false;
+      continue;
+    }
+    if (inBlockComment) {
+      out += ch;
+      if (ch === '*' && next === '/') { out += '/'; i++; inBlockComment = false; }
+      continue;
+    }
+    if (!inSingle && !inDouble) {
+      if (ch === '-' && next === '-') { out += '--'; i++; inLineComment = true; continue; }
+      if (ch === '/' && next === '*') { out += '/*'; i++; inBlockComment = true; continue; }
+    }
+    if (!inDouble && ch === "'") { inSingle = !inSingle; out += ch; continue; }
+    if (!inSingle && ch === '"') { inDouble = !inDouble; out += ch; continue; }
+    if (!inSingle && !inDouble && ch === '?') {
+      out += `$${++count}`;
+      continue;
+    }
+    out += ch;
+  }
+  return out;
 }
 
 if (dbType === 'postgres') {
   const { Pool } = require('pg');
+  // E3: padrão seguro — rejectUnauthorized:true. Usuário precisa setar
+  // explicitamente DATABASE_SSL=insecure para aceitar cert inválido (legacy).
+  let sslOpt;
+  const sslEnv = (process.env.DATABASE_SSL || '').toLowerCase();
+  if (sslEnv === 'false' || sslEnv === 'off' || sslEnv === '0') {
+    sslOpt = false;
+  } else if (sslEnv === 'insecure') {
+    sslOpt = { rejectUnauthorized: false };
+  } else {
+    // default seguro
+    sslOpt = { rejectUnauthorized: true };
+  }
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_SSL !== 'false' ? { rejectUnauthorized: false } : false,
+    ssl: sslOpt,
     max: 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
@@ -111,10 +162,13 @@ if (dbType === 'postgres') {
     const info = stmt.run(...params);
     return { rowCount: info.changes, rows: [], lastInsertRowid: info.lastInsertRowid };
   };
+  // E30: callback síncrono dentro de db.transaction (better-sqlite3 é síncrono).
+  // Qualquer async dentro de `fn` é uma violação documentada — para ops mistas,
+  // colete async fora da transação.
   withTransaction = async (fn) => {
-    const trx = db.transaction(async () => {
+    const trx = db.transaction(() => {
       const wrapped = {
-        query: async (sql, params = []) => {
+        query: (sql, params = []) => {
           try {
             const stmt = db.prepare(sql);
             const rows = stmt.all(...params);
@@ -145,4 +199,6 @@ module.exports = {
   withTransaction,
   pool,
   rawClient,
+  // exportado para testes do parser (E10)
+  _convertPlaceholders: convertPlaceholders,
 };

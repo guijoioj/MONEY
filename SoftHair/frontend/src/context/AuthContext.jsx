@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
+import tokenStorage from '../services/tokenStorage';
 
 const AuthContext = createContext(null);
 
@@ -11,9 +12,11 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = authToken || localStorage.getItem('token');
+    // E19: prefere tokenStorage in-memory; localStorage só na inicialização
+    const token = tokenStorage.getToken() || authToken || localStorage.getItem('token');
     if (token) {
       authToken = token;
+      tokenStorage.setTokens(token, null);
       if (authUser) {
         setUser(authUser);
         setLoading(false);
@@ -26,6 +29,7 @@ export function AuthProvider({ children }) {
           })
           .catch(() => {
             authToken = null;
+            tokenStorage.clearTokens();
             localStorage.removeItem('token');
             setUser(null);
           })
@@ -41,6 +45,10 @@ export function AuthProvider({ children }) {
     const { token, user } = res.data.data;
     authToken = token;
     authUser = user;
+    // E19: tokenStorage in-memory é a fonte primária; localStorage continua
+    // como persistência entre reloads do Electron (sem alternativa segura
+    // em renderer com contextIsolation puro até IPC bridge ser feito).
+    tokenStorage.setTokens(token, null);
     localStorage.setItem('token', token);
     setUser(user);
     return res.data.data;
@@ -49,6 +57,7 @@ export function AuthProvider({ children }) {
   const handleLogout = () => {
     authToken = null;
     authUser = null;
+    tokenStorage.clearTokens();
     localStorage.removeItem('token');
     setUser(null);
   };

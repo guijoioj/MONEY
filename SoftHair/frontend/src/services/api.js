@@ -1,4 +1,5 @@
 import axios from 'axios';
+import tokenStorage from './tokenStorage';
 
 const isFileProtocol = typeof window !== 'undefined' && window.location.protocol === 'file:';
 // Dentro do Electron (file://) usa backend embarcado em 127.0.0.1:3001.
@@ -17,8 +18,24 @@ const api = axios.create({
 export const TOKEN_KEY = 'token';
 export const USER_KEY = 'user';
 
+// E19: prioriza tokenStorage in-memory; localStorage fica como fallback de
+// compatibilidade até que todos os pontos do app sejam migrados. Em XSS o
+// tokenStorage in-memory limita a exposição: o atacante teria que executar
+// JS dentro do contexto do app vivo, não basta ler o disco.
+function readToken() {
+  return tokenStorage.getToken() || (typeof localStorage !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null);
+}
+
+function clearTokens() {
+  tokenStorage.clearTokens();
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+  }
+}
+
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = readToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -29,8 +46,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
+      clearTokens();
       window.location.href = isFileProtocol ? '/#/login' : '/login';
     }
     return Promise.reject(error);
