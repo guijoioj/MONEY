@@ -59,17 +59,24 @@ class AuthService {
       [email]
     );
 
+    // [P4-M7] Constant-time login: SEMPRE executa bcrypt.compare, mesmo se user não existe.
+    // Antes: usuário inexistente retornava imediato (~ms), existente esperava ~100ms — diferença
+    // mensurável permitia user enumeration por timing.
+    const DUMMY_HASH = '$2a$12$' + 'X'.repeat(53);
+    const hashToCompare = user?.senha_hash || DUMMY_HASH;
+    const validPassword = await bcrypt.compare(senha, hashToCompare);
+
     if (!user) {
       throw new Error('Credenciais inválidas');
     }
-
-    const validPassword = await bcrypt.compare(senha, user.senha_hash);
     if (!validPassword) {
       throw new Error('Credenciais inválidas');
     }
 
+    // [P3-A7] Não revelar que salão existe-mas-está-inativo (user enumeration).
+    // Retornar mensagem genérica idêntica a "user não existe / senha errada".
     if (!user.salao_ativo) {
-      throw new Error('Salão inativo');
+      throw new Error('Credenciais inválidas');
     }
 
     // Atualizar último acesso
@@ -95,17 +102,27 @@ class AuthService {
 
   /**
    * Gerar token JWT
+   * [A3] JWT curto + jti para permitir revogação via jwt_blacklist.
+   * [P3-B1] Admin recebe TTL menor (8h default) que usuários comuns (24h default).
+   * Pode ser sobrescrito por env JWT_EXPIRES_IN / JWT_ADMIN_EXPIRES_IN.
    */
   static generateToken(user) {
+    const crypto = require('crypto');
+    const adminTTL = process.env.JWT_ADMIN_EXPIRES_IN || '8h';
+    const regularTTL = process.env.JWT_EXPIRES_IN || '24h';
+    const expiresIn = user.tipo === 'admin' ? adminTTL : regularTTL;
     return jwt.sign(
       {
         userId: user.id,
         email: user.email,
         tipo: user.tipo,
-        salaoId: user.salao_id
+        salaoId: user.salao_id,
+        // [P6-M2] tokenVersion no payload — invalidação por troca de senha
+        tokenVersion: user.token_version || 0,
+        jti: crypto.randomBytes(16).toString('hex'),
       },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn }
     );
   }
 
@@ -113,7 +130,47 @@ class AuthService {
    * Verificar token JWT
    */
   static verifyToken(token) {
-    return jwt.verify(token, process.env.JWT_SECRET);
+    // [P4-M1] Travar algorithm em HS256 — defense-in-depth.
+    return jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+  }
+
+  /**
+   * Revogar token (logout) — adiciona jti à blacklist até a expiração natural.
+   */
+  static async revokeToken(decodedOrToken) {
+    let decoded = decodedOrToken;
+    if (typeof decodedOrToken === 'string') {
+      try { decoded = jwt.decode(decodedOrToken); } catch { return false; }
+    }
+    if (!decoded || !decoded.jti || !decoded.exp) return false;
+    try {
+      await query(
+        `INSERT INTO jwt_blacklist (jti, user_id, salao_id, expires_at)
+         VALUES ($1, $2, $3, to_timestamp($4))
+         ON CONFLICT (jti) DO NOTHING`,
+        [decoded.jti, decoded.userId || null, decoded.salaoId || null, decoded.exp]
+      );
+      return true;
+    } catch (e) {
+      console.error('[revokeToken] erro:', e.message);
+      return false;
+    }
+  }
+
+  /**
+   * Checa se jti está revogado.
+   */
+  static async isTokenRevoked(decoded) {
+    if (!decoded?.jti) return false;
+    try {
+      const row = await queryOne(
+        'SELECT 1 FROM jwt_blacklist WHERE jti = $1 AND expires_at > NOW()',
+        [decoded.jti]
+      );
+      return !!row;
+    } catch {
+      return false; // não bloqueia em caso de erro de DB
+    }
   }
 
   /**
@@ -212,13 +269,14 @@ class AuthService {
       throw new Error('Senha atual incorreta');
     }
 
-    if (newPassword.length < 6) {
-      throw new Error('Nova senha deve ter no mínimo 6 caracteres');
+    if (newPassword.length < 8 || !/^(?=.*[A-Za-z])(?=.*\d)/.test(newPassword)) {
+      throw new Error('Nova senha precisa de mínimo 8 caracteres, com letra e número');
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);
+    // [P6-M2] Incrementa token_version para invalidar JWTs anteriores
     await query(
-      'UPDATE usuarios SET senha_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      'UPDATE usuarios SET senha_hash = $1, token_version = COALESCE(token_version, 0) + 1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       [hashedPassword, userId]
     );
 

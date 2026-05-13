@@ -71,6 +71,20 @@ async function createTables() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- Clientes app (compatibilidade; dados reais ficam em clientes)
+    CREATE TABLE IF NOT EXISTS clientes_app (
+      id SERIAL PRIMARY KEY,
+      nome VARCHAR(255) NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password VARCHAR(255),
+      telefone VARCHAR(50),
+      foto TEXT,
+      push_token TEXT,
+      ativo BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Profissionais
     CREATE TABLE IF NOT EXISTS profissionais (
       id SERIAL PRIMARY KEY,
@@ -135,6 +149,41 @@ async function createTables() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- Pedidos de agendamento do app
+    CREATE TABLE IF NOT EXISTS pedidos_agendamento (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      cliente_app_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+      servico_id INTEGER REFERENCES servicos(id) ON DELETE SET NULL,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL,
+      data_desejada DATE NOT NULL,
+      horario_desejado TIME NOT NULL,
+      horario_alternativo TIME,
+      observacoes TEXT,
+      status VARCHAR(50) DEFAULT 'pendente',
+      agendamento_id INTEGER REFERENCES agendamentos(id) ON DELETE SET NULL,
+      atendido_por INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+      motivo_rejeicao TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Atendimentos
+    CREATE TABLE IF NOT EXISTS atendimentos (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      agendamento_id INTEGER,
+      cliente_id INTEGER REFERENCES clientes(id) ON DELETE SET NULL,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL,
+      servico_id INTEGER REFERENCES servicos(id) ON DELETE SET NULL,
+      data_atendimento DATE,
+      status VARCHAR(50) DEFAULT 'finalizado',
+      observacoes TEXT,
+      valor DECIMAL(10,2),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Vendas
     CREATE TABLE IF NOT EXISTS vendas (
       id SERIAL PRIMARY KEY,
@@ -162,6 +211,29 @@ async function createTables() {
       valor_total DECIMAL(10,2) NOT NULL
     );
 
+    -- Pedidos de loja do app
+    CREATE TABLE IF NOT EXISTS pedidos_loja (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      cliente_app_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+      status VARCHAR(50) DEFAULT 'pendente',
+      total DECIMAL(10,2) DEFAULT 0,
+      endereco_entrega TEXT,
+      forma_pagamento VARCHAR(50),
+      observacoes TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS pedido_loja_itens (
+      id SERIAL PRIMARY KEY,
+      pedido_id INTEGER REFERENCES pedidos_loja(id) ON DELETE CASCADE,
+      produto_id INTEGER REFERENCES produtos(id) ON DELETE SET NULL,
+      quantidade INTEGER NOT NULL,
+      preco_unitario DECIMAL(10,2) NOT NULL,
+      subtotal DECIMAL(10,2) NOT NULL
+    );
+
     -- Comissões
     CREATE TABLE IF NOT EXISTS comissoes (
       id SERIAL PRIMARY KEY,
@@ -173,6 +245,18 @@ async function createTables() {
       valor_comissao DECIMAL(10,2) NOT NULL,
       pago BOOLEAN DEFAULT false,
       data_pagamento DATE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS comissoes_pagamentos (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE CASCADE,
+      valor DECIMAL(10,2) NOT NULL,
+      data_pagamento DATE DEFAULT CURRENT_DATE,
+      observacoes TEXT,
+      motivo_estorno TEXT,
+      status VARCHAR(50) DEFAULT 'pago',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -198,6 +282,7 @@ async function createTables() {
     CREATE TABLE IF NOT EXISTS creditos_cliente (
       id SERIAL PRIMARY KEY,
       cliente_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
       tipo VARCHAR(50) NOT NULL,
       valor DECIMAL(10,2) NOT NULL,
       saldo_anterior DECIMAL(10,2) NOT NULL,
@@ -257,6 +342,123 @@ async function createTables() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       expires_at TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS registros_ponto (
+      id SERIAL PRIMARY KEY,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE CASCADE,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      tipo VARCHAR(50) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS configuracoes (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      chave VARCHAR(255) NOT NULL,
+      valor TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (salao_id, chave)
+    );
+
+    CREATE TABLE IF NOT EXISTS produtos_utilizados (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL,
+      agendamento_id INTEGER,
+      produto_id INTEGER REFERENCES produtos(id) ON DELETE SET NULL,
+      cliente_id INTEGER,
+      cliente_nome VARCHAR(255),
+      marca VARCHAR(255),
+      coloracao VARCHAR(255),
+      quantidade DECIMAL DEFAULT 1,
+      observacoes TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS chat_mensagens (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      remetente_id INTEGER NOT NULL,
+      remetente_tipo VARCHAR(20) NOT NULL,
+      destinatario_id INTEGER,
+      destinatario_tipo VARCHAR(20),
+      mensagem TEXT NOT NULL,
+      lida BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS bloqueios_horario (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE CASCADE,
+      data_inicio TIMESTAMPTZ NOT NULL,
+      data_fim TIMESTAMPTZ NOT NULL,
+      motivo TEXT DEFAULT 'Bloqueado',
+      dia_inteiro BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS despesas (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      descricao TEXT NOT NULL,
+      valor DECIMAL(10,2) NOT NULL,
+      categoria VARCHAR(100) DEFAULT 'Outros',
+      data DATE DEFAULT CURRENT_DATE,
+      recorrente BOOLEAN DEFAULT FALSE,
+      observacoes TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- [P5-C2] Audit log persistente — forense queryable de ações sensíveis
+    -- [P6-C2] Append-only + hash chain (previous_hash, current_hash) para detectar tampering
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER,
+      actor_id INTEGER,
+      actor_type VARCHAR(20),
+      action VARCHAR(100) NOT NULL,
+      entity_type VARCHAR(50),
+      entity_id INTEGER,
+      before_data JSONB,
+      after_data JSONB,
+      ip VARCHAR(45),
+      user_agent TEXT,
+      previous_hash VARCHAR(64),
+      current_hash VARCHAR(64),
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_audit_log_salao_created ON audit_log(salao_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log(action, created_at DESC);
+
+    -- [P5-A3] UNIQUE constraint para evitar duplicatas de cliente_app por race condition
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'uq_clientes_app_email'
+      ) THEN
+        BEGIN
+          ALTER TABLE clientes_app ADD CONSTRAINT uq_clientes_app_email UNIQUE (email);
+        EXCEPTION WHEN unique_violation OR duplicate_object THEN NULL;
+        END;
+      END IF;
+    END $$;
+
+    -- [P6-C3] UNIQUE em clientes(salao_id, LOWER(email)) — appAuth.js insere aqui,
+    -- não em clientes_app. P5-A3 estava aplicado na tabela errada.
+    -- 1) Deduplicar: manter o mais antigo por (salao_id, LOWER(email))
+    DO $$
+    BEGIN
+      DELETE FROM clientes a USING clientes b
+        WHERE a.id > b.id
+          AND a.email IS NOT NULL
+          AND b.email IS NOT NULL
+          AND LOWER(a.email) = LOWER(b.email)
+          AND COALESCE(a.salao_id, 0) = COALESCE(b.salao_id, 0);
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C3 dedup clientes: % (continuando)', SQLERRM;
+    END $$;
   `;
 
   await query(sql);
@@ -340,4 +542,264 @@ async function createFunctions() {
   console.log('✅ Funções criadas');
 }
 
-module.exports = { initDb };
+async function runMigrations() {
+  await query(`
+    ALTER TABLE agendamentos ADD COLUMN IF NOT EXISTS auxiliar_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL;
+    ALTER TABLE agendamentos ADD COLUMN IF NOT EXISTS cancelado_em TIMESTAMP;
+    ALTER TABLE agendamentos ADD COLUMN IF NOT EXISTS motivo_cancelamento TEXT;
+    ALTER TABLE creditos_cliente ADD COLUMN IF NOT EXISTS salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE;
+    ALTER TABLE clientes ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(255);
+    ALTER TABLE clientes ADD COLUMN IF NOT EXISTS app_ativo BOOLEAN DEFAULT false;
+    ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(255);
+    ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS app_ativo BOOLEAN DEFAULT false;
+    ALTER TABLE clientes ADD COLUMN IF NOT EXISTS push_token TEXT;
+    ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS push_token TEXT;
+    ALTER TABLE servicos ADD COLUMN IF NOT EXISTS cor VARCHAR(7) DEFAULT '#6366f1';
+    -- [P6-M2] token_version: incrementado a cada troca de senha. Middleware compara
+    -- com decoded.tokenVersion no JWT — se divergir, token é considerado revogado.
+    ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0;
+    ALTER TABLE clientes ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0;
+    ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0;
+  `);
+
+  // Caixa diário
+  await query(`
+    CREATE TABLE IF NOT EXISTS caixa (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      saldo_inicial DECIMAL(10,2) DEFAULT 0,
+      saldo_final DECIMAL(10,2),
+      observacoes TEXT,
+      aberto_por INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+      aberto_em TIMESTAMPTZ DEFAULT NOW(),
+      fechado_em TIMESTAMPTZ
+    )
+  `);
+
+  // [P8-M1] UNIQUE partial index: 1 único caixa aberto por dia por salão.
+  // Permite múltiplos caixas no mesmo dia se já fechados (fechamento + reabertura).
+  // Fecha a janela de race em READ COMMITTED do INSERT...WHERE NOT EXISTS em /caixa/abrir.
+  await query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS unq_caixa_salao_dia_aberto
+      ON caixa(salao_id, ((aberto_em AT TIME ZONE 'UTC')::date))
+      WHERE fechado_em IS NULL;
+  `).catch((e) => {
+    console.warn('[P8-M1] unique index caixa falhou (provavelmente duplicatas restantes):', e.message);
+  });
+
+  // Metas por profissional
+  await query(`
+    CREATE TABLE IF NOT EXISTS metas_profissional (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE CASCADE,
+      mes INTEGER NOT NULL,
+      ano INTEGER NOT NULL,
+      meta_valor DECIMAL(10,2) DEFAULT 0,
+      meta_atendimentos INTEGER DEFAULT 0,
+      UNIQUE(salao_id, profissional_id, mes, ano)
+    )
+  `);
+
+  // Programa de pontos/fidelidade
+  await query(`
+    CREATE TABLE IF NOT EXISTS pontos_fidelidade (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      cliente_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+      pontos INTEGER NOT NULL DEFAULT 0,
+      tipo VARCHAR(50) NOT NULL,
+      descricao TEXT,
+      referencia_id INTEGER,
+      referencia_tipo VARCHAR(50),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_pontos_cliente ON pontos_fidelidade(cliente_id, salao_id);
+  `);
+
+  // [P5-A5] Tabela dedicada para histórico de cliente (substitui pollution em agendamentos)
+  await query(`
+    CREATE TABLE IF NOT EXISTS historico_cliente (
+      id SERIAL PRIMARY KEY,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      cliente_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+      tipo VARCHAR(50) NOT NULL,
+      descricao TEXT NOT NULL,
+      entidade_id INTEGER,
+      data TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_historico_cliente_cliente ON historico_cliente(cliente_id, salao_id);
+    CREATE INDEX IF NOT EXISTS idx_historico_cliente_data ON historico_cliente(salao_id, created_at DESC);
+  `);
+
+  // [P5-C5] Fechamentos: adicionar campos para soft-delete + motivo de reabertura
+  await query(`
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS deleted_by INTEGER;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS motivo_delete TEXT;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS motivo_reabertura TEXT;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS reaberto_por INTEGER;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS reaberto_em TIMESTAMPTZ;
+    ALTER TABLE comissoes ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP;
+  `);
+
+  // [P6-C3] UNIQUE clientes(salao_id, LOWER(email)) WHERE email IS NOT NULL
+  await query(`
+    DO $$
+    BEGIN
+      -- Dedup defensiva caso ainda haja duplicatas no DB live
+      DELETE FROM clientes a USING clientes b
+        WHERE a.id > b.id
+          AND a.email IS NOT NULL
+          AND b.email IS NOT NULL
+          AND LOWER(a.email) = LOWER(b.email)
+          AND COALESCE(a.salao_id, 0) = COALESCE(b.salao_id, 0);
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C3 dedup clientes runtime: % (continuando)', SQLERRM;
+    END $$;
+  `);
+  await query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS unq_clientes_salao_email
+      ON clientes(salao_id, LOWER(email)) WHERE email IS NOT NULL;
+  `).catch((e) => {
+    console.warn('[P6-C3] unique index falhou (provavelmente duplicatas restantes):', e.message);
+  });
+
+  // [P6-C2] Audit log append-only + hash chain
+  // - Adiciona colunas previous_hash/current_hash (idempotente)
+  // - Cria trigger BEFORE UPDATE/DELETE que RAISE EXCEPTION
+  // - Trigger BEFORE INSERT que calcula current_hash = sha256(prev || canonical_row)
+  await query(`
+    ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS previous_hash VARCHAR(64);
+    ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS current_hash VARCHAR(64);
+  `);
+  await query(`
+    DO $$
+    BEGIN
+      -- Função que bloqueia UPDATE/DELETE
+      CREATE OR REPLACE FUNCTION audit_log_immutable() RETURNS TRIGGER AS $f$
+      BEGIN
+        RAISE EXCEPTION 'audit_log é append-only — UPDATE/DELETE proibido';
+      END;
+      $f$ LANGUAGE plpgsql;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C2 immutable function: % (continuando)', SQLERRM;
+    END $$;
+  `);
+  await query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_audit_log_no_update') THEN
+        CREATE TRIGGER trg_audit_log_no_update BEFORE UPDATE ON audit_log
+          FOR EACH ROW EXECUTE FUNCTION audit_log_immutable();
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_audit_log_no_delete') THEN
+        CREATE TRIGGER trg_audit_log_no_delete BEFORE DELETE ON audit_log
+          FOR EACH ROW EXECUTE FUNCTION audit_log_immutable();
+      END IF;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C2 triggers: % (continuando)', SQLERRM;
+    END $$;
+  `);
+  // Hash chain trigger BEFORE INSERT
+  await query(`
+    DO $$
+    BEGIN
+      CREATE OR REPLACE FUNCTION audit_log_hash_chain() RETURNS TRIGGER AS $f$
+      DECLARE
+        prev_hash TEXT;
+        canonical TEXT;
+      BEGIN
+        SELECT current_hash INTO prev_hash
+          FROM audit_log
+          ORDER BY id DESC LIMIT 1;
+        NEW.previous_hash := COALESCE(prev_hash, '');
+        canonical := COALESCE(NEW.previous_hash, '') || '|' ||
+                     COALESCE(NEW.salao_id::TEXT, '') || '|' ||
+                     COALESCE(NEW.actor_id::TEXT, '') || '|' ||
+                     COALESCE(NEW.actor_type, '') || '|' ||
+                     COALESCE(NEW.action, '') || '|' ||
+                     COALESCE(NEW.entity_type, '') || '|' ||
+                     COALESCE(NEW.entity_id::TEXT, '') || '|' ||
+                     COALESCE(NEW.before_data::TEXT, '') || '|' ||
+                     COALESCE(NEW.after_data::TEXT, '') || '|' ||
+                     COALESCE(NEW.ip, '') || '|' ||
+                     COALESCE(NEW.user_agent, '');
+        NEW.current_hash := encode(digest(canonical, 'sha256'), 'hex');
+        RETURN NEW;
+      END;
+      $f$ LANGUAGE plpgsql;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C2 hash chain function: % (continuando)', SQLERRM;
+    END $$;
+  `);
+  // pgcrypto extension may be required for digest()
+  await query(`
+    DO $$
+    BEGIN
+      CREATE EXTENSION IF NOT EXISTS pgcrypto;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'pgcrypto extension: % (continuando)', SQLERRM;
+    END $$;
+  `);
+  await query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_audit_log_hash_chain') THEN
+        CREATE TRIGGER trg_audit_log_hash_chain BEFORE INSERT ON audit_log
+          FOR EACH ROW EXECUTE FUNCTION audit_log_hash_chain();
+      END IF;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'P6-C2 hash chain trigger: % (continuando)', SQLERRM;
+    END $$;
+  `);
+
+  // [P5-C1] Trocar CASCADE → RESTRICT/SET NULL em FKs financeiras (preserva histórico)
+  // Idempotente: drop + recreate constraint só altera política, nada é apagado.
+  await query(`
+    DO $$
+    BEGIN
+      -- comissoes.profissional_id: histórico append-only → SET NULL (preserva valor pago)
+      IF EXISTS (SELECT 1 FROM information_schema.referential_constraints
+                 WHERE constraint_name = 'comissoes_profissional_id_fkey' AND delete_rule = 'CASCADE') THEN
+        ALTER TABLE comissoes DROP CONSTRAINT comissoes_profissional_id_fkey;
+        ALTER TABLE comissoes ADD CONSTRAINT comissoes_profissional_id_fkey
+          FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE SET NULL;
+      END IF;
+
+      -- comissoes.venda_id: histórico append-only → SET NULL
+      IF EXISTS (SELECT 1 FROM information_schema.referential_constraints
+                 WHERE constraint_name = 'comissoes_venda_id_fkey' AND delete_rule = 'CASCADE') THEN
+        ALTER TABLE comissoes DROP CONSTRAINT comissoes_venda_id_fkey;
+        ALTER TABLE comissoes ADD CONSTRAINT comissoes_venda_id_fkey
+          FOREIGN KEY (venda_id) REFERENCES vendas(id) ON DELETE SET NULL;
+      END IF;
+
+      -- venda_itens.produto_id: histórico append-only → SET NULL
+      IF EXISTS (SELECT 1 FROM information_schema.referential_constraints
+                 WHERE constraint_name = 'venda_itens_produto_id_fkey' AND delete_rule = 'CASCADE') THEN
+        ALTER TABLE venda_itens DROP CONSTRAINT venda_itens_produto_id_fkey;
+        ALTER TABLE venda_itens ADD CONSTRAINT venda_itens_produto_id_fkey
+          FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE SET NULL;
+      END IF;
+
+      -- atendimentos.cliente/profissional/servico já são SET NULL em initDb (linhas 176-178)
+
+      -- comissoes_pagamentos.profissional_id → SET NULL (preserva evidência de pagamento)
+      IF EXISTS (SELECT 1 FROM information_schema.referential_constraints
+                 WHERE constraint_name = 'comissoes_pagamentos_profissional_id_fkey' AND delete_rule = 'CASCADE') THEN
+        ALTER TABLE comissoes_pagamentos DROP CONSTRAINT comissoes_pagamentos_profissional_id_fkey;
+        ALTER TABLE comissoes_pagamentos ADD CONSTRAINT comissoes_pagamentos_profissional_id_fkey
+          FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE SET NULL;
+      END IF;
+    EXCEPTION WHEN OTHERS THEN
+      -- Tolerância: tabelas/constraints podem não existir em ambientes mais antigos
+      RAISE NOTICE 'P5-C1 migration: % (continuando)', SQLERRM;
+    END $$;
+  `);
+
+  console.log('✅ Migrations aplicadas');
+}
+
+module.exports = { initDb, runMigrations };

@@ -17,11 +17,22 @@ const TABLE_COLUMNS = {
   servicos: ['nome', 'descricao', 'preco', 'duracao_minutos', 'comissao_percentual', 'cor', 'ativo'],
   produtos: ['nome', 'descricao', 'preco_custo', 'preco_venda', 'quantidade_estoque', 'quantidade_minima', 'categoria', 'codigo_barras', 'ativo'],
   agendamentos: ['cliente_id', 'profissional_id', 'servico_id', 'data_hora', 'duracao_minutos', 'status', 'observacoes', 'valor'],
-  vendas: ['cliente_id', 'profissional_id', 'tipo', 'status', 'valor_total', 'desconto', 'valor_final', 'forma_pagamento', 'observacoes'],
-  comissoes: ['profissional_id', 'venda_id', 'valor_total', 'percentual', 'valor_comissao', 'pago', 'data_pagamento'],
-  atendimentos: ['cliente_id', 'profissional_id', 'servico_id', 'agendamento_id', 'valor', 'status', 'observacoes'],
-  fechamentos: ['data_inicio', 'data_fim', 'tipo', 'total_vendas', 'total_servicos', 'total_produtos', 'total_comissoes', 'total_liquido', 'observacoes', 'status'],
-  creditos_cliente: ['cliente_id', 'tipo', 'valor', 'saldo_anterior', 'saldo_novo', 'observacoes'],
+  // [P7-A1] `status` e `valor_final` REMOVIDOS — sync não pode finalizar venda nem definir valor_final.
+  // Finalização ocorre via rota dedicada (`POST /vendas/:id/finalizar`); `valor_final` é derivado
+  // (valor_total - desconto) no fluxo oficial com audit log.
+  vendas: ['cliente_id', 'profissional_id', 'tipo', 'valor_total', 'desconto', 'forma_pagamento', 'observacoes'],
+  // [P5-C4] `pago` e `data_pagamento` REMOVIDOS — sync nunca pode marcar comissão como paga.
+  // Pagamento deve passar pelo fluxo oficial (`POST /api/comissoes/pagar` ou `PUT /:id/pagar`)
+  // que tem `requireAdmin`, reconciliação de valor e audit log persistente.
+  comissoes: ['profissional_id', 'venda_id', 'valor_total', 'percentual', 'valor_comissao'],
+  // [P7-A1] `status` e `valor` REMOVIDOS — sync não pode reabrir/cancelar atendimento nem alterar
+  // valor monetário (que afeta cálculo de comissão). Status/valor migram via rotas oficiais
+  // (`/atendimentos/:id/finalizar`, `/atendimentos/:id/cancelar`) com audit log.
+  atendimentos: ['cliente_id', 'profissional_id', 'servico_id', 'agendamento_id', 'observacoes'],
+  // [P5-C4] `status` REMOVIDO — sync não pode reabrir/fechar fechamento. Use rota oficial com audit.
+  fechamentos: ['data_inicio', 'data_fim', 'tipo', 'total_vendas', 'total_servicos', 'total_produtos', 'total_comissoes', 'total_liquido', 'observacoes'],
+  // [P5-C4] `saldo_anterior`/`saldo_novo` REMOVIDOS — crédito é append-only via rota dedicada.
+  creditos_cliente: ['cliente_id', 'tipo', 'valor', 'observacoes'],
   notificacoes: ['tipo', 'titulo', 'mensagem', 'destinatario_id', 'destinatario_tipo', 'lida']
 };
 
@@ -46,6 +57,34 @@ function sanitizeData(table, data) {
     }
   }
   return sanitized;
+}
+
+// [P2-A6] Mapa de FKs conhecidas → tabela referenciada. Antes de INSERT/UPDATE,
+// validamos que cada FK aponta para um registro do MESMO salao_id (cross-tenant FKs).
+const FK_TABLE_MAP = {
+  cliente_id: 'clientes',
+  profissional_id: 'profissionais',
+  servico_id: 'servicos',
+  produto_id: 'produtos',
+  agendamento_id: 'agendamentos',
+  venda_id: 'vendas',
+  auxiliar_id: 'profissionais',
+};
+
+async function validateFkTenancy(client, sanitized, salaoId) {
+  for (const [col, value] of Object.entries(sanitized)) {
+    if (value === null || value === undefined) continue;
+    const refTable = FK_TABLE_MAP[col];
+    if (!refTable) continue;
+    const r = await client.query(
+      `SELECT 1 FROM ${refTable} WHERE id = $1 AND salao_id = $2`,
+      [value, salaoId]
+    );
+    if (!r.rows.length) {
+      return `FK ${col} (${value}) não pertence ao salão`;
+    }
+  }
+  return null;
 }
 
 // ─── GET /changes — Obter mudanças desde a última sincronização ───
@@ -110,10 +149,12 @@ router.post('/push', authMiddleware, async (req, res) => {
       });
     }
 
-    if (changes.length > 500) {
+    // [P4-M6] Limite reduzido para 100 — antes 500 podia gerar long-lock no Postgres
+    // dentro da transação serializável, exaurindo conexões sob concorrência.
+    if (changes.length > 100) {
       return res.status(400).json({
         success: false,
-        error: 'Máximo de 500 mudanças por requisição'
+        error: 'Máximo de 100 mudanças por requisição'
       });
     }
 
@@ -121,6 +162,9 @@ router.post('/push', authMiddleware, async (req, res) => {
 
     // Processar todas as mudanças dentro de uma transaction
     const results = await withTransaction(async (client) => {
+      // [P4-M6] Timeout de statement por transação — bloqueia escalada de long-lock
+      // se um INSERT bater em índice corrompido / lock pesado. 10s é folgado para 100 changes.
+      try { await client.query("SET LOCAL statement_timeout = '10s'"); } catch (_) { /* não-fatal */ }
       const txResults = [];
 
       for (const change of changes) {
@@ -145,6 +189,16 @@ router.post('/push', authMiddleware, async (req, res) => {
         try {
           let result;
           const sanitized = sanitizeData(table, data);
+
+          // [P2-A6] Antes de INSERT/UPDATE, validar que todas as FKs (cliente_id, profissional_id,
+          // servico_id, produto_id, agendamento_id, venda_id, auxiliar_id) pertencem ao salao_id atual.
+          if (operation === 'INSERT' || operation === 'UPDATE') {
+            const fkErr = await validateFkTenancy(client, sanitized, salaoId);
+            if (fkErr) {
+              txResults.push({ table, operation, success: false, error: fkErr });
+              continue;
+            }
+          }
 
           switch (operation) {
             case 'INSERT': {
@@ -202,7 +256,10 @@ router.post('/push', authMiddleware, async (req, res) => {
 
           txResults.push({ table, operation, success: true, data: result });
         } catch (error) {
-          txResults.push({ table, operation, success: false, error: error.message });
+          // [P2-M1] Sanitizar mensagem em prod (mensagens Postgres podem vazar schema).
+          console.error('[SYNC] erro em mudança:', table, operation, error.message);
+          const safe = process.env.NODE_ENV === 'production' ? 'Erro ao processar mudança' : error.message;
+          txResults.push({ table, operation, success: false, error: safe });
         }
       }
 
@@ -232,7 +289,7 @@ router.get('/last-sync', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('[SYNC] Erro ao obter última sincronização:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -252,7 +309,7 @@ router.post('/reset', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('[SYNC] Erro ao resetar sincronização:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

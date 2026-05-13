@@ -1,25 +1,41 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { query, queryOne } = require('../config/database');
+const { sendError } = require('../utils/sendError');
+
+// [M6] Rate-limit dedicado: previne enumeração massiva de salões públicos
+const publicSaloesLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: { success: false, error: 'Muitas requisições. Aguarde um minuto.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Listar salões publicamente (para app mobile de clientes)
-router.get('/publico', async (req, res) => {
+// [M6] Limita campos públicos (sem email/telefone) e exige termo de busca (mín 2 chars)
+router.get('/publico', publicSaloesLimiter, async (req, res) => {
   try {
     const { search } = req.query;
-    let sql = `SELECT id, nome, endereco, telefone, email, logo_url
-      FROM saloes WHERE ativo = true`;
-    const params = [];
-    if (search) {
-      params.push(`%${search}%`);
-      sql += ` AND nome ILIKE $1`;
+    const term = typeof search === 'string' ? search.trim() : '';
+    if (term.length < 2) {
+      return res.status(400).json({
+        success: false,
+        error: 'Informe um termo de busca com pelo menos 2 caracteres.'
+      });
     }
-    sql += ' ORDER BY nome';
-    const { rows } = await query(sql, params);
+    const sql = `SELECT id, nome, logo_url
+      FROM saloes WHERE ativo = true AND nome ILIKE $1
+      ORDER BY nome LIMIT 50`;
+    // [P3-M8] Escapa wildcards
+    const safe = require('../utils/helpers').escapeLike(term);
+    const { rows } = await query(sql, [`%${safe}%`]);
     res.json({ success: true, data: rows });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return sendError(res, 500, 'Erro ao listar salões', error);
   }
 });
 
@@ -30,14 +46,39 @@ router.get('/me', authMiddleware, async (req, res) => {
     if (!salao) return res.status(404).json({ success: false, error: 'Salão não encontrado' });
     res.json({ success: true, data: salao });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return sendError(res, 500, 'Erro ao buscar salão', error);
   }
 });
 
 // Atualizar salão atual
+// [P5-A7] Validador customizado de logo_url:
+// - Permite http(s)://
+// - Permite data:image/{png,jpeg,jpg,gif,webp};base64,... (SVG bloqueado — P6-A2)
+// - Bloqueia javascript:, vbscript:, file:, data:text/html, etc.
+// [P6-A2] svg+xml REMOVIDO: SVG é XML executável (script tags, onload, foreignObject).
+// Quando renderizado por <object>, <iframe>, dangerouslySetInnerHTML ou alguns
+// user-agents legados via <img>, dispara XSS persistente.
+function isSafeLogoUrl(value) {
+  if (value === null || value === undefined || value === '') return true; // opcional
+  if (typeof value !== 'string') return false;
+  if (value.length > 2048) return false;
+  const v = value.trim();
+  // http(s)
+  if (/^https?:\/\/[^\s<>"'`]+$/i.test(v)) return true;
+  // data: imagem apenas (raster — SVG bloqueado por XSS persistente)
+  if (/^data:image\/(png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=]+$/i.test(v)) return true;
+  return false;
+}
+
 router.put('/me', authMiddleware, requireAdmin, [
   body('nome').optional().isLength({ min: 2 }),
   body('email').optional().isEmail(),
+  body('logo_url').optional().custom((v) => {
+    if (!isSafeLogoUrl(v)) {
+      throw new Error('logo_url inválida (apenas http(s) ou data:image)');
+    }
+    return true;
+  }),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -55,7 +96,7 @@ router.put('/me', authMiddleware, requireAdmin, [
 
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return sendError(res, 500, 'Erro ao atualizar salão', error);
   }
 });
 

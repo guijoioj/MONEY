@@ -1,0 +1,2711 @@
+{
+  "nodes": [
+    {
+      "id": "babel_config_js",
+      "label": "babel.config.js",
+      "file_type": "code",
+      "source_file": "babel.config.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "metro_config_js",
+      "label": "metro.config.js",
+      "file_type": "code",
+      "source_file": "metro.config.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "nativewind_env_d_ts",
+      "label": "nativewind-env.d.ts",
+      "file_type": "code",
+      "source_file": "nativewind-env.d.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "tailwind_config_js",
+      "label": "tailwind.config.js",
+      "file_type": "code",
+      "source_file": "tailwind.config.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "expo_env_d_ts",
+      "label": "expo-env.d.ts",
+      "file_type": "code",
+      "source_file": "expo-env.d.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_layout_tsx",
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "layout_getderivedstatefromerror",
+      "label": "getDerivedStateFromError()",
+      "file_type": "code",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "app_index_tsx",
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "app/index.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "index_index",
+      "label": "Index()",
+      "file_type": "code",
+      "source_file": "app/index.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "app_auth_layout_tsx",
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/_layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "layout_authlayout",
+      "label": "AuthLayout()",
+      "file_type": "code",
+      "source_file": "app/(auth)/_layout.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "app_auth_login_tsx",
+      "label": "login.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "login_handlelogin",
+      "label": "handleLogin()",
+      "file_type": "code",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L25"
+    },
+    {
+      "id": "app_auth_register_tsx",
+      "label": "register.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "register_handleregister",
+      "label": "handleRegister()",
+      "file_type": "code",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L25"
+    },
+    {
+      "id": "app_cliente_layout_tsx",
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "layout_wsconnector",
+      "label": "WSConnector()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "layout_clientelayout",
+      "label": "ClienteLayout()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "app_cliente_tabs_layout_tsx",
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/_layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "layout_tabicon",
+      "label": "TabIcon()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/_layout.tsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "app_cliente_tabs_agendar_tsx",
+      "label": "agendar.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "agendar_formatardata",
+      "label": "formatarData()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L21"
+    },
+    {
+      "id": "agendar_formatardataexibicao",
+      "label": "formatarDataExibicao()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L25"
+    },
+    {
+      "id": "agendar_handlesubmit",
+      "label": "handleSubmit()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L91"
+    },
+    {
+      "id": "app_cliente_tabs_carrinho_tsx",
+      "label": "carrinho.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "carrinho_handleconfirmar",
+      "label": "handleConfirmar()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L53"
+    },
+    {
+      "id": "carrinho_resetar",
+      "label": "resetar()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L75"
+    },
+    {
+      "id": "app_cliente_tabs_loja_tsx",
+      "label": "loja.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "loja_handleaddtocart",
+      "label": "handleAddToCart()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L63"
+    },
+    {
+      "id": "app_cliente_tabs_meus_pedidos_loja_tsx",
+      "label": "meus-pedidos-loja.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/meus-pedidos-loja.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_cliente_tabs_pedidos_tsx",
+      "label": "pedidos.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/pedidos.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_cliente_tabs_perfil_tsx",
+      "label": "perfil.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "perfil_handlesalvar",
+      "label": "handleSalvar()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "perfil_handlelogout",
+      "label": "handleLogout()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L29"
+    },
+    {
+      "id": "app_cliente_tabs_index_tsx",
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/index.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_cliente_produto_id_tsx",
+      "label": "[id].tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "id_handleaddtocart",
+      "label": "handleAddToCart()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L51"
+    },
+    {
+      "id": "app_cliente_salao_id_tsx",
+      "label": "[id].tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/salao/[id].tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_profissional_layout_tsx",
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "layout_wsconnector",
+      "label": "WSConnector()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "layout_profissionallayout",
+      "label": "ProfissionalLayout()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L10"
+    },
+    {
+      "id": "app_profissional_tabs_layout_tsx",
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/_layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_profissional_tabs_agenda_tsx",
+      "label": "agenda.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "agenda_formatdate",
+      "label": "formatDate()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L30"
+    },
+    {
+      "id": "agenda_formathour",
+      "label": "formatHour()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L34"
+    },
+    {
+      "id": "agenda_handleavisaratraso",
+      "label": "handleAvisarAtraso()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L56"
+    },
+    {
+      "id": "agenda_navdate",
+      "label": "navDate()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L76"
+    },
+    {
+      "id": "app_profissional_tabs_atendimentos_tsx",
+      "label": "atendimentos.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "atendimentos_formatdate",
+      "label": "formatDate()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L28"
+    },
+    {
+      "id": "atendimentos_navdate",
+      "label": "navDate()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L45"
+    },
+    {
+      "id": "app_profissional_tabs_comissoes_tsx",
+      "label": "comissoes.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/comissoes.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_profissional_tabs_perfil_tsx",
+      "label": "perfil.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "perfil_handlelogout",
+      "label": "handleLogout()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L30"
+    },
+    {
+      "id": "app_profissional_tabs_ponto_tsx",
+      "label": "ponto.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "ponto_formattime",
+      "label": "formatTime()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L68"
+    },
+    {
+      "id": "ponto_formatdate",
+      "label": "formatDate()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L72"
+    },
+    {
+      "id": "ponto_salvarproduto",
+      "label": "salvarProduto()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L177"
+    },
+    {
+      "id": "ponto_baterponto",
+      "label": "baterPonto()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L191"
+    },
+    {
+      "id": "ponto_confirmarponto",
+      "label": "confirmarPonto()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L204"
+    },
+    {
+      "id": "ponto_confirmarfinalizaratendimento",
+      "label": "confirmarFinalizarAtendimento()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L215"
+    },
+    {
+      "id": "components_ui_badge_tsx",
+      "label": "Badge.tsx",
+      "file_type": "code",
+      "source_file": "components/ui/Badge.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "badge_badge",
+      "label": "Badge()",
+      "file_type": "code",
+      "source_file": "components/ui/Badge.tsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "components_ui_button_tsx",
+      "label": "Button.tsx",
+      "file_type": "code",
+      "source_file": "components/ui/Button.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "button_button",
+      "label": "Button()",
+      "file_type": "code",
+      "source_file": "components/ui/Button.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "components_ui_card_tsx",
+      "label": "Card.tsx",
+      "file_type": "code",
+      "source_file": "components/ui/Card.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "card_card",
+      "label": "Card()",
+      "file_type": "code",
+      "source_file": "components/ui/Card.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "components_ui_input_tsx",
+      "label": "Input.tsx",
+      "file_type": "code",
+      "source_file": "components/ui/Input.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_ui_loading_tsx",
+      "label": "Loading.tsx",
+      "file_type": "code",
+      "source_file": "components/ui/Loading.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "hooks_usenotificacoes_ts",
+      "label": "useNotificacoes.ts",
+      "file_type": "code",
+      "source_file": "hooks/useNotificacoes.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "usenotificacoes_usenotificacoes",
+      "label": "useNotificacoes()",
+      "file_type": "code",
+      "source_file": "hooks/useNotificacoes.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "hooks_usewebsocket_ts",
+      "label": "useWebSocket.ts",
+      "file_type": "code",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "usewebsocket_usewebsocket",
+      "label": "useWebSocket()",
+      "file_type": "code",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "hooks_useauth_ts",
+      "label": "useAuth.ts",
+      "file_type": "code",
+      "source_file": "hooks/useAuth.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "useauth_useauth",
+      "label": "useAuth()",
+      "file_type": "code",
+      "source_file": "hooks/useAuth.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "services_websocket_ts",
+      "label": "websocket.ts",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websocket_websocketmanager",
+      "label": "WebSocketManager",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "websocket_websocketmanager_connect",
+      "label": ".connect()",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "websocket_websocketmanager_disconnect",
+      "label": ".disconnect()",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L74"
+    },
+    {
+      "id": "websocket_websocketmanager_addlistener",
+      "label": ".addListener()",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L85"
+    },
+    {
+      "id": "websocket_websocketmanager_isconnected",
+      "label": ".isConnected()",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L92"
+    },
+    {
+      "id": "services_api_ts",
+      "label": "api.ts",
+      "file_type": "code",
+      "source_file": "services/api.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "store_authstore_ts",
+      "label": "authStore.ts",
+      "file_type": "code",
+      "source_file": "store/authStore.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "store_carrinhostore_ts",
+      "label": "carrinhoStore.ts",
+      "file_type": "code",
+      "source_file": "store/carrinhoStore.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "store_wsstore_ts",
+      "label": "wsStore.ts",
+      "file_type": "code",
+      "source_file": "store/wsStore.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "utils_security_ts",
+      "label": "security.ts",
+      "file_type": "code",
+      "source_file": "utils/security.ts",
+      "source_location": "L1"
+    }
+  ],
+  "edges": [
+    {
+      "source": "app_layout_tsx",
+      "target": "global_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_layout_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_layout_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_layout_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_layout_tsx",
+      "target": "react_native_gesture_handler",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_layout_tsx",
+      "target": "expo_status_bar",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_layout_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "app_layout_tsx",
+      "target": "store_authstore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "app_layout_tsx",
+      "target": "services_websocket",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "app_layout_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "app_layout_tsx",
+      "target": "layout_getderivedstatefromerror",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_index_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/index.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_index_tsx",
+      "target": "store_authstore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/index.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_index_tsx",
+      "target": "index_index",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/index.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_layout_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/_layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_layout_tsx",
+      "target": "store_authstore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/_layout.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_layout_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/_layout.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_layout_tsx",
+      "target": "layout_authlayout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/_layout.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_login_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_login_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_login_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_login_tsx",
+      "target": "components_ui_input",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_login_tsx",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_login_tsx",
+      "target": "hooks_useauth",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_login_tsx",
+      "target": "login_handlelogin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_register_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_register_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_register_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_register_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_register_tsx",
+      "target": "components_ui_input",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_register_tsx",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_register_tsx",
+      "target": "hooks_useauth",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_register_tsx",
+      "target": "register_handleregister",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_layout_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_layout_tsx",
+      "target": "store_authstore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_layout_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_layout_tsx",
+      "target": "hooks_usewebsocket",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_layout_tsx",
+      "target": "layout_wsconnector",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_layout_tsx",
+      "target": "layout_clientelayout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_layout_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/_layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_layout_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/_layout.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_layout_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/_layout.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_layout_tsx",
+      "target": "store_carrinhostore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/_layout.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_layout_tsx",
+      "target": "layout_tabicon",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/_layout.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "datetimepicker",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "components_ui_input",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "agendar_formatardata",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "agendar_formatardataexibicao",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "agendar_handlesubmit",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L91",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "store_carrinhostore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "carrinho_handleconfirmar",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "carrinho_resetar",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "store_carrinhostore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "loja_handleaddtocart",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_meus_pedidos_loja_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/meus-pedidos-loja.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_meus_pedidos_loja_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/meus-pedidos-loja.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_meus_pedidos_loja_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/meus-pedidos-loja.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_meus_pedidos_loja_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/meus-pedidos-loja.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_meus_pedidos_loja_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/meus-pedidos-loja.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_meus_pedidos_loja_tsx",
+      "target": "components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/meus-pedidos-loja.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_meus_pedidos_loja_tsx",
+      "target": "components_ui_badge",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/meus-pedidos-loja.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_meus_pedidos_loja_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/meus-pedidos-loja.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_pedidos_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/pedidos.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_pedidos_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/pedidos.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_pedidos_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/pedidos.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_pedidos_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/pedidos.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_pedidos_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/pedidos.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_pedidos_tsx",
+      "target": "components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/pedidos.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_pedidos_tsx",
+      "target": "components_ui_badge",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/pedidos.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_pedidos_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/pedidos.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "hooks_useauth",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "components_ui_input",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "perfil_handlesalvar",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "perfil_handlelogout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_index_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/index.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_index_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/index.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_index_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_index_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/index.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_index_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/index.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_index_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/index.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_index_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/index.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_tabs_index_tsx",
+      "target": "components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/index.tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_produto_id_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_produto_id_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_produto_id_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_produto_id_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_produto_id_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_produto_id_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_produto_id_tsx",
+      "target": "store_carrinhostore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_produto_id_tsx",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_produto_id_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_produto_id_tsx",
+      "target": "id_handleaddtocart",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_salao_id_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/salao/[id].tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_salao_id_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/salao/[id].tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_salao_id_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/salao/[id].tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_salao_id_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/salao/[id].tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_salao_id_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/salao/[id].tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_salao_id_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/salao/[id].tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_salao_id_tsx",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/salao/[id].tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "app_cliente_salao_id_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/salao/[id].tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_layout_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_layout_tsx",
+      "target": "store_authstore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_layout_tsx",
+      "target": "hooks_usewebsocket",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_layout_tsx",
+      "target": "layout_wsconnector",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_layout_tsx",
+      "target": "layout_profissionallayout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_layout_tsx",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/_layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_layout_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/_layout.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "components_ui_badge",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "agenda_formatdate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "agenda_formathour",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "agenda_handleavisaratraso",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L56",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "agenda_navdate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "agenda_navdate",
+      "target": "agenda_formatdate",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "components_ui_badge",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "atendimentos_formatdate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "atendimentos_navdate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "atendimentos_navdate",
+      "target": "atendimentos_formatdate",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L48",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_comissoes_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/comissoes.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_comissoes_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/comissoes.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_comissoes_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/comissoes.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_comissoes_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/comissoes.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_comissoes_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/comissoes.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_comissoes_tsx",
+      "target": "components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/comissoes.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_comissoes_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/comissoes.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_perfil_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_perfil_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_perfil_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_perfil_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_perfil_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_perfil_tsx",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_perfil_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_perfil_tsx",
+      "target": "hooks_useauth",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_perfil_tsx",
+      "target": "perfil_handlelogout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "components_ui_loading",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_formattime",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L68",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_formatdate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_salvarproduto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L177",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_baterponto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L191",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_confirmarponto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L204",
+      "weight": 1.0
+    },
+    {
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_confirmarfinalizaratendimento",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L215",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_badge_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Badge.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_badge_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Badge.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_badge_tsx",
+      "target": "badge_badge",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Badge.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_button_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Button.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_button_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Button.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_button_tsx",
+      "target": "button_button",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Button.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_card_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Card.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_card_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Card.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_card_tsx",
+      "target": "card_card",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Card.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_input_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Input.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_input_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Input.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_input_tsx",
+      "target": "vector_icons",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Input.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_loading_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Loading.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_loading_tsx",
+      "target": "react_native",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Loading.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usenotificacoes_ts",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useNotificacoes.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usenotificacoes_ts",
+      "target": "usenotificacoes_usenotificacoes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useNotificacoes.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usewebsocket_ts",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usewebsocket_ts",
+      "target": "react_query",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usewebsocket_ts",
+      "target": "services_websocket",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usewebsocket_ts",
+      "target": "store_wsstore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usewebsocket_ts",
+      "target": "hooks_usenotificacoes",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usewebsocket_ts",
+      "target": "usewebsocket_usewebsocket",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_useauth_ts",
+      "target": "expo_router",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useAuth.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_useauth_ts",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useAuth.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_useauth_ts",
+      "target": "store_authstore",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useAuth.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_useauth_ts",
+      "target": "services_websocket",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useAuth.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_useauth_ts",
+      "target": "useauth_useauth",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useAuth.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "services_websocket_ts",
+      "target": "services_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "services_websocket_ts",
+      "target": "websocket_websocketmanager",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "websocket_websocketmanager",
+      "target": "websocket_websocketmanager_connect",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "websocket_websocketmanager",
+      "target": "websocket_websocketmanager_connect",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "websocket_websocketmanager",
+      "target": "websocket_websocketmanager_disconnect",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "websocket_websocketmanager",
+      "target": "websocket_websocketmanager_addlistener",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "websocket_websocketmanager",
+      "target": "websocket_websocketmanager_isconnected",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L92",
+      "weight": 1.0
+    },
+    {
+      "source": "services_api_ts",
+      "target": "axios",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "services/api.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "services_api_ts",
+      "target": "async_storage",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "services/api.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "store_authstore_ts",
+      "target": "zustand",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "store/authStore.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "store_authstore_ts",
+      "target": "async_storage",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "store/authStore.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "store_carrinhostore_ts",
+      "target": "zustand",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "store/carrinhoStore.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "store_wsstore_ts",
+      "target": "zustand",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "store/wsStore.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "store_wsstore_ts",
+      "target": "services_websocket",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "store/wsStore.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "utils_security_ts",
+      "target": "crypto_js",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/security.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "utils_security_ts",
+      "target": "expo_constants",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/security.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "utils_security_ts",
+      "target": "expo_secure_store",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/security.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "layout_wsconnector",
+      "target": "usewebsocket_usewebsocket",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "usewebsocket_usewebsocket",
+      "target": "usenotificacoes_usenotificacoes",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -1,0 +1,1321 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "babel.config.js",
+      "file_type": "code",
+      "source_file": "babel.config.js",
+      "source_location": "L1",
+      "id": "babel_config_js",
+      "community": 20,
+      "norm_label": "babel.config.js"
+    },
+    {
+      "label": "metro.config.js",
+      "file_type": "code",
+      "source_file": "metro.config.js",
+      "source_location": "L1",
+      "id": "metro_config_js",
+      "community": 21,
+      "norm_label": "metro.config.js"
+    },
+    {
+      "label": "nativewind-env.d.ts",
+      "file_type": "code",
+      "source_file": "nativewind-env.d.ts",
+      "source_location": "L1",
+      "id": "nativewind_env_d_ts",
+      "community": 22,
+      "norm_label": "nativewind-env.d.ts"
+    },
+    {
+      "label": "tailwind.config.js",
+      "file_type": "code",
+      "source_file": "tailwind.config.js",
+      "source_location": "L1",
+      "id": "tailwind_config_js",
+      "community": 23,
+      "norm_label": "tailwind.config.js"
+    },
+    {
+      "label": "expo-env.d.ts",
+      "file_type": "code",
+      "source_file": "expo-env.d.ts",
+      "source_location": "L1",
+      "id": "expo_env_d_ts",
+      "community": 24,
+      "norm_label": "expo-env.d.ts"
+    },
+    {
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L1",
+      "id": "app_layout_tsx",
+      "community": 8,
+      "norm_label": "_layout.tsx"
+    },
+    {
+      "label": "getDerivedStateFromError()",
+      "file_type": "code",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L14",
+      "id": "layout_getderivedstatefromerror",
+      "community": 8,
+      "norm_label": "getderivedstatefromerror()"
+    },
+    {
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "app/index.tsx",
+      "source_location": "L1",
+      "id": "app_index_tsx",
+      "community": 9,
+      "norm_label": "index.tsx"
+    },
+    {
+      "label": "Index()",
+      "file_type": "code",
+      "source_file": "app/index.tsx",
+      "source_location": "L4",
+      "id": "index_index",
+      "community": 9,
+      "norm_label": "index()"
+    },
+    {
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/_layout.tsx",
+      "source_location": "L1",
+      "id": "app_auth_layout_tsx",
+      "community": 10,
+      "norm_label": "_layout.tsx"
+    },
+    {
+      "label": "AuthLayout()",
+      "file_type": "code",
+      "source_file": "app/(auth)/_layout.tsx",
+      "source_location": "L5",
+      "id": "layout_authlayout",
+      "community": 10,
+      "norm_label": "authlayout()"
+    },
+    {
+      "label": "login.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L1",
+      "id": "app_auth_login_tsx",
+      "community": 11,
+      "norm_label": "login.tsx"
+    },
+    {
+      "label": "handleLogin()",
+      "file_type": "code",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L25",
+      "id": "login_handlelogin",
+      "community": 11,
+      "norm_label": "handlelogin()"
+    },
+    {
+      "label": "register.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L1",
+      "id": "app_auth_register_tsx",
+      "community": 12,
+      "norm_label": "register.tsx"
+    },
+    {
+      "label": "handleRegister()",
+      "file_type": "code",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L25",
+      "id": "register_handleregister",
+      "community": 12,
+      "norm_label": "handleregister()"
+    },
+    {
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L1",
+      "id": "app_cliente_layout_tsx",
+      "community": 0,
+      "norm_label": "_layout.tsx"
+    },
+    {
+      "label": "WSConnector()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L5",
+      "id": "layout_wsconnector",
+      "community": 0,
+      "norm_label": "wsconnector()"
+    },
+    {
+      "label": "ClienteLayout()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L11",
+      "id": "layout_clientelayout",
+      "community": 0,
+      "norm_label": "clientelayout()"
+    },
+    {
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/_layout.tsx",
+      "source_location": "L1",
+      "id": "app_cliente_tabs_layout_tsx",
+      "community": 13,
+      "norm_label": "_layout.tsx"
+    },
+    {
+      "label": "TabIcon()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/_layout.tsx",
+      "source_location": "L6",
+      "id": "layout_tabicon",
+      "community": 13,
+      "norm_label": "tabicon()"
+    },
+    {
+      "label": "agendar.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L1",
+      "id": "app_cliente_tabs_agendar_tsx",
+      "community": 4,
+      "norm_label": "agendar.tsx"
+    },
+    {
+      "label": "formatarData()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L21",
+      "id": "agendar_formatardata",
+      "community": 4,
+      "norm_label": "formatardata()"
+    },
+    {
+      "label": "formatarDataExibicao()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L25",
+      "id": "agendar_formatardataexibicao",
+      "community": 4,
+      "norm_label": "formatardataexibicao()"
+    },
+    {
+      "label": "handleSubmit()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L91",
+      "id": "agendar_handlesubmit",
+      "community": 4,
+      "norm_label": "handlesubmit()"
+    },
+    {
+      "label": "carrinho.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L1",
+      "id": "app_cliente_tabs_carrinho_tsx",
+      "community": 6,
+      "norm_label": "carrinho.tsx"
+    },
+    {
+      "label": "handleConfirmar()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L53",
+      "id": "carrinho_handleconfirmar",
+      "community": 6,
+      "norm_label": "handleconfirmar()"
+    },
+    {
+      "label": "resetar()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L75",
+      "id": "carrinho_resetar",
+      "community": 6,
+      "norm_label": "resetar()"
+    },
+    {
+      "label": "loja.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L1",
+      "id": "app_cliente_tabs_loja_tsx",
+      "community": 14,
+      "norm_label": "loja.tsx"
+    },
+    {
+      "label": "handleAddToCart()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L63",
+      "id": "loja_handleaddtocart",
+      "community": 14,
+      "norm_label": "handleaddtocart()"
+    },
+    {
+      "label": "meus-pedidos-loja.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/meus-pedidos-loja.tsx",
+      "source_location": "L1",
+      "id": "app_cliente_tabs_meus_pedidos_loja_tsx",
+      "community": 25,
+      "norm_label": "meus-pedidos-loja.tsx"
+    },
+    {
+      "label": "pedidos.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/pedidos.tsx",
+      "source_location": "L1",
+      "id": "app_cliente_tabs_pedidos_tsx",
+      "community": 26,
+      "norm_label": "pedidos.tsx"
+    },
+    {
+      "label": "perfil.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L1",
+      "id": "app_cliente_tabs_perfil_tsx",
+      "community": 5,
+      "norm_label": "perfil.tsx"
+    },
+    {
+      "label": "handleSalvar()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L16",
+      "id": "perfil_handlesalvar",
+      "community": 5,
+      "norm_label": "handlesalvar()"
+    },
+    {
+      "label": "handleLogout()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L30",
+      "id": "perfil_handlelogout",
+      "community": 5,
+      "norm_label": "handlelogout()"
+    },
+    {
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/(tabs)/index.tsx",
+      "source_location": "L1",
+      "id": "app_cliente_tabs_index_tsx",
+      "community": 27,
+      "norm_label": "index.tsx"
+    },
+    {
+      "label": "[id].tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L1",
+      "id": "app_cliente_produto_id_tsx",
+      "community": 15,
+      "norm_label": "[id].tsx"
+    },
+    {
+      "label": "handleAddToCart()",
+      "file_type": "code",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L51",
+      "id": "id_handleaddtocart",
+      "community": 15,
+      "norm_label": "handleaddtocart()"
+    },
+    {
+      "label": "[id].tsx",
+      "file_type": "code",
+      "source_file": "app/(cliente)/salao/[id].tsx",
+      "source_location": "L1",
+      "id": "app_cliente_salao_id_tsx",
+      "community": 28,
+      "norm_label": "[id].tsx"
+    },
+    {
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L1",
+      "id": "app_profissional_layout_tsx",
+      "community": 0,
+      "norm_label": "_layout.tsx"
+    },
+    {
+      "label": "ProfissionalLayout()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L10",
+      "id": "layout_profissionallayout",
+      "community": 0,
+      "norm_label": "profissionallayout()"
+    },
+    {
+      "label": "_layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/_layout.tsx",
+      "source_location": "L1",
+      "id": "app_profissional_tabs_layout_tsx",
+      "community": 29,
+      "norm_label": "_layout.tsx"
+    },
+    {
+      "label": "agenda.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L1",
+      "id": "app_profissional_tabs_agenda_tsx",
+      "community": 3,
+      "norm_label": "agenda.tsx"
+    },
+    {
+      "label": "formatDate()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L30",
+      "id": "agenda_formatdate",
+      "community": 3,
+      "norm_label": "formatdate()"
+    },
+    {
+      "label": "formatHour()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L34",
+      "id": "agenda_formathour",
+      "community": 3,
+      "norm_label": "formathour()"
+    },
+    {
+      "label": "handleAvisarAtraso()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L56",
+      "id": "agenda_handleavisaratraso",
+      "community": 3,
+      "norm_label": "handleavisaratraso()"
+    },
+    {
+      "label": "navDate()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L76",
+      "id": "agenda_navdate",
+      "community": 3,
+      "norm_label": "navdate()"
+    },
+    {
+      "label": "atendimentos.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L1",
+      "id": "app_profissional_tabs_atendimentos_tsx",
+      "community": 7,
+      "norm_label": "atendimentos.tsx"
+    },
+    {
+      "label": "formatDate()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L28",
+      "id": "atendimentos_formatdate",
+      "community": 7,
+      "norm_label": "formatdate()"
+    },
+    {
+      "label": "navDate()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L45",
+      "id": "atendimentos_navdate",
+      "community": 7,
+      "norm_label": "navdate()"
+    },
+    {
+      "label": "comissoes.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/comissoes.tsx",
+      "source_location": "L1",
+      "id": "app_profissional_tabs_comissoes_tsx",
+      "community": 30,
+      "norm_label": "comissoes.tsx"
+    },
+    {
+      "label": "perfil.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L1",
+      "id": "app_profissional_tabs_perfil_tsx",
+      "community": 5,
+      "norm_label": "perfil.tsx"
+    },
+    {
+      "label": "ponto.tsx",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L1",
+      "id": "app_profissional_tabs_ponto_tsx",
+      "community": 1,
+      "norm_label": "ponto.tsx"
+    },
+    {
+      "label": "formatTime()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L68",
+      "id": "ponto_formattime",
+      "community": 1,
+      "norm_label": "formattime()"
+    },
+    {
+      "label": "formatDate()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L72",
+      "id": "ponto_formatdate",
+      "community": 1,
+      "norm_label": "formatdate()"
+    },
+    {
+      "label": "salvarProduto()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L177",
+      "id": "ponto_salvarproduto",
+      "community": 1,
+      "norm_label": "salvarproduto()"
+    },
+    {
+      "label": "baterPonto()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L191",
+      "id": "ponto_baterponto",
+      "community": 1,
+      "norm_label": "baterponto()"
+    },
+    {
+      "label": "confirmarPonto()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L204",
+      "id": "ponto_confirmarponto",
+      "community": 1,
+      "norm_label": "confirmarponto()"
+    },
+    {
+      "label": "confirmarFinalizarAtendimento()",
+      "file_type": "code",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L215",
+      "id": "ponto_confirmarfinalizaratendimento",
+      "community": 1,
+      "norm_label": "confirmarfinalizaratendimento()"
+    },
+    {
+      "label": "Badge.tsx",
+      "file_type": "code",
+      "source_file": "components/ui/Badge.tsx",
+      "source_location": "L1",
+      "id": "components_ui_badge_tsx",
+      "community": 16,
+      "norm_label": "badge.tsx"
+    },
+    {
+      "label": "Badge()",
+      "file_type": "code",
+      "source_file": "components/ui/Badge.tsx",
+      "source_location": "L24",
+      "id": "badge_badge",
+      "community": 16,
+      "norm_label": "badge()"
+    },
+    {
+      "label": "Button.tsx",
+      "file_type": "code",
+      "source_file": "components/ui/Button.tsx",
+      "source_location": "L1",
+      "id": "components_ui_button_tsx",
+      "community": 17,
+      "norm_label": "button.tsx"
+    },
+    {
+      "label": "Button()",
+      "file_type": "code",
+      "source_file": "components/ui/Button.tsx",
+      "source_location": "L14",
+      "id": "button_button",
+      "community": 17,
+      "norm_label": "button()"
+    },
+    {
+      "label": "Card.tsx",
+      "file_type": "code",
+      "source_file": "components/ui/Card.tsx",
+      "source_location": "L1",
+      "id": "components_ui_card_tsx",
+      "community": 18,
+      "norm_label": "card.tsx"
+    },
+    {
+      "label": "Card()",
+      "file_type": "code",
+      "source_file": "components/ui/Card.tsx",
+      "source_location": "L9",
+      "id": "card_card",
+      "community": 18,
+      "norm_label": "card()"
+    },
+    {
+      "label": "Input.tsx",
+      "file_type": "code",
+      "source_file": "components/ui/Input.tsx",
+      "source_location": "L1",
+      "id": "components_ui_input_tsx",
+      "community": 31,
+      "norm_label": "input.tsx"
+    },
+    {
+      "label": "Loading.tsx",
+      "file_type": "code",
+      "source_file": "components/ui/Loading.tsx",
+      "source_location": "L1",
+      "id": "components_ui_loading_tsx",
+      "community": 32,
+      "norm_label": "loading.tsx"
+    },
+    {
+      "label": "useNotificacoes.ts",
+      "file_type": "code",
+      "source_file": "hooks/useNotificacoes.ts",
+      "source_location": "L1",
+      "id": "hooks_usenotificacoes_ts",
+      "community": 0,
+      "norm_label": "usenotificacoes.ts"
+    },
+    {
+      "label": "useNotificacoes()",
+      "file_type": "code",
+      "source_file": "hooks/useNotificacoes.ts",
+      "source_location": "L3",
+      "id": "usenotificacoes_usenotificacoes",
+      "community": 0,
+      "norm_label": "usenotificacoes()"
+    },
+    {
+      "label": "useWebSocket.ts",
+      "file_type": "code",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L1",
+      "id": "hooks_usewebsocket_ts",
+      "community": 0,
+      "norm_label": "usewebsocket.ts"
+    },
+    {
+      "label": "useWebSocket()",
+      "file_type": "code",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L7",
+      "id": "usewebsocket_usewebsocket",
+      "community": 0,
+      "norm_label": "usewebsocket()"
+    },
+    {
+      "label": "useAuth.ts",
+      "file_type": "code",
+      "source_file": "hooks/useAuth.ts",
+      "source_location": "L1",
+      "id": "hooks_useauth_ts",
+      "community": 19,
+      "norm_label": "useauth.ts"
+    },
+    {
+      "label": "useAuth()",
+      "file_type": "code",
+      "source_file": "hooks/useAuth.ts",
+      "source_location": "L6",
+      "id": "useauth_useauth",
+      "community": 19,
+      "norm_label": "useauth()"
+    },
+    {
+      "label": "websocket.ts",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L1",
+      "id": "services_websocket_ts",
+      "community": 2,
+      "norm_label": "websocket.ts"
+    },
+    {
+      "label": "WebSocketManager",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L16",
+      "id": "websocket_websocketmanager",
+      "community": 2,
+      "norm_label": "websocketmanager"
+    },
+    {
+      "label": ".connect()",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L26",
+      "id": "websocket_websocketmanager_connect",
+      "community": 2,
+      "norm_label": ".connect()"
+    },
+    {
+      "label": ".disconnect()",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L74",
+      "id": "websocket_websocketmanager_disconnect",
+      "community": 2,
+      "norm_label": ".disconnect()"
+    },
+    {
+      "label": ".addListener()",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L85",
+      "id": "websocket_websocketmanager_addlistener",
+      "community": 2,
+      "norm_label": ".addlistener()"
+    },
+    {
+      "label": ".isConnected()",
+      "file_type": "code",
+      "source_file": "services/websocket.ts",
+      "source_location": "L92",
+      "id": "websocket_websocketmanager_isconnected",
+      "community": 2,
+      "norm_label": ".isconnected()"
+    },
+    {
+      "label": "api.ts",
+      "file_type": "code",
+      "source_file": "services/api.ts",
+      "source_location": "L1",
+      "id": "services_api_ts",
+      "community": 33,
+      "norm_label": "api.ts"
+    },
+    {
+      "label": "authStore.ts",
+      "file_type": "code",
+      "source_file": "store/authStore.ts",
+      "source_location": "L1",
+      "id": "store_authstore_ts",
+      "community": 34,
+      "norm_label": "authstore.ts"
+    },
+    {
+      "label": "carrinhoStore.ts",
+      "file_type": "code",
+      "source_file": "store/carrinhoStore.ts",
+      "source_location": "L1",
+      "id": "store_carrinhostore_ts",
+      "community": 35,
+      "norm_label": "carrinhostore.ts"
+    },
+    {
+      "label": "wsStore.ts",
+      "file_type": "code",
+      "source_file": "store/wsStore.ts",
+      "source_location": "L1",
+      "id": "store_wsstore_ts",
+      "community": 36,
+      "norm_label": "wsstore.ts"
+    },
+    {
+      "label": "security.ts",
+      "file_type": "code",
+      "source_file": "utils/security.ts",
+      "source_location": "L1",
+      "id": "utils_security_ts",
+      "community": 37,
+      "norm_label": "security.ts"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/_layout.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_src": "app_layout_tsx",
+      "_tgt": "layout_getderivedstatefromerror",
+      "source": "app_layout_tsx",
+      "target": "layout_getderivedstatefromerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/index.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_src": "app_index_tsx",
+      "_tgt": "index_index",
+      "source": "app_index_tsx",
+      "target": "index_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/_layout.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "app_auth_layout_tsx",
+      "_tgt": "layout_authlayout",
+      "source": "app_auth_layout_tsx",
+      "target": "layout_authlayout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login.tsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_src": "app_auth_login_tsx",
+      "_tgt": "login_handlelogin",
+      "source": "app_auth_login_tsx",
+      "target": "login_handlelogin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register.tsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_src": "app_auth_register_tsx",
+      "_tgt": "register_handleregister",
+      "source": "app_auth_register_tsx",
+      "target": "register_handleregister",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "app_cliente_layout_tsx",
+      "_tgt": "layout_wsconnector",
+      "source": "app_cliente_layout_tsx",
+      "target": "layout_wsconnector",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_src": "app_cliente_layout_tsx",
+      "_tgt": "layout_clientelayout",
+      "source": "app_cliente_layout_tsx",
+      "target": "layout_clientelayout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "app_profissional_layout_tsx",
+      "_tgt": "layout_wsconnector",
+      "source": "layout_wsconnector",
+      "target": "app_profissional_layout_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "app/(cliente)/_layout.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "layout_wsconnector",
+      "_tgt": "usewebsocket_usewebsocket",
+      "source": "layout_wsconnector",
+      "target": "usewebsocket_usewebsocket"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/_layout.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "app_cliente_tabs_layout_tsx",
+      "_tgt": "layout_tabicon",
+      "source": "app_cliente_tabs_layout_tsx",
+      "target": "layout_tabicon",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_src": "app_cliente_tabs_agendar_tsx",
+      "_tgt": "agendar_formatardata",
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "agendar_formatardata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_src": "app_cliente_tabs_agendar_tsx",
+      "_tgt": "agendar_formatardataexibicao",
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "agendar_formatardataexibicao",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/agendar.tsx",
+      "source_location": "L91",
+      "weight": 1.0,
+      "_src": "app_cliente_tabs_agendar_tsx",
+      "_tgt": "agendar_handlesubmit",
+      "source": "app_cliente_tabs_agendar_tsx",
+      "target": "agendar_handlesubmit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_src": "app_cliente_tabs_carrinho_tsx",
+      "_tgt": "carrinho_handleconfirmar",
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "carrinho_handleconfirmar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/carrinho.tsx",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_src": "app_cliente_tabs_carrinho_tsx",
+      "_tgt": "carrinho_resetar",
+      "source": "app_cliente_tabs_carrinho_tsx",
+      "target": "carrinho_resetar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/loja.tsx",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_src": "app_cliente_tabs_loja_tsx",
+      "_tgt": "loja_handleaddtocart",
+      "source": "app_cliente_tabs_loja_tsx",
+      "target": "loja_handleaddtocart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "app_cliente_tabs_perfil_tsx",
+      "_tgt": "perfil_handlesalvar",
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "perfil_handlesalvar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/(tabs)/perfil.tsx",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_src": "app_cliente_tabs_perfil_tsx",
+      "_tgt": "perfil_handlelogout",
+      "source": "app_cliente_tabs_perfil_tsx",
+      "target": "perfil_handlelogout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/perfil.tsx",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_perfil_tsx",
+      "_tgt": "perfil_handlelogout",
+      "source": "perfil_handlelogout",
+      "target": "app_profissional_tabs_perfil_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(cliente)/produto/[id].tsx",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_src": "app_cliente_produto_id_tsx",
+      "_tgt": "id_handleaddtocart",
+      "source": "app_cliente_produto_id_tsx",
+      "target": "id_handleaddtocart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/_layout.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "app_profissional_layout_tsx",
+      "_tgt": "layout_profissionallayout",
+      "source": "app_profissional_layout_tsx",
+      "target": "layout_profissionallayout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_agenda_tsx",
+      "_tgt": "agenda_formatdate",
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "agenda_formatdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_agenda_tsx",
+      "_tgt": "agenda_formathour",
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "agenda_formathour",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_agenda_tsx",
+      "_tgt": "agenda_handleavisaratraso",
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "agenda_handleavisaratraso",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_agenda_tsx",
+      "_tgt": "agenda_navdate",
+      "source": "app_profissional_tabs_agenda_tsx",
+      "target": "agenda_navdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/agenda.tsx",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_src": "agenda_navdate",
+      "_tgt": "agenda_formatdate",
+      "source": "agenda_formatdate",
+      "target": "agenda_navdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_atendimentos_tsx",
+      "_tgt": "atendimentos_formatdate",
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "atendimentos_formatdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_atendimentos_tsx",
+      "_tgt": "atendimentos_navdate",
+      "source": "app_profissional_tabs_atendimentos_tsx",
+      "target": "atendimentos_navdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/atendimentos.tsx",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_src": "atendimentos_navdate",
+      "_tgt": "atendimentos_formatdate",
+      "source": "atendimentos_formatdate",
+      "target": "atendimentos_navdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L68",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_ponto_tsx",
+      "_tgt": "ponto_formattime",
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_formattime",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L72",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_ponto_tsx",
+      "_tgt": "ponto_formatdate",
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_formatdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L177",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_ponto_tsx",
+      "_tgt": "ponto_salvarproduto",
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_salvarproduto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L191",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_ponto_tsx",
+      "_tgt": "ponto_baterponto",
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_baterponto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L204",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_ponto_tsx",
+      "_tgt": "ponto_confirmarponto",
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_confirmarponto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(profissional)/(tabs)/ponto.tsx",
+      "source_location": "L215",
+      "weight": 1.0,
+      "_src": "app_profissional_tabs_ponto_tsx",
+      "_tgt": "ponto_confirmarfinalizaratendimento",
+      "source": "app_profissional_tabs_ponto_tsx",
+      "target": "ponto_confirmarfinalizaratendimento",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Badge.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "components_ui_badge_tsx",
+      "_tgt": "badge_badge",
+      "source": "components_ui_badge_tsx",
+      "target": "badge_badge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Button.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_src": "components_ui_button_tsx",
+      "_tgt": "button_button",
+      "source": "components_ui_button_tsx",
+      "target": "button_button",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ui/Card.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_src": "components_ui_card_tsx",
+      "_tgt": "card_card",
+      "source": "components_ui_card_tsx",
+      "target": "card_card",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useNotificacoes.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "hooks_usenotificacoes_ts",
+      "_tgt": "usenotificacoes_usenotificacoes",
+      "source": "hooks_usenotificacoes_ts",
+      "target": "usenotificacoes_usenotificacoes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "usewebsocket_usewebsocket",
+      "_tgt": "usenotificacoes_usenotificacoes",
+      "source": "usenotificacoes_usenotificacoes",
+      "target": "usewebsocket_usewebsocket"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useWebSocket.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "hooks_usewebsocket_ts",
+      "_tgt": "usewebsocket_usewebsocket",
+      "source": "hooks_usewebsocket_ts",
+      "target": "usewebsocket_usewebsocket",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "hooks/useAuth.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "hooks_useauth_ts",
+      "_tgt": "useauth_useauth",
+      "source": "hooks_useauth_ts",
+      "target": "useauth_useauth",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "services_websocket_ts",
+      "_tgt": "websocket_websocketmanager",
+      "source": "services_websocket_ts",
+      "target": "websocket_websocketmanager",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_src": "websocket_websocketmanager",
+      "_tgt": "websocket_websocketmanager_connect",
+      "source": "websocket_websocketmanager",
+      "target": "websocket_websocketmanager_connect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_src": "websocket_websocketmanager",
+      "_tgt": "websocket_websocketmanager_disconnect",
+      "source": "websocket_websocketmanager",
+      "target": "websocket_websocketmanager_disconnect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L85",
+      "weight": 1.0,
+      "_src": "websocket_websocketmanager",
+      "_tgt": "websocket_websocketmanager_addlistener",
+      "source": "websocket_websocketmanager",
+      "target": "websocket_websocketmanager_addlistener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "services/websocket.ts",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_src": "websocket_websocketmanager",
+      "_tgt": "websocket_websocketmanager_isconnected",
+      "source": "websocket_websocketmanager",
+      "target": "websocket_websocketmanager_isconnected",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": []
+}

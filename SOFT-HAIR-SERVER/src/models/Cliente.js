@@ -64,7 +64,7 @@ class Cliente extends BaseModel {
       SELECT 
         COALESCE(COUNT(a.id), 0) as total_agendamentos,
         COALESCE(SUM(v.valor_total), 0) as total_gasto,
-        MAX(a.data) as ultima_visita
+        MAX(a.data_hora) as ultima_visita
       FROM clientes c
       LEFT JOIN agendamentos a ON a.cliente_id = c.id AND a.status = 'concluido'
       LEFT JOIN vendas v ON v.cliente_id = c.id AND v.status = 'finalizada'
@@ -73,6 +73,40 @@ class Cliente extends BaseModel {
     `;
     const { queryOne } = require('../config/database');
     return queryOne(sql, [clienteId]);
+  }
+
+  filterData(data) {
+    const mapped = { ...data };
+    delete mapped.search;
+    if (mapped.foto) {
+      mapped.foto_url = mapped.foto;
+      delete mapped.foto;
+    }
+    return mapped;
+  }
+
+  static async getAll(filters = {}, salaoId = null, options = {}) {
+    const { query } = require('../config/database');
+    const params = [];
+    let idx = 1;
+    let sql = 'SELECT * FROM clientes WHERE 1=1';
+
+    if (salaoId) {
+      sql += ` AND salao_id = $${idx++}`;
+      params.push(salaoId);
+    }
+    if (filters.ativo !== undefined) {
+      sql += ` AND ativo = $${idx++}`;
+      params.push(filters.ativo === true || filters.ativo === 'true');
+    }
+    if (filters.search) {
+      sql += ` AND (nome ILIKE $${idx} OR email ILIKE $${idx} OR telefone ILIKE $${idx})`;
+      params.push(`%${filters.search}%`);
+      idx++;
+    }
+
+    sql += ' ORDER BY nome';
+    return query(sql, params);
   }
 }
 

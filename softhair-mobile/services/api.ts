@@ -1,5 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { tokenStorage } from '../store/authStore';
 
 export const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? 'http://192.168.15.185:3001';
@@ -14,7 +15,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem('@softhair:token');
+    const token = await tokenStorage.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,7 +28,8 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      await AsyncStorage.multiRemove(['@softhair:token', '@softhair:user']);
+      await tokenStorage.deleteToken();
+      await AsyncStorage.removeItem('@softhair:user');
       // O store de auth reagirá ao token ausente no próximo acesso
     }
 

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const PedidoLoja = require('../../models/PedidoLoja');
 const Produto = require('../../models/Produto');
 const Venda = require('../../models/Venda');
@@ -8,7 +9,17 @@ const ClienteApp = require('../../models/ClienteApp');
 const { appAuthMiddleware } = require('../../middleware/appAuth');
 const { authMiddleware } = require('../../middleware/auth');
 const ws = require('../../services/websocketService');
-const { queryOne } = require('../../config/database');
+const { queryOne, pool } = require('../../config/database');
+const { logAction } = require('../../utils/auditLog');
+
+// [P2-C3] Rate-limit dedicado para enumeração pública de produtos.
+const publicProdutosLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: { error: 'Muitas requisições. Tente novamente em alguns minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 async function resolverOuCriarCliente(clienteAppId, salonId) {
   const clienteApp = await ClienteApp.findById(clienteAppId);
@@ -24,11 +35,23 @@ async function resolverOuCriarCliente(clienteAppId, salonId) {
   return novo?.id ?? null;
 }
 
-router.get('/saloes/:salonId/produtos', async (req, res) => {
+// [P2-C3] Endpoint público (cliente do app PODE listar sem login p/ onboarding),
+// MAS: rate-limited e campos sensíveis (preco_custo, quantidade_estoque exata) NÃO são expostos.
+router.get('/saloes/:salonId/produtos', publicProdutosLimiter, async (req, res) => {
   try {
     const produtos = await Produto.getAll({ ativo: true, ...req.query }, req.params.salonId);
-    res.json({ data: produtos });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const publicProdutos = produtos.map(p => ({
+      id: p.id,
+      nome: p.nome,
+      descricao: p.descricao,
+      preco_venda: p.preco_venda,
+      foto_url: p.foto_url,
+      categoria: p.categoria,
+      em_estoque: (p.quantidade_estoque || 0) > 0,
+      ativo: p.ativo,
+    }));
+    res.json({ data: publicProdutos });
+  } catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.post('/pedido', appAuthMiddleware, async (req, res) => {
@@ -36,12 +59,28 @@ router.post('/pedido', appAuthMiddleware, async (req, res) => {
     const { salonId, itens, enderecoEntrega, formaPagamento, observacoes } = req.body;
     if (!salonId || !itens?.length) return res.status(400).json({ error: 'salonId e itens são obrigatórios' });
 
-    // Compute total server-side from DB prices to prevent client-side manipulation
+    // [P2-M4 / P3-M3] Validar quantidade — inteiro positivo com upper bound 10000 (bloqueia DoS/overflow).
+    for (const item of itens) {
+      const qtd = Number(item.quantidade);
+      if (!Number.isInteger(qtd) || qtd <= 0 || qtd > 10000) {
+        return res.status(400).json({ error: `Quantidade inválida (1..10000) para produto ${item.produtoId}` });
+      }
+      item.quantidade = qtd;
+    }
+
+    // [P2-C2] Server-side pricing FILTRADO por salao_id — impede cross-tenant pricing.
+    // Cliente não pode mais usar produto de outro salão para forjar preço.
     let total = 0;
     for (const item of itens) {
-      const produto = await queryOne('SELECT preco FROM produtos WHERE id = ?', [item.produtoId]);
-      if (!produto) return res.status(400).json({ error: `Produto ${item.produtoId} não encontrado` });
-      total += produto.preco * item.quantidade;
+      const produto = await queryOne(
+        'SELECT preco_venda FROM produtos WHERE id = $1 AND salao_id = $2 AND ativo = true',
+        [item.produtoId, salonId]
+      );
+      if (!produto) return res.status(400).json({ error: `Produto ${item.produtoId} não encontrado neste salão` });
+      const precoUnitario = Number(produto.preco_venda);
+      item.precoUnitario = precoUnitario;
+      item.subtotal = precoUnitario * item.quantidade;
+      total += item.subtotal;
     }
     const pedido = await PedidoLoja.create(
       { salonId, clienteAppId: req.clienteApp.clienteAppId, total, enderecoEntrega, formaPagamento, observacoes },
@@ -78,17 +117,17 @@ router.post('/pedido', appAuthMiddleware, async (req, res) => {
       pedido
     });
     res.status(201).json(pedido);
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 router.get('/meus-pedidos', appAuthMiddleware, async (req, res) => {
   try { res.json({ data: await PedidoLoja.getByCliente(req.clienteApp.clienteAppId) }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.get('/pedidos', authMiddleware, async (req, res) => {
-  try { res.json({ data: await PedidoLoja.getBySalao(req.salonId, req.query) }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  try { res.json({ data: await PedidoLoja.getBySalao(req.salaoId, req.query) }); }
+  catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.put('/pedidos/:id/status', authMiddleware, async (req, res) => {
@@ -96,8 +135,34 @@ router.put('/pedidos/:id/status', authMiddleware, async (req, res) => {
     const { status } = req.body;
     const statusValidos = ['pendente', 'confirmado', 'preparando', 'enviado', 'entregue', 'cancelado'];
     if (!statusValidos.includes(status)) return res.status(400).json({ error: `Status inválido. Use: ${statusValidos.join(', ')}` });
-    const pedido = await PedidoLoja.atualizarStatus(req.params.id, req.salonId, status);
+
+    let pedido;
+    try {
+      pedido = await PedidoLoja.atualizarStatus(req.params.id, req.salaoId, status);
+    } catch (err) {
+      // [P9-M1] State machine errors → 400; not found → 404
+      if (err.code === 'NOT_FOUND') return res.status(404).json({ error: err.message });
+      if (err.code === 'INVALID_TRANSITION' || err.code === 'INVALID_STATUS') {
+        return res.status(400).json({ error: err.message });
+      }
+      throw err;
+    }
     if (!pedido) return res.status(404).json({ error: 'Pedido não encontrado' });
+
+    // [P9-M1] Audit log se status mudou
+    const previousStatus = pedido._previousStatus;
+    if (previousStatus && previousStatus !== status) {
+      await logAction({
+        req,
+        action: 'pedido_loja.status_change',
+        entityType: 'pedido_loja',
+        entityId: pedido.id,
+        before: { status: previousStatus },
+        after: { status },
+        salaoId: req.salaoId,
+      }).catch(() => {});
+    }
+    delete pedido._previousStatus;
 
     ws.notificarCliente(pedido.clienteAppId, {
       tipo: 'status_pedido_loja',
@@ -106,7 +171,7 @@ router.put('/pedidos/:id/status', authMiddleware, async (req, res) => {
       pedido
     });
     res.json(pedido);
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 module.exports = router;

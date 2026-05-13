@@ -7,8 +7,22 @@ const { initDb } = require('../config/initDb');
 
 async function createAdmin() {
   const email = process.argv[2] || process.env.SOFTHAIR_DEFAULT_ADMIN_EMAIL || 'admin@salao.com';
-  const password = process.argv[3] || process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD || 'admin123';
+  // [P7-B1] Sem fallback inseguro — exige senha explícita via argv[3] ou env.
+  // Senha mínima de 10 caracteres para evitar default fraco em staging/dev exposto.
+  const password = process.argv[3] || process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD;
   const name = process.argv[4] || 'Administrador';
+
+  if (!password) {
+    console.error('❌ Senha obrigatória.');
+    console.error('   Uso: node createAdmin.js <email> <senha> [nome]');
+    console.error('   OU defina SOFTHAIR_DEFAULT_ADMIN_PASSWORD (>=10 chars) no ambiente.');
+    process.exit(1);
+  }
+
+  if (password.length < 10) {
+    console.error(`❌ Senha muito curta (${password.length} chars). Mínimo 10 caracteres.`);
+    process.exit(1);
+  }
 
   try {
     console.log('Inicializando banco de dados...');

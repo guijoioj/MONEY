@@ -221,6 +221,14 @@ class Helpers {
   	return str.length > max ? str.substring(0, max - suffix.length) + suffix : str;
   }
 
+  /**
+   * [P3-M8] Escapa wildcards LIKE/ILIKE (%, _, \) — evita que cliente passe
+   * `search=%` e dump-e tudo. Use ANTES de concatenar com `%${term}%`.
+   */
+  static escapeLike(input) {
+    if (input == null) return '';
+    return String(input).replace(/[\\%_]/g, (m) => '\\' + m);
+  }
 }
 
 module.exports = Helpers;

@@ -1,22 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { ClienteService } = require('../services');
+const { invalidateClienteCache } = require('../middleware/clienteAuth');
 
 const clienteService = new ClienteService();
 
 // Listar clientes
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { search, ativo, page = 1, limit = 50 } = req.query;
+    const { search, ativo, page = 1 } = req.query;
     const salaoId = req.salaoId;
+    // [P2-B5] Cap superior em 200 para evitar exfiltração massiva.
+    const limit = Math.min(parseInt(req.query.limit) || 100, 200);
+    const offset = (parseInt(page) - 1) * limit;
 
     let filtros = {};
     if (ativo !== undefined) filtros.ativo = ativo === 'true';
-    if (search) filtros.termo = search;
+    if (search) filtros._search = search;
 
-    const result = await clienteService.listar(salaoId, filtros);
+    const result = await clienteService.listar(salaoId, filtros, { limit, offset });
     
     if (result.success) {
       res.json({ success: true, data: result.data });
@@ -25,8 +29,54 @@ router.get('/', authMiddleware, async (req, res) => {
     }
   } catch (error) {
     console.error('Erro ao listar clientes:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
+});
+
+// Clientes inadimplentes (DEVE ficar antes de /:id)
+router.get('/inadimplentes', authMiddleware, async (req, res) => {
+  try {
+    const { query } = require('../config/database');
+    const r = await query(`
+      SELECT c.id, c.nome, c.telefone, c.email,
+        COALESCE(SUM(v.valor_final),0) as total_devido,
+        COUNT(v.id) as qtd_vendas_abertas,
+        MAX(v.created_at) as ultima_venda
+      FROM clientes c
+      JOIN vendas v ON v.cliente_id = c.id
+      WHERE c.salao_id = $1
+        AND v.status IN ('pendente','aberto')
+        AND v.salao_id = $1
+      GROUP BY c.id, c.nome, c.telefone, c.email
+      HAVING SUM(v.valor_final) > 0
+      ORDER BY total_devido DESC
+    `, [req.salaoId]);
+    res.json({ success: true, data: r.rows });
+  } catch(e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
+});
+
+// Aniversariantes da semana (DEVE ficar antes de /:id)
+router.get('/aniversariantes', authMiddleware, async (req, res) => {
+  try {
+    const { query } = require('../config/database');
+    const r = await query(`
+      SELECT id, nome, telefone, email, data_nascimento,
+        EXTRACT(DAY FROM data_nascimento) as dia,
+        EXTRACT(MONTH FROM data_nascimento) as mes
+      FROM clientes
+      WHERE salao_id = $1
+        AND data_nascimento IS NOT NULL
+        AND ativo = true
+        AND (
+          EXTRACT(MONTH FROM data_nascimento) = EXTRACT(MONTH FROM CURRENT_DATE)
+          AND EXTRACT(DAY FROM data_nascimento) BETWEEN
+            EXTRACT(DAY FROM CURRENT_DATE) AND
+            EXTRACT(DAY FROM CURRENT_DATE + INTERVAL '7 days')
+        )
+      ORDER BY EXTRACT(DAY FROM data_nascimento)
+    `, [req.salaoId]);
+    res.json({ success: true, data: r.rows });
+  } catch(e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 // Obter cliente por ID
@@ -46,7 +96,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
     }
   } catch (error) {
     console.error('Erro ao obter cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -74,12 +124,28 @@ router.post('/', authMiddleware, [
     }
   } catch (error) {
     console.error('Erro ao criar cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
 // Atualizar cliente
-router.put('/:id', authMiddleware, [
+// [P6-A3] requireAdmin + whitelist explícita de campos editáveis.
+// NUNCA aceitar senha_hash, credito_disponivel, app_ativo, push_token direto —
+// esses campos têm rotas dedicadas com lógica própria (PUT /credito, /push-token, etc).
+const CLIENTE_UPDATABLE_FIELDS = [
+  'nome', 'telefone', 'email', 'cpf', 'data_nascimento',
+  'endereco', 'observacoes', 'foto_url', 'ativo'
+];
+function pickWhitelist(body, allowed) {
+  const out = {};
+  if (!body || typeof body !== 'object') return out;
+  for (const k of allowed) {
+    if (Object.prototype.hasOwnProperty.call(body, k)) out[k] = body[k];
+  }
+  return out;
+}
+
+router.put('/:id', authMiddleware, requireAdmin, [
   body('nome').optional().isLength({ min: 2 }).withMessage('Nome deve ter pelo menos 2 caracteres'),
   body('telefone').optional().isMobilePhone('pt-BR').withMessage('Telefone inválido'),
   body('email').optional().isEmail().withMessage('Email inválido'),
@@ -93,9 +159,17 @@ router.put('/:id', authMiddleware, [
     const { id } = req.params;
     const salaoId = req.salaoId;
 
-    const result = await clienteService.atualizar(id, req.body, salaoId);
+    // [P6-A3] Filtrar body antes de chegar no service (mass-assignment defense)
+    const safeBody = pickWhitelist(req.body, CLIENTE_UPDATABLE_FIELDS);
+    const result = await clienteService.atualizar(id, safeBody, salaoId);
 
     if (result.success) {
+      // [P7-M3] Se ativo/app_ativo mudou, invalidar cache do middleware para fechar
+      // a janela de até 2min onde token de cliente desativado ainda passaria.
+      if (Object.prototype.hasOwnProperty.call(safeBody, 'ativo') ||
+          Object.prototype.hasOwnProperty.call(safeBody, 'app_ativo')) {
+        try { invalidateClienteCache(parseInt(id, 10) || id); } catch (_) { /* não-fatal */ }
+      }
       res.json({ success: true, data: result.data });
     } else if (result.error.includes('não encontrado')) {
       res.status(404).json({ success: false, error: result.error });
@@ -104,12 +178,13 @@ router.put('/:id', authMiddleware, [
     }
   } catch (error) {
     console.error('Erro ao atualizar cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
 // Deletar cliente (soft delete)
-router.delete('/:id', authMiddleware, async (req, res) => {
+// [P6-A3] requireAdmin — apenas admin pode desativar clientes
+router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const salaoId = req.salaoId;
@@ -117,6 +192,8 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     const result = await clienteService.deletar(id, salaoId);
 
     if (result.success) {
+      // [P7-M3] Soft-delete desativa cliente — invalidar cache para fechar janela de 2min.
+      try { invalidateClienteCache(parseInt(id, 10) || id); } catch (_) { /* não-fatal */ }
       res.json({ success: true, message: result.message || 'Cliente desativado com sucesso' });
     } else if (result.error.includes('não encontrado')) {
       res.status(404).json({ success: false, error: result.error });
@@ -125,7 +202,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
   } catch (error) {
     console.error('Erro ao deletar cliente:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -144,7 +221,7 @@ router.get('/search/:termo', authMiddleware, async (req, res) => {
     }
   } catch (error) {
     console.error('Erro ao buscar clientes:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -173,7 +250,7 @@ router.put('/:id/credito', authMiddleware, [
     }
   } catch (error) {
     console.error('Erro ao adicionar crédito:', error);
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

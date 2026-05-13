@@ -19,13 +19,13 @@ export default function Administrativo() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Administrativo</h1>
-        <p className="text-gray-500">Gerenciamento financeiro e relatórios</p>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Administrativo</h1>
+        <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Gerenciamento financeiro e relatórios</p>
       </div>
 
       <div className="flex gap-6">
         <div className="w-64 flex-shrink-0">
-          <div className="bg-white rounded-xl shadow p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
             <nav className="space-y-1">
               <MenuItem 
                 active={activeSection === 'checkouts'} 
@@ -72,8 +72,8 @@ function MenuItem({ active, onClick, icon, title }) {
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
         active 
-          ? 'bg-indigo-50 text-indigo-700 font-medium' 
-          : 'text-gray-600 hover:bg-gray-50'
+          ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 font-medium' 
+          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900'
       }`}
     >
       {icon}
@@ -118,13 +118,13 @@ function CheckOutSection() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <DollarSign className="text-green-600" size={24} />
-            <h2 className="text-xl font-bold text-gray-800">Controle de Caixas</h2>
+            <DollarSign className="text-green-600 dark:text-green-400" size={24} />
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Controle de Caixas</h2>
           </div>
-          <button onClick={() => refetch()} className="p-2 hover:bg-gray-100 rounded-lg">
+          <button onClick={() => refetch()} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 rounded-lg">
             <RefreshCw size={20} />
           </button>
         </div>
@@ -132,13 +132,13 @@ function CheckOutSection() {
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setActiveTab('checkouts')}
-            className={`px-4 py-2 rounded-lg ${activeTab === 'checkouts' ? 'bg-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeTab === 'checkouts' ? 'bg-green-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Check Out
           </button>
           <button
             onClick={() => setActiveTab('estornos')}
-            className={`px-4 py-2 rounded-lg ${activeTab === 'estornos' ? 'bg-red-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeTab === 'estornos' ? 'bg-red-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Estornos ({estornadosSession.length})
           </button>
@@ -148,33 +148,33 @@ function CheckOutSection() {
           <>
             <div className="flex gap-4 mb-6">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data</label>
                 <input
                   type="date"
                   value={dataFiltro}
                   onChange={(e) => setDataFiltro(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-4 gap-4 mb-6">
-              <div className="bg-green-50 rounded-lg p-4">
-                <p className="text-sm text-green-600 font-medium">Total do Dia</p>
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
+                <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total do Dia</p>
                 <p className="text-2xl font-bold text-green-700">{formatCurrency(totalFechamentos)}</p>
               </div>
-              <div className="bg-blue-50 rounded-lg p-4">
-                <p className="text-sm text-blue-600 font-medium">Fechamentos</p>
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Fechamentos</p>
                 <p className="text-2xl font-bold text-blue-700">{fechamentos.length}</p>
               </div>
-              <div className="bg-purple-50 rounded-lg p-4">
-                <p className="text-sm text-purple-600 font-medium">Em Atendimentos</p>
+              <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4">
+                <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Em Atendimentos</p>
                 <p className="text-2xl font-bold text-purple-700">
                   {formatCurrency(fechamentos.reduce((sum, f) => sum + (f.totalAtendimentos || 0), 0))}
                 </p>
               </div>
-              <div className="bg-orange-50 rounded-lg p-4">
-                <p className="text-sm text-orange-600 font-medium">Em Vendas</p>
+              <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
+                <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">Em Vendas</p>
                 <p className="text-2xl font-bold text-orange-700">
                   {formatCurrency(fechamentos.reduce((sum, f) => sum + (f.totalVendas || 0), 0))}
                 </p>
@@ -183,39 +183,39 @@ function CheckOutSection() {
 
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profissional</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Atendimentos</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Vendas</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ações</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Cliente</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Atendimentos</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Vendas</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Total</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {isLoading ? (
                     <tr>
-                      <td colSpan="7" className="px-4 py-8 text-center text-gray-500">Carregando...</td>
+                      <td colSpan="7" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</td>
                     </tr>
                   ) : fechamentos.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="px-4 py-8 text-center text-gray-500">Nenhum fechamento encontrado</td>
+                      <td colSpan="7" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum fechamento encontrado</td>
                     </tr>
                   ) : (
                     fechamentos.map((f) => (
-                      <tr key={f.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-800">{f.clienteNome || 'Consumidor Final'}</td>
-                        <td className="px-4 py-3 text-gray-600">{formatDate(f.data)}</td>
-                        <td className="px-4 py-3 text-gray-600">{f.profissionalNome || '-'}</td>
-                        <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(f.totalAtendimentos)}</td>
-                        <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(f.totalVendas)}</td>
-                        <td className="px-4 py-3 text-right font-bold text-green-600">{formatCurrency(f.totalGeral)}</td>
+                      <tr key={f.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                        <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{f.clienteNome || 'Consumidor Final'}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(f.data)}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{f.profissionalNome || '-'}</td>
+                        <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">{formatCurrency(f.totalAtendimentos)}</td>
+                        <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">{formatCurrency(f.totalVendas)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">{formatCurrency(f.totalGeral)}</td>
                         <td className="px-4 py-3 text-center">
                           <button 
                             onClick={() => handleEstornar(f)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                            className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded-lg"
                             title="Estornar"
                           >
                             <X size={18} />
@@ -233,46 +233,46 @@ function CheckOutSection() {
         {activeTab === 'estornos' && (
           <>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data</label>
               <input
                 type="date"
                 value={dataFiltro}
                 onChange={(e) => setDataFiltro(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                 disabled
               />
             </div>
 
-            <div className="bg-red-50 rounded-lg p-4 mb-6">
-              <p className="text-sm text-red-600 font-medium">Total Estornado</p>
+            <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 mb-6">
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">Total Estornado</p>
               <p className="text-2xl font-bold text-red-700">
                 {formatCurrency(estornadosSession.reduce((sum, f) => sum + (f.totalGeral || 0), 0))}
               </p>
             </div>
 
             {estornadosSession.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 <X size={48} className="mx-auto mb-4 opacity-50" />
                 <p>Nenhum fechamento estornado</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profissional</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Cliente</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Total</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {estornadosSession.map((f) => (
-                      <tr key={f.id} className="hover:bg-gray-50 bg-red-50">
-                        <td className="px-4 py-3 font-medium text-gray-800">{f.clienteNome || 'Consumidor Final'}</td>
-                        <td className="px-4 py-3 text-gray-600">{formatDate(f.data)}</td>
-                        <td className="px-4 py-3 text-gray-600">{f.profissionalNome || '-'}</td>
-                        <td className="px-4 py-3 text-right font-bold text-red-600">{formatCurrency(f.totalGeral)}</td>
+                      <tr key={f.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 bg-red-50 dark:bg-red-900/30">
+                        <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{f.clienteNome || 'Consumidor Final'}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(f.data)}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{f.profissionalNome || '-'}</td>
+                        <td className="px-4 py-3 text-right font-bold text-red-600 dark:text-red-400">{formatCurrency(f.totalGeral)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -314,36 +314,36 @@ function EstornoModal({ fechamento, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl w-full max-w-md">
+      <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
         <div className="p-6 border-b flex items-center justify-between">
-          <h3 className="text-lg font-bold text-gray-800">Estornar Fechamento</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Estornar Fechamento</h3>
+          <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
             <X size={24} />
           </button>
         </div>
         
         <div className="p-6 space-y-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 rounded-lg p-4">
             <p className="text-red-700 font-medium">Atenção! Esta ação não pode ser desfeita.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-gray-500">Cliente</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Cliente</p>
               <p className="font-medium">{fechamento.clienteNome || 'Consumidor Final'}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total</p>
-              <p className="font-bold text-red-600">{formatCurrency(fechamento.totalGeral)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total</p>
+              <p className="font-bold text-red-600 dark:text-red-400">{formatCurrency(fechamento.totalGeral)}</p>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Motivo do Estorno *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Motivo do Estorno *</label>
             <textarea
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
               rows={3}
               placeholder="Informe o motivo do estorno..."
             />
@@ -353,7 +353,7 @@ function EstornoModal({ fechamento, onClose, onSuccess }) {
         <div className="p-6 border-t flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
           >
             Cancelar
           </button>
@@ -436,34 +436,34 @@ function FaturamentoSection() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
         <div className="flex items-center gap-3 mb-6">
-          <TrendingUp className="text-purple-600" size={24} />
-          <h2 className="text-xl font-bold text-gray-800">Faturamento</h2>
+          <TrendingUp className="text-purple-600 dark:text-purple-400" size={24} />
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Faturamento</h2>
         </div>
 
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setActiveReport('analitico')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'analitico' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'analitico' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Analítico
           </button>
           <button
             onClick={() => setActiveReport('profissional')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'profissional' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'profissional' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Por Profissional
           </button>
           <button
             onClick={() => setActiveReport('pagamento')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'pagamento' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'pagamento' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Por Forma de Pagamento
           </button>
           <button
             onClick={() => setActiveReport('creditos')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'creditos' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'creditos' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Créditos na Casa
           </button>
@@ -471,40 +471,40 @@ function FaturamentoSection() {
 
         <div className="flex gap-4 mb-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data Início</label>
             <input
               type="date"
               value={dataInicio}
               onChange={(e) => setDataInicio(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data Fim</label>
             <input
               type="date"
               value={dataFim}
               onChange={(e) => setDataFim(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-green-50 rounded-lg p-4">
-            <p className="text-sm text-green-600 font-medium">Total Faturado</p>
+          <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
+            <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total Faturado</p>
             <p className="text-2xl font-bold text-green-700">{formatCurrency(totalFaturamento)}</p>
           </div>
-          <div className="bg-blue-50 rounded-lg p-4">
-            <p className="text-sm text-blue-600 font-medium">Serviços</p>
+          <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Serviços</p>
             <p className="text-2xl font-bold text-blue-700">{formatCurrency(totalServicos)}</p>
           </div>
-          <div className="bg-orange-50 rounded-lg p-4">
-            <p className="text-sm text-orange-600 font-medium">Produtos</p>
+          <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
+            <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">Produtos</p>
             <p className="text-2xl font-bold text-orange-700">{formatCurrency(totalProdutos)}</p>
           </div>
-          <div className="bg-purple-50 rounded-lg p-4">
-            <p className="text-sm text-purple-600 font-medium">Fechamentos</p>
+          <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4">
+            <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Fechamentos</p>
             <p className="text-2xl font-bold text-purple-700">{fechamentos.length}</p>
           </div>
         </div>
@@ -512,28 +512,28 @@ function FaturamentoSection() {
         {activeReport === 'analitico' && (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profissional</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Forma Pagamento</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Cliente</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Forma Pagamento</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {fechamentos.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500">Nenhum registro encontrado</td>
+                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum registro encontrado</td>
                   </tr>
                 ) : (
                   fechamentos.map((f) => (
-                    <tr key={f.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-gray-600">{formatDate(f.data)}</td>
-                      <td className="px-4 py-3 font-medium text-gray-800">{f.clienteNome || 'Consumidor Final'}</td>
-                      <td className="px-4 py-3 text-gray-600">{f.profissionalNome || '-'}</td>
-                      <td className="px-4 py-3 text-gray-600 capitalize">{f.formaPagamento?.replace('_', ' ') || '-'}</td>
-                      <td className="px-4 py-3 text-right font-bold text-green-600">{formatCurrency(f.totalGeral)}</td>
+                    <tr key={f.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(f.data)}</td>
+                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{f.clienteNome || 'Consumidor Final'}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{f.profissionalNome || '-'}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300 capitalize">{f.formaPagamento?.replace('_', ' ') || '-'}</td>
+                      <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">{formatCurrency(f.totalGeral)}</td>
                     </tr>
                   ))
                 )}
@@ -545,9 +545,9 @@ function FaturamentoSection() {
         {activeReport === 'profissional' && (
           <div className="space-y-4">
             {Object.entries(porProfissional).map(([nome, valor]) => (
-              <div key={nome} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <span className="font-medium text-gray-800">{nome}</span>
-                <span className="font-bold text-indigo-600">{formatCurrency(valor)}</span>
+              <div key={nome} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <span className="font-medium text-gray-800 dark:text-gray-100">{nome}</span>
+                <span className="font-bold text-indigo-600 dark:text-indigo-400">{formatCurrency(valor)}</span>
               </div>
             ))}
           </div>
@@ -556,9 +556,9 @@ function FaturamentoSection() {
         {activeReport === 'pagamento' && (
           <div className="space-y-4">
             {Object.entries(porFormaPagamento).map(([forma, valor]) => (
-              <div key={forma} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <span className="font-medium text-gray-800 capitalize">{forma.replace('_', ' ')}</span>
-                <span className="font-bold text-green-600">{formatCurrency(valor)}</span>
+              <div key={forma} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <span className="font-medium text-gray-800 dark:text-gray-100 capitalize">{forma.replace('_', ' ')}</span>
+                <span className="font-bold text-green-600 dark:text-green-400">{formatCurrency(valor)}</span>
               </div>
             ))}
           </div>
@@ -633,7 +633,7 @@ function CreditosNaCasaSection() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-800">Clientes com Saldo de Créditos</h3>
+        <h3 className="font-semibold text-gray-800 dark:text-gray-100">Clientes com Saldo de Créditos</h3>
         <button
           onClick={() => {
             setSelectedCliente({ id: null, nome: 'Selecione...' });
@@ -647,28 +647,28 @@ function CreditosNaCasaSection() {
         </button>
       </div>
 
-      <div className="bg-green-50 rounded-lg p-4 mb-6">
-        <p className="text-sm text-green-600 font-medium">Total de Créditos na Casa</p>
+      <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 mb-6">
+        <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total de Créditos na Casa</p>
         <p className="text-2xl font-bold text-green-700">{formatCurrency(totalCreditos)}</p>
       </div>
 
       {isLoading ? (
-        <p className="text-center py-8 text-gray-500">Carregando...</p>
+        <p className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">Carregando...</p>
       ) : clientesComSaldo.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">
           <Gift size={48} className="mx-auto mb-4 opacity-50" />
           <p>Nenhum crédito registrado</p>
         </div>
       ) : (
         <div className="space-y-3">
           {clientesComSaldo.map((cliente) => (
-            <div key={cliente.id} className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
+            <div key={cliente.id} className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-800">{cliente.nome}</p>
-                <p className="text-sm text-gray-500">{cliente.telefone}</p>
+                <p className="font-medium text-gray-800 dark:text-gray-100">{cliente.nome}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{cliente.telefone}</p>
               </div>
               <div className="flex items-center gap-4">
-                <span className={`font-bold ${cliente.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`font-bold ${cliente.saldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                   {formatCurrency(cliente.saldo)}
                 </span>
                 <button
@@ -685,24 +685,24 @@ function CreditosNaCasaSection() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-md">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
             <div className="p-6 border-b flex items-center justify-between">
-              <h3 className="text-lg font-bold text-gray-800">Gerenciar Crédito</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Gerenciar Crédito</h3>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
             
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Cliente</label>
                 <select
                   value={selectedCliente?.id || ''}
                   onChange={(e) => {
                     const cliente = todosClientes.find(c => c.id === e.target.value);
                     setSelectedCliente(cliente || null);
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
                 >
                   <option value="">Selecione o cliente</option>
                   {todosClientes.map(c => (
@@ -712,7 +712,7 @@ function CreditosNaCasaSection() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Tipo</label>
                 <div className="flex gap-4">
                   <button
                     type="button"
@@ -720,7 +720,7 @@ function CreditosNaCasaSection() {
                     className={`flex-1 py-2 rounded-lg border ${
                       creditoForm.tipo === 'credito' 
                         ? 'bg-green-100 border-green-500 text-green-700' 
-                        : 'border-gray-300 text-gray-600'
+                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     Crédito (+)
@@ -731,7 +731,7 @@ function CreditosNaCasaSection() {
                     className={`flex-1 py-2 rounded-lg border ${
                       creditoForm.tipo === 'debito' 
                         ? 'bg-red-100 border-red-500 text-red-700' 
-                        : 'border-gray-300 text-gray-600'
+                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     Débito (-)
@@ -740,25 +740,25 @@ function CreditosNaCasaSection() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Valor (R$)</label>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   value={creditoForm.valor}
                   onChange={(e) => setCreditoForm({ ...creditoForm, valor: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
                   placeholder="0,00"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Descrição</label>
                 <input
                   type="text"
                   value={creditoForm.descricao}
                   onChange={(e) => setCreditoForm({ ...creditoForm, descricao: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
                   placeholder="Ex: Presente de aniversário"
                 />
               </div>
@@ -767,7 +767,7 @@ function CreditosNaCasaSection() {
             <div className="p-6 border-t flex gap-3">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="flex-1 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
               >
                 Cancelar
               </button>
@@ -928,11 +928,11 @@ function ComissoesSection() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Coins className="text-yellow-600" size={24} />
-            <h2 className="text-xl font-bold text-gray-800">Comissões</h2>
+            <Coins className="text-yellow-600 dark:text-yellow-400" size={24} />
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Comissões</h2>
           </div>
           <button
             onClick={openEditarComissoes}
@@ -946,25 +946,25 @@ function ComissoesSection() {
         <div className="flex gap-2 mb-6 flex-wrap">
           <button
             onClick={() => setActiveReport('realizadas')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'realizadas' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'realizadas' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Realizadas
           </button>
           <button
             onClick={() => setActiveReport('pagar')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'pagar' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'pagar' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             A Pagar
           </button>
           <button
             onClick={() => setActiveReport('pagas')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'pagas' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'pagas' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Pagas
           </button>
           <button
             onClick={() => setActiveReport('estornar')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'estornar' ? 'bg-red-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'estornar' ? 'bg-red-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Estorno de Pagamento ({comissoesEstornos.length})
           </button>
@@ -972,12 +972,12 @@ function ComissoesSection() {
 
         <div className="flex gap-4 mb-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data</label>
             <input
               type="date"
               value={dataFiltro}
               onChange={(e) => setDataFiltro(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>
@@ -985,42 +985,42 @@ function ComissoesSection() {
         {activeReport === 'realizadas' && (
           <>
             <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-yellow-50 rounded-lg p-4">
-                <p className="text-sm text-yellow-600 font-medium">Total em Comissões</p>
+              <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
+                <p className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">Total em Comissões</p>
                 <p className="text-2xl font-bold text-yellow-700">{formatCurrency(totalComissoes)}</p>
               </div>
-              <div className="bg-blue-50 rounded-lg p-4">
-                <p className="text-sm text-blue-600 font-medium">Profissionais</p>
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Profissionais</p>
                 <p className="text-2xl font-bold text-blue-700">{comissoesPorProfissional.length}</p>
               </div>
-              <div className="bg-green-50 rounded-lg p-4">
-                <p className="text-sm text-green-600 font-medium">Fechamentos</p>
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
+                <p className="text-sm text-green-600 dark:text-green-400 font-medium">Fechamentos</p>
                 <p className="text-2xl font-bold text-green-700">{fechamentos.length}</p>
               </div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profissional</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Comissão %</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Vendido</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor Comissão</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Comissão %</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Total Vendido</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor Comissão</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {comissoesPorProfissional.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500">Nenhum registro encontrado</td>
+                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum registro encontrado</td>
                     </tr>
                   ) : (
                     comissoesPorProfissional.map((c) => (
-                      <tr key={c.profissionalId} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-800">{c.nome}</td>
-                        <td className="px-4 py-3 text-right text-gray-600">{c.comissao}%</td>
-                        <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(c.totalVendido)}</td>
-                        <td className="px-4 py-3 text-right font-bold text-yellow-600">{formatCurrency(c.totalComissao)}</td>
+                      <tr key={c.profissionalId} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                        <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{c.nome}</td>
+                        <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">{c.comissao}%</td>
+                        <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">{formatCurrency(c.totalVendido)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-yellow-600 dark:text-yellow-400">{formatCurrency(c.totalComissao)}</td>
                       </tr>
                     ))
                   )}
@@ -1033,37 +1033,37 @@ function ComissoesSection() {
         {activeReport === 'pagar' && (
           <>
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-orange-50 rounded-lg p-4">
-                <p className="text-sm text-orange-600 font-medium">Total a Pagar</p>
+              <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
+                <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">Total a Pagar</p>
                 <p className="text-2xl font-bold text-orange-700">{formatCurrency(totalComissoes)}</p>
               </div>
-              <div className="bg-blue-50 rounded-lg p-4">
-                <p className="text-sm text-blue-600 font-medium">Profissionais</p>
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Profissionais</p>
                 <p className="text-2xl font-bold text-blue-700">{comissoesPorProfissional.length}</p>
               </div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profissional</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor Comissão</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ações</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor Comissão</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {comissoesPorProfissional.filter(c => !pagosSession.has(c.profissionalId)).length === 0 ? (
                     <tr>
-                      <td colSpan="3" className="px-4 py-8 text-center text-gray-500">Nenhuma comissão pendente</td>
+                      <td colSpan="3" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhuma comissão pendente</td>
                     </tr>
                   ) : (
                     comissoesPorProfissional
                       .filter(c => !pagosSession.has(c.profissionalId))
                       .map((c) => (
-                        <tr key={c.profissionalId} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 font-medium text-gray-800">{c.nome}</td>
-                          <td className="px-4 py-3 text-right font-bold text-yellow-600">{formatCurrency(c.totalComissao)}</td>
+                        <tr key={c.profissionalId} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                          <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{c.nome}</td>
+                          <td className="px-4 py-3 text-right font-bold text-yellow-600 dark:text-yellow-400">{formatCurrency(c.totalComissao)}</td>
                           <td className="px-4 py-3 text-center">
                             <button 
                               onClick={() => handlePagar(c)}
@@ -1084,37 +1084,37 @@ function ComissoesSection() {
         {activeReport === 'pagas' && (
           <>
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-green-50 rounded-lg p-4">
-                <p className="text-sm text-green-600 font-medium">Total Pago</p>
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
+                <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total Pago</p>
                 <p className="text-2xl font-bold text-green-700">{formatCurrency(totalPagas)}</p>
               </div>
-              <div className="bg-red-50 rounded-lg p-4">
-                <p className="text-sm text-red-600 font-medium">Total Estornado</p>
+              <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4">
+                <p className="text-sm text-red-600 dark:text-red-400 font-medium">Total Estornado</p>
                 <p className="text-2xl font-bold text-red-700">{formatCurrency(totalEstornos)}</p>
               </div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profissional</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ações</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {comissoesPagas.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500">Nenhum pagamento registrado</td>
+                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum pagamento registrado</td>
                     </tr>
                   ) : (
                     comissoesPagas.map((c) => (
-                      <tr key={c.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-800">{c.profissionalNome}</td>
-                        <td className="px-4 py-3 text-gray-600">{formatDate(c.dataPagamento)}</td>
-                        <td className="px-4 py-3 text-right font-bold text-green-600">{formatCurrency(c.valor)}</td>
+                      <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                        <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{c.profissionalNome}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(c.dataPagamento)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">{formatCurrency(c.valor)}</td>
                         <td className="px-4 py-3 text-center">
                           <button 
                             onClick={() => handleEstornar(c)}
@@ -1135,33 +1135,33 @@ function ComissoesSection() {
 
         {activeReport === 'estornar' && (
           <>
-            <div className="bg-red-50 rounded-lg p-4 mb-6">
-              <p className="text-sm text-red-600 font-medium">Total Estornado</p>
+            <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 mb-6">
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">Total Estornado</p>
               <p className="text-2xl font-bold text-red-700">{formatCurrency(totalEstornos)}</p>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profissional</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Motivo</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Valor</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Motivo</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {comissoesEstornos.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500">Nenhum estorno registrado</td>
+                      <td colSpan="4" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum estorno registrado</td>
                     </tr>
                   ) : (
                     comissoesEstornos.map((e) => (
-                      <tr key={e.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-800">{e.profissionalNome}</td>
-                        <td className="px-4 py-3 text-gray-600">{formatDate(e.createdAt)}</td>
-                        <td className="px-4 py-3 text-right font-bold text-red-600">{formatCurrency(e.valor)}</td>
-                        <td className="px-4 py-3 text-gray-600">{e.motivo}</td>
+                      <tr key={e.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                        <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{e.profissionalNome}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(e.createdAt)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-red-600 dark:text-red-400">{formatCurrency(e.valor)}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{e.motivo}</td>
                       </tr>
                     ))
                   )}
@@ -1173,28 +1173,28 @@ function ComissoesSection() {
 
         {showEditarComissoes && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
               <div className="p-6 border-b flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  <Edit3 className="text-yellow-600" size={20} />
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <Edit3 className="text-yellow-600 dark:text-yellow-400" size={20} />
                   Editar Comissões dos Profissionais
                 </h3>
-                <button onClick={() => setShowEditarComissoes(false)} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => setShowEditarComissoes(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                   <X size={24} />
                 </button>
               </div>
               
               <div className="flex-1 overflow-y-auto p-6">
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
                   Altere o percentual de comissão de cada profissional. Este valor é usado para calcular o valor de comissão a pagar.
                 </p>
                 
                 <div className="space-y-3">
                   {profissionaisLista.map((prof) => (
-                    <div key={prof.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={prof.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                       <div>
-                        <p className="font-medium text-gray-800">{prof.nome}</p>
-                        <p className="text-xs text-gray-500">{prof.especialidade || 'Sem especialidade'}</p>
+                        <p className="font-medium text-gray-800 dark:text-gray-100">{prof.nome}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{prof.especialidade || 'Sem especialidade'}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <input
@@ -1207,9 +1207,9 @@ function ComissoesSection() {
                             ...comissoesEdit,
                             [prof.id]: parseFloat(e.target.value) || 0
                           })}
-                          className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center"
+                          className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-center"
                         />
-                        <span className="text-gray-600 font-medium">%</span>
+                        <span className="text-gray-600 dark:text-gray-300 font-medium">%</span>
                       </div>
                     </div>
                   ))}
@@ -1219,7 +1219,7 @@ function ComissoesSection() {
               <div className="p-6 border-t flex gap-3">
                 <button
                   onClick={() => setShowEditarComissoes(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
                 >
                   Cancelar
                 </button>
@@ -1236,35 +1236,35 @@ function ComissoesSection() {
 
         {pagarModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl w-full max-w-md">
+            <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
               <div className="p-6 border-b flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-800">Registrar Pagamento</h3>
-                <button onClick={() => setPagarModal(null)} className="text-gray-400 hover:text-gray-600">
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Registrar Pagamento</h3>
+                <button onClick={() => setPagarModal(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                   <X size={24} />
                 </button>
               </div>
               
               <div className="p-6 space-y-4">
-                <div className="bg-green-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Profissional</p>
-                  <p className="font-bold text-gray-800">{pagarModal.nome}</p>
+                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Profissional</p>
+                  <p className="font-bold text-gray-800 dark:text-gray-100">{pagarModal.nome}</p>
                 </div>
                 
-                <div className="bg-yellow-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Valor da Comissão</p>
-                  <p className="text-2xl font-bold text-yellow-600">{formatCurrency(pagarModal.totalComissao)}</p>
+                <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Valor da Comissão</p>
+                  <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{formatCurrency(pagarModal.totalComissao)}</p>
                 </div>
 
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Data do Pagamento</p>
-                  <p className="font-medium text-gray-800">{formatDate(new Date().toISOString())}</p>
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Data do Pagamento</p>
+                  <p className="font-medium text-gray-800 dark:text-gray-100">{formatDate(new Date().toISOString())}</p>
                 </div>
               </div>
 
               <div className="p-6 border-t flex gap-3">
                 <button
                   onClick={() => setPagarModal(null)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
                 >
                   Cancelar
                 </button>
@@ -1281,38 +1281,38 @@ function ComissoesSection() {
 
         {estornoModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl w-full max-w-md">
+            <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md">
               <div className="p-6 border-b flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  <RotateCcw className="text-red-600" size={20} />
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <RotateCcw className="text-red-600 dark:text-red-400" size={20} />
                   Estornar Pagamento
                 </h3>
-                <button onClick={() => setEstornoModal(null)} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => setEstornoModal(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                   <X size={24} />
                 </button>
               </div>
               
               <div className="p-6 space-y-4">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 rounded-lg p-4">
                   <p className="text-red-700 font-medium">Atenção! Esta ação não pode ser desfeita.</p>
                 </div>
 
-                <div className="bg-green-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Profissional</p>
-                  <p className="font-bold text-gray-800">{estornoModal.profissionalNome}</p>
+                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Profissional</p>
+                  <p className="font-bold text-gray-800 dark:text-gray-100">{estornoModal.profissionalNome}</p>
                 </div>
                 
-                <div className="bg-yellow-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Valor a Estornar</p>
-                  <p className="text-2xl font-bold text-red-600">{formatCurrency(estornoModal.valor)}</p>
+                <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Valor a Estornar</p>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">{formatCurrency(estornoModal.valor)}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Motivo do Estorno *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Motivo do Estorno *</label>
                   <textarea
                     value={estornoMotivo}
                     onChange={(e) => setEstornoMotivo(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                     rows={3}
                     placeholder="Informe o motivo do estorno..."
                   />
@@ -1322,7 +1322,7 @@ function ComissoesSection() {
               <div className="p-6 border-t flex gap-3">
                 <button
                   onClick={() => setEstornoModal(null)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
                 >
                   Cancelar
                 </button>
@@ -1393,46 +1393,46 @@ function RelatoriosSection() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
         <div className="flex items-center gap-3 mb-6">
-          <BarChart3 className="text-blue-600" size={24} />
-          <h2 className="text-xl font-bold text-gray-800">Relatórios Gerais</h2>
+          <BarChart3 className="text-blue-600 dark:text-blue-400" size={24} />
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Relatórios Gerais</h2>
         </div>
 
         <div className="flex gap-2 mb-6 flex-wrap">
           <button
             onClick={() => setActiveReport('agenda')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'agenda' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'agenda' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Agenda/Serviços
           </button>
           <button
             onClick={() => setActiveReport('aniversariantes')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'aniversariantes' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'aniversariantes' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Aniversariantes
           </button>
           <button
             onClick={() => setActiveReport('profissionais')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'profissionais' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'profissionais' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Profissionais
           </button>
           <button
             onClick={() => setActiveReport('estoque')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'estoque' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'estoque' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Estoque
           </button>
           <button
             onClick={() => setActiveReport('movimentacoes')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'movimentacoes' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'movimentacoes' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Movimentações no Estoque
           </button>
           <button
             onClick={() => setActiveReport('precos')}
-            className={`px-4 py-2 rounded-lg ${activeReport === 'precos' ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-lg ${activeReport === 'precos' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'}`}
           >
             Tabela de Preços
           </button>
@@ -1440,12 +1440,12 @@ function RelatoriosSection() {
 
         <div className="flex gap-4 mb-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data</label>
             <input
               type="date"
               value={dataFiltro}
               onChange={(e) => setDataFiltro(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>
@@ -1453,34 +1453,34 @@ function RelatoriosSection() {
         {activeReport === 'agenda' && (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data/Hora</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Serviço</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profissional</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Data/Hora</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Cliente</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Serviço</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Profissional</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {agendamentos.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500">Nenhum agendamento encontrado</td>
+                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum agendamento encontrado</td>
                   </tr>
                 ) : (
                   agendamentos.map((a) => (
-                    <tr key={a.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-gray-600">{formatDate(a.dataHora)}</td>
-                      <td className="px-4 py-3 font-medium text-gray-800">{a.clienteNome || '-'}</td>
-                      <td className="px-4 py-3 text-gray-600">{a.servicoNome || '-'}</td>
-                      <td className="px-4 py-3 text-gray-600">{a.profissionalNome || '-'}</td>
+                    <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(a.dataHora)}</td>
+                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{a.clienteNome || '-'}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{a.servicoNome || '-'}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{a.profissionalNome || '-'}</td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           a.status === 'agendado' ? 'bg-blue-100 text-blue-700' :
                           a.status === 'confirmado' ? 'bg-green-100 text-green-700' :
                           a.status === 'cancelado' ? 'bg-red-100 text-red-700' :
                           a.status === 'convertido' ? 'bg-purple-100 text-purple-700' :
-                          'bg-gray-100 text-gray-700'
+                          'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
                         }`}>
                           {a.status}
                         </span>
@@ -1495,16 +1495,16 @@ function RelatoriosSection() {
 
         {activeReport === 'aniversariantes' && (
           <div>
-            <h3 className="font-semibold text-gray-800 mb-4">Aniversariantes de {MESES[mesAtual]}</h3>
+            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">Aniversariantes de {MESES[mesAtual]}</h3>
             {aniversariantes.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">Nenhum aniversariante neste mês</p>
+              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 text-center py-8">Nenhum aniversariante neste mês</p>
             ) : (
               <div className="grid grid-cols-3 gap-4">
                 {aniversariantes.map((c) => (
-                  <div key={c.id} className="bg-pink-50 rounded-lg p-4">
-                    <p className="font-medium text-gray-800">{c.nome}</p>
-                    <p className="text-sm text-gray-600">{c.telefone}</p>
-                    <p className="text-sm text-pink-600 mt-1">
+                  <div key={c.id} className="bg-pink-50 dark:bg-pink-900/30 rounded-lg p-4">
+                    <p className="font-medium text-gray-800 dark:text-gray-100">{c.nome}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{c.telefone}</p>
+                    <p className="text-sm text-pink-600 dark:text-pink-400 mt-1">
                       {new Date(c.dataNascimento).getDate()} de {MESES[new Date(c.dataNascimento).getMonth()]}
                     </p>
                   </div>
@@ -1517,21 +1517,21 @@ function RelatoriosSection() {
         {activeReport === 'profissionais' && (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Especialidade</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Nome</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Telefone</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Email</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Especialidade</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {profissionais.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-800">{p.nome}</td>
-                    <td className="px-4 py-3 text-gray-600">{p.telefone || '-'}</td>
-                    <td className="px-4 py-3 text-gray-600">{p.email || '-'}</td>
-                    <td className="px-4 py-3 text-gray-600">{p.especialidade || '-'}</td>
+                  <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                    <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{p.nome}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{p.telefone || '-'}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{p.email || '-'}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{p.especialidade || '-'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1542,33 +1542,33 @@ function RelatoriosSection() {
         {activeReport === 'estoque' && (
           <div>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-800">Produtos em Estoque</h3>
-              <span className="text-sm text-gray-500">{produtos.length} produtos</span>
+              <h3 className="font-semibold text-gray-800 dark:text-gray-100">Produtos em Estoque</h3>
+              <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{produtos.length} produtos</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produto</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoria</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Estoque</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Mínimo</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Preço</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Produto</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Categoria</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Estoque</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Mínimo</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Preço</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {produtos.map((p) => {
                     const estoqueBaixo = p.estoque <= (p.estoqueMinimo || 0);
                     return (
-                      <tr key={p.id} className={`hover:bg-gray-50 ${estoqueBaixo ? 'bg-red-50' : ''}`}>
-                        <td className="px-4 py-3 font-medium text-gray-800">{p.nome}</td>
-                        <td className="px-4 py-3 text-gray-600">{p.categoria || '-'}</td>
-                        <td className={`px-4 py-3 text-right ${estoqueBaixo ? 'text-red-600 font-bold' : 'text-gray-600'}`}>
+                      <tr key={p.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 ${estoqueBaixo ? 'bg-red-50 dark:bg-red-900/30' : ''}`}>
+                        <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{p.nome}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{p.categoria || '-'}</td>
+                        <td className={`px-4 py-3 text-right ${estoqueBaixo ? 'text-red-600 dark:text-red-400 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>
                           {p.estoque}
                           {estoqueBaixo && ' ⚠️'}
                         </td>
-                        <td className="px-4 py-3 text-right text-gray-600">{p.estoqueMinimo || 0}</td>
-                        <td className="px-4 py-3 text-right text-gray-600">
+                        <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">{p.estoqueMinimo || 0}</td>
+                        <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.precoVenda)}
                         </td>
                       </tr>
@@ -1581,7 +1581,7 @@ function RelatoriosSection() {
         )}
 
         {activeReport === 'movimentacoes' && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-500">
             <Package size={48} className="mx-auto mb-4 opacity-50" />
             <p>Relatório de Movimentações em Desenvolvimento</p>
           </div>
@@ -1589,56 +1589,56 @@ function RelatoriosSection() {
 
         {activeReport === 'precos' && (
           <div>
-            <h3 className="font-semibold text-gray-800 mb-4">Tabela de Preços - Serviços</h3>
+            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">Tabela de Preços - Serviços</h3>
             <div className="overflow-x-auto mb-8">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Serviço</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoria</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Duração</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Preço</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Serviço</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Categoria</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Duração</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Preço</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {produtosData?.data?.data?.filter(p => p.tipo === 'servico').map((s) => (
-                    <tr key={s.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-gray-800">{s.nome}</td>
-                      <td className="px-4 py-3 text-gray-600">{s.categoria || '-'}</td>
-                      <td className="px-4 py-3 text-center text-gray-600">{s.duracao || 30} min</td>
-                      <td className="px-4 py-3 text-right font-bold text-green-600">
+                    <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{s.nome}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{s.categoria || '-'}</td>
+                      <td className="px-4 py-3 text-center text-gray-600 dark:text-gray-300">{s.duracao || 30} min</td>
+                      <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(s.preco)}
                       </td>
                     </tr>
                   )) || (
                     <tr>
-                      <td colSpan="4" className="px-4 py-4 text-center text-gray-500">Nenhum serviço cadastrado</td>
+                      <td colSpan="4" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhum serviço cadastrado</td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
 
-            <h3 className="font-semibold text-gray-800 mb-4">Tabela de Preços - Produtos</h3>
+            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">Tabela de Preços - Produtos</h3>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produto</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marca</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Custo</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Venda</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Produto</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Marca</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Custo</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">Venda</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {produtos.filter(p => p.tipo === 'produto').map((p) => (
-                    <tr key={p.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-gray-800">{p.nome}</td>
-                      <td className="px-4 py-3 text-gray-600">{p.marca || '-'}</td>
-                      <td className="px-4 py-3 text-right text-gray-600">
+                    <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
+                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{p.nome}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{p.marca || '-'}</td>
+                      <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.precoCusto || 0)}
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-green-600">
+                      <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.precoVenda)}
                       </td>
                     </tr>

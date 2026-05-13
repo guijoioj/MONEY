@@ -36,6 +36,31 @@ class Usuario extends BaseModel {
       [hashedPassword, userId]
     );
   }
+
+  filterData(data) {
+    const mapped = { ...data };
+    if (mapped.password !== undefined) {
+      mapped.senha_hash = mapped.password;
+      delete mapped.password;
+    }
+    if (mapped.name !== undefined) {
+      mapped.nome = mapped.name;
+      delete mapped.name;
+    }
+    if (mapped.role !== undefined) {
+      mapped.tipo = mapped.role;
+      delete mapped.role;
+    }
+    if (mapped.salonId !== undefined) {
+      mapped.salao_id = mapped.salonId;
+      delete mapped.salonId;
+    }
+    return mapped;
+  }
+
+  static async findByEmail(email) {
+    return new Usuario().findByEmail(email);
+  }
 }
 
 module.exports = Usuario;

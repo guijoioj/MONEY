@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-require('@oo/env').config({path: require('path').resolve(__dirname, '../../.env')});
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const fs = require('fs');
@@ -42,7 +42,15 @@ async function createDefaultAdmin() {
       );
       
       if (salao.rows.length > 0) {
-        const hashedPassword = await bcrypt.hash(process.env.DEFAULT_ADMIN_PASSWORD || 'admin123', 10);
+        const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+        if (!adminPassword) {
+          console.warn('⚠️ DEFAULT_ADMIN_PASSWORD não definido — pulando criação de admin. Defina antes de rodar este script.');
+          return;
+        }
+        if (adminPassword.length < 10) {
+          throw new Error('DEFAULT_ADMIN_PASSWORD deve ter pelo menos 10 caracteres');
+        }
+        const hashedPassword = await bcrypt.hash(adminPassword, 12);
         
         await client.query(
           `INSERT INTO usuarios (nome, email, senha_hash, salao_id, tipo)

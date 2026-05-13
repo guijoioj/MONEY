@@ -110,8 +110,14 @@ class ProfissionalService {
         };
       }
 
-      // Soft delete
-      await profissionalModel.update(id, { ativo: false }, salaoId);
+      // [P3-B9] Soft delete: zera senha_hash + app_ativo. Senha antiga não volta
+      // se admin reativar — força reset.
+      await profissionalModel.update(id, {
+        ativo: false,
+        app_ativo: false,
+        senha_hash: null,
+        push_token: null,
+      }, salaoId);
 
       return {
         success: true,
@@ -131,10 +137,11 @@ class ProfissionalService {
       const { query } = require('../config/database');
       
       const servicos = await query(`
-        SELECT s.* FROM servicos s
-        JOIN profissional_servicos ps ON ps.servico_id = s.id
-        WHERE ps.profissional_id = $1 AND s.salao_id = $2 AND s.ativo = true
-      `, [profissionalId, salaoId]);
+        SELECT s.*
+        FROM servicos s
+        WHERE s.salao_id = $1 AND s.ativo = true
+        ORDER BY s.nome
+      `, [salaoId]);
 
       return {
         success: true,

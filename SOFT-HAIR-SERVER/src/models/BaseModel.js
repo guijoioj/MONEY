@@ -8,6 +8,38 @@ class BaseModel {
     this.tableName = tableName;
   }
 
+  static instance() {
+    return new this();
+  }
+
+  static async findById(id, salaoId = null) {
+    return this.instance().findById(id, salaoId);
+  }
+
+  static async getAll(filters = {}, salaoId = null, options = {}) {
+    return this.instance().findAll(filters, salaoId, options);
+  }
+
+  static async findAll(filters = {}, salaoId = null, options = {}) {
+    return this.instance().findAll(filters, salaoId, options);
+  }
+
+  static async create(data, salaoId = null) {
+    return this.instance().create(data, salaoId);
+  }
+
+  static async update(id, data, salaoId = null) {
+    return this.instance().update(id, data, salaoId);
+  }
+
+  static async delete(id, salaoId = null) {
+    return this.instance().delete(id, salaoId);
+  }
+
+  static async count(filters = {}, salaoId = null) {
+    return this.instance().count(filters, salaoId);
+  }
+
   async findById(id, salaoId = null) {
     let sql = `SELECT * FROM ${this.tableName} WHERE id = $1`;
     let params = [id];

@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { agendamentosAPI, clientesAPI, servicosAPI, profissionaisAPI, atendimentosAPI } from '../services/api';
 import { 
   ChevronLeft, ChevronRight, Plus, X, Clock, User, Phone, 
@@ -13,9 +14,9 @@ const PROFISSIONAL_COLORS = [
   { bg: 'bg-rose-100', border: 'border-rose-400', text: 'text-rose-800', accent: '#f43f5e' },
   { bg: 'bg-fuchsia-100', border: 'border-fuchsia-400', text: 'text-fuchsia-800', accent: '#d946ef' },
   { bg: 'bg-violet-100', border: 'border-violet-400', text: 'text-violet-800', accent: '#8b5cf6' },
-  { bg: 'bg-pink-50', border: 'border-pink-300', text: 'text-pink-700', accent: '#f472b6' },
+  { bg: 'bg-pink-50 dark:bg-pink-900/30', border: 'border-pink-300', text: 'text-pink-700', accent: '#f472b6' },
   { bg: 'bg-rose-50', border: 'border-rose-300', text: 'text-rose-700', accent: '#fb7185' },
-  { bg: 'bg-purple-50', border: 'border-purple-300', text: 'text-purple-700', accent: '#c084fc' },
+  { bg: 'bg-purple-50 dark:bg-purple-900/30', border: 'border-purple-300', text: 'text-purple-700', accent: '#c084fc' },
 ];
 
 const HORARIOS = [];
@@ -56,8 +57,8 @@ const normalizeRole = (role) => {
     { patterns: [/esteticist[ae]/i, /estetic[ae]/i], normalized: 'Esteticista' },
     // Depilador(a)
     { patterns: [/depil[ae]/i], normalized: 'Depilador' },
-    // Maquiador(a)
-    { patterns: [/maqui[ae]/i], normalized: 'Maquiador' },
+    // Maquiador(a) / Designer de Sobrancelha
+    { patterns: [/maqui[ae]/i, /designer/i, /sobrancelh/i], normalized: 'Maquiador' },
     // Auxiliar
     { patterns: [/auxiliar/i, /assistente/i], normalized: 'Auxiliar' },
   ];
@@ -84,9 +85,244 @@ const getRoleColor = (role) => {
 const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
+function SearchSelect({ value, onChange, options, placeholder, disabled, renderLabel }) {
+  const [search, setSearch] = React.useState('');
+  const [open, setOpen] = React.useState(false);
+  const [focused, setFocused] = React.useState(false);
+  const ref = React.useRef(null);
+
+  const selected = options.find(o => o.id === value);
+
+  React.useEffect(() => {
+    const handle = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+        setFocused(false);
+        setSearch('');
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, []);
+
+  const filtered = options.filter(o =>
+    renderLabel(o).toLowerCase().includes(search.toLowerCase())
+  );
+
+  const displayValue = focused ? search : (selected ? renderLabel(selected) : '');
+
+  return (
+    <div ref={ref} className="relative">
+      <input
+        type="text"
+        value={displayValue}
+        onChange={(e) => { setSearch(e.target.value); setOpen(true); }}
+        onFocus={() => { setFocused(true); setOpen(true); setSearch(''); }}
+        placeholder={selected ? renderLabel(selected) : placeholder}
+        disabled={disabled}
+        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+        autoComplete="off"
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
+          {filtered.map(o => (
+            <div
+              key={o.id}
+              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 dark:bg-indigo-900/30 text-sm ${o.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onChange(o.id);
+                setOpen(false);
+                setFocused(false);
+                setSearch('');
+              }}
+            >
+              {renderLabel(o)}
+            </div>
+          ))}
+        </div>
+      )}
+      {open && search.length > 0 && filtered.length === 0 && (
+        <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg mt-1 px-3 py-2 text-sm text-gray-400 dark:text-gray-500">
+          Nenhum resultado
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ClienteSearchSelect({ value, onChange, selectedCliente, disabled }) {
+  const [search, setSearch] = React.useState('');
+  const [open, setOpen] = React.useState(false);
+  const [focused, setFocused] = React.useState(false);
+  const [results, setResults] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const ref = React.useRef(null);
+  const timerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handle = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+        setFocused(false);
+        setSearch('');
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, []);
+
+  const doSearch = React.useCallback((text) => {
+    clearTimeout(timerRef.current);
+    if (!text || text.length < 1) { setResults([]); setLoading(false); return; }
+    setLoading(true);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const { clientesAPI } = await import('../services/api');
+        const res = await clientesAPI.getAll({ search: text, limit: 20 });
+        const raw = res.data?.data;
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
+        setResults(list.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')));
+      } catch { setResults([]); }
+      setLoading(false);
+    }, 300);
+  }, []);
+
+  const displayLabel = (c) => `${c.nome}${c.telefone ? ' — ' + c.telefone : ''}`;
+  const displayValue = focused ? search : (selectedCliente ? displayLabel(selectedCliente) : '');
+
+  return (
+    <div ref={ref} className="relative">
+      <input
+        type="text"
+        value={displayValue}
+        onChange={(e) => { setSearch(e.target.value); setOpen(true); doSearch(e.target.value); }}
+        onFocus={() => { setFocused(true); setOpen(true); setSearch(''); setResults([]); }}
+        placeholder={selectedCliente ? displayLabel(selectedCliente) : 'Buscar cliente por nome...'}
+        disabled={disabled}
+        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+        autoComplete="off"
+      />
+      {open && (
+        <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
+          {loading && <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Buscando...</div>}
+          {!loading && results.length === 0 && search.length > 0 && (
+            <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Nenhum resultado</div>
+          )}
+          {!loading && results.length === 0 && search.length === 0 && (
+            <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Digite para buscar</div>
+          )}
+          {results.map(c => (
+            <div
+              key={c.id}
+              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 dark:bg-indigo-900/30 text-sm ${c.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onChange(c.id, c);
+                setOpen(false);
+                setFocused(false);
+                setSearch('');
+              }}
+            >
+              {displayLabel(c)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ServicoSearchSelect({ value, onChange, selectedServico, disabled }) {
+  const [search, setSearch] = React.useState('');
+  const [open, setOpen] = React.useState(false);
+  const [focused, setFocused] = React.useState(false);
+  const [results, setResults] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const ref = React.useRef(null);
+  const timerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handle = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false); setFocused(false); setSearch('');
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, []);
+
+  const doSearch = React.useCallback((text) => {
+    clearTimeout(timerRef.current);
+    setLoading(true);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const { servicosAPI } = await import('../services/api');
+        const res = await servicosAPI.getAll({ search: text || '', limit: 30 });
+        const raw = res.data?.data;
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
+        setResults(list.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')));
+      } catch { setResults([]); }
+      setLoading(false);
+    }, 300);
+  }, []);
+
+  const displayLabel = (s) => {
+    const preco = s.preco ? ` — R$ ${parseFloat(s.preco).toFixed(2)}` : '';
+    const dur = s.duracao_minutos || s.duracao;
+    const durStr = dur ? ` (${dur}min)` : '';
+    return `${s.nome}${preco}${durStr}`;
+  };
+  const displayValue = focused ? search : (selectedServico ? displayLabel(selectedServico) : '');
+
+  return (
+    <div ref={ref} className="relative">
+      <input
+        type="text"
+        value={displayValue}
+        onChange={(e) => { setSearch(e.target.value); setOpen(true); doSearch(e.target.value); }}
+        onFocus={() => { setFocused(true); setOpen(true); setSearch(''); doSearch(''); }}
+        placeholder={selectedServico ? displayLabel(selectedServico) : 'Buscar serviço por nome...'}
+        disabled={disabled}
+        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+        autoComplete="off"
+      />
+      {open && (
+        <div className="absolute z-[9999] w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-1">
+          {loading && <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Buscando...</div>}
+          {!loading && results.length === 0 && <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Nenhum resultado</div>}
+          {results.map(s => (
+            <div
+              key={s.id}
+              className={`px-3 py-2 cursor-pointer hover:bg-indigo-50 dark:bg-indigo-900/30 text-sm ${s.id === value ? 'bg-indigo-100 font-medium text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onChange(s.id, s);
+                setOpen(false); setFocused(false); setSearch('');
+              }}
+            >
+              {displayLabel(s)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Agenda() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Atualizar agenda em tempo real via WebSocket
+  useWebSocket('admin', 'salao', (msg) => {
+    if (msg.type === 'AGENDAMENTO_ATUALIZADO' || msg.type === 'NOVO_PEDIDO_AGENDAMENTO' ||
+        msg.tipo === 'agendamento_atualizado' || msg.tipo === 'novo_pedido_agendamento') {
+      queryClient.invalidateQueries(['agendamentos-calendario']);
+      queryClient.invalidateQueries(['agendamentos-dashboard']);
+      queryClient.invalidateQueries(['solicitacoes']);
+    }
+  });
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedProfissionais, setSelectedProfissionais] = useState([]);
@@ -96,6 +332,8 @@ export default function Agenda() {
   const [editingAgendamento, setEditingAgendamento] = useState(null);
   const [selectedProfissionalCelula, setSelectedProfissionalCelula] = useState(null);
   const [selectedHoraCelula, setSelectedHoraCelula] = useState(null);
+  const [selectedClienteObj, setSelectedClienteObj] = useState(null);
+  const [selectedServicoObj, setSelectedServicoObj] = useState(null);
   const [notificacao, setNotificacao] = useState(null);
   const [agendamentosConvertidos, setAgendamentosConvertidos] = useState([]);
   const [hoveredAgendamento, setHoveredAgendamento] = useState(null);
@@ -103,8 +341,8 @@ export default function Agenda() {
   const autoConvertRef = useRef(false);
   const allAgendamentosRef = useRef([]);
   
-  const COL_WIDTH = 140;
-  const TIME_COL_WIDTH = 80;
+  const COL_WIDTH = 96;
+  const TIME_COL_WIDTH = 56;
 
   const [formData, setFormData] = useState({
     clienteId: '',
@@ -121,7 +359,7 @@ export default function Agenda() {
   const { data: agendamentosData, isLoading: loadingAgendamentos, refetch: refetchAgendamentos } = useQuery({
     queryKey: ['agendamentos-calendario'],
     queryFn: () => agendamentosAPI.getAll({}),
-    refetchInterval: 30000,
+    refetchInterval: 120000,
   });
 
   const { data: pendentesData } = useQuery({
@@ -137,7 +375,7 @@ export default function Agenda() {
 
   const { data: servicosData } = useQuery({
     queryKey: ['servicos-dropdown'],
-    queryFn: () => servicosAPI.getAll({ ativo: true }),
+    queryFn: () => servicosAPI.getAll({}),
   });
 
   const { data: profissionaisData } = useQuery({
@@ -147,7 +385,7 @@ export default function Agenda() {
 
   const { data: configData } = useQuery({
     queryKey: ['configuracoes'],
-    queryFn: () => import('../services/api').then(m => m.default.get('/configuracoes')),
+    queryFn: () => import('../services/api').then(m => m.saloesAPI.getMe()),
     refetchInterval: 60000,
   });
 
@@ -164,8 +402,9 @@ export default function Agenda() {
       queryClient.invalidateQueries(['agendamentos-dashboard']);
       closeModal();
     },
-    onError: () => {
-      console.error('Erro ao criar agendamento');
+    onError: (err) => {
+      const msg = err.response?.data?.error || err.response?.data?.message || (typeof err.response?.data === 'string' ? err.response.data : null) || err.message || 'Erro ao criar agendamento';
+      setAviso({ tipo: 'erro', mensagem: msg });
     },
   });
 
@@ -176,8 +415,8 @@ export default function Agenda() {
       queryClient.invalidateQueries(['agendamentos-dashboard']);
       closeModal();
     },
-    onError: () => {
-      console.error('Erro ao atualizar agendamento');
+    onError: (err) => {
+      setAviso({ tipo: 'erro', mensagem: err.response?.data?.error || err.message || 'Erro ao atualizar agendamento' });
     },
   });
 
@@ -187,8 +426,8 @@ export default function Agenda() {
       queryClient.invalidateQueries(['agendamentos-calendario']);
       queryClient.invalidateQueries(['agendamentos-dashboard']);
     },
-    onError: () => {
-      console.error('Erro ao deletar agendamento');
+    onError: (err) => {
+      alert(err.response?.data?.error || 'Erro ao deletar agendamento');
     },
   });
 
@@ -200,19 +439,62 @@ export default function Agenda() {
     }
   };
 
-  const converterMutation = useMutation({
-    mutationFn: () => Promise.resolve({ data: { resultados: [] } }),
+  const converterUmMutation = useMutation({
+    mutationFn: async ({ id }) => {
+      // Busca o agendamento para pegar dados
+      const ag = await agendamentosAPI.getById(id);
+      const data = ag?.data?.data;
+      if (!data) throw new Error('Agendamento não encontrado');
+
+      // Cria atendimento a partir do agendamento
+      const atend = await atendimentosAPI.create({
+        cliente_id: data.clienteId || data.cliente_id,
+        profissional_id: data.profissionalId || data.profissional_id,
+        servico_id: data.servicoId || data.servico_id,
+        agendamento_id: id,
+        valor: data.valor || 0,
+        status: 'em_andamento',
+      });
+
+      // Atualiza status do agendamento
+      await agendamentosAPI.update(id, { status: 'em_andamento' });
+      return atend;
+    },
     onSuccess: () => {
-      setNotificacao({ tipo: 'info', mensagem: 'Conversão automática não disponível neste servidor.' });
+      queryClient.invalidateQueries(['agendamentos']);
+      queryClient.invalidateQueries(['atendimentos']);
+      setNotificacao({ tipo: 'success', mensagem: 'Agendamento convertido em atendimento.' });
+    },
+    onError: (err) => {
+      setNotificacao({ tipo: 'error', mensagem: err.response?.data?.error || err.message || 'Erro ao converter agendamento.' });
     },
   });
 
-  const converterUmMutation = useMutation({
-    mutationFn: () => Promise.resolve({}),
-    onSuccess: () => {
-      setNotificacao({ tipo: 'info', mensagem: 'Conversão para atendimento não disponível neste servidor.' });
+  const converterMutation = useMutation({
+    mutationFn: async () => {
+      const pendentes = (data?.data?.data || []).filter(a => a.status === 'agendado' || a.status === 'confirmado');
+      const resultados = [];
+      for (const a of pendentes) {
+        try {
+          await converterUmMutation.mutateAsync({ id: a.id });
+          resultados.push({ id: a.id, ok: true });
+        } catch (e) {
+          resultados.push({ id: a.id, ok: false, error: e.message });
+        }
+      }
+      return { resultados };
+    },
+    onSuccess: (res) => {
+      const ok = res.resultados.filter(r => r.ok).length;
+      setNotificacao({ tipo: 'success', mensagem: `${ok} agendamento(s) convertido(s).` });
     },
   });
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (searchParams.get('new') === '1') { openModal(); setSearchParams({}); }
+  }, []);
 
   useEffect(() => {
     if (notificacao) {
@@ -221,7 +503,20 @@ export default function Agenda() {
     }
   }, [notificacao]);
 
-  const allAgendamentos = Array.isArray(agendamentosData?.data?.data) ? agendamentosData.data.data : [];
+  const mapAgendamento = (a) => ({
+    ...a,
+    dataHora: a.dataHora || a.data_hora,
+    clienteId: a.clienteId || a.cliente_id,
+    profissionalId: a.profissionalId || a.profissional_id,
+    auxiliarId: a.auxiliarId || a.auxiliar_id,
+    servicoId: a.servicoId || a.servico_id,
+    clienteNome: a.clienteNome || a.cliente_nome,
+    profissionalNome: a.profissionalNome || a.profissional_nome,
+    servicoNome: a.servicoNome || a.servico_nome,
+    servicoDuracao: a.servicoDuracao || a.duracao_minutos,
+  });
+
+  const allAgendamentos = (Array.isArray(agendamentosData?.data?.data) ? agendamentosData.data.data : []).map(mapAgendamento);
 
   // Mantém refs atualizados para uso no intervalo sem re-criar o efeito
   autoConvertRef.current = configData?.data?.conversao_automatica === 'true';
@@ -246,7 +541,8 @@ export default function Agenda() {
   }, []);
   const profissionaisRaw = Array.isArray(profissionaisData?.data?.data) ? profissionaisData.data.data : [];
   const profissionais = profissionaisRaw.filter(p => p && p.ativo);
-  const clientes = Array.isArray(clientesData?.data?.data) ? clientesData.data.data : [];
+  const clientesRaw = clientesData?.data?.data;
+  const clientes = Array.isArray(clientesRaw) ? clientesRaw : Array.isArray(clientesRaw?.data) ? clientesRaw.data : [];
   const servicos = Array.isArray(servicosData?.data?.data) ? servicosData.data.data : [];
   const atendimentosDoDia = Array.isArray(atendimentosData?.data?.data) ? atendimentosData.data.data : [];
 
@@ -266,26 +562,28 @@ export default function Agenda() {
     ? profissionais.filter(p => selectedProfissionais.includes(p.id))
     : filteredProfissionais;
 
-  const groupedProfissionais = useMemo(() => {
-    const groups = [];
+  const { groupedProfissionais, sortedProfissionais } = useMemo(() => {
     const seen = {};
-    visibleProfissionais.forEach(p => {
+    [...visibleProfissionais].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(p => {
       const rawRole = p.especialidade || 'Outros';
       const role = normalizeRole(rawRole);
-      if (!seen[role]) {
-        seen[role] = { role, profissionais: [] };
-        groups.push(seen[role]);
-      }
+      if (!seen[role]) seen[role] = { role, profissionais: [] };
       seen[role].profissionais.push(p);
     });
-    return groups;
+    const grouped = Object.values(seen).sort((a, b) => (a.role < b.role ? -1 : a.role > b.role ? 1 : 0));
+    return {
+      groupedProfissionais: grouped,
+      sortedProfissionais: grouped.flatMap(g => g.profissionais),
+    };
   }, [visibleProfissionais]);
 
+  const localDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
   const getAgendamentosDoDia = (date, profissionalId) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = localDateStr(date);
     return allAgendamentos.filter(a => {
       if (!a.dataHora) return false;
-      const agendDate = a.dataHora.split('T')[0];
+      const agendDate = a.dataHora.substring(0, 10);
       if (agendDate !== dateStr) return false;
       if (profissionalId && a.profissionalId !== profissionalId) return false;
       if (a.status === 'convertido') return false;
@@ -296,7 +594,8 @@ export default function Agenda() {
 
   const getDuracaoSlots = (agendamento) => {
     const servico = servicos.find(s => s.id === agendamento.servicoId);
-    const duracaoMin = servico?.duracao || agendamento.servicoDuracao || 30;
+    const duracaoMin = servico?.duracao_minutos || servico?.duracao
+      || agendamento.servicoDuracao || agendamento.duracao_minutos || 30;
     return Math.ceil(duracaoMin / 15);
   };
 
@@ -444,8 +743,8 @@ export default function Agenda() {
     } else {
       setEditingAgendamento(null);
       const defaultDate = date || selectedDate;
-      const defaultTime = hora ? `${hora}:00` : '09:00';
-      const defaultProfissional = profissional?.id || selectedProfissionalCelula?.id || visibleProfissionais[0]?.id || '';
+      const defaultTime = hora || '09:00';
+      const defaultProfissional = profissional?.id || selectedProfissionalCelula?.id || sortedProfissionais[0]?.id || '';
       
       if (hora && profissional) {
         setSelectedProfissionalCelula(profissional);
@@ -457,7 +756,7 @@ export default function Agenda() {
         servicoId: '',
         profissionalId: defaultProfissional,
         auxiliarId: '',
-        dataHora: `${defaultDate.toISOString().split('T')[0]}T${defaultTime}`,
+        dataHora: `${localDateStr(defaultDate)}T${defaultTime}`,
         observacoes: '',
         status: 'agendado'
       });
@@ -470,6 +769,8 @@ export default function Agenda() {
     setEditingAgendamento(null);
     setSelectedProfissionalCelula(null);
     setSelectedHoraCelula(null);
+    setSelectedClienteObj(null);
+    setSelectedServicoObj(null);
     setAviso({ tipo: '', mensagem: '' });
   };
 
@@ -493,14 +794,6 @@ export default function Agenda() {
 
     if (!formData.servicoId) {
       setAviso({ tipo: 'erro', mensagem: 'Selecione um serviço' });
-      return;
-    }
-
-    const agora = new Date();
-    const horarioSelecionado = new Date(formData.dataHora);
-    
-    if (horarioSelecionado <= agora) {
-      setAviso({ tipo: 'erro', mensagem: 'Não é possível agendar em horário já passado' });
       return;
     }
 
@@ -582,10 +875,20 @@ export default function Agenda() {
       return;
     }
 
+    const payload = {
+      cliente_id: formData.clienteId,
+      servico_id: formData.servicoId,
+      profissional_id: formData.profissionalId,
+      auxiliar_id: formData.auxiliarId || null,
+      data_hora: formData.dataHora,
+      observacoes: formData.observacoes,
+      status: formData.status,
+    };
+
     if (editingAgendamento) {
-      updateMutation.mutate({ id: editingAgendamento.id, data: formData });
+      updateMutation.mutate({ id: editingAgendamento.id, data: payload });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(payload);
     }
   };
 
@@ -594,32 +897,32 @@ export default function Agenda() {
   };
 
   const getCountAgendamentosNoDia = (date) => {
-    const dateStr = date.toISOString().split('T')[0];
-    return allAgendamentos.filter(a => a.dataHora?.startsWith(dateStr)).length;
+    const dateStr = localDateStr(date);
+    return allAgendamentos.filter(a => a.dataHora?.substring(0,10) === dateStr).length;
   };
 
   return (
     <div className="space-y-4">
       {notificacao && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg flex items-center gap-3 max-w-md animate-pulse ${
-          notificacao.tipo === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'
+          notificacao.tipo === 'success' ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-800 dark:text-green-200' : 'bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200'
         }`}>
           {notificacao.tipo === 'success' ? (
-            <Check size={20} className="text-green-600" />
+            <Check size={20} className="text-green-600 dark:text-green-400" />
           ) : (
-            <AlertCircle size={20} className="text-red-600" />
+            <AlertCircle size={20} className="text-red-600 dark:text-red-400" />
           )}
           <span className="flex-1">{notificacao.mensagem}</span>
-          <button onClick={() => setNotificacao(null)} className="text-gray-400 hover:text-gray-600">
+          <button onClick={() => setNotificacao(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
             <X size={18} />
           </button>
         </div>
       )}
 
       {pendentesData?.data?.data?.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 rounded-xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Clock className="text-yellow-600" size={20} />
+            <Clock className="text-yellow-600 dark:text-yellow-400" size={20} />
             <span className="text-yellow-800 font-medium">
               {pendentesData.data.data.length} agendamento(s) aguardando conversão
             </span>
@@ -636,14 +939,14 @@ export default function Agenda() {
       )}
 
       {agendamentosConvertidos.length > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+        <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 rounded-xl p-4">
           <p className="text-green-800 font-medium flex items-center gap-2">
             <Check size={18} />
             {agendamentosConvertidos.length} atendimento(s) criado(s) automaticamente dos agendamentos
           </p>
           <button 
             onClick={() => setAgendamentosConvertidos([])}
-            className="text-sm text-green-600 hover:text-green-700 mt-1"
+            className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 mt-1"
           >
             Ocultar mensagem
           </button>
@@ -651,7 +954,7 @@ export default function Agenda() {
       )}
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">Agenda</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Agenda</h1>
         <button 
           onClick={() => openModal(null, selectedDate)}
           className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
@@ -663,22 +966,22 @@ export default function Agenda() {
 
       <div className="flex gap-4">
         <div className="w-72 flex-shrink-0">
-          <div className="bg-white rounded-xl shadow p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
             <div className="flex items-center justify-between mb-4">
-              <button onClick={prevMonth} className="p-2 hover:bg-pink-50 rounded-lg transition-colors">
-                <ChevronLeft size={20} className="text-gray-600" />
+              <button onClick={prevMonth} className="p-2 hover:bg-pink-50 dark:bg-pink-900/30 rounded-lg transition-colors">
+                <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
               </button>
-              <h3 className="font-semibold text-gray-800">
+              <h3 className="font-semibold text-gray-800 dark:text-gray-100">
                 {MESES[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h3>
-              <button onClick={nextMonth} className="p-2 hover:bg-pink-50 rounded-lg transition-colors">
-                <ChevronRight size={20} className="text-gray-600" />
+              <button onClick={nextMonth} className="p-2 hover:bg-pink-50 dark:bg-pink-900/30 rounded-lg transition-colors">
+                <ChevronRight size={20} className="text-gray-600 dark:text-gray-300" />
               </button>
             </div>
 
             <div className="grid grid-cols-7 gap-1 text-center mb-2">
               {DIAS_SEMANA.map(d => (
-                <div key={d} className="text-xs font-medium text-gray-500 py-1">{d}</div>
+                <div key={d} className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 py-1">{d}</div>
               ))}
             </div>
 
@@ -691,14 +994,14 @@ export default function Agenda() {
                     onClick={() => handleDateSelect(date)}
                     className={`
                       relative p-2 text-sm rounded-lg transition-all
-                      ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 hover:bg-pink-50'}
+                      ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 dark:text-gray-200 hover:bg-pink-50 dark:bg-pink-900/30'}
                       ${isToday(date) ? 'bg-pink-100 text-pink-700 font-semibold' : ''}
                       ${isSelected(date) ? 'bg-indigo-600 text-white hover:bg-indigo-700' : ''}
                     `}
                   >
                     {date.getDate()}
                     {count > 0 && isCurrentMonth && (
-                      <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${isSelected(date) || isToday(date) ? 'bg-white' : 'bg-indigo-500'}`} />
+                      <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${isSelected(date) || isToday(date) ? 'bg-white dark:bg-gray-800' : 'bg-indigo-500'}`} />
                     )}
                   </button>
                 );
@@ -706,14 +1009,14 @@ export default function Agenda() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow p-4 mt-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mt-4">
             <div className="flex items-center gap-2 mb-3">
-              <Filter size={16} className="text-gray-500" />
-              <h3 className="font-semibold text-gray-800">Filtros</h3>
+              <Filter size={16} className="text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+              <h3 className="font-semibold text-gray-800 dark:text-gray-100">Filtros</h3>
             </div>
 
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-500 uppercase mb-2 block">Tipo</label>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-2 block">Tipo</label>
               <div className="space-y-1">
                 {[
                   { value: 'todos', label: 'Todos' },
@@ -727,25 +1030,25 @@ export default function Agenda() {
                       value={opt.value}
                       checked={filtroTipo === opt.value}
                       onChange={(e) => setFiltroTipo(e.target.value)}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="text-indigo-600 dark:text-indigo-400 focus:ring-indigo-500"
                     />
-                    <span className="text-sm text-gray-700">{opt.label}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-200">{opt.label}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-medium text-gray-500 uppercase mb-2 block">Profissionais</label>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-2 block">Profissionais</label>
               <div className="space-y-1">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={selectedProfissionais.length === 0}
                     onChange={() => setSelectedProfissionais([])}
-                    className="rounded text-indigo-600 focus:ring-indigo-500"
+                    className="rounded text-indigo-600 dark:text-indigo-400 focus:ring-indigo-500"
                   />
-                  <span className="text-sm text-gray-700">Todos</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-200">Todos</span>
                 </label>
                 {profissionais.map((p, idx) => {
                   const color = PROFISSIONAL_COLORS[idx % PROFISSIONAL_COLORS.length];
@@ -761,10 +1064,10 @@ export default function Agenda() {
                             setSelectedProfissionais(selectedProfissionais.filter(id => id !== p.id));
                           }
                         }}
-                        className="rounded text-indigo-600 focus:ring-indigo-500"
+                        className="rounded text-indigo-600 dark:text-indigo-400 focus:ring-indigo-500"
                       />
                       <span className={`w-3 h-3 rounded-full ${color.bg}`} style={{ borderLeft: `3px solid ${color.accent}` }} />
-                      <span className="text-sm text-gray-700">{p.nome}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-200">{p.nome}</span>
                     </label>
                   );
                 })}
@@ -772,7 +1075,7 @@ export default function Agenda() {
             </div>
 
             <div className="mt-4">
-              <label className="text-xs font-medium text-gray-500 uppercase mb-2 block">Status</label>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-2 block">Status</label>
               <div className="space-y-1">
                 {[
                   { value: 'todos', label: 'Todos', color: 'bg-gray-400' },
@@ -786,10 +1089,10 @@ export default function Agenda() {
                       type="checkbox"
                       checked={statusFilter === opt.value}
                       onChange={() => setStatusFilter(opt.value)}
-                      className="rounded text-indigo-600 focus:ring-indigo-500"
+                      className="rounded text-indigo-600 dark:text-indigo-400 focus:ring-indigo-500"
                     />
                     <span className={`w-3 h-3 rounded-full ${opt.color}`} />
-                    <span className="text-sm text-gray-700">{opt.label}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-200">{opt.label}</span>
                   </label>
                 ))}
               </div>
@@ -797,56 +1100,79 @@ export default function Agenda() {
           </div>
         </div>
 
-        <div className="flex-1 bg-white rounded-xl shadow overflow-hidden flex flex-col min-h-0">
-          <div className="overflow-auto flex-1" ref={gridRef}>
-            <div style={{ minWidth: TIME_COL_WIDTH + (visibleProfissionais.length * COL_WIDTH), minHeight: '100%' }}>
-              <div className="sticky top-0 z-30 bg-gray-50 border-b border-r">
-                {/* Linha 1: Barras de cargo agrupadas */}
+        <div
+          className="agenda-grid-wrapper flex-1 flex flex-col min-h-0 rounded-2xl overflow-hidden"
+          style={{
+            minWidth: 0,
+            background: 'rgba(255,255,255,0.65)',
+            backdropFilter: 'blur(32px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+            border: '1px solid rgba(255,255,255,0.7)',
+            boxShadow: '0 2px 32px rgba(0,0,0,0.07), 0 1px 0 rgba(255,255,255,0.9) inset',
+          }}
+        >
+          <div className="overflow-auto flex-1" ref={gridRef} style={{ overflowX: 'auto', overflowY: 'auto' }}>
+            <div style={{ minWidth: TIME_COL_WIDTH + (sortedProfissionais.length * COL_WIDTH), minHeight: '100%' }}>
+              {/* Header sticky */}
+              <div className="sticky top-0 z-30" style={{ background: 'rgba(250,250,252,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                {/* Linha 1: grupos */}
                 <div className="flex">
-                  <div className="w-20 flex-shrink-0 border-r border-b" style={{ minHeight: 28 }} />
+                  <div className="w-20 flex-shrink-0" style={{ minHeight: 34, borderRight: '1px solid rgba(0,0,0,0.05)' }} />
                   {groupedProfissionais.map(({ role, profissionais: profs }) => {
                     const roleColor = getRoleColor(role);
                     return (
                       <div
                         key={role}
-                        className="border-r border-b flex items-center justify-center text-xs font-bold tracking-wide"
+                        className="flex items-center justify-center"
                         style={{
                           width: profs.length * COL_WIDTH,
                           minWidth: profs.length * COL_WIDTH,
-                          height: 28,
-                          backgroundColor: roleColor.bg,
-                          color: roleColor.text,
+                          height: 34,
+                          borderRight: '1px solid rgba(255,255,255,0.4)',
+                          background: `${roleColor.bg}18`,
+                          backdropFilter: 'blur(8px)',
                         }}
                       >
-                        {role.toUpperCase()}
+                        <span
+                          className="text-[10px] font-bold tracking-widest uppercase"
+                          style={{ color: roleColor.bg }}
+                        >
+                          {role}
+                        </span>
                       </div>
                     );
                   })}
                 </div>
-                {/* Linha 2: Nomes individuais */}
+                {/* Linha 2: profissionais */}
                 <div className="flex">
-                  <div className="w-20 flex-shrink-0 p-2 text-center border-r">
-                    <span className="text-xs font-semibold text-gray-600">Horário</span>
+                  <div className="w-20 flex-shrink-0 flex items-center justify-end pr-3" style={{ borderRight: '1px solid rgba(0,0,0,0.05)' }}>
+                    <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.08em', color: 'rgba(100,100,120,0.5)', textTransform: 'uppercase' }}>Hora</span>
                   </div>
-                  {visibleProfissionais.map((profissional, idx) => {
-                    const color = PROFISSIONAL_COLORS[idx % PROFISSIONAL_COLORS.length];
+                  {sortedProfissionais.map((profissional, idx) => {
+                    const roleColor = getRoleColor(normalizeRole(profissional.especialidade || ''));
                     return (
                       <div
                         key={profissional.id}
-                        className="min-w-[140px] w-[140px] p-1.5 text-center border-r"
+                        className="min-w-[96px] w-[96px] py-2 text-center"
+                        style={{ borderRight: '1px solid rgba(255,255,255,0.4)', background: `${roleColor.bg}10` }}
                       >
-                        <div className="flex flex-col items-center">
-                          <div className={`w-7 h-7 rounded-full ${color.bg} flex items-center justify-center mb-0.5`}>
-                            <User size={14} className={color.text} />
+                        <div className="flex flex-col items-center gap-0.5">
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm"
+                            style={{ background: `${roleColor.bg}25`, border: `1.5px solid ${roleColor.bg}40` }}
+                          >
+                            <User size={14} style={{ color: roleColor.bg }} />
                           </div>
-                          <span className="text-xs font-medium text-gray-800 leading-tight">{profissional.nome?.split(' ')[0]}</span>
+                          <span className="text-gray-700 dark:text-gray-200" style={{ fontSize: 11, fontWeight: 500, letterSpacing: '-0.01em' }}>
+                            {profissional.nome?.split(' ')[0]}
+                          </span>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-              
+
               <div style={{ position: 'relative', height: HORARIOS.length * SLOT_HEIGHT }}>
                 {HORARIOS.map((hora, horaIdx) => {
                   const isHour = hora.endsWith(':00');
@@ -854,25 +1180,36 @@ export default function Agenda() {
                   return (
                     <div
                       key={hora}
-                      className="flex border-r"
+                      className="agenda-row flex"
                       style={{
                         height: SLOT_HEIGHT,
-                        borderBottom: isHour ? '1px solid #d1d5db' : isHalfHour ? '1px dashed #e5e7eb' : '1px dotted #f3f4f6',
+                        borderBottom: isHour
+                          ? '1px solid rgba(0,0,0,0.08)'
+                          : isHalfHour
+                          ? '1px solid rgba(0,0,0,0.04)'
+                          : '1px solid rgba(0,0,0,0.02)',
                       }}
                     >
-                      <div className="w-20 flex-shrink-0 border-r bg-gray-50 flex items-start justify-end pr-2 pt-0.5">
+                      <div
+                        className="agenda-time-col w-20 flex-shrink-0 flex items-start justify-end pr-3 pt-0.5"
+                        style={{ borderRight: '1px solid rgba(0,0,0,0.05)', background: 'rgba(248,248,252,0.6)' }}
+                      >
                         {isHour ? (
-                          <span className="text-xs font-semibold text-gray-700">{hora}</span>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(50,50,80,0.55)', letterSpacing: '-0.01em' }}>{hora}</span>
                         ) : isHalfHour ? (
-                          <span className="text-[10px] text-gray-400">{hora}</span>
-                        ) : (
-                          <span className="text-[9px] text-gray-300">{hora}</span>
-                        )}
+                          <span style={{ fontSize: 9, color: 'rgba(100,100,130,0.3)' }}>{hora}</span>
+                        ) : null}
                       </div>
-                      {visibleProfissionais.map((profissional) => (
+                      {sortedProfissionais.map((profissional) => (
                         <div
                           key={profissional.id}
-                          className={`min-w-[140px] w-[140px] border-r relative ${Math.floor(horaIdx / 4) % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
+                          className="min-w-[96px] w-[96px] relative cursor-pointer agenda-cell hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                          style={{
+                            borderRight: '1px solid rgba(0,0,0,0.04)',
+                            background: isHour && Math.floor(horaIdx / 4) % 2 === 0
+                              ? 'rgba(255,255,255,0.4)'
+                              : 'rgba(248,248,252,0.25)',
+                          }}
                           onClick={() => openModal(null, selectedDate, hora, profissional)}
                         />
                       ))}
@@ -880,7 +1217,7 @@ export default function Agenda() {
                   );
                 })}
                 
-                {visibleProfissionais.map((profissional, profIdx) => {
+                {sortedProfissionais.map((profissional, profIdx) => {
                   const color = PROFISSIONAL_COLORS[profIdx % PROFISSIONAL_COLORS.length];
                   const agendamentosDoProf = getAgendamentosDoDia(selectedDate, profissional.id);
                   const atendimentosDoProf = getAtendimentosDoProfissional(profissional.id);
@@ -897,16 +1234,16 @@ export default function Agenda() {
 
                   // Coletar horários de agendamentos convertidos com auxiliar neste profissional
                   const convertedAuxTimes = new Set();
-                  const dateStr = selectedDate.toISOString().split('T')[0];
+                  const dateStr = localDateStr(selectedDate);
                   allAgendamentos.forEach(a => {
-                    if (a.status === 'convertido' && a.auxiliarId === profissional.id && a.dataHora && a.dataHora.startsWith(dateStr)) {
+                    if (a.status === 'convertido' && a.auxiliarId === profissional.id && a.dataHora && a.dataHora.substring(0,10) === dateStr) {
                       const hora = a.dataHora.split('T')[1]?.substring(0, 5);
                       if (hora) convertedAuxTimes.add(hora);
                     }
                   });
 
                   return (
-                    <>
+                    <React.Fragment key={profissional.id}>
                       {agendamentosDoProf.map((agend) => {
                         if (!agend.dataHora) return null;
                         if (agend.status === 'convertido') return null;
@@ -926,10 +1263,10 @@ export default function Agenda() {
                         const isHovered = hoveredAgendamento === agend.id;
 
                         const statusStyle = isCancelled
-                          ? { bg: 'bg-red-100', border: 'border-red-400', text: 'text-red-700', opacity: 'opacity-70', label: null }
+                          ? { bg: 'bg-red-100 dark:bg-red-900/40', border: 'border-red-400 dark:border-red-600', text: 'text-red-700 dark:text-red-300', opacity: 'opacity-70', label: null }
                           : isConfirmed
-                          ? { bg: 'bg-green-100', border: 'border-green-500', text: 'text-green-800', opacity: '', label: null }
-                          : { bg: 'bg-yellow-100', border: 'border-yellow-500', text: 'text-yellow-800', opacity: '', label: null };
+                          ? { bg: 'bg-green-100 dark:bg-green-900/40', border: 'border-green-500 dark:border-green-600', text: 'text-green-800 dark:text-green-200', opacity: '', label: null }
+                          : { bg: 'bg-yellow-100 dark:bg-yellow-900/40', border: 'border-yellow-500 dark:border-yellow-600', text: 'text-yellow-800 dark:text-yellow-200', opacity: '', label: null };
 
                         return (
                           <div
@@ -951,10 +1288,10 @@ export default function Agenda() {
                             <div className="flex justify-between items-start">
                               <div className="flex-1 min-w-0">
                                 <div className={`font-semibold ${statusStyle.text} truncate text-[11px]`}>
-                                  {getClienteNome(agend.clienteId)}
+                                  {agend.clienteNome || getClienteNome(agend.clienteId)}
                                 </div>
                                 <div className={`${statusStyle.text} opacity-75 truncate text-[10px]`}>
-                                  {getServicoNome(agend.servicoId)}
+                                  {agend.servicoNome || getServicoNome(agend.servicoId)}
                                 </div>
                                 {slots > 1 && (
                                   <div className={`${statusStyle.text} opacity-60 text-[9px] mt-0.5`}>
@@ -970,7 +1307,7 @@ export default function Agenda() {
                                       deleteMutation.mutate(agend.id);
                                     }
                                   }}
-                                  className="ml-1 p-1 bg-red-100 hover:bg-red-200 rounded text-red-600 flex-shrink-0"
+                                  className="ml-1 p-1 bg-red-100 hover:bg-red-200 rounded text-red-600 dark:text-red-400 flex-shrink-0"
                                   title="Excluir agendamento"
                                 >
                                   <Trash2 size={12} />
@@ -995,10 +1332,10 @@ export default function Agenda() {
                     {allAgendamentos.filter(a => {
                       if (!a.auxiliarId || a.auxiliarId !== profissional.id) return false;
                       if (!a.dataHora) return false;
-                      const dateStr = selectedDate.toISOString().split('T')[0];
+                      const dateStr = localDateStr(selectedDate);
                       if (a.status === 'cancelado') return false;
                       if (a.status === 'convertido') return false;
-                      return a.dataHora.startsWith(dateStr);
+                      return a.dataHora.substring(0,10) === dateStr;
                     }).map(agend => {
                       const horaAgend = agend.dataHora.split('T')[1]?.substring(0, 5);
                       if (!horaAgend) return null;
@@ -1013,16 +1350,19 @@ export default function Agenda() {
                       return (
                         <div
                           key={`aux-agend-${agend.id}`}
-                          className="absolute bg-teal-100 border-teal-500 border-l-4 p-1.5 rounded-r-lg text-xs cursor-pointer transition-all overflow-hidden z-20 hover:brightness-95"
+                          className="absolute bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400 border-l-4 p-1.5 rounded-r-lg text-xs cursor-pointer transition-all overflow-hidden z-20 hover:brightness-95"
                           style={{ top: `${top}px`, left: `${left}px`, width: `${COL_WIDTH}px`, height: `${height}px` }}
                           onClick={(e) => { e.stopPropagation(); openModal(agend); }}
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-teal-800 truncate text-[11px]">
-                              Auxiliar: {getProfissionalNome(agend.auxiliarId)}
+                            <div className="font-semibold text-yellow-800 truncate text-[11px]">
+                              {agend.clienteNome || getClienteNome(agend.clienteId)}
                             </div>
-                            <div className="text-teal-800 opacity-75 truncate text-[10px]">
-                              {getClienteNome(agend.clienteId)}
+                            <div className="text-yellow-700 opacity-75 truncate text-[10px]">
+                              {agend.servicoNome || getServicoNome(agend.servicoId)}
+                            </div>
+                            <div className="text-yellow-600 dark:text-yellow-400 text-[9px] mt-0.5">
+                              aux: {getProfissionalNome(agend.profissionalId)}
                             </div>
                           </div>
                         </div>
@@ -1079,7 +1419,7 @@ export default function Agenda() {
                                 {atend.servicos?.length || 0} serviço(s)
                               </div>
                               {atend.auxiliarId && (
-                                <div className="text-purple-600 opacity-60 truncate text-[9px]">
+                                <div className="text-purple-600 dark:text-purple-400 opacity-60 truncate text-[9px]">
                                   + Auxiliar
                                 </div>
                               )}
@@ -1146,7 +1486,7 @@ export default function Agenda() {
                         </div>
                       );
                     })}
-                  </>
+                  </React.Fragment>
                 );
               })}
               </div>
@@ -1157,59 +1497,43 @@ export default function Agenda() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
-              <h2 className="text-lg font-bold text-gray-800">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">
                 {editingAgendamento?.isAtendimento ? 'Visualizar Atendimento' : (editingAgendamento ? 'Editar Agendamento' : 'Novo Agendamento')}
               </h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+              <button onClick={closeModal} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300">
                 <X size={24} />
               </button>
             </div>
             
             <form onSubmit={handleSubmit} className="p-4 space-y-3 overflow-y-auto flex-1">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-                <select
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Cliente *</label>
+                <ClienteSearchSelect
                   value={formData.clienteId}
-                  onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  onChange={(id, obj) => { setFormData({ ...formData, clienteId: id }); setSelectedClienteObj(obj); }}
+                  selectedCliente={selectedClienteObj}
                   disabled={editingAgendamento?.isAtendimento}
-                  required
-                >
-                  <option value="">Selecione um cliente</option>
-                  {clientes.map((cliente) => (
-                    <option key={cliente.id} value={cliente.id}>
-                      {cliente.nome} - {cliente.telefone}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Serviço *</label>
-                <select
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Serviço *</label>
+                <ServicoSearchSelect
                   value={formData.servicoId}
-                  onChange={(e) => setFormData({ ...formData, servicoId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  onChange={(id, obj) => { setFormData({ ...formData, servicoId: id }); setSelectedServicoObj(obj); }}
+                  selectedServico={selectedServicoObj}
                   disabled={editingAgendamento?.isAtendimento}
-                  required
-                >
-                  <option value="">Selecione um serviço</option>
-                  {servicos.map((servico) => (
-                    <option key={servico.id} value={servico.id}>
-                      {servico.nome} - R$ {servico.preco?.toFixed(2)} ({servico.duracao}min)
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Profissional *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Profissional *</label>
                 <select
                   value={formData.profissionalId}
                   onChange={(e) => setFormData({ ...formData, profissionalId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   disabled={editingAgendamento?.isAtendimento}
                   required
                 >
@@ -1221,11 +1545,11 @@ export default function Agenda() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Auxiliar</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Auxiliar</label>
                 <select
                   value={formData.auxiliarId}
                   onChange={(e) => setFormData({ ...formData, auxiliarId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   disabled={editingAgendamento?.isAtendimento}
                 >
                   <option value="">Sem auxiliar</option>
@@ -1242,23 +1566,23 @@ export default function Agenda() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data e Hora *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data e Hora *</label>
                 <input
                   type="datetime-local"
                   value={formData.dataHora}
                   onChange={(e) => setFormData({ ...formData, dataHora: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   disabled={editingAgendamento?.isAtendimento}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   disabled={editingAgendamento?.isAtendimento}
                 >
                   <option value="agendado">Agendado</option>
@@ -1268,11 +1592,11 @@ export default function Agenda() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Observações</label>
                 <textarea
                   value={formData.observacoes}
                   onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   rows={3}
                   placeholder="Observações sobre o agendamento..."
                   disabled={editingAgendamento?.isAtendimento}
@@ -1281,7 +1605,7 @@ export default function Agenda() {
 
               {aviso.mensagem && (
                 <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
-                  aviso.tipo === 'erro' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                  aviso.tipo === 'erro' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 border border-red-200' : 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 border border-yellow-200'
                 }`}>
                   <AlertCircle size={18} />
                   {aviso.mensagem}
@@ -1293,7 +1617,7 @@ export default function Agenda() {
                   <button
                     type="button"
                     onClick={() => handleDelete(editingAgendamento.id)}
-                    className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"
+                    className="px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100"
                   >
                     Excluir
                   </button>
@@ -1308,7 +1632,7 @@ export default function Agenda() {
                       }
                     }}
                     disabled={converterUmMutation.isPending}
-                    className="px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 disabled:opacity-50"
+                    className="px-4 py-2 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-100 disabled:opacity-50"
                   >
                     {converterUmMutation.isPending ? 'Convertendo...' : 'Converter p/ Atendimento'}
                   </button>
@@ -1316,7 +1640,7 @@ export default function Agenda() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
                 >
                   Cancelar
                 </button>

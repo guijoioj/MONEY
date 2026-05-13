@@ -4,11 +4,30 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const ClienteApp = require('../../models/ClienteApp');
 const Cliente = require('../../models/Cliente');
-const BootstrapService = require('../../services/bootstrapService');
+const { appAuthMiddleware } = require('../../middleware/appAuth');
+const { query } = require('../../config/database');
+
+const crypto = require('crypto');
+function signClienteToken(cliente) {
+  return jwt.sign(
+    {
+      clienteAppId: cliente.id,
+      clienteId: cliente.id,
+      email: cliente.email,
+      nome: cliente.nome,
+      type: 'cliente',
+      jti: crypto.randomBytes(16).toString('hex'),
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+  );
+}
 
 router.post('/register', async (req, res) => {
   try {
-    const { nome, email, password, telefone } = req.body;
+    const { nome, password, telefone } = req.body;
+    // [B2] normaliza email para evitar duplicação User@x.com vs user@x.com
+    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
     if (!nome || !email || !password) return res.status(400).json({ error: 'nome, email e password são obrigatórios' });
     
     // Validate password strength
@@ -24,47 +43,47 @@ router.post('/register', async (req, res) => {
     if (existing) return res.status(400).json({ error: 'Email já cadastrado' });
     const hashedPassword = await bcrypt.hash(password, 12);
     const cliente = await ClienteApp.create({ nome, email, password: hashedPassword, telefone });
-    const { secret, expiresIn } = BootstrapService.getJwtConfig();
-    const token = jwt.sign({ clienteAppId: cliente.id, email: cliente.email, nome: cliente.nome }, secret, { expiresIn });
+    const token = signClienteToken(cliente);
     res.status(201).json({ user: ClienteApp.sanitize(cliente), token });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
     const cliente = await ClienteApp.findByEmail(email);
+    // [P6-C4] Constant-time: SEMPRE roda bcrypt.compare, mesmo quando user não existe.
+    // Antes o early-return revelava enumeração de email via timing — rota duplicada
+    // (legacy) tinha ficado sem o fix do P5-A4 em appAuth.js.
+    const DUMMY_HASH = '$2a$12$' + 'X'.repeat(53);
+    const hashToCompare = cliente?.password || DUMMY_HASH;
+    const valid = password ? await bcrypt.compare(password, hashToCompare) : false;
     if (!cliente) return res.status(401).json({ error: 'Credenciais inválidas' });
-    const valid = await bcrypt.compare(password, cliente.password);
+    if (!cliente.password) return res.status(401).json({ error: 'Credenciais inválidas' });
     if (!valid) return res.status(401).json({ error: 'Credenciais inválidas' });
-    const { secret, expiresIn } = BootstrapService.getJwtConfig();
-    const token = jwt.sign({ clienteAppId: cliente.id, email: cliente.email, nome: cliente.nome }, secret, { expiresIn });
+    const token = signClienteToken(cliente);
     res.json({ user: ClienteApp.sanitize(cliente), token });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
+// [M5] Rota legacy: redireciona para a rota canônica do profissional.
+// Mantida temporariamente para compatibilidade com versões antigas do app.
+// TODO: remover após confirmação de que nenhum app < v2 está em uso.
 router.post('/profissional/login', async (req, res) => {
-  try {
-    const AuthService = require('../../services/authService');
-    const { queryOne } = require('../../config/database');
-    const { email, password } = req.body;
-    const result = await AuthService.login({ email, password });
-    const profissional = result.user.profissionalId
-      ? await queryOne('SELECT * FROM profissionais WHERE id=?', [result.user.profissionalId])
-      : null;
-    res.json({ ...result, profissional });
-  } catch (e) { res.status(401).json({ error: e.message }); }
+  console.warn('[DEPRECATED] /api/app/legacy/auth/profissional/login chamado. Migrar para /api/app/profissional/auth/login');
+  return res.status(410).json({
+    success: false,
+    error: 'Rota legacy descontinuada. Use POST /api/app/profissional/auth/login.'
+  });
 });
-
-const { appAuthMiddleware } = require('../../middleware/appAuth');
-const { query } = require('../../config/database');
 
 router.get('/me', appAuthMiddleware, async (req, res) => {
   try {
     const cliente = await ClienteApp.findById(req.clienteApp.clienteAppId);
     if (!cliente) return res.status(404).json({ error: 'Usuário não encontrado' });
     res.json({ user: ClienteApp.sanitize(cliente) });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
 router.put('/me', appAuthMiddleware, async (req, res) => {
@@ -77,22 +96,27 @@ router.put('/me', appAuthMiddleware, async (req, res) => {
 
     const cliente = await ClienteApp.update(req.clienteApp.clienteAppId, updates);
 
-    const saloesVinculados = await query(
-      'SELECT DISTINCT "salonId" FROM clientes WHERE email = ?',
-      [cliente.email]
-    );
-    for (const { salonId } of saloesVinculados) {
-      const lista = await Cliente.getAll({ search: cliente.email }, salonId);
-      if (lista.length) {
-        const campos = {};
-        if (nome) campos.nome = nome;
-        if (telefone) campos.telefone = telefone;
-        await Cliente.update(lista[0].id, campos, salonId);
+    // [P6-M3] Buscar por email EXATO (não ILIKE via search) e atualizar por salao_id.
+    // Antes: search=cliente.email + ILIKE matchava substrings em nome/telefone/email,
+    // cross-tenant, potencialmente sobrescrevendo dados alheios.
+    if (cliente.email) {
+      const campos = {};
+      if (nome) campos.nome = nome;
+      if (telefone) campos.telefone = telefone;
+      if (Object.keys(campos).length > 0) {
+        await query(
+          `UPDATE clientes SET
+             nome = COALESCE($1, nome),
+             telefone = COALESCE($2, telefone),
+             updated_at = NOW()
+           WHERE LOWER(email) = LOWER($3)`,
+          [campos.nome || null, campos.telefone || null, cliente.email]
+        );
       }
     }
 
     res.json({ user: ClienteApp.sanitize(cliente) });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 router.put('/me/senha', appAuthMiddleware, async (req, res) => {
@@ -116,7 +140,7 @@ router.put('/me/senha', appAuthMiddleware, async (req, res) => {
     const hash = await bcrypt.hash(novaSenha, 12);
     await ClienteApp.update(req.clienteApp.clienteAppId, { password: hash });
     res.json({ message: 'Senha alterada com sucesso' });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 router.put('/me/push-token', appAuthMiddleware, async (req, res) => {
@@ -124,7 +148,7 @@ router.put('/me/push-token', appAuthMiddleware, async (req, res) => {
     const { pushToken } = req.body;
     await ClienteApp.update(req.clienteApp.clienteAppId, { pushToken });
     res.json({ message: 'Push token atualizado' });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) { require("../../utils/sendError").sendError(res, 400, "Requisição inválida", e); }
 });
 
 module.exports = router;

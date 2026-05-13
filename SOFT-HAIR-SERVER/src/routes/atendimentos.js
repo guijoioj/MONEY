@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { AtendimentoService } = require('../services');
 
 const service = new AtendimentoService();
@@ -13,7 +13,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const result = await service.listar(req.salaoId, { status, profissional_id, data_inicio, data_fim, limit });
     res.json({ success: result.success, data: result.data || [], error: result.error });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -24,7 +24,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
     if (result.success) res.json({ success: true, data: result.data });
     else res.status(404).json({ success: false, error: result.error });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -42,18 +42,30 @@ router.post('/', authMiddleware, [
     if (result.success) res.status(201).json({ success: true, data: result.data });
     else res.status(400).json({ success: false, error: result.error });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
 // Atualizar
-router.put('/:id', authMiddleware, async (req, res) => {
+// [P8-A2] requireAdmin + validator isIn + state machine (service-level)
+router.put('/:id', authMiddleware, requireAdmin, [
+  body('status').optional().isIn(['agendado', 'em_andamento', 'finalizado', 'cancelado'])
+    .withMessage('Status inválido (use: agendado, em_andamento, finalizado, cancelado)'),
+  body('observacoes').optional().isString().isLength({ max: 1000 }),
+], async (req, res) => {
   try {
-    const result = await service.atualizar(req.params.id, req.body, req.salaoId);
-    if (result.success) res.json({ success: true, data: result.data });
-    else res.status(404).json({ success: false, error: result.error });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
+    const result = await service.atualizar(req.params.id, req.body, req.salaoId, { req });
+    if (result.success) {
+      res.json({ success: true, data: result.data });
+    } else {
+      const code = /Transição inválida|Status inválido|imutável/i.test(result.error || '') ? 400 : 404;
+      res.status(code).json({ success: false, error: result.error });
+    }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
@@ -64,7 +76,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     if (result.success) res.json({ success: true, message: result.message });
     else res.status(404).json({ success: false, error: result.error });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 

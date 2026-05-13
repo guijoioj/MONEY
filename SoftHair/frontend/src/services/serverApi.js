@@ -73,7 +73,7 @@ class SoftHairApiClient {
   }
 
   async getProfile() {
-    return (await this.api.get('/auth/profile')).data;
+    return (await this.api.get('/auth/me')).data;
   }
 
   async changePassword(senhaAtual, novaSenha) {
@@ -200,7 +200,7 @@ class SoftHairApiClient {
   }
 
   async cancelarAgendamento(id, motivo) {
-    return (await this.api.post(`/agendamentos/${id}/cancelar`, { motivo })).data;
+    return (await this.api.put(`/agendamentos/${id}`, { status: 'cancelado', motivo })).data;
   }
 
   // Vendas

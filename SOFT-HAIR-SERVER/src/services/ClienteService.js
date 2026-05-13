@@ -1,13 +1,56 @@
 const Cliente = require('../models/Cliente');
 
 class ClienteService {
-  async listar(salaoId, filtros = {}) {
+  async listar(salaoId, filtros = {}, options = {}) {
     try {
-      const clienteModel = new Cliente();
-      const clientes = await clienteModel.findAll(filtros, salaoId);
+      const { query } = require('../config/database');
+      const limit = Math.min(parseInt(options.limit) || 100, 100);
+      const offset = Math.max(parseInt(options.offset) || 0, 0);
+
+      // Extrair termo de busca especial antes de montar filtros SQL
+      const searchTerm = filtros._search || null;
+      const ativo = filtros.ativo;
+
+      let conditions = ['salao_id = $1'];
+      let params = [salaoId];
+      let paramCount = 2;
+
+      if (ativo !== undefined) {
+        conditions.push(`ativo = $${paramCount++}`);
+        params.push(ativo);
+      }
+
+      if (searchTerm) {
+        // [P3-M8] Escapa wildcards LIKE/ILIKE
+        const safe = require('../utils/helpers').escapeLike(searchTerm);
+        conditions.push(`(nome ILIKE $${paramCount} OR telefone ILIKE $${paramCount} OR email ILIKE $${paramCount})`);
+        params.push(`%${safe}%`);
+        paramCount++;
+      }
+
+      const where = conditions.join(' AND ');
+
+      // Contar total
+      const countResult = await query(`SELECT COUNT(*) FROM clientes WHERE ${where}`, params);
+      const total = parseInt(countResult.rows ? countResult.rows[0].count : countResult[0].count);
+
+      // Buscar página
+      const rows = await query(
+        `SELECT * FROM clientes WHERE ${where} ORDER BY nome ASC LIMIT $${paramCount} OFFSET $${paramCount + 1}`,
+        [...params, limit, offset]
+      );
+
+      const data = rows.rows || rows;
+
       return {
         success: true,
-        data: clientes
+        data: {
+          data,
+          total,
+          page: Math.floor(offset / limit) + 1,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        }
       };
     } catch (error) {
       console.error('Erro ao listar clientes:', error);
@@ -167,15 +210,16 @@ class ClienteService {
     try {
       const clienteModel = new Cliente();
       const { query } = require('../config/database');
-      
+      // [P3-M8] Escapa wildcards
+      const safe = require('../utils/helpers').escapeLike(termo);
       const clientes = await query(`
-        SELECT * FROM clientes 
-        WHERE salao_id = $1 
-        AND ativo = true 
-        AND (nome ILIKE $2 OR telefone ILIKE $2 OR email ILIKE $2) 
-        ORDER BY nome 
+        SELECT * FROM clientes
+        WHERE salao_id = $1
+        AND ativo = true
+        AND (nome ILIKE $2 OR telefone ILIKE $2 OR email ILIKE $2)
+        ORDER BY nome
         LIMIT $3
-      `, [salaoId, `%${termo}%`, limit]);
+      `, [salaoId, `%${safe}%`, limit]);
 
       return {
         success: true,

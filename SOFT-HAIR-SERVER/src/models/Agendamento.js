@@ -155,6 +155,90 @@ class Agendamento extends BaseModel {
     `;
     return queryOne(sql, [novoStatus, id, observacao]);
   }
+
+  filterData(data) {
+    const mapped = { ...data };
+    if (mapped.clienteId !== undefined) {
+      mapped.cliente_id = mapped.clienteId;
+      delete mapped.clienteId;
+    }
+    if (mapped.profissionalId !== undefined) {
+      mapped.profissional_id = mapped.profissionalId;
+      delete mapped.profissionalId;
+    }
+    if (mapped.servicoId !== undefined) {
+      mapped.servico_id = mapped.servicoId;
+      delete mapped.servicoId;
+    }
+    if (mapped.dataHora !== undefined) {
+      mapped.data_hora = mapped.dataHora;
+      delete mapped.dataHora;
+    }
+    if (mapped.duracao !== undefined && mapped.duracao_minutos === undefined) {
+      mapped.duracao_minutos = mapped.duracao;
+      delete mapped.duracao;
+    }
+    return mapped;
+  }
+
+  static async getAll(filters = {}, salaoId = null) {
+    let sql = `
+      SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome, s.nome as servico_nome
+      FROM agendamentos a
+      LEFT JOIN clientes c ON c.id = a.cliente_id
+      LEFT JOIN profissionais p ON p.id = a.profissional_id
+      LEFT JOIN servicos s ON s.id = a.servico_id
+      WHERE 1=1
+    `;
+    const params = [];
+    let idx = 1;
+
+    if (salaoId) {
+      sql += ` AND a.salao_id = $${idx++}`;
+      params.push(salaoId);
+    }
+    if (filters.clienteId) {
+      sql += ` AND a.cliente_id = $${idx++}`;
+      params.push(filters.clienteId);
+    }
+    if (filters.profissionalId) {
+      sql += ` AND a.profissional_id = $${idx++}`;
+      params.push(filters.profissionalId);
+    }
+    if (filters.status) {
+      sql += ` AND a.status = $${idx++}`;
+      params.push(filters.status);
+    }
+    if (filters.data) {
+      sql += ` AND DATE(a.data_hora) = $${idx++}::date`;
+      params.push(filters.data);
+    }
+
+    sql += ' ORDER BY a.data_hora DESC';
+    return query(sql, params);
+  }
+
+  static async verificarDisponibilidade(profissionalId, dataHora, duracao = 30, salaoId = null) {
+    const model = new Agendamento();
+    const conflito = await model.verificarConflito(profissionalId, dataHora, duracao);
+    if (salaoId) {
+      const agendamento = await queryOne('SELECT salao_id FROM profissionais WHERE id = $1', [profissionalId]);
+      if (agendamento && agendamento.salao_id !== Number(salaoId)) {
+        return { disponivel: false };
+      }
+    }
+    return { disponivel: !conflito };
+  }
+
+  static async proximoHorarioVago(profissionalId, dataHora, duracao = 30) {
+    const base = new Date(dataHora);
+    for (let i = 1; i <= 16; i++) {
+      const tentativa = new Date(base.getTime() + i * 30 * 60000);
+      const disponibilidade = await this.verificarDisponibilidade(profissionalId, tentativa.toISOString(), duracao);
+      if (disponibilidade.disponivel) return tentativa.toISOString();
+    }
+    return null;
+  }
 }
 
 module.exports = Agendamento;

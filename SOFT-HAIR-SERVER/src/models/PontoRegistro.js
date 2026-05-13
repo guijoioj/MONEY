@@ -1,40 +1,46 @@
-const { v4: uuidv4 } = require('uuid');
-const { query, queryOne, queryRun } = require('../config/database');
+const { query, queryOne } = require('../config/database');
 
 class PontoRegistro {
-  static async registrar(data) {
-    const id = uuidv4();
-    await queryRun(
-      'INSERT INTO ponto_registros (id,"salonId","profissionalId",tipo,"atendimentoId",observacoes) VALUES (?,?,?,?,?,?)',
-      [id, data.salonId, data.profissionalId, data.tipo, data.atendimentoId||null, data.observacoes||null]
-    );
-    return this.findById(id);
+  static async create(data) {
+    return queryOne(`
+      INSERT INTO registros_ponto (salao_id, profissional_id, tipo)
+      VALUES ($1, $2, $3)
+      RETURNING *
+    `, [data.salao_id || data.salonId, data.profissional_id || data.profissionalId, data.tipo]);
   }
 
   static async findById(id) {
-    return queryOne('SELECT * FROM ponto_registros WHERE id=?', [id]);
+    return queryOne('SELECT * FROM registros_ponto WHERE id = $1', [id]);
   }
 
-  static async getByProfissional(profissionalId, salonId, data) {
-    let sql = 'SELECT * FROM ponto_registros WHERE "profissionalId"=? AND "salonId"=?';
-    const params = [profissionalId, salonId];
-    if (data) { sql += ' AND "timestamp"::date=?::date'; params.push(data); }
-    sql += ' ORDER BY "timestamp" ASC';
+  static async getByProfissional(profissionalId, salaoId, data) {
+    const params = [profissionalId, salaoId];
+    let sql = 'SELECT * FROM registros_ponto WHERE profissional_id = $1 AND salao_id = $2';
+    if (data) {
+      sql += ' AND DATE(created_at) = $3::date';
+      params.push(data);
+    }
+    sql += ' ORDER BY created_at';
     return query(sql, params);
   }
 
-  static async getUltimoPonto(profissionalId, salonId) {
-    return queryOne('SELECT * FROM ponto_registros WHERE "profissionalId"=? AND "salonId"=? ORDER BY "timestamp" DESC LIMIT 1', [profissionalId, salonId]);
+  static async getUltimoPonto(profissionalId, salaoId) {
+    return queryOne(`
+      SELECT * FROM registros_ponto
+      WHERE profissional_id = $1 AND salao_id = $2
+      ORDER BY created_at DESC
+      LIMIT 1
+    `, [profissionalId, salaoId]);
   }
 
-  static async getResumoHoje(profissionalId, salonId) {
-    const registros = await this.getByProfissional(profissionalId, salonId, new Date().toISOString().split('T')[0]);
+  static async getResumoHoje(profissionalId, salaoId) {
+    const registros = await this.getByProfissional(profissionalId, salaoId, new Date().toISOString().split('T')[0]);
     const entrada = registros.find(r => r.tipo === 'entrada');
-    const saida = registros.findLast(r => r.tipo === 'saida');
-    const horasTrabalhadas = entrada && saida
-      ? ((new Date(saida.timestamp) - new Date(entrada.timestamp)) / 3600000).toFixed(1)
+    const saida = [...registros].reverse().find(r => r.tipo === 'saida');
+    const horas = entrada && saida
+      ? ((new Date(saida.created_at) - new Date(entrada.created_at)) / 3600000).toFixed(1)
       : null;
-    return { registros, entrada, saida, horasTrabalhadas };
+    return { registros, entrada, saida, horasTrabalhadas: horas };
   }
 }
 

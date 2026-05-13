@@ -1,0 +1,542 @@
+{
+  "communities": {
+    "0": [
+      "frontend_src_services_serverapi_js",
+      "serverapi_softhairapiclient",
+      "serverapi_softhairapiclient_addcreditocliente",
+      "serverapi_softhairapiclient_cancelaragendamento",
+      "serverapi_softhairapiclient_changepassword",
+      "serverapi_softhairapiclient_checkconnectivity",
+      "serverapi_softhairapiclient_checkhealth",
+      "serverapi_softhairapiclient_cleartoken",
+      "serverapi_softhairapiclient_constructor",
+      "serverapi_softhairapiclient_createagendamento",
+      "serverapi_softhairapiclient_createcliente",
+      "serverapi_softhairapiclient_createproduto",
+      "serverapi_softhairapiclient_createprofissional",
+      "serverapi_softhairapiclient_createservico",
+      "serverapi_softhairapiclient_createvenda",
+      "serverapi_softhairapiclient_deletecliente",
+      "serverapi_softhairapiclient_deleteproduto",
+      "serverapi_softhairapiclient_deleteprofissional",
+      "serverapi_softhairapiclient_deleteservico",
+      "serverapi_softhairapiclient_getagendamento",
+      "serverapi_softhairapiclient_getagendamentos",
+      "serverapi_softhairapiclient_getchanges",
+      "serverapi_softhairapiclient_getcliente",
+      "serverapi_softhairapiclient_getclientes",
+      "serverapi_softhairapiclient_getlastsync",
+      "serverapi_softhairapiclient_getproduto",
+      "serverapi_softhairapiclient_getprodutos",
+      "serverapi_softhairapiclient_getprofile",
+      "serverapi_softhairapiclient_getprofissionais",
+      "serverapi_softhairapiclient_getprofissional",
+      "serverapi_softhairapiclient_getservico",
+      "serverapi_softhairapiclient_getservicos",
+      "serverapi_softhairapiclient_getvenda",
+      "serverapi_softhairapiclient_getvendas",
+      "serverapi_softhairapiclient_login",
+      "serverapi_softhairapiclient_pushchanges",
+      "serverapi_softhairapiclient_register",
+      "serverapi_softhairapiclient_searchclientes",
+      "serverapi_softhairapiclient_setserverurl",
+      "serverapi_softhairapiclient_settoken",
+      "serverapi_softhairapiclient_updateagendamento",
+      "serverapi_softhairapiclient_updatecliente",
+      "serverapi_softhairapiclient_updateestoque",
+      "serverapi_softhairapiclient_updateproduto",
+      "serverapi_softhairapiclient_updateprofissional",
+      "serverapi_softhairapiclient_updateservico"
+    ],
+    "1": [
+      "cli_cmd_find",
+      "cli_cmd_index",
+      "cli_cmd_insert",
+      "cli_cmd_mcp_check",
+      "cli_cmd_search",
+      "cli_cmd_shell",
+      "cli_cmd_show",
+      "cli_cmd_stats",
+      "cli_cmd_top",
+      "cli_main",
+      "llm_ollama_embed_func",
+      "llm_ollama_llm_func",
+      "rag_find_entity",
+      "rag_get_rag",
+      "rag_insert_texts",
+      "rag_patch_extraction_examples",
+      "rag_query",
+      "rag_show_entity",
+      "rag_stats",
+      "rag_top_entities",
+      "server_call_tool",
+      "server_list_tools",
+      "server_main",
+      "server_run",
+      "tools_lightrag_lightrag_kg_cli_py",
+      "tools_lightrag_lightrag_kg_init_py",
+      "tools_lightrag_lightrag_kg_llm_py",
+      "tools_lightrag_lightrag_kg_rag_py",
+      "tools_lightrag_lightrag_kg_server_py"
+    ],
+    "2": [
+      "docs_knowledge_graph_execution_enrich_knowledge_graph_py",
+      "enrich_knowledge_graph_collect_notes",
+      "enrich_knowledge_graph_detect_domains",
+      "enrich_knowledge_graph_detect_entities",
+      "enrich_knowledge_graph_enrich_concept_note",
+      "enrich_knowledge_graph_enrich_domain_note",
+      "enrich_knowledge_graph_enrich_source_note",
+      "enrich_knowledge_graph_extract_file_path",
+      "enrich_knowledge_graph_extract_repo",
+      "enrich_knowledge_graph_find_source_file",
+      "enrich_knowledge_graph_generate_resumo",
+      "enrich_knowledge_graph_has_code_block",
+      "enrich_knowledge_graph_is_already_enriched",
+      "enrich_knowledge_graph_main",
+      "enrich_knowledge_graph_process_note",
+      "enrich_knowledge_graph_rationale_142",
+      "enrich_knowledge_graph_rationale_164",
+      "enrich_knowledge_graph_rationale_189",
+      "enrich_knowledge_graph_rationale_334",
+      "enrich_knowledge_graph_rationale_393",
+      "enrich_knowledge_graph_rationale_40",
+      "enrich_knowledge_graph_rationale_46",
+      "enrich_knowledge_graph_rationale_463",
+      "enrich_knowledge_graph_rationale_492",
+      "enrich_knowledge_graph_rationale_52",
+      "enrich_knowledge_graph_rationale_69",
+      "enrich_knowledge_graph_rationale_74",
+      "enrich_knowledge_graph_rationale_96"
+    ],
+    "3": [
+      "frontend_src_syncmanager_js",
+      "syncmanager_softhairsyncmanager",
+      "syncmanager_softhairsyncmanager_applyremotechange",
+      "syncmanager_softhairsyncmanager_callapi",
+      "syncmanager_softhairsyncmanager_constructor",
+      "syncmanager_softhairsyncmanager_createagendamento",
+      "syncmanager_softhairsyncmanager_createcliente",
+      "syncmanager_softhairsyncmanager_createvenda",
+      "syncmanager_softhairsyncmanager_deletecliente",
+      "syncmanager_softhairsyncmanager_flushpendingchanges",
+      "syncmanager_softhairsyncmanager_getagendamentos",
+      "syncmanager_softhairsyncmanager_getclientes",
+      "syncmanager_softhairsyncmanager_getlastsync",
+      "syncmanager_softhairsyncmanager_getonlinestatus",
+      "syncmanager_softhairsyncmanager_getpendingchangescount",
+      "syncmanager_softhairsyncmanager_getprodutos",
+      "syncmanager_softhairsyncmanager_getprofissionais",
+      "syncmanager_softhairsyncmanager_getservicos",
+      "syncmanager_softhairsyncmanager_handleoffline",
+      "syncmanager_softhairsyncmanager_handleonline",
+      "syncmanager_softhairsyncmanager_loadpendingchanges",
+      "syncmanager_softhairsyncmanager_queuechange",
+      "syncmanager_softhairsyncmanager_savependingchanges",
+      "syncmanager_softhairsyncmanager_syncdata",
+      "syncmanager_softhairsyncmanager_updatecliente",
+      "syncmanager_softhairsyncmanager_updateprodutoestoque"
+    ],
+    "4": [
+      "administrativo_administrativo",
+      "administrativo_checkoutsection",
+      "administrativo_comissoessection",
+      "administrativo_creditosnacasasection",
+      "administrativo_estornomodal",
+      "administrativo_faturamentosection",
+      "administrativo_menuitem",
+      "administrativo_relatoriossection",
+      "atendimentos_atendimentos",
+      "clientes_clientes",
+      "dashboard_dashboard",
+      "dashboard_getautocharttype",
+      "fechamento_fechamento",
+      "frontend_src_pages_administrativo_jsx",
+      "frontend_src_pages_atendimentos_jsx",
+      "frontend_src_pages_clientes_jsx",
+      "frontend_src_pages_dashboard_jsx",
+      "frontend_src_pages_fechamento_jsx",
+      "frontend_src_pages_servicoseprodutos_jsx",
+      "frontend_src_pages_vendas_jsx",
+      "servicoseprodutos_abaprodutos",
+      "servicoseprodutos_abaservicos",
+      "servicoseprodutos_formatcurrency",
+      "servicoseprodutos_formatduration",
+      "servicoseprodutos_servicoseprodutos",
+      "vendas_vendas"
+    ],
+    "5": [
+      "cli_cmd_export",
+      "to_obsidian_build_index",
+      "to_obsidian_canonical_entity_name",
+      "to_obsidian_classify_domains",
+      "to_obsidian_classify_entity",
+      "to_obsidian_classify_entity_kind",
+      "to_obsidian_doc_note_link",
+      "to_obsidian_folder_for_doc",
+      "to_obsidian_load_entities",
+      "to_obsidian_load_full_docs",
+      "to_obsidian_main",
+      "to_obsidian_parse_doc",
+      "to_obsidian_run_export",
+      "to_obsidian_should_skip_entity",
+      "to_obsidian_slugify",
+      "to_obsidian_unique_entity_note_path",
+      "to_obsidian_write_ai_context",
+      "to_obsidian_write_concept_note",
+      "to_obsidian_write_doc_note",
+      "to_obsidian_write_domain_note",
+      "to_obsidian_write_entity_index",
+      "to_obsidian_write_entity_note",
+      "to_obsidian_write_folder_index",
+      "tools_lightrag_lightrag_kg_to_obsidian_py"
+    ],
+    "6": [
+      "index_collect_files_for_repo",
+      "index_collect_git_history",
+      "index_doc_id",
+      "index_is_excluded",
+      "index_lang_for",
+      "index_load_manifest",
+      "index_main",
+      "index_rationale_50",
+      "index_rationale_81",
+      "index_retry_failed_queue",
+      "index_run_index",
+      "index_save_manifest",
+      "index_sha1_file",
+      "index_sha1_str",
+      "index_wrap",
+      "test_smoke_test_config_paths",
+      "test_smoke_test_doc_id",
+      "test_smoke_test_imports",
+      "test_smoke_test_slugify",
+      "test_smoke_test_wrap",
+      "tools_lightrag_lightrag_kg_index_py",
+      "tools_lightrag_tests_test_smoke_py"
+    ],
+    "7": [
+      "app_app",
+      "app_protectedroute",
+      "app_publicroute",
+      "authcontext_authprovider",
+      "authcontext_useauth",
+      "configuracoes_configuracoes",
+      "frontend_src_app_jsx",
+      "frontend_src_components_layout_jsx",
+      "frontend_src_context_authcontext_jsx",
+      "frontend_src_hooks_usewebsocket_js",
+      "frontend_src_pages_configuracoes_jsx",
+      "frontend_src_pages_login_jsx",
+      "layout_layout",
+      "login_login",
+      "usewebsocket_getwsurl",
+      "usewebsocket_usewebsocket"
+    ],
+    "8": [
+      "filesystemeventhandler",
+      "tools_lightrag_watch_and_index_py",
+      "watch_and_index_changehandler",
+      "watch_and_index_changehandler_init",
+      "watch_and_index_changehandler_on_any_event",
+      "watch_and_index_debouncedindexer",
+      "watch_and_index_debouncedindexer_init",
+      "watch_and_index_debouncedindexer_run",
+      "watch_and_index_debouncedindexer_trigger",
+      "watch_and_index_main",
+      "watch_and_index_rationale_1"
+    ],
+    "9": [
+      "docs_knowledge_graph_execution_enrich_definitive_py",
+      "enrich_definitive_clean_source_note",
+      "enrich_definitive_enrich_entity_note",
+      "enrich_definitive_generate_entity_resumo",
+      "enrich_definitive_main",
+      "enrich_definitive_process",
+      "enrich_definitive_rationale_155",
+      "enrich_definitive_rationale_266",
+      "enrich_definitive_rationale_298",
+      "enrich_definitive_rationale_33"
+    ],
+    "10": [
+      "docs_knowledge_graph_execution_enrich_pass2_py",
+      "enrich_pass2_find_source_code",
+      "enrich_pass2_generate_smart_resumo",
+      "enrich_pass2_main",
+      "enrich_pass2_process_note",
+      "enrich_pass2_rationale_111",
+      "enrich_pass2_rationale_126",
+      "enrich_pass2_rationale_27"
+    ],
+    "11": [
+      "agenda_agenda",
+      "agenda_clientesearchselect",
+      "agenda_getrolecolor",
+      "agenda_normalizerole",
+      "agenda_searchselect",
+      "agenda_servicosearchselect",
+      "frontend_src_pages_agenda_jsx"
+    ],
+    "12": [
+      "docs_knowledge_graph_execution_enrich_nuclear_py",
+      "enrich_nuclear_main",
+      "enrich_nuclear_process_note",
+      "enrich_nuclear_rationale_102",
+      "enrich_nuclear_rationale_19",
+      "enrich_nuclear_smart_entity_resumo"
+    ],
+    "13": [
+      "electron_main_js",
+      "main_createwindow",
+      "main_getresourcepath",
+      "main_startbackend",
+      "main_waitforbackend"
+    ],
+    "14": [
+      "frontend_src_pages_solicitacoes_jsx",
+      "solicitacoes_formatdatetime",
+      "solicitacoes_pedidocard",
+      "solicitacoes_solicitacoes",
+      "solicitacoes_statusbadge"
+    ],
+    "15": [
+      "agendamentos_agendamentos",
+      "frontend_src_pages_agendamentos_jsx"
+    ],
+    "16": [
+      "customizacao_customizacao",
+      "frontend_src_pages_customizacao_jsx"
+    ],
+    "17": [
+      "frontend_src_pages_produtos_jsx",
+      "produtos_produtos"
+    ],
+    "18": [
+      "frontend_src_pages_servicos_jsx",
+      "servicos_servicos"
+    ],
+    "19": [
+      "backup_backup",
+      "frontend_src_pages_backup_jsx"
+    ],
+    "20": [
+      "frontend_src_pages_notificacoes_jsx",
+      "notificacoes_notificacoes"
+    ],
+    "21": [
+      "frontend_src_pages_register_jsx",
+      "register_register"
+    ],
+    "22": [
+      "frontend_src_pages_profissionais_jsx",
+      "profissionais_profissionais"
+    ],
+    "23": [
+      "validate_security_js"
+    ],
+    "24": [
+      "electron_preload_js"
+    ],
+    "25": [
+      "frontend_postcss_config_js"
+    ],
+    "26": [
+      "frontend_tailwind_config_js"
+    ],
+    "27": [
+      "frontend_vite_config_js"
+    ],
+    "28": [
+      "frontend_src_main_jsx"
+    ],
+    "29": [
+      "frontend_src_services_api_js"
+    ],
+    "30": [
+      "frontend_src_sync_syncmanager_js"
+    ],
+    "31": [
+      "tools_lightrag_lightrag_kg_config_py"
+    ]
+  },
+  "cohesion": {
+    "0": 0.05,
+    "1": 0.11,
+    "2": 0.11,
+    "3": 0.15,
+    "4": 0.1,
+    "5": 0.17,
+    "6": 0.15,
+    "7": 0.13,
+    "8": 0.22,
+    "9": 0.27,
+    "10": 0.32,
+    "11": 0.29,
+    "12": 0.4,
+    "13": 0.6,
+    "14": 0.5,
+    "15": 1.0,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0,
+    "21": 1.0,
+    "22": 1.0,
+    "23": 1.0,
+    "24": 1.0,
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0,
+    "28": 1.0,
+    "29": 1.0,
+    "30": 1.0,
+    "31": 1.0
+  },
+  "gods": [
+    {
+      "id": "serverapi_softhairapiclient",
+      "label": "SoftHairApiClient",
+      "degree": 45
+    },
+    {
+      "id": "syncmanager_softhairsyncmanager",
+      "label": "SoftHairSyncManager",
+      "degree": 25
+    },
+    {
+      "id": "to_obsidian_build_index",
+      "label": "build_index()",
+      "degree": 21
+    },
+    {
+      "id": "servicoseprodutos_formatcurrency",
+      "label": "formatCurrency()",
+      "degree": 13
+    },
+    {
+      "id": "index_run_index",
+      "label": "run_index()",
+      "degree": 11
+    },
+    {
+      "id": "enrich_knowledge_graph_enrich_source_note",
+      "label": "enrich_source_note()",
+      "degree": 10
+    },
+    {
+      "id": "server_run",
+      "label": "run()",
+      "degree": 7
+    },
+    {
+      "id": "authcontext_useauth",
+      "label": "useAuth()",
+      "degree": 6
+    },
+    {
+      "id": "index_collect_files_for_repo",
+      "label": "collect_files_for_repo()",
+      "degree": 6
+    },
+    {
+      "id": "rag_get_rag",
+      "label": "get_rag()",
+      "degree": 6
+    }
+  ],
+  "surprises": [
+    {
+      "source": "cmd_index()",
+      "target": "run_index()",
+      "source_files": [
+        "tools/lightrag/lightrag_kg/cli.py",
+        "tools/lightrag/lightrag_kg/index.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `cmd_index()` unexpectedly reaches hub `run_index()`"
+    },
+    {
+      "source": "test_slugify()",
+      "target": "slugify()",
+      "source_files": [
+        "tools/lightrag/tests/test_smoke.py",
+        "tools/lightrag/lightrag_kg/to_obsidian.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `test_slugify()` unexpectedly reaches hub `slugify()`"
+    },
+    {
+      "source": "ProtectedRoute()",
+      "target": "useAuth()",
+      "source_files": [
+        "frontend/src/App.jsx",
+        "frontend/src/context/AuthContext.jsx"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; peripheral node `ProtectedRoute()` unexpectedly reaches hub `useAuth()`"
+    },
+    {
+      "source": "PublicRoute()",
+      "target": "useAuth()",
+      "source_files": [
+        "frontend/src/App.jsx",
+        "frontend/src/context/AuthContext.jsx"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; peripheral node `PublicRoute()` unexpectedly reaches hub `useAuth()`"
+    },
+    {
+      "source": "Login()",
+      "target": "useAuth()",
+      "source_files": [
+        "frontend/src/pages/Login.jsx",
+        "frontend/src/context/AuthContext.jsx"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; peripheral node `Login()` unexpectedly reaches hub `useAuth()`"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `run()` connect `Community 1` to `Community 8`, `Community 5`, `Community 6`?",
+      "why": "High betweenness centrality (0.022) - this node is a cross-community bridge."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 2 inferred relationships involving `build_index()` (e.g. with `collect_files_for_repo()` and `_wrap()`) actually correct?",
+      "why": "`build_index()` has 2 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 10 inferred relationships involving `formatCurrency()` (e.g. with `Atendimentos()` and `Vendas()`) actually correct?",
+      "why": "`formatCurrency()` has 10 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 3 inferred relationships involving `run_index()` (e.g. with `cmd_index()` and `get_rag()`) actually correct?",
+      "why": "`run_index()` has 3 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `Gera resumo inteligente para entity notes baseado no nome e conex\u00f5es.`, `Enriquece uma entity note.`, `Limpa boilerplate restante de source notes.` to the rest of the system?",
+      "why": "25 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 1` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.11 - nodes in this community are weakly interconnected."
+    }
+  ]
+}

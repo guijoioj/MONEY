@@ -26,7 +26,9 @@ class ComissaoService {
         params.push(filtros.data_inicio, filtros.data_fim);
       }
 
-      sql += ' ORDER BY co.created_at DESC';
+      // [P5-B9] LIMIT configurável via env (default 200, máx 2000)
+      const lim = Math.min(parseInt(process.env.COMISSOES_LIST_LIMIT || '200', 10) || 200, 2000);
+      sql += ` ORDER BY co.created_at DESC LIMIT ${lim}`;
       const data = await query(sql, params);
       return { success: true, data };
     } catch (error) {
