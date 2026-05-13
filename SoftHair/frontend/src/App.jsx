@@ -8,7 +8,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-
 // Lazy: post-login pages (heavy deps like recharts, dexie, etc.)
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Administrativo = lazy(() => import('./pages/Administrativo'));
@@ -29,6 +28,7 @@ const Solicitacoes = lazy(() => import('./pages/Solicitacoes'));
 const Caixa = lazy(() => import('./pages/Caixa'));
 const Metas = lazy(() => import('./pages/Metas'));
 const Relatorios = lazy(() => import('./pages/Relatorios'));
+const Sync = lazy(() => import('./pages/Sync'));
 
 function PageFallback() {
   return (
@@ -113,6 +113,7 @@ export default function App() {
         <Route path="caixa" element={lazyEl(Caixa)} />
         <Route path="metas" element={lazyEl(Metas)} />
         <Route path="relatorios" element={lazyEl(Relatorios)} />
+        <Route path="sync" element={lazyEl(Sync)} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />

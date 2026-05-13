@@ -1,40 +1,69 @@
 {
-  "name": "softHair",
-  "version": "2.2.0",
-  "description": "SoftHair - Sistema de Administracao de Salao de Beleza",
+  "name": "softhair",
+  "version": "3.0.0",
+  "description": "SoftHair - Sistema de gestão para salões de beleza (Electron + SQLite + sync opcional)",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
+    "electron": "electron .",
     "dev": "electron . --dev",
-    "build": "npm run build:frontend && electron-builder",
+    "backend:install": "cd backend && npm install",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend:install": "cd frontend && npm install",
+    "frontend:dev": "cd frontend && npm run dev",
     "build:frontend": "cd frontend && npm run build",
+    "build:electron": "npm run build:frontend && electron-builder",
     "build:win": "npm run build:frontend && electron-builder --win",
-    "build:linux": "npm run build:frontend && electron-builder --linux"
+    "build:linux": "npm run build:frontend && electron-builder --linux",
+    "build:mac": "npm run build:frontend && electron-builder --mac",
+    "dist": "npm run build:frontend && electron-builder --publish=never",
+    "postinstall": "npm run backend:install && npm run frontend:install"
   },
   "build": {
-    "appId": "com.softHair.app",
+    "appId": "com.softhair.app",
     "productName": "SoftHair",
     "directories": {
-      "output": "dist"
+      "output": "dist-electron",
+      "buildResources": "build"
     },
     "files": [
       "electron/**/*",
       "frontend/dist/**/*",
-      "backend/**/*",
-      "MANUAL-DE-USO.html"
+      "MANUAL-DE-USO.html",
+      "package.json"
     ],
     "extraResources": [
       {
-        "from": "backend/data",
-        "to": "backend/data",
-        "filter": ["**/*"]
+        "from": "backend",
+        "to": "backend",
+        "filter": ["**/*", "!node_modules/.cache/**"]
       }
     ],
+    "asarUnpack": [
+      "**/node_modules/better-sqlite3/**"
+    ],
     "win": {
-      "target": "dir"
+      "target": ["nsis"],
+      "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.icns"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "build/icon.png",
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SoftHair"
     }
   },
-  "keywords": ["beauty", "salon", "management", "desktop"],
+  "keywords": ["beauty", "salon", "management", "desktop", "electron", "sqlite"],
   "author": "SoftHair",
   "license": "MIT",
   "devDependencies": {

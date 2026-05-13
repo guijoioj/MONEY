@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const isFileProtocol = typeof window !== 'undefined' && window.location.protocol === 'file:';
-const apiBaseURL = import.meta.env.VITE_API_URL || (isFileProtocol ? 'http://localhost:3001/api' : '/api');
+// Dentro do Electron (file://) usa backend embarcado em 127.0.0.1:3001.
+// Em dev sem VITE_API_URL definida, aponta pro backend embarcado.
+const apiBaseURL = import.meta.env.VITE_API_URL || (isFileProtocol ? 'http://127.0.0.1:3001/api' : 'http://127.0.0.1:3001/api');
 
 const api = axios.create({
   baseURL: apiBaseURL,

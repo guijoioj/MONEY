@@ -19,6 +19,7 @@ import {
   Bell,
   BarChart3,
   Inbox,
+  Cloud,
   Search,
   Plus,
   CalendarPlus,
@@ -135,6 +136,7 @@ export default function Layout() {
     { to: '/relatorios', icon: BarChart3, label: 'Relatórios' },
     { to: '/backup', icon: Database, label: 'Backup' },
     { to: '/notificacoes', icon: Bell, label: 'Notificações', badge: notifCount },
+    { to: '/sync', icon: Cloud, label: 'Sync Cloud' },
     { to: '/customizacao', icon: Palette, label: 'Personalizar' },
     { to: '/configuracoes', icon: Settings, label: 'Configurações' },
   ];

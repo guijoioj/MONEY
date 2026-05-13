@@ -1,0 +1,9 @@
+node_modules/
+package-lock.json
+database/*.db
+database/*.db-journal
+database/*.db-wal
+database/*.db-shm
+database/sync-config.json
+.env
+*.log
