@@ -104,6 +104,9 @@ if (dbType === 'postgres') {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      // P3-B7: statement_timeout — query travada (lock dispute, deadlock) aborta
+      // em 10s em vez de bloquear a connection do pool indefinidamente.
+      await client.query("SET LOCAL statement_timeout = '10s'");
       const wrapped = {
         query: async (sql, params = []) => {
           const pgSql = sql.includes('?') ? convertPlaceholders(sql) : sql;

@@ -197,20 +197,29 @@ class SyncService {
     // P2-C5: salao_id resolvido em runtime (do JWT cloud ou do DB local).
     // Hardcoded 1 era inválido quando admin troca de salão ou faz restore.
     this._localSalaoId = null;
+    // P3-B1: cache TTL — invalida após 1h para pegar trocas de salão.
+    this._localSalaoIdAt = 0;
     this.knownFingerprint = null; // P2-C6: TOFU fingerprint do cert
 
     this.loadConfig();
   }
 
-  // P2-C5 + P3-C7: resolve salao_id local do banco (single-tenant local) ou do JWT cloud.
+  // P2-C5 + P3-C7 + P3-B1: resolve salao_id local do banco (single-tenant local) ou do JWT cloud.
   // Cacheia o resultado para evitar query a cada pull.
   //
   // P3-C7: se o JWT cloud informa um salao_id que NÃO existe no banco local
   // (admin trocou de salão na cloud sem reset local), warn e cai no salao_id do
   // banco local. Sem esse check, o pull tenta inserir rows com salao_id=2
   // mas saloes(id=2) não existe → FK violation silenciosa.
+  //
+  // P3-B1: cache TTL 1h — invalida automaticamente para pegar trocas de salão
+  // mesmo se o usuário não chamar `configure({ token })` (que invalida no Pass 2).
   getLocalSalaoId() {
-    if (this._localSalaoId) return this._localSalaoId;
+    const CACHE_TTL_MS = 60 * 60 * 1000;
+    const now = Date.now();
+    if (this._localSalaoId && (now - this._localSalaoIdAt) < CACHE_TTL_MS) {
+      return this._localSalaoId;
+    }
     let jwtSalaoId = null;
     try {
       if (this.token) {
@@ -238,6 +247,7 @@ class SyncService {
         const exists = queryOne(`SELECT id FROM saloes WHERE id = ?`, [jwtSalaoId]);
         if (exists) {
           this._localSalaoId = jwtSalaoId;
+          this._localSalaoIdAt = now;
           return this._localSalaoId;
         }
         // Mismatch — informar via lastError para UI mostrar.
@@ -252,10 +262,12 @@ class SyncService {
 
     if (localSalaoId !== null) {
       this._localSalaoId = localSalaoId;
+      this._localSalaoIdAt = now;
       return this._localSalaoId;
     }
     // Fallback final (banco fresh sem salão).
     this._localSalaoId = 1;
+    this._localSalaoIdAt = now;
     return this._localSalaoId;
   }
 
@@ -378,9 +390,12 @@ class SyncService {
   // E3 + P2-C6: axios com TLS forçado E TOFU fingerprint do cert.
   // No primeiro sync sucesso, grava fingerprint256 do peer cert. Nas próximas
   // requisições, compara — se mudou, aborta e exige reconexão.
+  // P3-B5: keepAlive reduz handshake TLS em syncs frequentes (intervalo 10-30s).
   buildAxiosConfig() {
     const agent = new https.Agent({
       rejectUnauthorized: true, // E3: NUNCA aceita cert inválido
+      keepAlive: true,
+      maxSockets: 5,
       // P2-C6: hook para capturar fingerprint do peer cert.
       checkServerIdentity: (host, cert) => {
         const tls = require('tls');
