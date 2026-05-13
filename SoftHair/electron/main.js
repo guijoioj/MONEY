@@ -9,6 +9,13 @@
  * Em dev (--dev):
  *   - backend deve estar rodando manualmente
  *   - frontend é servido pelo Vite em http://localhost:3000
+ *
+ * Pass 1 fixes:
+ *   - E1: JWT_SECRET nunca hardcoded; persiste em userData/secrets.json
+ *   - E11: requestSingleInstanceLock — evita 2 backends no mesmo db
+ *   - E15: setWindowOpenHandler + will-navigate restritos
+ *   - E20: sanitize de mensagens em dialog.showErrorBox
+ *   - E21: rotação básica de logs
  */
 
 const { app, BrowserWindow, shell, Menu, dialog } = require('electron');
@@ -16,11 +23,26 @@ const path = require('path');
 const { fork } = require('child_process');
 const fs = require('fs');
 const http = require('http');
+const crypto = require('crypto');
 
 let mainWindow;
 let backendProcess;
 let isQuitting = false;
 const isDev = process.argv.includes('--dev');
+const BACKEND_PORT = parseInt(process.env.SOFTHAIR_PORT, 10) || 3001;
+
+// E11: single instance lock — primeiro Electron pega, segundo encerra.
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+  process.exit(0);
+}
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  }
+});
 
 function getResourcePath(relativePath) {
   if (isDev) {
@@ -30,6 +52,67 @@ function getResourcePath(relativePath) {
     return path.join(process.resourcesPath, relativePath);
   }
   return path.join(__dirname, '..', relativePath);
+}
+
+// E1: gera/carrega JWT_SECRET persistido em userData/SoftHair/database/secrets.json (chmod 0o600).
+function loadJwtSecret(dataDir) {
+  const secretsFile = path.join(dataDir, 'secrets.json');
+  try {
+    if (fs.existsSync(secretsFile)) {
+      const cfg = JSON.parse(fs.readFileSync(secretsFile, 'utf-8'));
+      if (cfg.jwtSecret && cfg.jwtSecret.length >= 32) return cfg.jwtSecret;
+    }
+    const generated = crypto.randomBytes(48).toString('hex');
+    fs.writeFileSync(
+      secretsFile,
+      JSON.stringify({ jwtSecret: generated, createdAt: new Date().toISOString() }, null, 2),
+      { mode: 0o600 }
+    );
+    try { fs.chmodSync(secretsFile, 0o600); } catch (_) { /* Windows */ }
+    return generated;
+  } catch (e) {
+    console.error('[Electron] Falha ao carregar/gerar JWT secret:', e.message);
+    // Fallback efêmero — só para esta execução.
+    return crypto.randomBytes(48).toString('hex');
+  }
+}
+
+// E20: redact paths absolutos/secret-like de mensagens antes de mostrar em dialog
+function sanitizeMessage(msg) {
+  if (!msg) return 'Erro desconhecido';
+  let s = String(msg);
+  // remove paths absolutos
+  s = s.replace(/(\/[\w\-./]+)/g, '<path>');
+  s = s.replace(/([A-Z]:\\[^\s]+)/g, '<path>');
+  // limita tamanho
+  if (s.length > 300) s = s.slice(0, 300) + '...';
+  return s;
+}
+
+// E21: append a log file em userData/logs/softhair-YYYY-MM-DD.log com rotação por tamanho.
+function getLogPath() {
+  try {
+    return path.join(app.getPath('userData'), 'logs', `softhair-${new Date().toISOString().slice(0, 10)}.log`);
+  } catch {
+    return null;
+  }
+}
+
+function appendLog(line) {
+  const logPath = getLogPath();
+  if (!logPath) return;
+  try {
+    const dir = path.dirname(logPath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    // rotação por tamanho (10MB)
+    try {
+      const st = fs.statSync(logPath);
+      if (st.size > 10 * 1024 * 1024) {
+        fs.renameSync(logPath, logPath + '.' + Date.now() + '.old');
+      }
+    } catch (_) { /* arquivo ainda não existe */ }
+    fs.appendFileSync(logPath, `[${new Date().toISOString()}] ${line}\n`);
+  } catch (_) { /* não-fatal */ }
 }
 
 function startBackend() {
@@ -47,51 +130,64 @@ function startBackend() {
 
   if (!fs.existsSync(serverPath)) {
     console.error('[Electron] Servidor não encontrado em:', serverPath);
-    dialog.showErrorBox('SoftHair', `Backend não encontrado em ${serverPath}`);
+    dialog.showErrorBox('SoftHair', `Backend não encontrado em ${sanitizeMessage(serverPath)}`);
     return;
   }
+
+  // E1: jwt secret estável entre execuções (caso env não venha de fora).
+  const jwtSecret = process.env.JWT_SECRET || loadJwtSecret(dataDir);
 
   backendProcess = fork(serverPath, [], {
     env: {
       ...process.env,
       NODE_ENV: 'production',
-      PORT: process.env.SOFTHAIR_PORT || '3001',
+      PORT: String(BACKEND_PORT),
       HOST: '127.0.0.1',
       DATABASE_TYPE: process.env.DATABASE_TYPE || 'sqlite',
       SOFTHAIR_DATA_DIR: dataDir,
-      JWT_SECRET: process.env.JWT_SECRET || require('crypto').randomBytes(32).toString('hex'),
-      JWT_EXPIRES_IN: '30d',
-      SOFTHAIR_DEFAULT_ADMIN_EMAIL: process.env.SOFTHAIR_DEFAULT_ADMIN_EMAIL || 'admin@salao.com',
-      SOFTHAIR_DEFAULT_ADMIN_PASSWORD: process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD || 'admin123',
+      JWT_SECRET: jwtSecret,
+      // E8: 24h em vez de 30d
+      JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
+      // E4: não passamos mais SOFTHAIR_DEFAULT_ADMIN_*; bootstrap via UI.
     },
     stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
   });
 
   backendProcess.on('error', (err) => {
     console.error('[Electron] Erro no backend:', err);
+    appendLog(`[backend] error: ${err.message}`);
     if (!isQuitting) {
-      dialog.showErrorBox('SoftHair', `Falha ao iniciar backend: ${err.message}`);
+      dialog.showErrorBox('SoftHair', `Falha ao iniciar backend: ${sanitizeMessage(err.message)}`);
     }
   });
 
   if (backendProcess.stdout) {
-    backendProcess.stdout.on('data', (d) => process.stdout.write(`[backend] ${d}`));
+    backendProcess.stdout.on('data', (d) => {
+      const line = d.toString();
+      process.stdout.write(`[backend] ${line}`);
+      appendLog(`[backend] ${line.trim()}`);
+    });
   }
   if (backendProcess.stderr) {
-    backendProcess.stderr.on('data', (d) => process.stderr.write(`[backend:err] ${d}`));
+    backendProcess.stderr.on('data', (d) => {
+      const line = d.toString();
+      process.stderr.write(`[backend:err] ${line}`);
+      appendLog(`[backend:err] ${line.trim()}`);
+    });
   }
 
   backendProcess.on('close', (code) => {
     console.log('[Electron] Backend encerrou com código:', code);
+    appendLog(`[backend] close code=${code}`);
     if (!isQuitting && code !== 0) {
-      dialog.showErrorBox('SoftHair', 'O backend encerrou inesperadamente.');
+      dialog.showErrorBox('SoftHair', 'O backend encerrou inesperadamente. Verifique os logs.');
     }
   });
 }
 
 function waitForBackend(retries, delay, cb) {
   http
-    .get('http://127.0.0.1:3001/api/health', (res) => {
+    .get(`http://127.0.0.1:${BACKEND_PORT}/api/health`, (res) => {
       if (res.statusCode === 200) return cb();
       if (retries > 0) setTimeout(() => waitForBackend(retries - 1, delay, cb), delay);
       else cb();
@@ -111,6 +207,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: true,
+      webSecurity: true,
       preload: path.join(__dirname, 'preload.js'),
     },
     show: false,
@@ -119,17 +217,52 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => mainWindow.show());
 
+  // E15: setWindowOpenHandler — bloqueia tudo, manda https/http pro browser externo
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('https://') || url.startsWith('http://')) {
+      try {
+        const u = new URL(url);
+        if (
+          u.protocol === 'https:' ||
+          (u.protocol === 'http:' &&
+            (u.hostname === 'localhost' || u.hostname === '127.0.0.1'))
+        ) {
+          shell.openExternal(url).catch(() => {});
+        }
+      } catch (_) { /* invalid url */ }
+    }
+    return { action: 'deny' };
+  });
+
   if (isDev) {
-    mainWindow.loadURL('http://localhost:3000').catch((err) => {
-      dialog.showErrorBox('SoftHair', `Erro ao carregar dev URL: ${err.message}`);
+    const devURL = 'http://localhost:3000';
+    mainWindow.loadURL(devURL).catch((err) => {
+      dialog.showErrorBox('SoftHair', `Erro ao carregar dev URL: ${sanitizeMessage(err.message)}`);
     });
     mainWindow.webContents.openDevTools();
+
+    // E15: bloquear navegação fora do dev URL ou do backend local
+    mainWindow.webContents.on('will-navigate', (event, url) => {
+      try {
+        const u = new URL(url);
+        const allowed =
+          url.startsWith(devURL) ||
+          (u.hostname === '127.0.0.1' && String(u.port) === String(BACKEND_PORT)) ||
+          (u.hostname === 'localhost' && String(u.port) === String(BACKEND_PORT));
+        if (!allowed) {
+          event.preventDefault();
+        }
+      } catch (_) {
+        event.preventDefault();
+      }
+    });
   } else {
     const indexPath = getResourcePath(path.join('frontend', 'dist', 'index.html'));
     const indexURL = 'file://' + indexPath;
 
+    // E15: bloquear navegação que não seja para o indexURL (file://...)
     mainWindow.webContents.on('will-navigate', (event, url) => {
-      if (url.startsWith('file://') && !url.startsWith(indexURL)) {
+      if (!url.startsWith(indexURL)) {
         event.preventDefault();
       }
     });
@@ -206,6 +339,16 @@ function createWindow() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
+// Crash handler — E21
+process.on('uncaughtException', (err) => {
+  console.error('[Electron] uncaughtException:', err);
+  appendLog(`[main] uncaughtException: ${err.stack || err.message}`);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[Electron] unhandledRejection:', reason);
+  appendLog(`[main] unhandledRejection: ${reason && reason.stack ? reason.stack : reason}`);
+});
+
 app.whenReady().then(() => {
   if (!isDev) {
     startBackend();
@@ -221,11 +364,25 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   isQuitting = true;
-  if (backendProcess) backendProcess.kill();
+  if (backendProcess) {
+    try {
+      backendProcess.kill('SIGTERM');
+      setTimeout(() => {
+        try { backendProcess.kill('SIGKILL'); } catch (_) { /* já morto */ }
+      }, 2000);
+    } catch (_) { /* noop */ }
+  }
   if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('before-quit', () => {
   isQuitting = true;
-  if (backendProcess) backendProcess.kill();
+  if (backendProcess) {
+    try {
+      backendProcess.kill('SIGTERM');
+      setTimeout(() => {
+        try { backendProcess.kill('SIGKILL'); } catch (_) { /* já morto */ }
+      }, 2000);
+    } catch (_) { /* noop */ }
+  }
 });

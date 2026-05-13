@@ -57,12 +57,14 @@ cd SoftHair/frontend && npm run dev
 cd SoftHair && npm run dev
 ```
 
-Login padrão (criado automaticamente no primeiro start):
+Primeiro acesso (setup wizard):
 
-- Email: `admin@salao.com`
-- Senha: `admin123`
-
-> Altere imediatamente após o primeiro login.
+No primeiro start o app **não** cria admin default. O usuário deve passar pelo
+setup wizard na tela inicial para criar o primeiro admin com senha forte
+(mínimo 8 caracteres). Alternativamente, defina as envs
+`BOOTSTRAP_ADMIN_EMAIL` e `BOOTSTRAP_ADMIN_PASSWORD` (>= 8 chars) antes do
+primeiro start; nesse caso o admin é criado automaticamente sem aparecer no
+console.
 
 ## 4. Gerar instalador para os PCs do salão
 
@@ -148,12 +150,33 @@ Para desenvolvedores que querem customizar, criar arquivo `.env` em `SoftHair/ba
 PORT=3001
 HOST=127.0.0.1
 DATABASE_TYPE=sqlite
+# JWT_SECRET é gerado e persistido automaticamente em
+# userData/SoftHair/database/secrets.json (chmod 0o600) no primeiro boot.
+# Pode-se forçar via env; precisa ter no mínimo 32 caracteres.
 JWT_SECRET=<gera com: openssl rand -hex 32>
-JWT_EXPIRES_IN=30d
-SOFTHAIR_DEFAULT_ADMIN_EMAIL=admin@salao.com
-SOFTHAIR_DEFAULT_ADMIN_PASSWORD=admin123
+JWT_EXPIRES_IN=24h
+# (E4) Para evitar setup wizard, defina ambos abaixo antes do 1º boot:
+BOOTSTRAP_ADMIN_EMAIL=admin@example.com
+BOOTSTRAP_ADMIN_PASSWORD=<>=8 chars>
 SYNC_INTERVAL_MS=30000
 ```
+
+## Code signing (E14)
+
+Code signing **não está configurado** no electron-builder. Para distribuir
+artefatos confiáveis:
+
+- **Windows**: comprar cert OV/EV (DigiCert, Sectigo) e adicionar
+  `win.certificateFile` e `win.certificatePassword` no `build` do
+  `package.json`, ou usar `azure-signtool` em CI. SmartScreen avisa
+  "Publisher unknown" sem signing.
+- **macOS**: Apple Developer ID + `mac.identity` + `afterSign` com
+  `electron-notarize`. Apps não-notarizados são bloqueados em macOS 10.15+.
+- **Linux**: AppImage não requer signing mas pode ser assinado com gpg.
+
+Auto-update (electron-updater) **exige** signing para verificar autenticidade
+dos updates. Até signing estar disponível, instalações devem ser distribuídas
+apenas via canal oficial.
 
 Para usar PostgreSQL ao invés de SQLite (raro, geralmente só em dev):
 

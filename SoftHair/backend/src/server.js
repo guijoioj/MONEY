@@ -5,6 +5,13 @@
  * Opcional: PostgreSQL (DATABASE_TYPE=postgres + DATABASE_URL).
  *
  * Roda como child process do Electron em produção, ou standalone em dev.
+ *
+ * Pass 1 fixes:
+ *   - E7: CORS restrito a origens locais conhecidas (não `origin: true`)
+ *   - E12: bind explícito em 127.0.0.1 (HOST default = '127.0.0.1')
+ *   - E13: helmet com CSP básica habilitada
+ *   - E22: logger nunca imprime body
+ *   - E23: stub responde 501 e exige auth
  */
 
 require('dotenv').config();
@@ -14,21 +21,44 @@ const helmet = require('helmet');
 
 const { initDb } = require('./config/initDb');
 const syncService = require('./services/syncService');
+const { authMiddleware } = require('./middleware/auth');
 
 const app = express();
 
 // ── Security ──
+// E13: CSP básica para defesa em profundidade
 app.use(
   helmet({
-    contentSecurityPolicy: false, // app desktop, sem necessidade
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'", 'http://127.0.0.1:*', 'https://*.onrender.com'],
+        fontSrc: ["'self'", 'data:'],
+      },
+    },
     crossOriginEmbedderPolicy: false,
   })
 );
 
-// ── CORS ── (permissivo: app desktop / dev)
+// ── CORS ── (E7: restrito a origens locais/electron file://)
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+];
 app.use(
   cors({
-    origin: true,
+    origin: (origin, callback) => {
+      // Electron file:// envia origin = null/undefined — permitido.
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      if (origin === 'file://') return callback(null, true);
+      return callback(new Error('Origin não permitido'), false);
+    },
     credentials: true,
   })
 );
@@ -37,12 +67,15 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ── Logger simples ──
+// E22: nunca loga body, redacta urls com query sensível.
 app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
     if (process.env.NODE_ENV !== 'production' || res.statusCode >= 400) {
       const dt = Date.now() - start;
-      console.log(`[${req.method}] ${req.originalUrl} ${res.statusCode} ${dt}ms`);
+      // Redact possíveis tokens em querystring
+      const safeUrl = req.originalUrl.replace(/(token|senha|password)=[^&]+/gi, '$1=<redacted>');
+      console.log(`[${req.method}] ${safeUrl} ${res.statusCode} ${dt}ms`);
     }
   });
   next();
@@ -60,10 +93,10 @@ app.use('/api/atendimentos', require('./routes/atendimentos'));
 app.use('/api/vendas', require('./routes/vendas'));
 app.use('/api/sync', require('./routes/sync'));
 
-// Stub para endpoints ainda não portados — sempre retorna array vazio.
-// Evita 404 em telas legadas (notificações, fechamento, comissões etc.).
+// Stub para endpoints ainda não portados.
+// E23: requer auth e devolve 501 Not Implemented em vez de 200 silencioso.
 ['notificacoes', 'fechamentos', 'comissoes', 'creditos', 'historico', 'saloes', 'backup'].forEach((rota) => {
-  app.use(`/api/${rota}`, (req, res) => {
+  app.use(`/api/${rota}`, authMiddleware, (req, res) => {
     if (req.method === 'GET') {
       if (rota === 'notificacoes' && req.path === '/count') {
         return res.json({ success: true, naoLidas: 0 });
@@ -73,7 +106,9 @@ app.use('/api/sync', require('./routes/sync'));
       }
       return res.json({ success: true, data: [] });
     }
-    res.json({ success: true, message: 'stub - rota não implementada localmente' });
+    return res
+      .status(501)
+      .json({ success: false, error: `Rota ${rota} não implementada localmente` });
   });
 });
 
@@ -85,11 +120,13 @@ app.use((req, res) => {
 // ── Error handler ──
 app.use((err, req, res, next) => {
   console.error(`[ERROR] ${req.method} ${req.originalUrl}:`, err.message);
-  res.status(err.status || 500).json({ success: false, error: err.message });
+  const safe = process.env.NODE_ENV === 'production' ? 'Erro interno' : err.message;
+  res.status(err.status || 500).json({ success: false, error: safe });
 });
 
 // ── Boot ──
 const PORT = parseInt(process.env.PORT) || 3001;
+// E12: forçar 127.0.0.1 como default — nunca 0.0.0.0
 const HOST = process.env.HOST || '127.0.0.1';
 
 try {
@@ -111,6 +148,13 @@ function shutdown(signal) {
   syncService.stop();
   server.close(() => {
     console.log('[SHUTDOWN] HTTP fechado');
+    // E10: fechar handle do SQLite explicitamente antes de sair
+    try {
+      const { rawClient, dbType: dbtp } = require('./config/database');
+      if (dbtp === 'sqlite' && rawClient && typeof rawClient.close === 'function') {
+        rawClient.close();
+      }
+    } catch (_) { /* noop */ }
     process.exit(0);
   });
   setTimeout(() => process.exit(1), 5000);

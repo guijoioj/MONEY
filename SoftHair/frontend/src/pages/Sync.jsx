@@ -1,7 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Cloud, CloudOff, RefreshCw, CheckCircle, AlertCircle, Lock } from 'lucide-react';
+import { Cloud, CloudOff, RefreshCw, CheckCircle, AlertCircle, Lock, LogOut, ShieldAlert } from 'lucide-react';
 import api from '../services/api';
+
+// E3: valida que cloudUrl é HTTPS (ou loopback em dev).
+function isValidCloudUrl(url) {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    if (u.protocol === 'https:') return true;
+    if (u.protocol === 'http:') {
+      const h = u.hostname;
+      return h === 'localhost' || h === '127.0.0.1' || h === '::1';
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
 
 export default function Sync() {
   const queryClient = useQueryClient();
@@ -18,6 +34,7 @@ export default function Sync() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mode, setMode] = useState('login');
+  const [urlError, setUrlError] = useState(null);
 
   useEffect(() => {
     if (status) {
@@ -25,6 +42,15 @@ export default function Sync() {
       setEnabled(!!status.enabled);
     }
   }, [status]);
+
+  useEffect(() => {
+    // E3: feedback imediato se a URL não for HTTPS
+    if (cloudUrl && !isValidCloudUrl(cloudUrl)) {
+      setUrlError('URL inválida — use HTTPS ou loopback (127.0.0.1).');
+    } else {
+      setUrlError(null);
+    }
+  }, [cloudUrl]);
 
   const configure = useMutation({
     mutationFn: (payload) => api.post('/sync/configure', payload).then((r) => r.data.data),
@@ -41,7 +67,22 @@ export default function Sync() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sync-status'] }),
   });
 
+  // E9: disconnect — limpa credenciais
+  const disconnect = useMutation({
+    mutationFn: () => api.post('/sync/disconnect').then((r) => r.data),
+    onSuccess: () => {
+      setToken('');
+      setEmail('');
+      setSenha('');
+      queryClient.invalidateQueries({ queryKey: ['sync-status'] });
+    },
+  });
+
   const handleSaveConfig = () => {
+    if (!isValidCloudUrl(cloudUrl)) {
+      setUrlError('URL inválida — use HTTPS ou loopback (127.0.0.1).');
+      return;
+    }
     configure.mutate({ cloudUrl, token, enabled });
   };
 
@@ -51,7 +92,17 @@ export default function Sync() {
   };
 
   const handleLoginCloud = () => {
+    if (!isValidCloudUrl(cloudUrl)) {
+      setUrlError('URL inválida — use HTTPS ou loopback (127.0.0.1).');
+      return;
+    }
     loginCloud.mutate({ cloudUrl, email, senha });
+  };
+
+  const handleDisconnect = () => {
+    if (window.confirm('Desconectar do cloud? Token e configuração serão apagados deste computador.')) {
+      disconnect.mutate();
+    }
   };
 
   if (isLoading) {
@@ -65,6 +116,7 @@ export default function Sync() {
   const isConfigured = !!status?.configured;
   const isEnabled = !!status?.enabled;
   const isSyncing = !!status?.syncing;
+  const isInvalidUrl = !!urlError;
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
@@ -110,6 +162,18 @@ export default function Sync() {
             <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
             <span>Configure URL e credenciais antes de ativar a sincronização.</span>
           </div>
+        )}
+
+        {/* E9: Botão "Desconectar" só aparece quando configurado */}
+        {isConfigured && (
+          <button
+            onClick={handleDisconnect}
+            disabled={disconnect.isPending}
+            className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50"
+          >
+            <LogOut size={14} />
+            Desconectar cloud
+          </button>
         )}
       </div>
 
@@ -178,9 +242,17 @@ export default function Sync() {
               type="text"
               value={cloudUrl}
               onChange={(e) => setCloudUrl(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1"
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                isInvalidUrl ? 'border-red-400' : 'border-gray-300'
+              }`}
               placeholder="https://money-f5rz.onrender.com/api"
             />
+            {isInvalidUrl && (
+              <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                <ShieldAlert size={12} />
+                {urlError}
+              </p>
+            )}
           </div>
 
           {mode === 'login' ? (
@@ -206,7 +278,7 @@ export default function Sync() {
               </div>
               <button
                 onClick={handleLoginCloud}
-                disabled={loginCloud.isPending || !cloudUrl || !email || !senha}
+                disabled={loginCloud.isPending || !cloudUrl || !email || !senha || isInvalidUrl}
                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white disabled:opacity-50"
                 style={{ backgroundColor: 'var(--color-primary)' }}
               >
@@ -238,12 +310,17 @@ export default function Sync() {
               </div>
               <button
                 onClick={handleSaveConfig}
-                disabled={configure.isPending || !cloudUrl || !token}
+                disabled={configure.isPending || !cloudUrl || !token || isInvalidUrl}
                 className="w-full px-4 py-2 rounded-lg text-white disabled:opacity-50"
                 style={{ backgroundColor: 'var(--color-primary)' }}
               >
                 {configure.isPending ? 'Salvando...' : 'Salvar configuração'}
               </button>
+              {configure.isError && (
+                <p className="text-sm text-red-600">
+                  Erro: {configure.error?.response?.data?.error || configure.error?.message}
+                </p>
+              )}
             </>
           )}
         </div>
