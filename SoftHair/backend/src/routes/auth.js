@@ -2,8 +2,27 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
-const { query, queryOne, queryRun } = require('../config/database');
+const { query, queryOne, queryRun, withTransaction, dbType } = require('../config/database');
 const { authMiddleware, generateToken } = require('../middleware/auth');
+
+// P2-A6: lista mínima de senhas comuns rejeitadas no setup.
+const COMMON_PASSWORDS = new Set([
+  'password', 'senha123', '12345678', '123456789', '1234567890',
+  'qwerty123', 'admin123', 'admin1234', 'softhair', 'softhair1',
+  'salaobeleza', 'cabeleireiro', 'password1', 'iloveyou', 'aaaaaaaa',
+  'abcdefgh', '11111111', '00000000', 'changeme', 'letmein123',
+]);
+
+// P2-A6: valida complexidade — ao menos uma letra minúscula, uma maiúscula,
+// um dígito; 8+ chars; não pode ser senha trivial.
+function isStrongPassword(senha) {
+  if (typeof senha !== 'string' || senha.length < 8) return false;
+  if (COMMON_PASSWORDS.has(senha.toLowerCase())) return false;
+  if (!/[a-z]/.test(senha)) return false;
+  if (!/[A-Z]/.test(senha)) return false;
+  if (!/\d/.test(senha)) return false;
+  return true;
+}
 
 // E4: setup endpoint público — apenas quando não há admins ainda.
 // Permite o app criar o primeiro admin via UI (setup wizard) com senha forte.
@@ -18,7 +37,13 @@ router.get('/needs-setup', async (req, res) => {
 
 router.post('/bootstrap-admin', [
   body('email').isEmail().withMessage('Email inválido'),
-  body('senha').isLength({ min: 8 }).withMessage('Senha deve ter no mínimo 8 caracteres'),
+  body('senha').custom((value) => {
+    if (!isStrongPassword(value)) {
+      // P2-A6: mensagem genérica de regra, sem leak da lista de comuns.
+      throw new Error('Senha fraca: use 8+ caracteres com maiúscula, minúscula e número');
+    }
+    return true;
+  }),
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
 ], async (req, res) => {
   try {
@@ -27,25 +52,48 @@ router.post('/bootstrap-admin', [
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    // Só permite se não houver nenhum admin ativo ainda
-    const existing = await queryOne(`SELECT COUNT(*) as n FROM usuarios WHERE ativo = 1`);
-    if (existing && (existing.n || 0) > 0) {
-      return res.status(403).json({ success: false, error: 'Setup já concluído' });
-    }
-
-    const salao = await queryOne(`SELECT id FROM saloes ORDER BY id LIMIT 1`);
-    if (!salao) {
-      return res.status(500).json({ success: false, error: 'Salão default não encontrado' });
-    }
-
     const { email, senha, nome } = req.body;
     const senha_hash = await bcrypt.hash(senha, 10);
-    await queryRun(
-      `INSERT INTO usuarios (email, senha_hash, nome, tipo, salao_id, ativo) VALUES (?, ?, ?, 'admin', ?, 1)`,
-      [email, senha_hash, nome, salao.id]
-    );
+
+    // P2-A7: bootstrap atomic — usa transação para garantir que apenas UM admin
+    // possa ser criado mesmo em concorrência. Re-checa dentro da transação.
+    const result = await withTransaction(async (client) => {
+      const checkRes = await client.query(
+        `SELECT COUNT(*) as n FROM usuarios WHERE ativo = 1`,
+        []
+      );
+      // PG retorna { rows: [{n}] }; SQLite wrap retorna { rows: [{n}] }
+      const row = checkRes.rows ? checkRes.rows[0] : checkRes;
+      const count = Number(row?.n || 0);
+      if (count > 0) {
+        return { ok: false, code: 403, error: 'Setup já concluído' };
+      }
+      const salaoRes = await client.query(
+        `SELECT id FROM saloes ORDER BY id LIMIT 1`,
+        []
+      );
+      const salaoRow = (salaoRes.rows ? salaoRes.rows[0] : salaoRes);
+      if (!salaoRow || !salaoRow.id) {
+        return { ok: false, code: 500, error: 'Salão default não encontrado' };
+      }
+      // INSERT idempotente: UNIQUE(email) já bloqueia duplo.
+      await client.query(
+        `INSERT INTO usuarios (email, senha_hash, nome, tipo, salao_id, ativo) VALUES (?, ?, ?, 'admin', ?, 1)`,
+        [email, senha_hash, nome, salaoRow.id]
+      );
+      return { ok: true };
+    });
+
+    if (!result.ok) {
+      return res.status(result.code).json({ success: false, error: result.error });
+    }
+
     res.json({ success: true, message: 'Admin criado. Faça login.' });
   } catch (error) {
+    // P2-A7: erro de UNIQUE (corrida real perdida) — retornar 409.
+    if (error && /UNIQUE|duplicate key/i.test(error.message)) {
+      return res.status(409).json({ success: false, error: 'Email já em uso' });
+    }
     res.status(500).json({ success: false, error: error.message });
   }
 });

@@ -3,7 +3,11 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
+const { validateId } = require('../middleware/validateId');
 const { query, queryOne, queryRun } = require('../config/database');
+
+// P2-A2 (E28): valida `:id` numérico.
+router.param('id', validateId);
 
 router.get('/', authMiddleware, async (req, res) => {
   try {

@@ -43,6 +43,26 @@ app.use(
   })
 );
 
+// P2-A5: anti-DNS-rebinding. Aceita só Host loopback. Bloqueia simple requests
+// que tentem alcançar 127.0.0.1 via DNS rebinding (`evil.com` → 127.0.0.1).
+const ALLOWED_HOSTS = new Set([
+  'localhost',
+  '127.0.0.1',
+  '[::1]',
+  '::1',
+]);
+app.use((req, res, next) => {
+  // req.hostname já normaliza porta. `req.headers.host` tem `host:port`.
+  const host = req.hostname || '';
+  if (!ALLOWED_HOSTS.has(host)) {
+    return res.status(421).json({
+      success: false,
+      error: 'Misdirected Request — host header inválido',
+    });
+  }
+  next();
+});
+
 // ── CORS ── (E7: restrito a origens locais/electron file://)
 const ALLOWED_ORIGINS = [
   'http://localhost:3000',

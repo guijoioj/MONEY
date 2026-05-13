@@ -117,10 +117,18 @@ function isValidCloudUrl(url) {
 // {iv, tag, ct} para AES-256-GCM. Em ambientes onde Electron expõe safeStorage
 // pode-se substituir por essa API; o método atual mantém o arquivo plaintext
 // fora do disco e exige conhecer JWT_SECRET (que vive em secrets.json 0o600).
+//
+// P2-C3: NUNCA cair em fallback string ('fallback') — gera chave previsível
+// que qualquer atacante com o sync-config.json descriptografa instantaneamente.
 function getEncryptionKey() {
   const { JWT_SECRET } = require('../middleware/auth');
+  if (!JWT_SECRET || typeof JWT_SECRET !== 'string' || JWT_SECRET.length < 32) {
+    const err = new Error('JWT_SECRET ausente — token criptografia indisponível');
+    err.code = 'NO_JWT_SECRET';
+    throw err;
+  }
   return crypto
-    .createHmac('sha256', JWT_SECRET || 'fallback')
+    .createHmac('sha256', JWT_SECRET)
     .update('softhair-sync-token-v1')
     .digest();
 }
@@ -128,8 +136,9 @@ function getEncryptionKey() {
 function encryptToken(plain) {
   if (!plain) return null;
   try {
+    const key = getEncryptionKey(); // P2-C3: throw se JWT_SECRET ausente
     const iv = crypto.randomBytes(12);
-    const cipher = crypto.createCipheriv('aes-256-gcm', getEncryptionKey(), iv);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
     const ct = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()]);
     const tag = cipher.getAuthTag();
     return {
@@ -139,6 +148,9 @@ function encryptToken(plain) {
       ct: ct.toString('base64'),
     };
   } catch (e) {
+    // P2-C3: se a key não existe, NÃO grava token plaintext — retorna null
+    // e o caller deve decidir (a config será salva sem token, forçando
+    // re-login no cloud na próxima inicialização).
     console.error('[SyncService] Falha ao criptografar token:', e.message);
     return null;
   }
@@ -146,13 +158,18 @@ function encryptToken(plain) {
 
 function decryptToken(enc) {
   if (!enc) return null;
-  // Compat: token antigo plaintext
-  if (typeof enc === 'string') return enc;
+  // P2-C3: compat string removido — token antigo plaintext é REJEITADO
+  // (não confiar em plaintext sem encrypt). Usuário precisa reconectar.
+  if (typeof enc === 'string') {
+    console.warn('[SyncService] Token cloud em formato legado (plaintext) descartado — reconecte.');
+    return null;
+  }
   if (typeof enc !== 'object' || !enc.iv || !enc.tag || !enc.ct) return null;
   try {
+    const key = getEncryptionKey();
     const decipher = crypto.createDecipheriv(
       'aes-256-gcm',
-      getEncryptionKey(),
+      key,
       Buffer.from(enc.iv, 'base64')
     );
     decipher.setAuthTag(Buffer.from(enc.tag, 'base64'));
@@ -177,10 +194,44 @@ class SyncService {
     this.lastError = null;
     this.syncing = false;
     this.syncPromise = null; // E18: mutex
-    this.localSalaoId = 1;   // E6: hardcoded em SQLite seed; usado para validar pull
-    this.knownFingerprint = null; // E9: TOFU fingerprint do cert
+    // P2-C5: salao_id resolvido em runtime (do JWT cloud ou do DB local).
+    // Hardcoded 1 era inválido quando admin troca de salão ou faz restore.
+    this._localSalaoId = null;
+    this.knownFingerprint = null; // P2-C6: TOFU fingerprint do cert
 
     this.loadConfig();
+  }
+
+  // P2-C5: resolve salao_id local do banco (single-tenant local) ou do JWT cloud.
+  // Cacheia o resultado para evitar query a cada pull.
+  getLocalSalaoId() {
+    if (this._localSalaoId) return this._localSalaoId;
+    try {
+      // Estratégia 1: tenta extrair do JWT cloud (mais autoritativo).
+      if (this.token) {
+        const parts = this.token.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+          if (payload.salaoId) {
+            this._localSalaoId = Number(payload.salaoId);
+            return this._localSalaoId;
+          }
+        }
+      }
+    } catch (_) { /* JWT inválido, cai pro fallback */ }
+    try {
+      // Estratégia 2: primeiro salão do banco local.
+      const row = queryOne(`SELECT id FROM saloes ORDER BY id LIMIT 1`);
+      if (row && row.id) {
+        this._localSalaoId = Number(row.id);
+        return this._localSalaoId;
+      }
+    } catch (e) {
+      console.error('[SyncService] Falha ao resolver localSalaoId do DB:', e.message);
+    }
+    // Fallback final.
+    this._localSalaoId = 1;
+    return this._localSalaoId;
   }
 
   loadConfig() {
@@ -233,7 +284,11 @@ class SyncService {
       }
       this.cloudUrl = cloudUrl;
     }
-    if (token !== undefined) this.token = token;
+    if (token !== undefined) {
+      this.token = token;
+      // P2-C5: invalidar cache do salao_id — pode vir de JWT diferente.
+      this._localSalaoId = null;
+    }
     if (enabled !== undefined) this.enabled = !!enabled;
 
     if (this.enabled && this.cloudUrl && this.token) {
@@ -280,14 +335,35 @@ class SyncService {
     console.log('[SyncService] Parado');
   }
 
-  // E3: axios instance com TLS validation forçado
+  // E3 + P2-C6: axios com TLS forçado E TOFU fingerprint do cert.
+  // No primeiro sync sucesso, grava fingerprint256 do peer cert. Nas próximas
+  // requisições, compara — se mudou, aborta e exige reconexão.
   buildAxiosConfig() {
+    const agent = new https.Agent({
+      rejectUnauthorized: true, // E3: NUNCA aceita cert inválido
+      // P2-C6: hook para capturar fingerprint do peer cert.
+      checkServerIdentity: (host, cert) => {
+        const tls = require('tls');
+        const defaultCheck = tls.checkServerIdentity(host, cert);
+        if (defaultCheck) return defaultCheck; // hostname mismatch / SAN
+        const fp = cert.fingerprint256;
+        if (this.knownFingerprint) {
+          if (this.knownFingerprint !== fp) {
+            return new Error(
+              `Cert fingerprint mudou (TOFU): conhecido=${this.knownFingerprint.slice(0, 16)}... atual=${fp.slice(0, 16)}... — reconecte`
+            );
+          }
+        } else {
+          // Trust on First Use — grava na próxima saveConfig.
+          this._pendingFingerprint = fp;
+        }
+        return undefined; // OK
+      },
+    });
     return {
       headers: { Authorization: `Bearer ${this.token}` },
       timeout: 15000,
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: true, // E3: NUNCA aceita cert inválido
-      }),
+      httpsAgent: agent,
     };
   }
 
@@ -338,12 +414,33 @@ class SyncService {
       const remoteChanges = remoteRes.data?.data || remoteRes.data || {};
       const totalRemote = await this.applyRemoteChanges(remoteChanges);
 
+      // P2-C6: commit fingerprint capturado em TOFU.
+      if (this._pendingFingerprint && !this.knownFingerprint) {
+        this.knownFingerprint = this._pendingFingerprint;
+        console.log(`[SyncService] TOFU fingerprint gravado: ${this.knownFingerprint.slice(0, 16)}...`);
+      }
+      this._pendingFingerprint = null;
+
       this.lastSync = new Date().toISOString();
       this.lastError = null;
       this.saveConfig();
 
       return { success: true, pushed: changes.length, pulled: totalRemote, at: this.lastSync };
     } catch (error) {
+      // P2-A8: 401/403 — token expirado/inválido. Desabilitar sync para evitar
+      // loop infinito de retries. UI deve mostrar reconnect.
+      const status = error.response?.status;
+      if (status === 401 || status === 403) {
+        this.enabled = false;
+        this.lastError = `Token cloud expirado ou inválido (HTTP ${status}) — reconecte`;
+        if (this.interval) {
+          clearInterval(this.interval);
+          this.interval = null;
+        }
+        this.saveConfig();
+        console.warn('[SyncService] Auth falhou, sync desabilitado:', this.lastError);
+        return { success: false, error: this.lastError, requiresReauth: true };
+      }
       this.lastError = error.message;
       console.error('[SyncService] Erro:', error.message);
       return { success: false, error: error.message };
@@ -395,17 +492,19 @@ class SyncService {
         try {
           const sanitized = sanitizeRow(table, row);
           if (!sanitized || !sanitized.id) continue;
-          // E6: tenant isolation — rejeitar se salao_id existe e não é o local
+          // E6 + P2-C5: tenant isolation — rejeitar se salao_id existe e não
+          // é o local. localSalaoId é resolvido dinamicamente do JWT/DB.
+          const localSalaoId = this.getLocalSalaoId();
           if (sanitized.salao_id !== undefined && sanitized.salao_id !== null) {
-            if (Number(sanitized.salao_id) !== Number(this.localSalaoId)) {
+            if (Number(sanitized.salao_id) !== Number(localSalaoId)) {
               console.warn(
-                `[SyncService] DROP ${table}#${sanitized.id} — salao_id=${sanitized.salao_id} != local=${this.localSalaoId}`
+                `[SyncService] DROP ${table}#${sanitized.id} — salao_id=${sanitized.salao_id} != local=${localSalaoId}`
               );
               continue;
             }
           } else {
             // Forçar salao_id local se ausente
-            sanitized.salao_id = this.localSalaoId;
+            sanitized.salao_id = localSalaoId;
           }
           await this.upsertRow(table, sanitized);
           total++;

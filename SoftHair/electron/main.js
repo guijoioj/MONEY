@@ -25,6 +25,21 @@ const fs = require('fs');
 const http = require('http');
 const crypto = require('crypto');
 
+// P2-C1: módulo compartilhado para JWT secret. Mesma fonte que middleware/auth.js.
+function getSecretsLib() {
+  // Em prod, o backend foi copiado para resources/backend/. Em dev, repo direto.
+  const candidates = [
+    path.join(process.resourcesPath || '', 'backend', 'src', 'lib', 'secrets.js'),
+    path.join(__dirname, '..', 'backend', 'src', 'lib', 'secrets.js'),
+  ];
+  for (const p of candidates) {
+    try {
+      if (p && fs.existsSync(p)) return require(p);
+    } catch (_) { /* skip */ }
+  }
+  return null;
+}
+
 let mainWindow;
 let backendProcess;
 let isQuitting = false;
@@ -54,26 +69,51 @@ function getResourcePath(relativePath) {
   return path.join(__dirname, '..', relativePath);
 }
 
-// E1: gera/carrega JWT_SECRET persistido em userData/SoftHair/database/secrets.json (chmod 0o600).
+// P2-C1/P2-C2/P2-B1/P2-B5: delega para o módulo compartilhado backend/src/lib/secrets.js
+// Garante que main.js e backend embarcado leiam o MESMO arquivo, com write atomic.
 function loadJwtSecret(dataDir) {
+  const secretsLib = getSecretsLib();
+  if (secretsLib && typeof secretsLib.resolveJwtSecret === 'function') {
+    try {
+      // P2-B5: em prod, falhar visivelmente se não conseguir persistir.
+      const requirePersisted = app.isPackaged;
+      return secretsLib.resolveJwtSecret({ dataDir, requirePersisted });
+    } catch (e) {
+      console.error('[Electron] Falha ao resolver JWT secret via lib:', e.message);
+      if (app.isPackaged) {
+        try {
+          dialog.showErrorBox(
+            'SoftHair',
+            'Não foi possível persistir credenciais de segurança. Verifique permissões do diretório userData.'
+          );
+        } catch (_) { /* noop */ }
+        app.exit(1);
+      }
+      // Em dev, gera efêmero.
+      return crypto.randomBytes(32).toString('hex');
+    }
+  }
+  // Fallback (extremamente improvável: secrets.js não encontrado).
+  console.error('[Electron] secrets.js lib não encontrado. Usando fallback inline.');
   const secretsFile = path.join(dataDir, 'secrets.json');
   try {
     if (fs.existsSync(secretsFile)) {
       const cfg = JSON.parse(fs.readFileSync(secretsFile, 'utf-8'));
       if (cfg.jwtSecret && cfg.jwtSecret.length >= 32) return cfg.jwtSecret;
     }
-    const generated = crypto.randomBytes(48).toString('hex');
-    fs.writeFileSync(
-      secretsFile,
-      JSON.stringify({ jwtSecret: generated, createdAt: new Date().toISOString() }, null, 2),
-      { mode: 0o600 }
-    );
+    // P2-B1: 32 bytes
+    const generated = crypto.randomBytes(32).toString('hex');
+    const tmp = secretsFile + '.' + process.pid + '.' + Date.now() + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify({ jwtSecret: generated, createdAt: new Date().toISOString() }, null, 2), { mode: 0o600 });
+    try { fs.renameSync(tmp, secretsFile); } catch (_) {
+      try { fs.unlinkSync(secretsFile); } catch (_) { /* noop */ }
+      fs.renameSync(tmp, secretsFile);
+    }
     try { fs.chmodSync(secretsFile, 0o600); } catch (_) { /* Windows */ }
     return generated;
   } catch (e) {
     console.error('[Electron] Falha ao carregar/gerar JWT secret:', e.message);
-    // Fallback efêmero — só para esta execução.
-    return crypto.randomBytes(48).toString('hex');
+    return crypto.randomBytes(32).toString('hex');
   }
 }
 
@@ -350,6 +390,9 @@ process.on('unhandledRejection', (reason) => {
 });
 
 app.whenReady().then(() => {
+  // P2-A1: expor isPackaged via env para o preload (process.env.ELECTRON_IS_PACKAGED).
+  process.env.ELECTRON_IS_PACKAGED = String(!!app.isPackaged);
+
   if (!isDev) {
     startBackend();
     waitForBackend(60, 500, createWindow);
