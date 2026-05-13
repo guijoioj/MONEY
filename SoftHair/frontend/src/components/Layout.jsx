@@ -19,6 +19,7 @@ import {
   Bell,
   BarChart3,
   Inbox,
+  Cloud,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
@@ -97,6 +98,7 @@ export default function Layout() {
     { to: '/fechamento', icon: ClipboardCheck, label: 'Fechamento' },
     { to: '/backup', icon: Database, label: 'Backup' },
     { to: '/notificacoes', icon: Bell, label: 'Notificações', badge: notifCount },
+    { to: '/sync', icon: Cloud, label: 'Sync Cloud' },
     { to: '/customizacao', icon: Palette, label: 'Personalizar' },
     { to: '/configuracoes', icon: Settings, label: 'Configurações' },
   ];

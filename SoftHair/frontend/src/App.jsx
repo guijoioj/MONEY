@@ -19,6 +19,7 @@ import Customizacao from './pages/Customizacao';
 import Configuracoes from './pages/Configuracoes';
 import Notificacoes from './pages/Notificacoes';
 import Solicitacoes from './pages/Solicitacoes';
+import Sync from './pages/Sync';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -82,6 +83,7 @@ export default function App() {
         <Route path="customizacao" element={<Customizacao />} />
         <Route path="configuracoes" element={<Configuracoes />} />
         <Route path="notificacoes" element={<Notificacoes />} />
+        <Route path="sync" element={<Sync />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
