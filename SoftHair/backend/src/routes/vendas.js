@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
 const { validateId } = require('../middleware/validateId');
 const { query, queryOne, queryRun, withTransaction } = require('../config/database');
+const { validateFKs } = require('../lib/tenant');
 
 // P2-A2 (E28): valida `:id` numérico.
 router.param('id', validateId);
@@ -71,8 +72,39 @@ router.post('/', authMiddleware, [
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
+    const { cliente_id, profissional_id, tipo, status, valor_total, desconto, valor_final, forma_pagamento, observacoes, itens } = req.body;
+
+    // P3-C4: tenant validation para cliente, profissional, e cada produto_id em itens.
+    const fkRefs = [];
+    if (cliente_id) fkRefs.push({ table: 'clientes', id: cliente_id });
+    if (profissional_id) fkRefs.push({ table: 'profissionais', id: profissional_id });
+    if (Array.isArray(itens)) {
+      for (const item of itens) {
+        if (item.produto_id) fkRefs.push({ table: 'produtos', id: item.produto_id });
+      }
+    }
+    const badFK = await validateFKs(fkRefs, req.salaoId);
+    if (badFK) {
+      return res.status(400).json({
+        success: false,
+        error: `Referência inválida: ${badFK.table}#${badFK.id} não pertence a este salão`,
+      });
+    }
+
+    // P3-C5: validar estoque suficiente ANTES da transação (defesa em profundidade)
+    // O guard atomic está no UPDATE com WHERE quantidade_estoque >= ?.
+    if (Array.isArray(itens)) {
+      for (const item of itens) {
+        if (!Number.isInteger(item.quantidade) || item.quantidade <= 0) {
+          return res.status(400).json({
+            success: false,
+            error: 'Quantidade deve ser um inteiro positivo',
+          });
+        }
+      }
+    }
+
     const result = await withTransaction(async (client) => {
-      const { cliente_id, profissional_id, tipo, status, valor_total, desconto, valor_final, forma_pagamento, observacoes, itens } = req.body;
       const insertVenda = await client.query(
         `INSERT INTO vendas (salao_id, cliente_id, profissional_id, tipo, status, valor_total, desconto, valor_final, forma_pagamento, observacoes)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -87,14 +119,22 @@ router.post('/', authMiddleware, [
 
       if (itens && Array.isArray(itens)) {
         for (const item of itens) {
+          // P3-C5: UPDATE atomic com guard de estoque — se quantidade insuficiente,
+          // rowCount=0 e abortamos a transação (throw cai no catch da withTransaction).
+          const upd = await client.query(
+            `UPDATE produtos SET quantidade_estoque = quantidade_estoque - ?
+             WHERE id = ? AND quantidade_estoque >= ?`,
+            [item.quantidade, item.produto_id, item.quantidade]
+          );
+          if (!upd.rowCount || upd.rowCount === 0) {
+            const err = new Error(`Estoque insuficiente para produto#${item.produto_id}`);
+            err.statusCode = 409;
+            throw err;
+          }
           await client.query(
             `INSERT INTO venda_itens (venda_id, produto_id, quantidade, preco_unitario, valor_total)
              VALUES (?, ?, ?, ?, ?)`,
             [vendaId, item.produto_id, item.quantidade, item.preco_unitario, item.quantidade * item.preco_unitario]
-          );
-          await client.query(
-            `UPDATE produtos SET quantidade_estoque = quantidade_estoque - ? WHERE id = ?`,
-            [item.quantidade, item.produto_id]
           );
         }
       }
@@ -105,7 +145,8 @@ router.post('/', authMiddleware, [
 
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    const status = error.statusCode || 500;
+    res.status(status).json({ success: false, error: error.message });
   }
 });
 

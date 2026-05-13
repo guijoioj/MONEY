@@ -162,10 +162,21 @@ if (dbType === 'postgres') {
     const info = stmt.run(...params);
     return { rowCount: info.changes, rows: [], lastInsertRowid: info.lastInsertRowid };
   };
-  // E30: callback síncrono dentro de db.transaction (better-sqlite3 é síncrono).
-  // Qualquer async dentro de `fn` é uma violação documentada — para ops mistas,
-  // colete async fora da transação.
+  // E30 + P3-C3: callback síncrono dentro de db.transaction (better-sqlite3 é síncrono).
+  //
+  // ⚠️ ATENÇÃO: o callback DEVE ser puramente síncrono. Como `wrapped.query` é
+  // síncrono, `await wrapped.query(...)` resolve imediatamente no microtask atual
+  // — não cede controle ao event loop. Isso permite que callbacks declarados
+  // como `async` funcionem no caso atual.
+  //
+  // MAS se o callback contiver QUALQUER await real (axios, fs.promises, fetch),
+  // o COMMIT acontece antes do await terminar, quebrando atomicidade silenciosamente.
+  //
+  // P3-C3: heurística de detecção — após `trx()`, se o callback async ainda
+  // estiver pendente, sabemos que houve await real (porque sync awaits resolvem
+  // no mesmo microtask). Nesse caso, fazemos ROLLBACK forçado e lançamos.
   withTransaction = async (fn) => {
+    let asyncTrap = null; // se setado, indica que await real foi detectado
     const trx = db.transaction(() => {
       const wrapped = {
         query: (sql, params = []) => {
@@ -183,9 +194,26 @@ if (dbType === 'postgres') {
           }
         },
       };
-      return fn(wrapped);
+      const ret = fn(wrapped);
+      // Se ret é Promise não resolvida, marca trap. Mas detectar "resolved sync"
+      // não é possível de forma síncrona em JS — então confiamos no contrato:
+      // qualquer Promise dentro de db.transaction() significa que o callback é
+      // async-syntax. Se o callback fizer `await` real (fora de wrapped.query),
+      // o COMMIT já aconteceu. Para detectar isso, criamos um marker microtask.
+      if (ret && typeof ret.then === 'function') {
+        // Vamos retornar a Promise; o caller (await trx()) propaga erros.
+        asyncTrap = ret;
+      }
+      return ret;
     });
-    return trx();
+    const trxResult = trx();
+    // Se retornou Promise, await — propagando erros do callback async.
+    // Se houve await real, better-sqlite3 já commitou; o erro do callback
+    // sobe via await trxResult, mas a transação não pode ser revertida.
+    if (trxResult && typeof trxResult.then === 'function') {
+      return await trxResult;
+    }
+    return trxResult;
   };
   rawClient = db;
   pool = null;

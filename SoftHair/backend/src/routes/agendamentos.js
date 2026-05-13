@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
 const { validateId } = require('../middleware/validateId');
 const { query, queryOne, queryRun } = require('../config/database');
+const { validateFKs } = require('../lib/tenant');
 
 // P2-A2 (E28): valida `:id` numérico.
 router.param('id', validateId);
@@ -85,6 +86,23 @@ router.post('/', authMiddleware, [
     }
 
     const { cliente_id, profissional_id, servico_id, data_hora, duracao_minutos, observacoes, valor, status } = req.body;
+
+    // P3-C4: validar que IDs de FK pertencem ao mesmo salão (cross-tenant guard)
+    const badFK = await validateFKs(
+      [
+        { table: 'clientes', id: cliente_id },
+        { table: 'profissionais', id: profissional_id },
+        { table: 'servicos', id: servico_id },
+      ],
+      req.salaoId
+    );
+    if (badFK) {
+      return res.status(400).json({
+        success: false,
+        error: `Referência inválida: ${badFK.table}#${badFK.id} não pertence a este salão`,
+      });
+    }
+
     const result = await queryRun(
       `INSERT INTO agendamentos (salao_id, cliente_id, profissional_id, servico_id, data_hora, duracao_minutos, observacoes, valor, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -108,6 +126,21 @@ router.put('/:id', authMiddleware, async (req, res) => {
       [req.params.id, req.salaoId]
     );
     if (!existing) return res.status(404).json({ success: false, error: 'Agendamento não encontrado' });
+
+    // P3-C4: validar FKs que estão sendo trocadas
+    const fkRefs = [];
+    if (req.body.cliente_id !== undefined) fkRefs.push({ table: 'clientes', id: req.body.cliente_id });
+    if (req.body.profissional_id !== undefined) fkRefs.push({ table: 'profissionais', id: req.body.profissional_id });
+    if (req.body.servico_id !== undefined) fkRefs.push({ table: 'servicos', id: req.body.servico_id });
+    if (fkRefs.length > 0) {
+      const badFK = await validateFKs(fkRefs, req.salaoId);
+      if (badFK) {
+        return res.status(400).json({
+          success: false,
+          error: `Referência inválida: ${badFK.table}#${badFK.id} não pertence a este salão`,
+        });
+      }
+    }
 
     const fields = ['cliente_id', 'profissional_id', 'servico_id', 'data_hora', 'duracao_minutos', 'observacoes', 'valor', 'status'];
     const updates = [];

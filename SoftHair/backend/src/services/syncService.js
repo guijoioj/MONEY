@@ -202,34 +202,59 @@ class SyncService {
     this.loadConfig();
   }
 
-  // P2-C5: resolve salao_id local do banco (single-tenant local) ou do JWT cloud.
+  // P2-C5 + P3-C7: resolve salao_id local do banco (single-tenant local) ou do JWT cloud.
   // Cacheia o resultado para evitar query a cada pull.
+  //
+  // P3-C7: se o JWT cloud informa um salao_id que NÃO existe no banco local
+  // (admin trocou de salão na cloud sem reset local), warn e cai no salao_id do
+  // banco local. Sem esse check, o pull tenta inserir rows com salao_id=2
+  // mas saloes(id=2) não existe → FK violation silenciosa.
   getLocalSalaoId() {
     if (this._localSalaoId) return this._localSalaoId;
+    let jwtSalaoId = null;
     try {
-      // Estratégia 1: tenta extrair do JWT cloud (mais autoritativo).
       if (this.token) {
         const parts = this.token.split('.');
         if (parts.length === 3) {
           const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
           if (payload.salaoId) {
-            this._localSalaoId = Number(payload.salaoId);
-            return this._localSalaoId;
+            jwtSalaoId = Number(payload.salaoId);
           }
         }
       }
-    } catch (_) { /* JWT inválido, cai pro fallback */ }
+    } catch (_) { /* JWT inválido */ }
+
+    let localSalaoId = null;
     try {
-      // Estratégia 2: primeiro salão do banco local.
       const row = queryOne(`SELECT id FROM saloes ORDER BY id LIMIT 1`);
-      if (row && row.id) {
-        this._localSalaoId = Number(row.id);
-        return this._localSalaoId;
-      }
+      if (row && row.id) localSalaoId = Number(row.id);
     } catch (e) {
-      console.error('[SyncService] Falha ao resolver localSalaoId do DB:', e.message);
+      console.error('[SyncService] Falha ao resolver salao_id local do DB:', e.message);
     }
-    // Fallback final.
+
+    // P3-C7: se o JWT informa um salao_id, validar que existe localmente.
+    if (jwtSalaoId !== null) {
+      try {
+        const exists = queryOne(`SELECT id FROM saloes WHERE id = ?`, [jwtSalaoId]);
+        if (exists) {
+          this._localSalaoId = jwtSalaoId;
+          return this._localSalaoId;
+        }
+        // Mismatch — informar via lastError para UI mostrar.
+        this.lastError =
+          `JWT cloud informa salao_id=${jwtSalaoId} mas não existe localmente. ` +
+          `Usando salao_id=${localSalaoId || 1} do banco local. Reconecte com o salão correto.`;
+        console.warn('[SyncService]', this.lastError);
+      } catch (e) {
+        console.error('[SyncService] Falha ao validar salao_id do JWT:', e.message);
+      }
+    }
+
+    if (localSalaoId !== null) {
+      this._localSalaoId = localSalaoId;
+      return this._localSalaoId;
+    }
+    // Fallback final (banco fresh sem salão).
     this._localSalaoId = 1;
     return this._localSalaoId;
   }

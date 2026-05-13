@@ -197,7 +197,9 @@ function initDb() {
   //   - se BOOTSTRAP_ADMIN_EMAIL + BOOTSTRAP_ADMIN_PASSWORD estão setados, usamos
   //   - senão, criamos apenas o salão. O frontend deve oferecer setup wizard
   //     que cria o primeiro admin com senha forte do usuário (POST /api/auth/bootstrap-admin).
+  // P3-C6: também valida `isStrongPassword` (não só `.length >= 8`).
   const bcrypt = require('bcryptjs');
+  const { isStrongPassword } = require('../lib/passwords');
   const existing = db.prepare('SELECT COUNT(*) as n FROM saloes').get() || { n: 0 };
   if ((existing.n || 0) === 0) {
     const info = db.prepare(
@@ -210,14 +212,23 @@ function initDb() {
     const bootstrapEmail = process.env.BOOTSTRAP_ADMIN_EMAIL;
     const bootstrapPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD;
 
-    if (bootstrapEmail && bootstrapPassword && bootstrapPassword.length >= 8) {
-      const senhaHash = bcrypt.hashSync(bootstrapPassword, 10);
-      db.prepare(
-        `INSERT INTO usuarios (email, senha_hash, nome, tipo, salao_id, ativo)
-         VALUES (?, ?, ?, 'admin', ?, 1)`
-      ).run(bootstrapEmail, senhaHash, 'Administrador', salaoId);
-      // E22/E20: nunca logar senha em plaintext, mesmo bootstrap.
-      console.log(`[initDb] Admin bootstrap criado: ${bootstrapEmail}`);
+    if (bootstrapEmail && bootstrapPassword) {
+      // P3-C6: rejeitar senha fraca, mesmo via env. Senão, deixa para setup wizard.
+      if (!isStrongPassword(bootstrapPassword)) {
+        console.warn(
+          '[initDb] BOOTSTRAP_ADMIN_PASSWORD não atende a política de senha forte ' +
+          '(8+ chars, maiúscula, minúscula, dígito, não comum). ' +
+          'Admin NÃO foi criado — use o setup wizard na UI.'
+        );
+      } else {
+        const senhaHash = bcrypt.hashSync(bootstrapPassword, 10);
+        db.prepare(
+          `INSERT INTO usuarios (email, senha_hash, nome, tipo, salao_id, ativo)
+           VALUES (?, ?, ?, 'admin', ?, 1)`
+        ).run(bootstrapEmail, senhaHash, 'Administrador', salaoId);
+        // E22/E20: nunca logar senha em plaintext, mesmo bootstrap.
+        console.log(`[initDb] Admin bootstrap criado: ${bootstrapEmail}`);
+      }
     } else {
       console.log('[initDb] Nenhum admin criado — use o setup wizard na UI para criar o primeiro admin.');
     }

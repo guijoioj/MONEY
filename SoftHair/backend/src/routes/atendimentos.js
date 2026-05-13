@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
 const { validateId } = require('../middleware/validateId');
 const { query, queryOne, queryRun } = require('../config/database');
+const { validateFKs } = require('../lib/tenant');
 
 // P2-A2 (E28): valida `:id` numérico.
 router.param('id', validateId);
@@ -66,6 +67,24 @@ router.post('/', authMiddleware, [
     }
 
     const { cliente_id, profissional_id, servico_id, agendamento_id, valor, status, observacoes } = req.body;
+
+    // P3-C4: tenant validation para FKs
+    const badFK = await validateFKs(
+      [
+        { table: 'clientes', id: cliente_id },
+        { table: 'profissionais', id: profissional_id },
+        { table: 'servicos', id: servico_id },
+        { table: 'agendamentos', id: agendamento_id },
+      ],
+      req.salaoId
+    );
+    if (badFK) {
+      return res.status(400).json({
+        success: false,
+        error: `Referência inválida: ${badFK.table}#${badFK.id} não pertence a este salão`,
+      });
+    }
+
     const result = await queryRun(
       `INSERT INTO atendimentos (salao_id, cliente_id, profissional_id, servico_id, agendamento_id, valor, status, observacoes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -88,6 +107,20 @@ router.put('/:id', authMiddleware, async (req, res) => {
       [req.params.id, req.salaoId]
     );
     if (!existing) return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
+
+    // P3-C4: validar agendamento_id se alterado
+    if (req.body.agendamento_id !== undefined && req.body.agendamento_id !== null) {
+      const badFK = await validateFKs(
+        [{ table: 'agendamentos', id: req.body.agendamento_id }],
+        req.salaoId
+      );
+      if (badFK) {
+        return res.status(400).json({
+          success: false,
+          error: `Referência inválida: ${badFK.table}#${badFK.id} não pertence a este salão`,
+        });
+      }
+    }
 
     const fields = ['status', 'observacoes', 'valor', 'agendamento_id'];
     const updates = [];
@@ -114,14 +147,24 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// P3-A10: soft delete em vez de DELETE — preserva audit trail e suporta LGPD/recovery.
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const result = await queryRun(
-      `DELETE FROM atendimentos WHERE id = ? AND salao_id = ?`,
+      `UPDATE atendimentos SET status = 'cancelado', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+       WHERE id = ? AND salao_id = ? AND status != 'cancelado'`,
       [req.params.id, req.salaoId]
     );
-    if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
-    res.json({ success: true, message: 'Atendimento removido' });
+    if (result.rowCount === 0) {
+      // Pode ser que não exista OU já estava cancelado — diferenciamos
+      const exists = await queryOne(
+        `SELECT id FROM atendimentos WHERE id = ? AND salao_id = ?`,
+        [req.params.id, req.salaoId]
+      );
+      if (!exists) return res.status(404).json({ success: false, error: 'Atendimento não encontrado' });
+      return res.json({ success: true, message: 'Atendimento já estava cancelado' });
+    }
+    res.json({ success: true, message: 'Atendimento cancelado' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

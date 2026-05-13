@@ -1,32 +1,36 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const { query, queryOne, queryRun, withTransaction, dbType } = require('../config/database');
 const { authMiddleware, generateToken } = require('../middleware/auth');
+const { isStrongPassword } = require('../lib/passwords');
 
-// P2-A6: lista mínima de senhas comuns rejeitadas no setup.
-const COMMON_PASSWORDS = new Set([
-  'password', 'senha123', '12345678', '123456789', '1234567890',
-  'qwerty123', 'admin123', 'admin1234', 'softhair', 'softhair1',
-  'salaobeleza', 'cabeleireiro', 'password1', 'iloveyou', 'aaaaaaaa',
-  'abcdefgh', '11111111', '00000000', 'changeme', 'letmein123',
-]);
+// P3-C2: rate-limit anti-brute-force.
+// 5 tentativas / 15 min por IP em /login. Pesos: limite curto.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Muitas tentativas. Tente novamente em 15 minutos.' },
+  skipSuccessfulRequests: true,
+});
 
-// P2-A6: valida complexidade — ao menos uma letra minúscula, uma maiúscula,
-// um dígito; 8+ chars; não pode ser senha trivial.
-function isStrongPassword(senha) {
-  if (typeof senha !== 'string' || senha.length < 8) return false;
-  if (COMMON_PASSWORDS.has(senha.toLowerCase())) return false;
-  if (!/[a-z]/.test(senha)) return false;
-  if (!/[A-Z]/.test(senha)) return false;
-  if (!/\d/.test(senha)) return false;
-  return true;
-}
+// P3-C2: setup endpoints menos sensíveis mas vale limitar pra evitar enumeration.
+const setupLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Muitas requisições. Tente novamente em 1 minuto.' },
+});
 
 // E4: setup endpoint público — apenas quando não há admins ainda.
 // Permite o app criar o primeiro admin via UI (setup wizard) com senha forte.
-router.get('/needs-setup', async (req, res) => {
+// P3-C2: setupLimiter — 10/min para evitar enumeration.
+router.get('/needs-setup', setupLimiter, async (req, res) => {
   try {
     const row = await queryOne(`SELECT COUNT(*) as n FROM usuarios WHERE ativo = 1`);
     res.json({ success: true, data: { needsSetup: !row || (row.n || 0) === 0 } });
@@ -35,7 +39,7 @@ router.get('/needs-setup', async (req, res) => {
   }
 });
 
-router.post('/bootstrap-admin', [
+router.post('/bootstrap-admin', setupLimiter, [
   body('email').isEmail().withMessage('Email inválido'),
   body('senha').custom((value) => {
     if (!isStrongPassword(value)) {
@@ -98,7 +102,7 @@ router.post('/bootstrap-admin', [
   }
 });
 
-router.post('/login', [
+router.post('/login', loginLimiter, [
   body('email').isEmail().withMessage('Email inválido'),
   body('senha').notEmpty().withMessage('Senha é obrigatória'),
 ], async (req, res) => {
