@@ -53,6 +53,57 @@ async function createBackup() {
   return { filename, path: dest, size: fs.statSync(dest).size };
 }
 
+// P5-A7: backup automático diário com retention de 7 dias.
+// Cron simples (setInterval 1h) que dispara backup se último é >24h atrás.
+// Roda apenas para SQLite e fora de testes.
+function pruneOldBackups(maxKeep = 7) {
+  try {
+    ensureBackupsDir();
+    const files = fs.readdirSync(BACKUPS_DIR)
+      .filter((f) => f.endsWith('.db'))
+      .map((f) => {
+        const full = path.join(BACKUPS_DIR, f);
+        return { name: f, full, mtime: fs.statSync(full).mtimeMs };
+      })
+      .sort((a, b) => b.mtime - a.mtime);
+    for (const file of files.slice(maxKeep)) {
+      try { fs.unlinkSync(file.full); } catch (_) { /* skip */ }
+    }
+  } catch (e) {
+    console.warn('[backup] pruneOldBackups falhou:', e.message);
+  }
+}
+
+function startAutomaticBackup() {
+  if (dbType !== 'sqlite') return;
+  if (process.env.NODE_ENV === 'test') return;
+  const ONE_HOUR_MS = 60 * 60 * 1000;
+  const TARGET_INTERVAL_MS = 24 * ONE_HOUR_MS;
+  const tick = async () => {
+    try {
+      ensureBackupsDir();
+      const files = fs.readdirSync(BACKUPS_DIR)
+        .filter((f) => f.endsWith('.db'))
+        .map((f) => fs.statSync(path.join(BACKUPS_DIR, f)).mtimeMs)
+        .sort((a, b) => b - a);
+      const latest = files[0] || 0;
+      if (Date.now() - latest >= TARGET_INTERVAL_MS) {
+        console.log('[backup] Disparando backup automático diário...');
+        await createBackup();
+        pruneOldBackups(7);
+      }
+    } catch (e) {
+      console.warn('[backup] backup automático falhou:', e.message);
+    }
+  };
+  // Roda 30s após boot (dá tempo do server inicializar) e depois a cada hora.
+  setTimeout(tick, 30 * 1000);
+  setInterval(tick, ONE_HOUR_MS);
+}
+
+// Inicia o cron no require do módulo — chamado uma vez por boot do backend.
+startAutomaticBackup();
+
 router.post('/create', authMiddleware, async (req, res) => {
   try {
     const result = await createBackup();

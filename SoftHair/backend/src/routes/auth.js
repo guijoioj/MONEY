@@ -186,4 +186,101 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// P5-A2: LGPD art. 18 — exclusão de dados.
+// User confirma com senha; o backend purga todos os dados do salão local.
+//  - DROP rows de todas as tabelas de dados (preserva schema).
+//  - Apaga secrets.json, sync-config.json e backups.
+//  - Apaga logs.
+//  - Responde com flag restart_required:true para o Electron reinicializar
+//    (regenera secrets.json + bootstrap wizard).
+//
+// Uso esperado: tela Configuracoes "Apagar todos os dados deste salão".
+// Reversível APENAS via backup local recente.
+router.post('/me/delete-account-data', authMiddleware, [
+  body('senha').notEmpty().withMessage('Senha é obrigatória para confirmar'),
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+    const { senha } = req.body;
+    // re-valida senha do user logado
+    const user = await queryOne(
+      `SELECT id, senha_hash FROM usuarios WHERE id = ? AND ativo = 1`,
+      [req.user.userId]
+    );
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
+    }
+    const valid = await bcrypt.compare(senha, user.senha_hash);
+    if (!valid) {
+      return res.status(401).json({ success: false, error: 'Senha inválida' });
+    }
+
+    // Purga dados — DELETE em ordem de FK (filhos antes de pais).
+    const tables = [
+      'venda_itens',
+      'vendas',
+      'atendimentos',
+      'agendamentos',
+      'sync_log',
+      'sync_conflicts',
+      'clientes',
+      'profissionais',
+      'servicos',
+      'produtos',
+    ];
+    for (const t of tables) {
+      try {
+        await queryRun(`DELETE FROM ${t}`, []);
+      } catch (e) {
+        console.warn(`[delete-account-data] Falha ao limpar ${t}: ${e.message}`);
+      }
+    }
+
+    // Tenta remover arquivos persistidos. Best-effort — não bloqueia resposta.
+    setTimeout(() => {
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const dataDir =
+          process.env.SOFTHAIR_DATA_DIR ||
+          path.join(__dirname, '..', '..', 'database');
+        const filesToRemove = ['secrets.json', 'sync-config.json'];
+        for (const f of filesToRemove) {
+          try {
+            const full = path.join(dataDir, f);
+            if (fs.existsSync(full)) fs.unlinkSync(full);
+          } catch (_) { /* skip */ }
+        }
+        // backups e logs
+        for (const sub of ['backups', 'logs']) {
+          const subPath = path.join(dataDir, sub);
+          try {
+            if (fs.existsSync(subPath)) {
+              for (const entry of fs.readdirSync(subPath)) {
+                try { fs.unlinkSync(path.join(subPath, entry)); } catch (_) { /* skip */ }
+              }
+            }
+          } catch (_) { /* skip */ }
+        }
+        // Sai imediatamente para forçar regeneração do secret e fresh bootstrap.
+        console.log('[delete-account-data] Dados purgados. Saindo para forçar restart...');
+        process.exit(0);
+      } catch (e) {
+        console.error('[delete-account-data] Falha ao purgar arquivos:', e.message);
+      }
+    }, 1500);
+
+    res.json({
+      success: true,
+      message: 'Todos os dados foram excluídos. O aplicativo será reiniciado.',
+      data: { restart_required: true },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

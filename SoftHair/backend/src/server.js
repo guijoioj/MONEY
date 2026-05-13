@@ -70,11 +70,16 @@ app.use((req, res, next) => {
 });
 
 // ── CORS ── (E7: restrito a origens locais/electron file://)
+// P5-A8: ALLOWED_ORIGINS construído dinamicamente lendo PORT do env para
+// que custom port (raro mas suportado) funcione em dev.
+const PORT_FOR_CORS = parseInt(process.env.PORT) || 3001;
 const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:3001',
   'http://127.0.0.1:3001',
+  `http://localhost:${PORT_FOR_CORS}`,
+  `http://127.0.0.1:${PORT_FOR_CORS}`,
 ];
 app.use(
   cors({
@@ -120,12 +125,16 @@ app.use('/api/vendas', require('./routes/vendas'));
 app.use('/api/sync', require('./routes/sync'));
 // P4-C6: backup local implementado (mínimo: create / list / restore SQLite).
 app.use('/api/backup', require('./routes/backup'));
+// P5-A1: comissões + despesas implementadas (cálculos básicos, suficientes
+// para fechamento financeiro do salão).
+app.use('/api/comissoes', require('./routes/comissoes'));
+app.use('/api/despesas', require('./routes/despesas'));
 
 // Stub para endpoints ainda não portados.
 // E23 + P4-M6: stubs sinalizam `stub: true` para UI mostrar banner "em desenvolvimento"
 // em vez de "lista vazia". Apenas exceções (notificacoes/count, saloes/me) retornam
 // dados reais para não quebrar componentes que dependem deles.
-['notificacoes', 'fechamentos', 'comissoes', 'creditos', 'historico', 'saloes'].forEach((rota) => {
+['notificacoes', 'fechamentos', 'creditos', 'historico', 'saloes'].forEach((rota) => {
   app.use(`/api/${rota}`, authMiddleware, (req, res) => {
     if (req.method === 'GET') {
       if (rota === 'notificacoes' && req.path === '/count') {

@@ -96,10 +96,15 @@ router.post('/now', authMiddleware, async (req, res) => {
   res.json({ success: result.success !== false, data: { ...result, ...syncService.getStatus() } });
 });
 
-// E9: disconnect endpoint — limpa cloudUrl, token, lastSync
-router.post('/disconnect', authMiddleware, (req, res) => {
-  syncService.disconnect();
-  res.json({ success: true, data: syncService.getStatus() });
+// E9 + P5-A10: disconnect endpoint — limpa cloudUrl, token, lastSync.
+// Agora awaits para garantir que sync em progresso terminou antes de responder.
+router.post('/disconnect', authMiddleware, async (req, res) => {
+  try {
+    await syncService.disconnect();
+    res.json({ success: true, data: syncService.getStatus() });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
 });
 
 router.post('/login-cloud', authMiddleware, async (req, res) => {

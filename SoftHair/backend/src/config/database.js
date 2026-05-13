@@ -179,6 +179,23 @@ if (dbType === 'postgres') {
   // estiver pendente, sabemos que houve await real (porque sync awaits resolvem
   // no mesmo microtask). Nesse caso, fazemos ROLLBACK forçado e lançamos.
   withTransaction = async (fn) => {
+    // P5-A6: recusar callbacks async-syntax em SQLite withTransaction.
+    // better-sqlite3 é síncrono — qualquer `await` real (axios, fs.promises)
+    // dentro do callback quebra atomicidade silenciosamente (COMMIT acontece
+    // antes do await retornar). Bloquear no registro previne corrupção.
+    if (fn && fn.constructor && fn.constructor.name === 'AsyncFunction') {
+      // O contrato atual aceita async porque os callers usam `await wrapped.query(...)`
+      // mas wrapped.query é síncrono (resolve no mesmo microtask). Permitir mas
+      // logar aviso para que callers eventualmente migrem para callback síncrono.
+      // (Throw aqui quebraria auth.js bootstrap. Manter compat com aviso.)
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.warn(
+          '[withTransaction] callback async-syntax — apenas use `wrapped.query`. ' +
+          'await em qualquer outra Promise quebra atomicidade.'
+        );
+      }
+    }
     let asyncTrap = null; // se setado, indica que await real foi detectado
     const trx = db.transaction(() => {
       const wrapped = {

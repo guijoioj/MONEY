@@ -290,6 +290,14 @@ class SyncService {
   }
 
   saveConfig() {
+    // P5-A10: durante disconnect em curso, NUNCA regrava o arquivo
+    // — protege da race "axios em flight termina e saveConfig recria sync-config.json".
+    if (this._disconnecting) return;
+    // P5-M7: não criar arquivo vazio se não há config relevante.
+    if (!this.cloudUrl && !this.token && !this.enabled && !this.lastSync) {
+      try { if (fs.existsSync(CONFIG_FILE)) fs.unlinkSync(CONFIG_FILE); } catch (_) { /* noop */ }
+      return;
+    }
     try {
       if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
       const payload = {
@@ -337,38 +345,49 @@ class SyncService {
   }
 
   /**
-   * E9 + P2-B4: desconectar — limpa todos os campos de credencial em memória,
-   * e remove o arquivo do disco (em vez de escrever '{}') — não deixa rastro.
+   * E9 + P2-B4 + P5-A10: desconectar — limpa todos os campos de credencial
+   * em memória e remove o arquivo do disco. Aguarda sync em progresso antes
+   * de zerar fields para evitar race onde axios call em flight regrava o
+   * arquivo via saveConfig().
    */
-  disconnect() {
-    this.stop();
-    this.cloudUrl = null;
-    this.token = null;
-    this.enabled = false;
-    this.lastSync = null;
-    this.lastError = null;
-    this.knownFingerprint = null;
-    this._pendingFingerprint = null;
-    this._localSalaoId = null;
+  async disconnect() {
+    this._disconnecting = true;
     try {
-      if (fs.existsSync(CONFIG_FILE)) {
-        fs.unlinkSync(CONFIG_FILE);
+      this.stop();
+      // P5-A10: aguarda sync em progresso terminar para não recriar o arquivo.
+      if (this.syncPromise) {
+        try { await this.syncPromise; } catch (_) { /* ignora erro de sync abortado */ }
       }
-    } catch (e) {
-      console.error('[SyncService] Falha ao limpar config:', e.message);
-      // fallback: sobrescreve com {} se unlink falhar
+      this.cloudUrl = null;
+      this.token = null;
+      this.enabled = false;
+      this.lastSync = null;
+      this.lastError = null;
+      this.knownFingerprint = null;
+      this._pendingFingerprint = null;
+      this._localSalaoId = null;
       try {
-        fs.writeFileSync(CONFIG_FILE, '{}', { mode: 0o600 });
-        try { fs.chmodSync(CONFIG_FILE, 0o600); } catch (_) { /* noop */ }
-      } catch (e2) {
-        // P3-M3: último recurso — truncate para ficar vazio
+        if (fs.existsSync(CONFIG_FILE)) {
+          fs.unlinkSync(CONFIG_FILE);
+        }
+      } catch (e) {
+        console.error('[SyncService] Falha ao limpar config:', e.message);
+        // fallback: sobrescreve com {} se unlink falhar
         try {
-          fs.truncateSync(CONFIG_FILE, 0);
-          console.warn('[SyncService] disconnect: truncate fallback aplicado');
-        } catch (_) {
-          console.error('[SyncService] disconnect: ALL FALLBACKS FAILED — credenciais podem persistir em disco.');
+          fs.writeFileSync(CONFIG_FILE, '{}', { mode: 0o600 });
+          try { fs.chmodSync(CONFIG_FILE, 0o600); } catch (_) { /* noop */ }
+        } catch (e2) {
+          // P3-M3: último recurso — truncate para ficar vazio
+          try {
+            fs.truncateSync(CONFIG_FILE, 0);
+            console.warn('[SyncService] disconnect: truncate fallback aplicado');
+          } catch (_) {
+            console.error('[SyncService] disconnect: ALL FALLBACKS FAILED — credenciais podem persistir em disco.');
+          }
         }
       }
+    } finally {
+      this._disconnecting = false;
     }
   }
 

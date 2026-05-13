@@ -169,6 +169,22 @@ function initDb() {
       valor_total REAL NOT NULL
     );
 
+    -- P5-A1: tabela mínima de despesas para o salão.
+    -- Não-sincronizada com cloud (despesas locais ao salão; sync opcional roadmap).
+    CREATE TABLE IF NOT EXISTS despesas (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      salao_id INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      descricao TEXT NOT NULL,
+      valor REAL NOT NULL,
+      categoria TEXT,
+      data TEXT NOT NULL,
+      observacoes TEXT,
+      created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_despesas_salao ON despesas(salao_id);
+    CREATE INDEX IF NOT EXISTS idx_despesas_data ON despesas(data);
+
     CREATE TABLE IF NOT EXISTS sync_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       tabela TEXT NOT NULL,
