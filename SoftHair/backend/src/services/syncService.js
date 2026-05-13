@@ -300,7 +300,8 @@ class SyncService {
   }
 
   /**
-   * E9: desconectar — limpa todos os campos de credencial em memória e disco.
+   * E9 + P2-B4: desconectar — limpa todos os campos de credencial em memória,
+   * e remove o arquivo do disco (em vez de escrever '{}') — não deixa rastro.
    */
   disconnect() {
     this.stop();
@@ -310,13 +311,19 @@ class SyncService {
     this.lastSync = null;
     this.lastError = null;
     this.knownFingerprint = null;
+    this._pendingFingerprint = null;
+    this._localSalaoId = null;
     try {
       if (fs.existsSync(CONFIG_FILE)) {
-        fs.writeFileSync(CONFIG_FILE, '{}', { mode: 0o600 });
-        try { fs.chmodSync(CONFIG_FILE, 0o600); } catch (_) { /* noop */ }
+        fs.unlinkSync(CONFIG_FILE);
       }
     } catch (e) {
       console.error('[SyncService] Falha ao limpar config:', e.message);
+      // fallback: sobrescreve com {} se unlink falhar
+      try {
+        fs.writeFileSync(CONFIG_FILE, '{}', { mode: 0o600 });
+        try { fs.chmodSync(CONFIG_FILE, 0o600); } catch (_) { /* noop */ }
+      } catch (_) { /* noop */ }
     }
   }
 
@@ -516,21 +523,44 @@ class SyncService {
     return total;
   }
 
+  // P2-B2: upsert atomic. Tenta INSERT ... ON CONFLICT(id) DO UPDATE,
+  // suportado tanto por SQLite quanto Postgres. Em fallback, SELECT + UPDATE/INSERT.
   async upsertRow(table, row) {
-    const existing = await queryOne(`SELECT id FROM ${table} WHERE id = ?`, [row.id]);
     const cols = Object.keys(row);
-    if (existing) {
-      const sets = cols.filter((c) => c !== 'id').map((c) => `${c} = ?`);
-      const values = cols.filter((c) => c !== 'id').map((c) => row[c]);
-      values.push(row.id);
-      await queryRun(`UPDATE ${table} SET ${sets.join(', ')} WHERE id = ?`, values);
-    } else {
-      const placeholders = cols.map(() => '?').join(', ');
-      const values = cols.map((c) => row[c]);
-      await queryRun(
-        `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${placeholders})`,
-        values
-      );
+    if (cols.length === 0) return;
+    const placeholders = cols.map(() => '?').join(', ');
+    const values = cols.map((c) => row[c]);
+    const updates = cols
+      .filter((c) => c !== 'id')
+      .map((c) => `${c} = excluded.${c}`)
+      .join(', ');
+    try {
+      if (updates) {
+        await queryRun(
+          `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${placeholders})
+           ON CONFLICT(id) DO UPDATE SET ${updates}`,
+          values
+        );
+      } else {
+        await queryRun(
+          `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${placeholders})`,
+          values
+        );
+      }
+    } catch (e) {
+      // Fallback (caso o adapter não suporte ON CONFLICT) — comportamento legado
+      const existing = await queryOne(`SELECT id FROM ${table} WHERE id = ?`, [row.id]);
+      if (existing) {
+        const sets = cols.filter((c) => c !== 'id').map((c) => `${c} = ?`);
+        const updValues = cols.filter((c) => c !== 'id').map((c) => row[c]);
+        updValues.push(row.id);
+        await queryRun(`UPDATE ${table} SET ${sets.join(', ')} WHERE id = ?`, updValues);
+      } else {
+        await queryRun(
+          `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${placeholders})`,
+          values
+        );
+      }
     }
   }
 
