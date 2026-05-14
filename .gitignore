@@ -20,6 +20,9 @@ jspm_packages/
 # Build files
 dist/
 build/
+# P7-C1: exceção — SoftHair/build/ contém icons de electron-builder, deve ser versionado
+!SoftHair/build/
+!SoftHair/build/**
 
 # IDE files
 .idea/

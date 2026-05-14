@@ -64,7 +64,7 @@
     },
     "mac": {
       "target": "dmg",
-      "icon": "build/icon.icns"
+      "icon": "build/icon.png"
     },
     "linux": {
       "target": ["AppImage"],
@@ -90,6 +90,10 @@
   "author": "SoftHair",
   "license": "MIT",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/guijoioj/SoftHair.git"
+  },
   "dependencies": {
     "electron-updater": "^6.3.9"
   },
