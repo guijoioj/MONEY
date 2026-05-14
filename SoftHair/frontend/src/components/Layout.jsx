@@ -33,6 +33,7 @@ import api from '../services/api';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useTheme } from '../context/ThemeContext';
 import StubGlobalBanner from './StubGlobalBanner';
+import BackendDownBanner from './BackendDownBanner';
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -396,6 +397,8 @@ export default function Layout() {
       </div>
       {/* P5-C3: banner global escuta eventos stub do interceptor de axios */}
       <StubGlobalBanner />
+      {/* P7-M4: banner global de erro de rede / backend morto */}
+      <BackendDownBanner />
     </div>
   );
 }

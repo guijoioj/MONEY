@@ -187,7 +187,19 @@ export default function Despesas() {
           </thead>
           <tbody className="divide-y divide-gray-50">
             {(listData || []).length === 0 ? (
-              <tr><td colSpan={5} className="text-center py-8 text-gray-400 dark:text-gray-500">Nenhuma despesa encontrada</td></tr>
+              <tr><td colSpan={5} className="py-10">
+                {/* P7-M2: empty state com CTA — em vez de só "Nenhuma despesa encontrada", oferece ação. */}
+                <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
+                  <DollarSign className="w-10 h-10 opacity-40" />
+                  <p className="text-sm">Nenhuma despesa registrada neste período.</p>
+                  <button
+                    onClick={() => setModal('new')}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                  >
+                    <Plus className="w-4 h-4" /> Criar primeira despesa
+                  </button>
+                </div>
+              </td></tr>
             ) : (listData || []).map(d => (
               <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                 <td className="px-4 py-3">

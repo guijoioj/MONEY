@@ -39,7 +39,9 @@ app.use(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
+        // P7-M10: backend serve apenas JSON — img-src restrito a 'none'.
+        // Defesa em profundidade adicional (CSP do frontend continua permitindo https:).
+        imgSrc: ["'none'"],
         connectSrc: ["'self'", 'http://127.0.0.1:*'],
         fontSrc: ["'self'", 'data:'],
         frameAncestors: ["'none'"],

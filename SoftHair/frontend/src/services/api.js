@@ -45,6 +45,8 @@ api.interceptors.request.use((config) => {
 // P5-C3 + P5-M5: interceptor detecta stub:true e emite CustomEvent global.
 // Componente <StubGlobalBanner> escuta e renderiza aviso "em desenvolvimento".
 // Mantém telas existentes intocadas — adição é puramente aditiva.
+// P7-M4: também dispara `softhair:backend-down` em erro de rede (ECONNREFUSED,
+// timeout, !error.response) para Layout mostrar banner "modo offline temporário".
 api.interceptors.response.use(
   (response) => {
     try {
@@ -58,6 +60,14 @@ api.interceptors.response.use(
           }));
         }
       }
+      // P7-M4: backend voltou — limpar banner caso esteja ativo.
+      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+        try {
+          window.dispatchEvent(new CustomEvent('softhair:backend-up', {
+            detail: { timestamp: Date.now() },
+          }));
+        } catch (_) { /* noop */ }
+      }
     } catch (_) { /* never break the response on telemetry */ }
     return response;
   },
@@ -65,6 +75,18 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       clearTokens();
       window.location.href = isFileProtocol ? '/#/login' : '/login';
+    }
+    // P7-M4: detectar erro de rede (!error.response significa que axios não
+    // recebeu nenhuma resposta — ECONNREFUSED/timeout/DNS fail). Em Electron,
+    // típicamente significa que o backend embarcado morreu ou está reiniciando.
+    if (!error.response && typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      try {
+        const url = error.config?.url || '';
+        const code = error.code || '';
+        window.dispatchEvent(new CustomEvent('softhair:backend-down', {
+          detail: { url, code, message: error.message, timestamp: Date.now() },
+        }));
+      } catch (_) { /* noop */ }
     }
     return Promise.reject(error);
   }

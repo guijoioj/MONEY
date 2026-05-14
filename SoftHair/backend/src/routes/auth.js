@@ -294,4 +294,86 @@ router.post('/me/delete-account-data', authMiddleware, [
   }
 });
 
+// P7-M1: LGPD art. 18 — direito à portabilidade.
+// Titular pode requerer cópia legível dos dados do salão. Retornamos JSON
+// agregado com todas as entidades. Não usa ZIP (sem dep adicional); browser
+// pode usar JSON.stringify para abrir/salvar como arquivo.
+//
+// Output: { salao, clientes, profissionais, servicos, produtos, agendamentos,
+//           atendimentos, vendas, despesas, exportedAt, version }
+router.get('/me/export-data', authMiddleware, async (req, res) => {
+  try {
+    const salaoId = req.salaoId || req.user?.salao_id || 1;
+    const safeQuery = async (sql, params) => {
+      try { return await query(sql, params); } catch (_) { return []; }
+    };
+
+    const [salao] = await safeQuery(
+      `SELECT id, nome, endereco, telefone, email, cnpj, logo_url, ativo, created_at, updated_at
+       FROM saloes WHERE id = ?`,
+      [salaoId]
+    );
+    const clientes = await safeQuery(
+      `SELECT * FROM clientes WHERE salao_id = ? ORDER BY id`,
+      [salaoId]
+    );
+    const profissionais = await safeQuery(
+      `SELECT id, salao_id, nome, telefone, email, cpf, especialidade,
+              comissao_percentual, foto_url, ativo, created_at, updated_at
+       FROM profissionais WHERE salao_id = ? ORDER BY id`,
+      [salaoId]
+    );
+    const servicos = await safeQuery(
+      `SELECT * FROM servicos WHERE salao_id = ? ORDER BY id`,
+      [salaoId]
+    );
+    const produtos = await safeQuery(
+      `SELECT * FROM produtos WHERE salao_id = ? ORDER BY id`,
+      [salaoId]
+    );
+    const agendamentos = await safeQuery(
+      `SELECT * FROM agendamentos WHERE salao_id = ? ORDER BY data_hora DESC`,
+      [salaoId]
+    );
+    const atendimentos = await safeQuery(
+      `SELECT * FROM atendimentos WHERE salao_id = ? ORDER BY created_at DESC`,
+      [salaoId]
+    );
+    const vendas = await safeQuery(
+      `SELECT * FROM vendas WHERE salao_id = ? ORDER BY created_at DESC`,
+      [salaoId]
+    );
+    const despesas = await safeQuery(
+      `SELECT * FROM despesas WHERE salao_id = ? ORDER BY data DESC`,
+      [salaoId]
+    );
+
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      salao: salao || { id: salaoId },
+      clientes,
+      profissionais,
+      servicos,
+      produtos,
+      agendamentos,
+      atendimentos,
+      vendas,
+      despesas,
+      _readme: 'Dados exportados conforme LGPD art. 18 (portabilidade). ' +
+               'Senhas, tokens e secrets nunca são incluídos. ' +
+               'Para reimportar em outra instalação, contate o suporte.',
+    };
+
+    // Header sugere ao browser salvar como arquivo
+    res.setHeader('Content-Disposition',
+      `attachment; filename="softhair-export-${new Date().toISOString().slice(0, 10)}.json"`);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.json(payload);
+  } catch (e) {
+    console.error('[export-data] erro:', e.message);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 module.exports = router;

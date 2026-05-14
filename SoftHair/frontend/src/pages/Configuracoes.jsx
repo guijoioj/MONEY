@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { User, CheckCircle, Keyboard, Trash2, ShieldAlert, AlertCircle } from 'lucide-react';
+import { User, CheckCircle, Keyboard, Trash2, ShieldAlert, AlertCircle, Download } from 'lucide-react';
 import api from '../services/api';
 
 const DEFAULT_BIND = { key: 'k', meta: true, ctrl: false };
@@ -122,6 +122,32 @@ export default function Configuracoes() {
   const [bind, setBind] = useState(getBind);
   const [recording, setRecording] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  // P7-M1: LGPD art. 18 — direito à portabilidade.
+  // Baixa JSON com todos os dados do salão. Backend nunca inclui senhas/tokens.
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await api.get('/auth/me/export-data', { responseType: 'blob' });
+      const blob = new Blob([res.data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `softhair-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setMessage('Dados exportados!');
+      setTimeout(() => setMessage(''), 2500);
+    } catch (e) {
+      setMessage('Falha ao exportar: ' + (e.response?.data?.error || e.message));
+      setTimeout(() => setMessage(''), 4000);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     if (!recording) return;
@@ -199,6 +225,24 @@ export default function Configuracoes() {
           vendas, despesas, etc.) e arquivos de configuração. Útil para descomissionar
           a instalação ou transferir o computador. <strong>Faça backup antes</strong>.
         </p>
+
+        {/* P7-M1: LGPD art. 18 - portabilidade. Botão separado para baixar dados. */}
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <p className="text-sm text-gray-700 dark:text-gray-200 mb-2">
+            <strong>Exportar dados</strong> — baixe um arquivo JSON com todos os dados
+            deste salão (clientes, agendamentos, vendas, etc.). Conforme LGPD art. 18,
+            direito à portabilidade. Senhas e tokens nunca são incluídos.
+          </p>
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-blue-500 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-50"
+          >
+            <Download size={16} />
+            {exporting ? 'Exportando...' : 'Exportar dados (LGPD)'}
+          </button>
+        </div>
+
         <button
           onClick={() => setDeleteOpen(true)}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm border-2 border-red-500 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"

@@ -106,6 +106,25 @@ function setupAutoUpdater() {
       console.log('[AutoUpdater] update baixado:', info && info.version);
       appendLog(`[autoUpdater] update-downloaded: ${info && info.version}`);
       if (!mainWindow || mainWindow.isDestroyed()) return;
+      // P7-M6: incluir release notes no dialog para o user saber o que mudou.
+      // electron-updater envia `info.releaseNotes` (string ou array de {note, version}).
+      // Sanitizamos HTML simples e limitamos a 600 chars para não estourar dialog.
+      let releaseNotes = '';
+      try {
+        const raw = info && info.releaseNotes;
+        if (typeof raw === 'string') {
+          releaseNotes = raw;
+        } else if (Array.isArray(raw)) {
+          releaseNotes = raw.map((n) => `v${n.version}: ${n.note}`).join('\n\n');
+        }
+        // strip tags HTML simples + colapsa whitespace
+        releaseNotes = String(releaseNotes || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        if (releaseNotes.length > 600) releaseNotes = releaseNotes.slice(0, 600) + '...';
+      } catch (_) { releaseNotes = ''; }
+      const baseDetail = 'Clique em "Reiniciar agora" para aplicar imediatamente, ou escolha "Depois" para instalar quando fechar o app.';
+      const detail = releaseNotes
+        ? `Novidades da versão:\n\n${releaseNotes}\n\n${baseDetail}`
+        : baseDetail;
       // Dialog não intrusiva — botão "Reiniciar agora" / "Depois"
       try {
         dialog.showMessageBox(mainWindow, {
@@ -115,7 +134,7 @@ function setupAutoUpdater() {
           cancelId: 1,
           title: 'SoftHair — atualização disponível',
           message: `Versão ${info && info.version ? info.version : 'nova'} pronta para instalar.`,
-          detail: 'Clique em "Reiniciar agora" para aplicar imediatamente, ou escolha "Depois" para instalar quando fechar o app.',
+          detail,
         }).then((res) => {
           if (res.response === 0) {
             try { autoUpdater.quitAndInstall(); } catch (e) {
