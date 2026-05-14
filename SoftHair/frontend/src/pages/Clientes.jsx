@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clientesAPI, vendasAPI, fechamentosAPI } from '../services/api';
+import { validateForm } from '../services/validators';
 import { Search, Plus, Edit2, Trash2, X, Phone, Mail, Calendar, AlertCircle, User, Clock, Package, Scissors, DollarSign, Star, TrendingUp, ShoppingCart, ShoppingBag, Gift } from 'lucide-react';
 
 export default function Clientes() {
@@ -63,6 +64,8 @@ export default function Clientes() {
 
   const queryClient = useQueryClient();
   const [error, setError] = useState('');
+  // P7-A3: erros field-level para validação client-side antes do round-trip backend.
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const createMutation = useMutation({
     mutationFn: (data) => clientesAPI.create(data),
@@ -125,6 +128,21 @@ export default function Clientes() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // P7-A3: validação client-side antes do round-trip. Backend continua revalidando.
+    const v = validateForm(formData, {
+      nome: { required: true },
+      telefone: { telefone: true, required: true },
+      email: { email: true },
+      cpf: { cpf: true },
+      dataNascimento: { date: true },
+    });
+    if (!v.valid) {
+      setFieldErrors(v.errors);
+      setError('Verifique os campos destacados antes de salvar.');
+      return;
+    }
+    setFieldErrors({});
+    setError('');
     if (editingCliente) {
       updateMutation.mutate({ id: editingCliente.id, data: formData });
     } else {
@@ -263,19 +281,22 @@ export default function Clientes() {
                 <input
                   type="text"
                   value={formData.telefone}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  onChange={(e) => { setFormData({ ...formData, telefone: e.target.value }); if (fieldErrors.telefone) setFieldErrors({ ...fieldErrors, telefone: null }); }}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${fieldErrors.telefone ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'}`}
+                  placeholder="(11) 98765-4321"
                   required
                 />
+                {fieldErrors.telefone && <p className="text-xs text-red-600 mt-1">{fieldErrors.telefone}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Email</label>
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  onChange={(e) => { setFormData({ ...formData, email: e.target.value }); if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: null }); }}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${fieldErrors.email ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'}`}
                 />
+                {fieldErrors.email && <p className="text-xs text-red-600 mt-1">{fieldErrors.email}</p>}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -283,9 +304,11 @@ export default function Clientes() {
                   <input
                     type="text"
                     value={formData.cpf}
-                    onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    onChange={(e) => { setFormData({ ...formData, cpf: e.target.value }); if (fieldErrors.cpf) setFieldErrors({ ...fieldErrors, cpf: null }); }}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${fieldErrors.cpf ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'}`}
+                    placeholder="000.000.000-00"
                   />
+                  {fieldErrors.cpf && <p className="text-xs text-red-600 mt-1">{fieldErrors.cpf}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nascimento</label>

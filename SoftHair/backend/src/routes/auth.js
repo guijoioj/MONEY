@@ -67,6 +67,10 @@ router.post('/bootstrap-admin', setupLimiter, [
     // P4-A7: contar TODOS os usuários (mesmo ativo=0). Senão, atacante que
     // consegue UPDATE usuarios SET ativo=0 (ou recover usuário antigo) consegue
     // re-bootstrap e criar admin novo. Bootstrap só roda em banco truly fresh.
+    // P7-A10: além do COUNT+INSERT dentro da transação, fazemos um INSERT condicional
+    // (WHERE NOT EXISTS) — em SQLite WAL com 2 requests paralelos, COUNT pode dar 0
+    // em ambos antes do primeiro commit. Com `WHERE NOT EXISTS`, o segundo INSERT
+    // simplesmente não insere (0 rows changed), garantindo atomicidade real.
     const result = await withTransaction(async (client) => {
       const checkRes = await client.query(
         `SELECT COUNT(*) as n FROM usuarios`,
@@ -86,11 +90,18 @@ router.post('/bootstrap-admin', setupLimiter, [
       if (!salaoRow || !salaoRow.id) {
         return { ok: false, code: 500, error: 'Salão default não encontrado' };
       }
-      // INSERT idempotente: UNIQUE(email) já bloqueia duplo.
-      await client.query(
-        `INSERT INTO usuarios (email, senha_hash, nome, tipo, salao_id, ativo) VALUES (?, ?, ?, 'admin', ?, 1)`,
+      // P7-A10: INSERT condicional. Se 2 requests paralelos chegam, apenas 1 insere.
+      const insRes = await client.query(
+        `INSERT INTO usuarios (email, senha_hash, nome, tipo, salao_id, ativo)
+         SELECT ?, ?, ?, 'admin', ?, 1
+         WHERE NOT EXISTS (SELECT 1 FROM usuarios)`,
         [email, senha_hash, nome, salaoRow.id]
       );
+      // Em SQLite, queryRun wrap retorna { rowCount }. Em pg, idem.
+      const inserted = Number(insRes?.rowCount ?? insRes?.changes ?? 0);
+      if (inserted === 0) {
+        return { ok: false, code: 409, error: 'Outra requisição criou o admin primeiro. Tente fazer login.' };
+      }
       return { ok: true };
     });
 

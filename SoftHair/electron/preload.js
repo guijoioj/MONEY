@@ -45,6 +45,24 @@ function onNavigate(callback) {
   return () => ipcRenderer.removeListener('navigate', handler);
 }
 
+// P7-A7: notificação nativa do desktop. Em Windows mostra toast na barra de
+// tarefas; em macOS no Notification Center; em Linux via libnotify. Usado
+// para alertar owner do salão sobre novo agendamento mesmo quando o app está
+// fora de foco (mobile envia → cloud → sync → owner não vê popup in-app).
+//
+// Validação: title/body devem ser strings curtas, sanitizadas para evitar
+// injection se renderer comprometido tentasse abrir URL malicioso (Linux
+// suporta tags HTML em body em algumas distros).
+function safeNotify({ title, body }) {
+  if (typeof title !== 'string' || typeof body !== 'string') return;
+  // Limita tamanho para evitar abuse
+  const safeTitle = title.slice(0, 100);
+  const safeBody = body.slice(0, 300).replace(/<[^>]*>/g, ''); // strip tags
+  try {
+    ipcRenderer.send('softhair:notify', { title: safeTitle, body: safeBody });
+  } catch (_) { /* swallow */ }
+}
+
 contextBridge.exposeInMainWorld('electron', {
   openExternal: safeOpenExternal,
   // E26: não expor path absoluto. Apenas se está empacotado e a plataforma.
@@ -54,4 +72,6 @@ contextBridge.exposeInMainWorld('electron', {
   showItemInFolder: safeShowItemInFolder,
   // P2-M4: navegação a partir do menu da app.
   onNavigate,
+  // P7-A7: notificação nativa para alertas off-focus.
+  notify: safeNotify,
 });

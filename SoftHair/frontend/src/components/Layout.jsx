@@ -90,6 +90,18 @@ export default function Layout() {
       setPopups((prev) => [...prev, { id, titulo: data.titulo, mensagem: data.mensagem, pedido: data.pedido }]);
       setSolicitacoesCount((prev) => prev + 1);
       setTimeout(() => setPopups((prev) => prev.filter((p) => p.id !== id)), 8000);
+      // P7-A7: notificação nativa do desktop quando app está fora de foco.
+      // Disparada via IPC → electron Notification API (toast/Notification Center/libnotify).
+      try {
+        if (typeof document !== 'undefined' && document.hidden &&
+            typeof window !== 'undefined' && window.electron &&
+            typeof window.electron.notify === 'function') {
+          window.electron.notify({
+            title: data.titulo || 'SoftHair — nova solicitação',
+            body: data.mensagem || 'Você recebeu um novo pedido de agendamento.',
+          });
+        }
+      } catch (_) { /* noop — notify é best-effort */ }
     }
   }, []);
 

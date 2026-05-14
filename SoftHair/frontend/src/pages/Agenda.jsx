@@ -812,7 +812,8 @@ export default function Agenda() {
         tipo: 'erro', 
         mensagem: `Bloqueado: ${profissionalConflito?.nome || 'Profissional'} já tem agendamento marcado para ${horarioConflito.toLocaleDateString('pt-BR')} às ${horarioConflito.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} com ${clienteConflito?.nome || 'outro cliente'}. Escolha outro horário.` 
       });
-      console.log('Conflito detectado:', conflitos);
+      // P7-A2: console.log removido — vazava cliente_id/profissional_id/horarios
+      // via Electron logs persistidos em userData/logs/. Aviso já visível na UI.
       return;
     }
 

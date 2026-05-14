@@ -18,7 +18,7 @@
  *   - E21: rotação básica de logs
  */
 
-const { app, BrowserWindow, shell, Menu, dialog, crashReporter, session, safeStorage } = require('electron');
+const { app, BrowserWindow, shell, Menu, dialog, crashReporter, session, safeStorage, ipcMain, Notification } = require('electron');
 const path = require('path');
 const { fork } = require('child_process');
 const fs = require('fs');
@@ -759,6 +759,51 @@ function purgeOldCrashDumps() {
     }
   } catch (_) { /* não-fatal */ }
 }
+
+// P7-A7: handler de notificação nativa. Renderer envia title+body sanitizados
+// via window.electron.notify(). Mostramos Notification do sistema operacional
+// (toast no Windows / Notification Center no macOS / libnotify em Linux).
+// Rate-limit defensivo: max 5 notifications/30s para evitar spam acidental.
+const _notifyTimestamps = [];
+ipcMain.on('softhair:notify', (_event, payload) => {
+  if (!payload || typeof payload !== 'object') return;
+  const { title, body } = payload;
+  if (typeof title !== 'string' || typeof body !== 'string') return;
+  // Sanitização adicional (defesa em profundidade)
+  const safeTitle = title.slice(0, 100);
+  const safeBody = body.slice(0, 300).replace(/<[^>]*>/g, '');
+  // Rate-limit: max 5 em 30s
+  const now = Date.now();
+  while (_notifyTimestamps.length && _notifyTimestamps[0] < now - 30000) {
+    _notifyTimestamps.shift();
+  }
+  if (_notifyTimestamps.length >= 5) {
+    appendLog('[notify] rate-limited (>5/30s)');
+    return;
+  }
+  _notifyTimestamps.push(now);
+  try {
+    if (Notification.isSupported()) {
+      const n = new Notification({
+        title: safeTitle,
+        body: safeBody,
+        silent: false,
+      });
+      // Clicar volta o foco para a janela do app
+      n.on('click', () => {
+        try {
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+          }
+        } catch (_) { /* noop */ }
+      });
+      n.show();
+    }
+  } catch (e) {
+    appendLog(`[notify] error: ${e.message}`);
+  }
+});
 
 app.whenReady().then(() => {
   // P2-A1: expor isPackaged via env para o preload (process.env.ELECTRON_IS_PACKAGED).

@@ -92,7 +92,8 @@ router.post('/configure', authMiddleware, (req, res) => {
 });
 
 router.post('/now', authMiddleware, async (req, res) => {
-  const result = await syncService.syncNow();
+  // P7-A5: force=true ignora backoff porque é ação manual do user.
+  const result = await syncService.syncNow({ force: true });
   res.json({ success: result.success !== false, data: { ...result, ...syncService.getStatus() } });
 });
 

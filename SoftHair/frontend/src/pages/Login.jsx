@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Scissors, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../services/api';
+import { passwordStrengthScore, passwordStrengthLabel, passwordStrengthColor } from '../services/validators';
 
 /**
  * P3-C1: setup wizard inline na primeira utilização.
@@ -19,6 +20,52 @@ function isStrongPasswordClient(senha) {
   if (!/[A-Z]/.test(senha)) return false;
   if (!/\d/.test(senha)) return false;
   return true;
+}
+
+/**
+ * P7-A4: PasswordStrength indicator visual em tempo real.
+ *
+ * Mostra barra colorida + checklist abaixo do input para feedback
+ * imediato durante setup wizard. Score 0-4 via passwordStrengthScore.
+ */
+function PasswordStrength({ value }) {
+  if (!value) return null;
+  const score = passwordStrengthScore(value);
+  const label = passwordStrengthLabel(score);
+  const color = passwordStrengthColor(score);
+  const checks = [
+    { ok: value.length >= 8, label: '8+ caracteres' },
+    { ok: /[A-Z]/.test(value), label: 'maiúscula' },
+    { ok: /[a-z]/.test(value), label: 'minúscula' },
+    { ok: /\d/.test(value), label: 'número' },
+  ];
+  return (
+    <div className="mt-2 space-y-1.5">
+      <div className="flex items-center gap-2">
+        <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div
+            className="h-full transition-all duration-200 rounded-full"
+            style={{ width: `${(score / 4) * 100}%`, backgroundColor: color }}
+          />
+        </div>
+        {label && (
+          <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color }}>
+            {label}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+        {checks.map((c) => (
+          <span
+            key={c.label}
+            className={`text-[10px] flex items-center gap-0.5 ${c.ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}`}
+          >
+            {c.ok ? '✓' : '○'} {c.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default function Login() {
@@ -211,9 +258,8 @@ export default function Login() {
                 minLength={8}
                 disabled={setupLoading || setupSuccess}
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Mínimo 8 caracteres com pelo menos uma maiúscula, uma minúscula e um número.
-              </p>
+              {/* P7-A4: indicador de força em tempo real */}
+              <PasswordStrength value={setupPassword} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Confirme a senha</label>

@@ -32,6 +32,11 @@ const DATA_DIR =
 
 const CONFIG_FILE = path.join(DATA_DIR, 'sync-config.json');
 
+// P7-A8: limite de mudanças por ciclo. Sem isso, salão offline há 6 meses
+// envia 50K rows em um único push (timeout, 100% CPU, OOM). Com limit, sync
+// é progressivo — cada ciclo envia até N mudanças até zerar a backlog.
+const SYNC_BATCH_LIMIT = parseInt(process.env.SYNC_BATCH_LIMIT, 10) || 5000;
+
 // Tabelas autorizadas no sync — devem espelhar TABLE_COLUMNS abaixo
 const SYNC_TABLES = [
   'clientes',
@@ -205,6 +210,12 @@ class SyncService {
     // iteração de _doSync (já que applyRemoteChanges seta updated_at = now).
     // Mantido no formato `${table}#${id}` → expira após 2 iterações.
     this._recentlyPulled = new Map(); // key → ttlCount
+
+    // P7-A5: retry exponencial. Após falha transitória (network blip, 5xx),
+    // adia próximo tick por base × 2^N até MAX_BACKOFF_MS. Em sucesso, reseta.
+    this._consecutiveFailures = 0;
+    this._nextAllowedSyncAt = 0;
+    this.MAX_BACKOFF_MS = 5 * 60 * 1000; // 5min
 
     this.loadConfig();
   }
@@ -451,8 +462,9 @@ class SyncService {
 
   /**
    * E18: mutex via promise — reentrante seguro.
+   * P7-A5: respeita backoff exponencial em falhas transitórias.
    */
-  async syncNow() {
+  async syncNow({ force = false } = {}) {
     if (this.syncPromise) return this.syncPromise;
     if (!this.enabled || !this.cloudUrl || !this.token) {
       return { skipped: true, reason: 'desabilitado ou não configurado' };
@@ -461,6 +473,11 @@ class SyncService {
     if (!isValidCloudUrl(this.cloudUrl)) {
       this.lastError = 'cloudUrl inválida (apenas HTTPS ou loopback)';
       return { success: false, error: this.lastError };
+    }
+    // P7-A5: respeita janela de backoff salvo se user clicou "Sincronizar Agora" (force).
+    if (!force && Date.now() < this._nextAllowedSyncAt) {
+      const waitSec = Math.ceil((this._nextAllowedSyncAt - Date.now()) / 1000);
+      return { skipped: true, reason: `backoff ativo (${waitSec}s até próximo retry)` };
     }
 
     this.syncing = true;
@@ -505,9 +522,18 @@ class SyncService {
 
       this.lastSync = new Date().toISOString();
       this.lastError = null;
+      // P7-A5: reset backoff em sucesso.
+      this._consecutiveFailures = 0;
+      this._nextAllowedSyncAt = 0;
       this.saveConfig();
 
-      return { success: true, pushed: changes.length, pulled: totalRemote, at: this.lastSync };
+      return {
+        success: true,
+        pushed: changes.length,
+        pulled: totalRemote,
+        at: this.lastSync,
+        truncated: changes.length === SYNC_BATCH_LIMIT,
+      };
     } catch (error) {
       // P2-A8: 401/403 — token expirado/inválido. Desabilitar sync para evitar
       // loop infinito de retries. UI deve mostrar reconnect.
@@ -523,9 +549,22 @@ class SyncService {
         console.warn('[SyncService] Auth falhou, sync desabilitado:', this.lastError);
         return { success: false, error: this.lastError, requiresReauth: true };
       }
-      this.lastError = error.message;
+      // P7-A5: backoff exponencial em falhas transitórias (5xx, ECONNRESET, ETIMEDOUT).
+      // Increment counter (max 5), aplica `base * 2^N` no _nextAllowedSyncAt.
+      // Sucesso resetará para zero acima.
+      const isTransient = !status || (status >= 500 && status < 600) ||
+        /ECONNRESET|ETIMEDOUT|ENETUNREACH|EHOSTUNREACH|ECONNREFUSED/.test(error.code || '');
+      if (isTransient) {
+        this._consecutiveFailures = Math.min(this._consecutiveFailures + 1, 5);
+        const base = 30 * 1000; // 30s base
+        const delay = Math.min(base * Math.pow(2, this._consecutiveFailures - 1), this.MAX_BACKOFF_MS);
+        this._nextAllowedSyncAt = Date.now() + delay;
+        this.lastError = `${error.message} (retry em ${Math.ceil(delay / 1000)}s)`;
+      } else {
+        this.lastError = error.message;
+      }
       console.error('[SyncService] Erro:', error.message);
-      return { success: false, error: error.message };
+      return { success: false, error: this.lastError };
     }
   }
 
@@ -541,15 +580,25 @@ class SyncService {
       if (ttl <= 0) this._recentlyPulled.delete(key);
       else this._recentlyPulled.set(key, ttl - 1);
     }
+    // P7-A8: distribuir limite igualmente entre tabelas para sync progressivo.
+    // Quando há backlog grande (>5K rows), cada tabela contribui ~700 e o resto
+    // entra no próximo ciclo (next `since` move para frente quando lastSync salvar).
+    const perTable = Math.max(50, Math.floor(SYNC_BATCH_LIMIT / SYNC_TABLES.length));
     for (const t of SYNC_TABLES) {
+      if (out.length >= SYNC_BATCH_LIMIT) break;
       try {
         // E4: SELECT explícito por allowlist (em vez de SELECT *)
         const cols = TABLE_COLUMNS[t].join(', ');
+        // P7-A8: ORDER BY updated_at para sync determinístico e progressivo.
         const rows = await query(
-          `SELECT ${cols} FROM ${t} WHERE updated_at > ? OR (updated_at IS NULL AND created_at > ?)`,
-          [since, since]
+          `SELECT ${cols} FROM ${t}
+           WHERE updated_at > ? OR (updated_at IS NULL AND created_at > ?)
+           ORDER BY COALESCE(updated_at, created_at) ASC
+           LIMIT ?`,
+          [since, since, perTable]
         );
         for (const row of rows) {
+          if (out.length >= SYNC_BATCH_LIMIT) break;
           const data = sanitizeRow(t, row);
           if (!data) continue;
           // P5-M4: skip se foi recém-aplicado via pull (evita loop push-pull).
@@ -749,6 +798,10 @@ class SyncService {
       lastError: this.lastError,
       syncing: this.syncing,
       dbType,
+      // P7-A5: expor estado de backoff para UI mostrar "Aguardando Ns antes do próximo retry"
+      consecutiveFailures: this._consecutiveFailures,
+      nextAllowedSyncAt: this._nextAllowedSyncAt,
+      backoffActive: Date.now() < this._nextAllowedSyncAt,
     };
   }
 }
