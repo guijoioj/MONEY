@@ -33,6 +33,47 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// P6-C1: lista distinta de categorias usadas em produtos
+router.get('/categorias', authMiddleware, async (req, res) => {
+  try {
+    const rows = await query(
+      `SELECT DISTINCT categoria FROM produtos
+       WHERE salao_id = ? AND categoria IS NOT NULL AND categoria != ''
+       ORDER BY categoria`,
+      [req.salaoId]
+    );
+    res.json({ success: true, data: rows.map((r) => r.categoria) });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// P6-C1: ajuste de estoque atômico
+router.patch('/:id/estoque', authMiddleware, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { quantidade } = req.body || {};
+    if (!Number.isFinite(Number(quantidade))) {
+      return res.status(400).json({ success: false, error: 'quantidade obrigatória (delta numérico)' });
+    }
+    const existing = await queryOne(
+      `SELECT id, quantidade_estoque FROM produtos WHERE id = ? AND salao_id = ?`,
+      [id, req.salaoId]
+    );
+    if (!existing) return res.status(404).json({ success: false, error: 'Produto não encontrado' });
+    const novo = Math.max(0, Number(existing.quantidade_estoque || 0) + Number(quantidade));
+    await queryRun(
+      `UPDATE produtos SET quantidade_estoque = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+       WHERE id = ? AND salao_id = ?`,
+      [novo, id, req.salaoId]
+    );
+    const data = await queryOne(`SELECT * FROM produtos WHERE id = ?`, [id]);
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get('/estoque-baixo', authMiddleware, async (req, res) => {
   try {
     const data = await query(

@@ -441,7 +441,10 @@ class SyncService {
     });
     return {
       headers: { Authorization: `Bearer ${this.token}` },
-      timeout: 15000,
+      // P6-A7: 45s cobre cold start típico do Render free tier (30-60s).
+      // Antes 15s falhava na primeira request da manhã enquanto a instância
+      // estava subindo.
+      timeout: 45000,
       httpsAgent: agent,
     };
   }

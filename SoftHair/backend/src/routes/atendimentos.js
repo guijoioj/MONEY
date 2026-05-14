@@ -37,6 +37,31 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// P6-C1: marcar atendimento(s) como finalizado(s) com pagamento
+router.post('/fechamento', authMiddleware, async (req, res) => {
+  try {
+    const { atendimento_ids, forma_pagamento, observacoes } = req.body || {};
+    if (!Array.isArray(atendimento_ids) || atendimento_ids.length === 0) {
+      return res.status(400).json({ success: false, error: 'atendimento_ids deve ser array não-vazio' });
+    }
+    let count = 0;
+    for (const id of atendimento_ids) {
+      const r = await queryRun(
+        `UPDATE atendimentos
+         SET status = 'finalizado',
+             observacoes = COALESCE(?, observacoes),
+             updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+         WHERE id = ? AND salao_id = ? AND status != 'finalizado'`,
+        [observacoes || null, id, req.salaoId]
+      );
+      if (r.rowCount > 0) count++;
+    }
+    res.json({ success: true, data: { finalizados: count, forma_pagamento: forma_pagamento || null } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const data = await queryOne(

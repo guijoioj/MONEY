@@ -141,13 +141,8 @@ export const atendimentosAPI = {
   getAll: (params) => api.get('/atendimentos', { params }),
   getById: (id) => api.get(`/atendimentos/${id}`),
   create: (data) => api.post('/atendimentos', data),
-  update: (id, data) => {
-    console.log('API update - id:', id, 'data:', data);
-    return api.put(`/atendimentos/${id}`, data).then(response => {
-      console.log('API update - response:', response);
-      return response;
-    });
-  },
+  // P6-A2: console.log removido em produção (vazava data via Electron logs)
+  update: (id, data) => api.put(`/atendimentos/${id}`, data),
   delete: (id) => api.delete(`/atendimentos/${id}`),
   fechamento: (data) => api.post('/atendimentos/fechamento', data),
 };

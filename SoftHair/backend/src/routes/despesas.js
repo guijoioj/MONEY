@@ -13,13 +13,30 @@ const { validateId } = require('../middleware/validateId');
 // Aplicar validateId em todas as rotas que usam :id
 router.param('id', validateId);
 
+// P6-A1: aceitar tanto mes/ano (formato do frontend) quanto dataInicio/dataFim.
+function rangeFromQuery(q) {
+  if (q.dataInicio || q.dataFim) {
+    return { inicio: q.dataInicio || null, fim: q.dataFim || null };
+  }
+  if (q.mes && q.ano) {
+    const m = String(q.mes).padStart(2, '0');
+    const last = new Date(Number(q.ano), Number(q.mes), 0).getDate();
+    return {
+      inicio: `${q.ano}-${m}-01`,
+      fim: `${q.ano}-${m}-${String(last).padStart(2, '0')}`,
+    };
+  }
+  return { inicio: null, fim: null };
+}
+
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { dataInicio, dataFim, categoria } = req.query;
+    const { categoria } = req.query;
+    const { inicio, fim } = rangeFromQuery(req.query);
     const params = [req.salaoId || 1];
     let where = 'salao_id = ?';
-    if (dataInicio) { where += ' AND data >= ?'; params.push(dataInicio); }
-    if (dataFim) { where += ' AND data <= ?'; params.push(dataFim); }
+    if (inicio) { where += ' AND data >= ?'; params.push(inicio); }
+    if (fim) { where += ' AND data <= ?'; params.push(fim); }
     if (categoria) { where += ' AND categoria = ?'; params.push(categoria); }
     const rows = await query(
       `SELECT id, descricao, valor, categoria, data, observacoes, created_at, updated_at
@@ -37,28 +54,33 @@ router.get('/', authMiddleware, async (req, res) => {
 
 router.get('/resumo', authMiddleware, async (req, res) => {
   try {
-    const { dataInicio, dataFim } = req.query;
+    const { inicio, fim } = rangeFromQuery(req.query);
     const params = [req.salaoId || 1];
     let where = 'salao_id = ?';
-    if (dataInicio) { where += ' AND data >= ?'; params.push(dataInicio); }
-    if (dataFim) { where += ' AND data <= ?'; params.push(dataFim); }
+    if (inicio) { where += ' AND data >= ?'; params.push(inicio); }
+    if (fim) { where += ' AND data <= ?'; params.push(fim); }
     const totalRow = await queryOne(
       `SELECT COALESCE(SUM(valor), 0) AS total, COUNT(*) AS count FROM despesas WHERE ${where}`,
       params
     );
     const porCategoria = await query(
-      `SELECT categoria, COALESCE(SUM(valor), 0) AS total, COUNT(*) AS count
+      `SELECT COALESCE(categoria, 'Outros') AS categoria,
+              COALESCE(SUM(valor), 0) AS total,
+              COUNT(*) AS quantidade
        FROM despesas WHERE ${where}
        GROUP BY categoria
        ORDER BY total DESC`,
       params
     );
+    // P6-A1: retornar ambos alias para compatibilidade com clientes legados (e o
+    // frontend que lia `resumoData.categorias`).
     res.json({
       success: true,
       data: {
         total: Number(totalRow?.total || 0),
         count: Number(totalRow?.count || 0),
         porCategoria,
+        categorias: porCategoria,
       },
     });
   } catch (e) {

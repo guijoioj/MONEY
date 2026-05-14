@@ -318,9 +318,34 @@ function getLogPath() {
   }
 }
 
+// P6-A9: redact JWT-like tokens e Bearer headers em logs persistidos.
+// JWT pattern: eyJ<base64>.<base64>.<base64> — capturado por regex robusta.
+function redactSecrets(line) {
+  if (!line || typeof line !== 'string') return line;
+  return line
+    // Bearer xxx
+    .replace(/(Bearer\s+)[A-Za-z0-9_=.\-]+/gi, '$1<redacted>')
+    // JWT raw (eyJ...) — 3 segments base64
+    .replace(/eyJ[A-Za-z0-9_=\-]+\.[A-Za-z0-9_=\-]+\.[A-Za-z0-9_=\-.+/]+/g, '<jwt-redacted>')
+    // tokens em query string
+    .replace(/(token|senha|password|secret|api[_-]?key)=[^&\s]+/gi, '$1=<redacted>');
+}
+
+// P6-M5: rate-limit do appendLog — descarta floods >100 linhas/segundo.
+let _logBurstCount = 0;
+let _logBurstWindow = 0;
+
 function appendLog(line) {
   const logPath = getLogPath();
   if (!logPath) return;
+  // Rate-limit: se >100 linhas no mesmo segundo, dropa silenciosamente.
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (nowSec !== _logBurstWindow) {
+    _logBurstWindow = nowSec;
+    _logBurstCount = 0;
+  }
+  _logBurstCount++;
+  if (_logBurstCount > 100) return;
   try {
     const dir = path.dirname(logPath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -340,7 +365,9 @@ function appendLog(line) {
         } catch (_) { /* gzip falhou, mantém .old plaintext */ }
       }
     } catch (_) { /* arquivo ainda não existe */ }
-    fs.appendFileSync(logPath, `[${new Date().toISOString()}] ${line}\n`);
+    // P6-A9: aplicar redact antes de escrever
+    const safe = redactSecrets(line);
+    fs.appendFileSync(logPath, `[${new Date().toISOString()}] ${safe}\n`);
   } catch (_) { /* não-fatal */ }
 }
 

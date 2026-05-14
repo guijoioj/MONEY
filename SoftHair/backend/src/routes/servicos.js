@@ -29,6 +29,12 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// P6-C1: categorias de serviços (derivado de coluna `cor` ou nome — sem tabela própria)
+// Como `servicos` não tem campo categoria, retornamos vazio (compat com frontend).
+router.get('/categorias', authMiddleware, async (req, res) => {
+  res.json({ success: true, data: [] });
+});
+
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const data = await queryOne(

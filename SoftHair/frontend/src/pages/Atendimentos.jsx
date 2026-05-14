@@ -74,15 +74,9 @@ export default function Atendimentos() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => {
-      console.log('Update mutation - id:', id);
-      console.log('Update mutation - data:', data);
-      return atendimentosAPI.update(id, data);
-    },
-    onSuccess: (result) => {
-      console.log('Update mutation - success:', result);
-      console.log('Update mutation - status:', result?.status);
-      console.log('Update mutation - data:', result?.data);
+    // P6-A2: console.log removidos — vazavam id/data via Electron logs.
+    mutationFn: ({ id, data }) => atendimentosAPI.update(id, data),
+    onSuccess: () => {
       queryClient.invalidateQueries(['atendimentos']);
       // Adicionar pequeno delay para garantir que os dados sejam processados
       setTimeout(() => {
@@ -90,7 +84,6 @@ export default function Atendimentos() {
       }, 100);
     },
     onError: (err) => {
-      console.error('Update mutation - error:', err);
       alert(err.response?.data?.error || err.message || 'Erro ao salvar atendimento');
     },
   });
@@ -150,9 +143,7 @@ export default function Atendimentos() {
     try {
       const res = await atendimentosAPI.getById(id);
       const atendimento = res.data.data;
-
-      console.log('loadAtendimentoForEdit - atendimento:', atendimento);
-      console.log('loadAtendimentoForEdit - atendimento.id:', atendimento?.id);
+      // P6-A2: console.log removido — vazava dados do atendimento.
 
       setEditingAtendimento(atendimento);
       setFormData({
@@ -282,12 +273,8 @@ export default function Atendimentos() {
     e.preventDefault();
     e.stopPropagation();
 
-    // Debug: verificar dados antes de enviar
-    console.log('Submit - editingAtendimento:', editingAtendimento);
-    console.log('Submit - editingAtendimento.id:', editingAtendimento?.id);
-    console.log('Submit - formData:', formData);
-    console.log('Submit - produtosUsados:', produtosUsados);
-    console.log('Submit - servicosUsados:', servicosUsados);
+    // P6-A2: console.log de debug removidos — vazavam clienteId/desconto/totais
+    // através do appendLog do Electron (userData/logs/) para arquivo.
 
     // Validação básica
     if (!formData.data) {
@@ -331,13 +318,9 @@ export default function Atendimentos() {
       }))
     };
 
-    console.log('Submit - data to send:', data);
-
     if (editingAtendimento && editingAtendimento.id) {
-      console.log('Updating atendimento:', editingAtendimento.id);
       updateMutation.mutate({ id: editingAtendimento.id, data });
     } else {
-      console.log('Creating new atendimento');
       createMutation.mutate(data);
     }
   };

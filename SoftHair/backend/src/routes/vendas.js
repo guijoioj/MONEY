@@ -35,6 +35,53 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// P6-C1: estatísticas agregadas de vendas para dashboards
+router.get('/estatisticas', authMiddleware, async (req, res) => {
+  try {
+    const { data_inicio, data_fim } = req.query;
+    const params = [req.salaoId];
+    let dateFilter = '';
+    if (data_inicio) { dateFilter += ' AND date(created_at) >= ?'; params.push(data_inicio); }
+    if (data_fim) { dateFilter += ' AND date(created_at) <= ?'; params.push(data_fim); }
+
+    const totalRow = await queryOne(
+      `SELECT
+         COUNT(*) AS total_vendas,
+         COALESCE(SUM(valor_final), 0) AS receita_total,
+         COALESCE(SUM(desconto), 0) AS descontos_total
+       FROM vendas
+       WHERE salao_id = ? AND status != 'cancelada' ${dateFilter}`,
+      params
+    );
+    const porTipo = await query(
+      `SELECT tipo, COUNT(*) AS qtd, COALESCE(SUM(valor_final), 0) AS total
+       FROM vendas
+       WHERE salao_id = ? AND status != 'cancelada' ${dateFilter}
+       GROUP BY tipo`,
+      params
+    );
+    const porPagamento = await query(
+      `SELECT COALESCE(forma_pagamento, 'sem informacao') AS forma, COUNT(*) AS qtd, COALESCE(SUM(valor_final), 0) AS total
+       FROM vendas
+       WHERE salao_id = ? AND status != 'cancelada' ${dateFilter}
+       GROUP BY forma_pagamento`,
+      params
+    );
+    res.json({
+      success: true,
+      data: {
+        totalVendas: Number(totalRow?.total_vendas || 0),
+        receitaTotal: Number(totalRow?.receita_total || 0),
+        descontosTotal: Number(totalRow?.descontos_total || 0),
+        porTipo,
+        porPagamento,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const venda = await queryOne(

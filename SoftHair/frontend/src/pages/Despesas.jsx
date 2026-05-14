@@ -156,10 +156,10 @@ export default function Despesas() {
         </div>
       </div>
 
-      {/* Cards por categoria */}
-      {resumoData?.categorias?.length > 0 && (
+      {/* Cards por categoria — P6-A1: backend agora retorna `porCategoria` (alias `categorias` mantido) */}
+      {((resumoData?.porCategoria || resumoData?.categorias)?.length > 0) && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {resumoData.categorias.map(c => (
+          {(resumoData.porCategoria || resumoData.categorias).map(c => (
             <div key={c.categoria} className="bg-white dark:bg-gray-800 border rounded-xl p-4 shadow-sm">
               <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">{c.categoria}</p>
               <p className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-1">{formatCurrency(c.total)}</p>
@@ -167,7 +167,7 @@ export default function Despesas() {
                 <div className="h-full bg-red-400 rounded-full"
                   style={{ width: resumoData.total > 0 ? `${(c.total / resumoData.total * 100).toFixed(0)}%` : '0%' }} />
               </div>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{c.quantidade} registro(s)</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{c.quantidade || c.count} registro(s)</p>
             </div>
           ))}
         </div>

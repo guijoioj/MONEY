@@ -129,19 +129,21 @@ app.use('/api/backup', require('./routes/backup'));
 // para fechamento financeiro do salão).
 app.use('/api/comissoes', require('./routes/comissoes'));
 app.use('/api/despesas', require('./routes/despesas'));
+// P6-C1: rotas novas (financeiro, bloqueios, configuracoes, saloes) — eliminam 404
+app.use('/api/financeiro', require('./routes/financeiro'));
+app.use('/api/bloqueios', require('./routes/bloqueios'));
+app.use('/api/configuracoes', require('./routes/configuracoes'));
+app.use('/api/saloes', require('./routes/saloes'));
 
 // Stub para endpoints ainda não portados.
-// E23 + P4-M6: stubs sinalizam `stub: true` para UI mostrar banner "em desenvolvimento"
-// em vez de "lista vazia". Apenas exceções (notificacoes/count, saloes/me) retornam
-// dados reais para não quebrar componentes que dependem deles.
-['notificacoes', 'fechamentos', 'creditos', 'historico', 'saloes'].forEach((rota) => {
+// E23 + P4-M6 + P6-C1: stubs sinalizam `stub: true` para UI mostrar banner "em desenvolvimento"
+// em vez de "lista vazia" ou 404. Inclui também rotas mobile (`app/pedidos`) e auth
+// fluxos não-aplicáveis em desktop offline (forgot/reset password sem email server).
+['notificacoes', 'fechamentos', 'creditos', 'historico'].forEach((rota) => {
   app.use(`/api/${rota}`, authMiddleware, (req, res) => {
     if (req.method === 'GET') {
       if (rota === 'notificacoes' && req.path === '/count') {
         return res.json({ success: true, naoLidas: 0 });
-      }
-      if (rota === 'saloes' && req.path === '/me') {
-        return res.json({ success: true, data: { id: 1, nome: 'Meu Salão' } });
       }
       // P4-M6: flag stub para UI mostrar aviso "em desenvolvimento"
       return res.json({ success: true, data: [], stub: true, message: `Funcionalidade ${rota} em desenvolvimento na versão desktop` });
@@ -150,6 +152,23 @@ app.use('/api/despesas', require('./routes/despesas'));
       .status(501)
       .json({ success: false, error: `Rota ${rota} não implementada localmente` });
   });
+});
+
+// P6-C1: stubs explícitos para fluxos mobile e auth email-dependent
+app.use('/api/app/pedidos', authMiddleware, (req, res) => {
+  if (req.method === 'GET') {
+    return res.json({ success: true, data: [], stub: true, message: 'Solicitações via app mobile não disponíveis localmente (requer sync cloud)' });
+  }
+  return res.status(501).json({ success: false, error: 'Operação requer sync com servidor cloud' });
+});
+app.use('/api/auth/forgot-password', (req, res) => {
+  res.status(501).json({ success: false, error: 'Recuperação por email não disponível no app desktop. Use a opção "Apagar dados" e reinicialize o admin.' });
+});
+app.use('/api/auth/reset-password', (req, res) => {
+  res.status(501).json({ success: false, error: 'Reset por email não disponível no app desktop.' });
+});
+app.use('/api/auth/change-password', authMiddleware, (req, res) => {
+  res.status(501).json({ success: false, error: 'Use o setup wizard após apagar dados (Configurações).' });
 });
 
 // ── 404 ──

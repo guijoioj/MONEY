@@ -41,18 +41,34 @@ export default function Login() {
   const [setupSuccess, setSetupSuccess] = useState(false);
   const [setupLoading, setSetupLoading] = useState(false);
 
-  // P3-C1: detectar primeira instalação
+  // P3-C1 + P6-A8: detectar primeira instalação com retry em ECONNREFUSED
+  // (race comum em Electron prod onde backend ainda está iniciando).
+  // Retries 1s × até 30 tentativas (30s). Após, mostra mensagem de erro clara.
   useEffect(() => {
     let alive = true;
-    api.get('/auth/needs-setup')
-      .then((res) => {
-        if (!alive) return;
-        setNeedsSetup(!!res.data?.data?.needsSetup);
-      })
-      .catch(() => {
-        if (!alive) return;
-        setNeedsSetup(false);
-      });
+    let attempts = 0;
+    const MAX_ATTEMPTS = 30;
+
+    const probe = () => {
+      api.get('/auth/needs-setup')
+        .then((res) => {
+          if (!alive) return;
+          setNeedsSetup(!!res.data?.data?.needsSetup);
+        })
+        .catch((err) => {
+          if (!alive) return;
+          attempts++;
+          const isNetwork = !err?.response; // ECONNREFUSED, timeout, etc.
+          if (isNetwork && attempts < MAX_ATTEMPTS) {
+            setTimeout(probe, 1000);
+            return;
+          }
+          // Em erro definitivo, segue para login (admin precisa existir).
+          // Frontend mostrará erro de login se backend ainda fora.
+          setNeedsSetup(false);
+        });
+    };
+    probe();
     return () => { alive = false; };
   }, []);
 

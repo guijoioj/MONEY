@@ -9,7 +9,7 @@
  * Cloud (Google Drive) ainda não disponível — banner explicativo.
  */
 import { useState, useEffect } from 'react';
-import { Database, Plus, Cloud, RefreshCw, AlertCircle, CheckCircle, Archive } from 'lucide-react';
+import { Database, Plus, Cloud, RefreshCw, AlertCircle, CheckCircle, Archive, Download } from 'lucide-react';
 import api from '../services/api';
 
 function formatBytes(n) {
@@ -77,6 +77,31 @@ export default function Backup() {
       setError(e.response?.data?.error || e.message || 'Falha ao restaurar backup');
     } finally {
       setRestoring(null);
+    }
+  };
+
+  // P6-C4: download de backup como blob — funciona em Electron file:// porque
+  // axios envia Authorization e a resposta vira ObjectURL para `<a download>`.
+  const handleDownload = async (filename) => {
+    setError('');
+    setSuccess('');
+    try {
+      const res = await api.get(`/backup/download/${encodeURIComponent(filename)}`, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([res.data], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      // Liberar memória após download dispatched
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setSuccess(`Download iniciado: ${filename}`);
+    } catch (e) {
+      setError(e.response?.data?.error || e.message || 'Falha ao baixar backup');
     }
   };
 
@@ -150,14 +175,25 @@ export default function Backup() {
                     {formatBytes(f.size)} {' '} {formatDate(f.mtime)}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleRestore(f.filename)}
-                  disabled={!!restoring}
-                  className="px-3 py-1.5 rounded-md text-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
-                >
-                  {restoring === f.filename ? 'Restaurando...' : 'Restaurar'}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(f.filename)}
+                    disabled={!!restoring}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                    title="Baixar backup para pendrive ou outra pasta"
+                  >
+                    <Download size={14} /> Baixar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRestore(f.filename)}
+                    disabled={!!restoring}
+                    className="px-3 py-1.5 rounded-md text-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                  >
+                    {restoring === f.filename ? 'Restaurando...' : 'Restaurar'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>

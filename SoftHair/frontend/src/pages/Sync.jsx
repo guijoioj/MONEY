@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Cloud, CloudOff, RefreshCw, CheckCircle, AlertCircle, Lock, LogOut, ShieldAlert } from 'lucide-react';
+import { Cloud, CloudOff, RefreshCw, CheckCircle, AlertCircle, Lock, LogOut, ShieldAlert, GitMerge } from 'lucide-react';
 import api from '../services/api';
 
 // E3: valida que cloudUrl é HTTPS (ou loopback em dev).
@@ -26,6 +26,21 @@ export default function Sync() {
     queryKey: ['sync-status'],
     queryFn: () => api.get('/sync/status').then((r) => r.data.data),
     refetchInterval: 5000,
+  });
+
+  // P6-C2: lista de conflitos pendentes (sync_conflicts onde resolved=0).
+  const { data: conflictsData } = useQuery({
+    queryKey: ['sync-conflicts'],
+    queryFn: () => api.get('/sync/conflicts').then((r) => r.data.data),
+    refetchInterval: 10000,
+  });
+  const conflicts = conflictsData?.conflicts || [];
+  const pending = Number(conflictsData?.pending || 0);
+
+  const resolveConflict = useMutation({
+    mutationFn: ({ id, choice }) =>
+      api.post(`/sync/conflicts/${id}/resolve`, { choice }).then((r) => r.data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sync-conflicts'] }),
   });
 
   const [cloudUrl, setCloudUrl] = useState('https://money-f5rz.onrender.com/api');
@@ -325,6 +340,74 @@ export default function Sync() {
           )}
         </div>
       </div>
+
+      {/* P6-C2: painel de conflitos pendentes — last-write-wins detection */}
+      {pending > 0 && (
+        <div className="rounded-xl shadow-md p-6 border-l-4 border-yellow-500" style={{ backgroundColor: 'var(--color-surface)' }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <GitMerge className="text-yellow-600 dark:text-yellow-400" />
+              <h2 className="text-lg font-semibold">Conflitos de Sincronização Pendentes</h2>
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-semibold">
+                {pending}
+              </span>
+            </div>
+          </div>
+          <p className="text-sm opacity-70 mb-4">
+            Mudanças locais conflitam com versões mais antigas vindas da nuvem.
+            Escolha qual versão manter para cada registro.
+          </p>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {conflicts.slice(0, 50).map((c) => (
+              <div key={c.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-sm">
+                    <strong>{c.tabela}</strong> #{c.registro_id}
+                  </div>
+                  <div className="text-xs opacity-60">
+                    detectado: {c.detected_at ? new Date(c.detected_at).toLocaleString('pt-BR') : '—'}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs mb-2">
+                  <div className="p-2 rounded bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800">
+                    <div className="font-medium mb-1">Local ({c.local_updated_at})</div>
+                    <pre className="overflow-x-auto whitespace-pre-wrap break-all font-mono text-[10px] max-h-32">
+{JSON.stringify(c.local || {}, null, 2)}
+                    </pre>
+                  </div>
+                  <div className="p-2 rounded bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800">
+                    <div className="font-medium mb-1">Remoto ({c.remote_updated_at})</div>
+                    <pre className="overflow-x-auto whitespace-pre-wrap break-all font-mono text-[10px] max-h-32">
+{JSON.stringify(c.remote || {}, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => resolveConflict.mutate({ id: c.id, choice: 'local' })}
+                    disabled={resolveConflict.isPending}
+                    className="px-3 py-1.5 rounded-md text-xs border border-blue-300 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50"
+                  >
+                    Manter local
+                  </button>
+                  <button
+                    onClick={() => resolveConflict.mutate({ id: c.id, choice: 'remote' })}
+                    disabled={resolveConflict.isPending}
+                    className="px-3 py-1.5 rounded-md text-xs border border-purple-300 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 disabled:opacity-50"
+                  >
+                    Aplicar remoto
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          {pending > 50 && (
+            <p className="text-xs opacity-60 mt-2">
+              Mostrando 50 de {pending}. Continue resolvendo para ver os próximos.
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="text-xs opacity-60 text-center">
         Os dados locais ficam sempre no banco SQLite deste computador. A sincronização envia/recebe alterações da nuvem.

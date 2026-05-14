@@ -139,6 +139,20 @@ if (dbType === 'postgres') {
   const db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
+  // P6-A4: auto_vacuum=INCREMENTAL libera páginas órfãs após DELETE
+  // (LGPD delete-data, cleanups). Sem isso, arquivo cresce monotonicamente.
+  try { db.pragma('auto_vacuum = INCREMENTAL'); } catch (_) { /* setting fixa após primeiro VACUUM */ }
+  // P6-A4: synchronous=NORMAL combinado com WAL é safe e mais rápido que FULL.
+  try { db.pragma('synchronous = NORMAL'); } catch (_) { /* noop */ }
+  // P6-A4: maintenance periódico — roda no boot uma vez (cheap).
+  setImmediate(() => {
+    try {
+      db.exec('PRAGMA incremental_vacuum');
+      db.exec('PRAGMA optimize');
+    } catch (e) {
+      console.warn('[DB] vacuum/optimize falharam:', e.message);
+    }
+  });
 
   console.log(`[DB] SQLite ativo em ${dbPath}`);
 

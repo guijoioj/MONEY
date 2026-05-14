@@ -37,6 +37,106 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// P6-C1: rotas extras esperadas pelo frontend embarcado
+router.get('/proximos', authMiddleware, async (req, res) => {
+  try {
+    const dias = parseInt(req.query.dias) || 7;
+    const data = await query(
+      `SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome, s.nome as servico_nome
+       FROM agendamentos a
+       LEFT JOIN clientes c ON c.id = a.cliente_id
+       LEFT JOIN profissionais p ON p.id = a.profissional_id
+       LEFT JOIN servicos s ON s.id = a.servico_id
+       WHERE a.salao_id = ?
+         AND a.status != 'cancelado'
+         AND date(a.data_hora) BETWEEN date('now') AND date('now', '+' || ? || ' days')
+       ORDER BY a.data_hora`,
+      [req.salaoId, dias]
+    );
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.get('/pendentes', authMiddleware, async (req, res) => {
+  try {
+    const data = await query(
+      `SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome, s.nome as servico_nome
+       FROM agendamentos a
+       LEFT JOIN clientes c ON c.id = a.cliente_id
+       LEFT JOIN profissionais p ON p.id = a.profissional_id
+       LEFT JOIN servicos s ON s.id = a.servico_id
+       WHERE a.salao_id = ?
+         AND a.status IN ('agendado', 'confirmado')
+         AND a.data_hora < datetime('now')
+       ORDER BY a.data_hora`,
+      [req.salaoId]
+    );
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// P6-C1: converter agendamento em atendimento (lógica simples)
+router.post('/converter/:id', authMiddleware, async (req, res) => {
+  try {
+    const ag = await queryOne(
+      `SELECT * FROM agendamentos WHERE id = ? AND salao_id = ?`,
+      [req.params.id, req.salaoId]
+    );
+    if (!ag) return res.status(404).json({ success: false, error: 'Agendamento não encontrado' });
+    if (ag.status === 'cancelado') {
+      return res.status(400).json({ success: false, error: 'Agendamento cancelado não pode ser convertido' });
+    }
+    const r = await queryRun(
+      `INSERT INTO atendimentos (salao_id, cliente_id, profissional_id, servico_id, agendamento_id, valor, status, observacoes)
+       VALUES (?, ?, ?, ?, ?, ?, 'em_andamento', ?)`,
+      [req.salaoId, ag.cliente_id, ag.profissional_id, ag.servico_id, ag.id, ag.valor || 0, ag.observacoes || null]
+    );
+    await queryRun(
+      `UPDATE agendamentos SET status = 'realizado', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`,
+      [ag.id]
+    );
+    res.json({ success: true, data: { atendimento_id: r.lastInsertRowid } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/converter-todos', authMiddleware, async (req, res) => {
+  try {
+    // Converte todos os agendamentos vencidos não realizados
+    const pendentes = await query(
+      `SELECT id, cliente_id, profissional_id, servico_id, valor, observacoes
+       FROM agendamentos
+       WHERE salao_id = ?
+         AND status IN ('agendado', 'confirmado')
+         AND data_hora < datetime('now')`,
+      [req.salaoId]
+    );
+    let convertidos = 0;
+    for (const ag of pendentes || []) {
+      try {
+        await queryRun(
+          `INSERT INTO atendimentos (salao_id, cliente_id, profissional_id, servico_id, agendamento_id, valor, status, observacoes)
+           VALUES (?, ?, ?, ?, ?, ?, 'em_andamento', ?)`,
+          [req.salaoId, ag.cliente_id, ag.profissional_id, ag.servico_id, ag.id, ag.valor || 0, ag.observacoes || null]
+        );
+        await queryRun(
+          `UPDATE agendamentos SET status = 'realizado', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`,
+          [ag.id]
+        );
+        convertidos++;
+      } catch (_) { /* skip individual failures */ }
+    }
+    res.json({ success: true, data: { convertidos } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get('/disponiveis/:profissionalId', authMiddleware, async (req, res) => {
   try {
     const { data } = req.query;
