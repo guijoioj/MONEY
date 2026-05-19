@@ -1,26 +1,29 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAdminPin } from '../context/AdminPinContext';
 
+/**
+ * RequireAdminPin — bloqueia rota até user digitar PIN admin.
+ *
+ * Reseta `allowed` quando location.pathname muda → toda navegação pede PIN
+ * de novo (fix do bug "PIN não pede ao re-entrar na mesma aba").
+ */
 export default function RequireAdminPin({ children }) {
   const { requestPin } = useAdminPin();
   const navigate = useNavigate();
+  const location = useLocation();
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    // Sempre pede PIN — sem cache de sessão
+    setAllowed(false); // reseta em toda mudança de rota
     requestPin().then((ok) => {
       if (cancelled) return;
-      if (ok) {
-        setAllowed(true);
-      } else {
-        navigate(-1);
-      }
+      if (ok) setAllowed(true);
+      else navigate(-1);
     });
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location.pathname, requestPin, navigate]);
 
   if (!allowed) return null;
   return children;

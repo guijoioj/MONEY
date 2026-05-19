@@ -121,12 +121,12 @@ export default function App() {
         <Route path="metas" element={lazyEl(Metas)} />
         <Route path="relatorios" element={<RequireAdminPin>{lazyEl(Relatorios)}</RequireAdminPin>} />
         <Route path="sync" element={lazyEl(Sync)} />
-        {/* V2 Comissões */}
-        <Route path="comissoes-v2" element={lazyEl(ComissoesV2)} />
-        <Route path="comissoes/regras" element={lazyEl(RegrasComissao)} />
-        <Route path="comissoes/extrato/:id" element={lazyEl(ExtratoProfissional)} />
-        <Route path="comissoes/pagamento" element={lazyEl(PagamentoComissao)} />
-        <Route path="configurar-servidor" element={lazyEl(ConfigurarServidor)} />
+        {/* V2 Comissões — financeiro, exige PIN admin */}
+        <Route path="comissoes-v2" element={<RequireAdminPin>{lazyEl(ComissoesV2)}</RequireAdminPin>} />
+        <Route path="comissoes/regras" element={<RequireAdminPin>{lazyEl(RegrasComissao)}</RequireAdminPin>} />
+        <Route path="comissoes/extrato/:id" element={<RequireAdminPin>{lazyEl(ExtratoProfissional)}</RequireAdminPin>} />
+        <Route path="comissoes/pagamento" element={<RequireAdminPin>{lazyEl(PagamentoComissao)}</RequireAdminPin>} />
+        <Route path="configurar-servidor" element={<RequireAdminPin>{lazyEl(ConfigurarServidor)}</RequireAdminPin>} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
