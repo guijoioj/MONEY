@@ -1,9 +1,14 @@
 import { useEffect, useRef } from 'react';
 
 const isFileProtocol = typeof window !== 'undefined' && window.location.protocol === 'file:';
+const isElectronDev = typeof window !== 'undefined' && !!window.electron;
 
 function getWsUrl(tipo, id) {
-  if (isFileProtocol) return `ws://localhost:3001/ws?tipo=${tipo}&id=${id}`;
+  // Electron (file:// ou dev) sempre fala com backend embarcado em 3001
+  if (isFileProtocol || isElectronDev) {
+    return `ws://127.0.0.1:3001/ws?tipo=${tipo}&id=${id}`;
+  }
+  // Browser web: mesmo host da page
   const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   return `${proto}//${window.location.host}/ws?tipo=${tipo}&id=${id}`;
 }

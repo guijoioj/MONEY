@@ -1367,10 +1367,17 @@ function RelatoriosSection() {
     queryFn: () => produtosAPI.getAll({ ativo: true }),
   });
 
-  const agendamentos = agendamentosData?.data?.data || [];
-  const clientes = clientesData?.data?.data || [];
-  const profissionais = profissionaisData?.data?.data || [];
-  const produtos = produtosData?.data?.data || [];
+  // Handle both shapes: {data: [...]} (legacy) and {data: {data: [...], total}} (paginated)
+  const pickArray = (resp) => {
+    const d = resp?.data;
+    if (Array.isArray(d)) return d;
+    if (Array.isArray(d?.data)) return d.data;
+    return [];
+  };
+  const agendamentos = pickArray(agendamentosData);
+  const clientes = pickArray(clientesData);
+  const profissionais = pickArray(profissionaisData);
+  const produtos = pickArray(produtosData);
 
   const hoje = new Date();
   const mesAtual = hoje.getMonth();

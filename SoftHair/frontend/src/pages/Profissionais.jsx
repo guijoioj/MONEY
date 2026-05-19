@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { profissionaisAPI } from '../services/api';
+import { useAdminPin } from '../context/AdminPinContext';
 import { Search, Plus, Edit2, Trash2, X, User, Phone, Mail, MapPin, AlertCircle } from 'lucide-react';
 
 export default function Profissionais() {
+  const { requestPin } = useAdminPin();
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProfissional, setEditingProfissional] = useState(null);
@@ -45,7 +47,12 @@ export default function Profissionais() {
     onError: (err) => alert(err.response?.data?.error || 'Erro ao excluir profissional'),
   });
 
-  const openModal = (profissional = null) => {
+  const openModal = async (profissional = null) => {
+    // Editar sempre pede PIN; criar não precisa de PIN
+    if (profissional) {
+      const ok = await requestPin();
+      if (!ok) return;
+    }
     if (profissional) {
       setEditingProfissional(profissional);
       setFormData({
@@ -63,7 +70,7 @@ export default function Profissionais() {
         nome: '',
         telefone: '',
         email: '',
-            especialidade: '',
+        especialidade: '',
         comissao_percentual: 0,
         ativo: true
       });
@@ -86,7 +93,9 @@ export default function Profissionais() {
     }
   };
 
-  const handleDeleteClick = (profissional) => {
+  const handleDeleteClick = async (profissional) => {
+    const ok = await requestPin();
+    if (!ok) return;
     setDeleteModal({ open: true, profissional });
   };
 

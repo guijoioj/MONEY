@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
+import RequireAdminPin from './components/RequireAdminPin';
 
 // Eager: auth pages (lightweight, first-paint critical)
 import Login from './pages/Login';
@@ -93,26 +94,26 @@ export default function App() {
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={lazyEl(Dashboard)} />
-        <Route path="administrativo" element={lazyEl(Administrativo)} />
+        <Route path="administrativo" element={<RequireAdminPin>{lazyEl(Administrativo)}</RequireAdminPin>} />
         <Route path="agenda" element={lazyEl(Agenda)} />
         <Route path="solicitacoes" element={lazyEl(Solicitacoes)} />
         <Route path="clientes" element={lazyEl(Clientes)} />
-        <Route path="servicos-e-produtos" element={lazyEl(ServicosEProdutos)} />
+        <Route path="servicos-e-produtos" element={<RequireAdminPin>{lazyEl(ServicosEProdutos)}</RequireAdminPin>} />
         <Route path="servicos" element={<Navigate to="/servicos-e-produtos" replace />} />
         <Route path="produtos" element={<Navigate to="/servicos-e-produtos" replace />} />
         <Route path="profissionais" element={lazyEl(Profissionais)} />
         <Route path="atendimentos" element={lazyEl(Atendimentos)} />
-        <Route path="vendas" element={lazyEl(Vendas)} />
-        <Route path="fechamento" element={lazyEl(Fechamento)} />
-        <Route path="backup" element={lazyEl(Backup)} />
-        <Route path="despesas" element={lazyEl(Despesas)} />
-        <Route path="financeiro" element={lazyEl(Financeiro)} />
+        <Route path="vendas" element={<RequireAdminPin>{lazyEl(Vendas)}</RequireAdminPin>} />
+        <Route path="fechamento" element={<RequireAdminPin>{lazyEl(Fechamento)}</RequireAdminPin>} />
+        <Route path="backup" element={<RequireAdminPin>{lazyEl(Backup)}</RequireAdminPin>} />
+        <Route path="despesas" element={<RequireAdminPin>{lazyEl(Despesas)}</RequireAdminPin>} />
+        <Route path="financeiro" element={<RequireAdminPin>{lazyEl(Financeiro)}</RequireAdminPin>} />
         <Route path="customizacao" element={lazyEl(Customizacao)} />
         <Route path="configuracoes" element={lazyEl(Configuracoes)} />
         <Route path="notificacoes" element={lazyEl(Notificacoes)} />
-        <Route path="caixa" element={lazyEl(Caixa)} />
+        <Route path="caixa" element={<RequireAdminPin>{lazyEl(Caixa)}</RequireAdminPin>} />
         <Route path="metas" element={lazyEl(Metas)} />
-        <Route path="relatorios" element={lazyEl(Relatorios)} />
+        <Route path="relatorios" element={<RequireAdminPin>{lazyEl(Relatorios)}</RequireAdminPin>} />
         <Route path="sync" element={lazyEl(Sync)} />
       </Route>
 

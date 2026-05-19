@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicosAPI, produtosAPI } from '../services/api';
+import { useAdminPin } from '../context/AdminPinContext';
 import {
   Search, Plus, Edit2, Trash2, X, Clock, DollarSign,
   AlertCircle, Package, AlertTriangle, Scissors, Percent
@@ -20,6 +21,7 @@ const formatDuration = (minutes) => {
 // ─── Serviços ────────────────────────────────────────────────────────────────
 
 function AbaServicos() {
+  const { requestPin } = useAdminPin();
   const [search, setSearch] = useState('');
   const [categoria, setCategoria] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,8 +56,10 @@ function AbaServicos() {
     onError: (err) => alert(err.response?.data?.error || 'Erro ao excluir serviço'),
   });
 
-  const openModal = (servico = null) => {
+  const openModal = async (servico = null) => {
     if (servico) {
+      const ok = await requestPin();
+      if (!ok) return;
       setEditingServico(servico);
       setFormData({
         nome: servico.nome || '',
@@ -72,6 +76,12 @@ function AbaServicos() {
       setFormData({ nome: '', descricao: '', duracao: 30, preco: '', categoria: '', baseComissao: '', comissaoPorcentagem: '', ativo: true });
     }
     setIsModalOpen(true);
+  };
+
+  const handleDeleteServico = async (servico) => {
+    const ok = await requestPin();
+    if (!ok) return;
+    setDeleteModal({ open: true, servico });
   };
 
   const closeModal = () => { setIsModalOpen(false); setEditingServico(null); setFormError(''); };
@@ -145,7 +155,7 @@ function AbaServicos() {
                   </div>
                   <div className="flex gap-1">
                     <button onClick={() => openModal(servico)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded"><Edit2 size={16} /></button>
-                    <button onClick={() => setDeleteModal({ open: true, servico })} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded"><Trash2 size={16} /></button>
+                    <button onClick={() => handleDeleteServico(servico)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded"><Trash2 size={16} /></button>
                   </div>
                 </div>
                 {servico.descricao && <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm mb-3">{servico.descricao}</p>}
@@ -288,6 +298,7 @@ function AbaServicos() {
 // ─── Produtos ─────────────────────────────────────────────────────────────────
 
 function AbaProdutos() {
+  const { requestPin } = useAdminPin();
   const [search, setSearch] = useState('');
   const [categoria, setCategoria] = useState('');
   const [estoqueBaixo, setEstoqueBaixo] = useState(false);
@@ -326,8 +337,10 @@ function AbaProdutos() {
     onError: (err) => alert(err.response?.data?.error || 'Erro ao excluir produto'),
   });
 
-  const openModal = (produto = null) => {
+  const openModal = async (produto = null) => {
     if (produto) {
+      const ok = await requestPin();
+      if (!ok) return;
       setEditingProduto(produto);
       setFormData({
         nome: produto.nome || '',
@@ -347,6 +360,12 @@ function AbaProdutos() {
       setFormData({ nome: '', descricao: '', marca: '', categoria: '', precoVenda: '', baseComissao: '', comissaoPorcentagem: '', estoque: 0, estoqueMinimo: 0, unidade: 'un', ativo: true });
     }
     setIsModalOpen(true);
+  };
+
+  const handleDeleteProduto = async (produto) => {
+    const ok = await requestPin();
+    if (!ok) return;
+    setDeleteModal({ open: true, produto });
   };
 
   const closeModal = () => { setIsModalOpen(false); setEditingProduto(null); setFormError(''); };
@@ -449,7 +468,7 @@ function AbaProdutos() {
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
                           <button onClick={() => openModal(produto)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded"><Edit2 size={18} /></button>
-                          <button onClick={() => setDeleteModal({ open: true, produto })} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded"><Trash2 size={18} /></button>
+                          <button onClick={() => handleDeleteProduto(produto)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-900/30 rounded"><Trash2 size={18} /></button>
                         </div>
                       </td>
                     </tr>
