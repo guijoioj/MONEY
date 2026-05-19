@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual Financeiro — SoftHair</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --card: #283549;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #6366f1;
+    --accent-light: #818cf8;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --border: #334155;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  header.hero {
+    background: linear-gradient(135deg, var(--accent) 0%, #4338ca 100%);
+    padding: 60px 20px 50px;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  header.hero h1 {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: white;
+  }
+  header.hero p {
+    font-size: 18px;
+    color: #c7d2fe;
+    margin-bottom: 20px;
+  }
+  header.hero .meta {
+    font-size: 13px;
+    color: #c7d2fe;
+    opacity: 0.85;
+  }
+  .toc {
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 40px;
+    border: 1px solid var(--border);
+  }
+  .toc h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: var(--accent-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .toc ol {
+    list-style: none;
+    counter-reset: section;
+  }
+  .toc li {
+    counter-increment: section;
+    margin-bottom: 8px;
+    padding-left: 32px;
+    position: relative;
+  }
+  .toc li::before {
+    content: counter(section, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    font-weight: 600;
+    color: var(--accent-light);
+    font-variant-numeric: tabular-nums;
+  }
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px dotted transparent;
+    transition: all 0.15s;
+  }
+  .toc a:hover {
+    color: var(--accent-light);
+    border-bottom-color: var(--accent-light);
+  }
+  section {
+    margin-bottom: 60px;
+    scroll-margin-top: 20px;
+  }
+  section h2 {
+    font-size: 28px;
+    color: var(--accent-light);
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+    font-weight: 700;
+  }
+  section h3 {
+    font-size: 20px;
+    color: var(--text);
+    margin-top: 32px;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  section h4 {
+    font-size: 16px;
+    color: var(--accent-light);
+    margin-top: 20px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  p { margin-bottom: 14px; color: var(--text); }
+  ul, ol { margin: 0 0 16px 24px; }
+  li { margin-bottom: 6px; }
+  strong { color: white; font-weight: 600; }
+  code {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--accent-light);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13.5px;
+    font-family: 'JetBrains Mono', Menlo, Consolas, monospace;
+  }
+  pre {
+    background: #0b1220;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 14px 0 18px;
+    font-size: 13.5px;
+    font-family: 'JetBrains Mono', Menlo, Consolas, monospace;
+    line-height: 1.5;
+  }
+  pre code {
+    background: none;
+    color: var(--text);
+    padding: 0;
+    font-size: inherit;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 24px;
+    background: var(--panel);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14.5px;
+  }
+  th {
+    background: var(--card);
+    font-weight: 600;
+    color: var(--accent-light);
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(99, 102, 241, 0.06); }
+  .card {
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+    border-left: 4px solid var(--accent);
+  }
+  .card.warn { border-left-color: var(--amber); }
+  .card.danger { border-left-color: var(--red); }
+  .card.ok { border-left-color: var(--green); }
+  .card h4 { margin-top: 0; color: white; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  @media (max-width: 720px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  .flow {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 20px 0;
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--accent-light);
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge.pendente { background: rgba(245, 158, 11, 0.2); color: var(--amber); }
+  .badge.paga { background: rgba(16, 185, 129, 0.2); color: var(--green); }
+  .badge.estornada { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+  .badge.info { background: rgba(99, 102, 241, 0.2); color: var(--accent-light); }
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+  .anchor {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  h2:hover .anchor, h3:hover .anchor { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Manual Financeiro — SoftHair</h1>
+  <p>Guia completo de operação financeira do salão</p>
+  <div class="meta">Vendas · Comissões V2 · Caixa · Despesas · Fechamento · DRE · Relatórios</div>
+</header>
+
+<div class="container">
+
+<nav class="toc">
+  <h2>📑 Sumário</h2>
+  <ol>
+    <li><a href="#visao-geral">Visão geral e como tudo conecta</a></li>
+    <li><a href="#vendas">Vendas (entrada de dinheiro)</a></li>
+    <li><a href="#atendimentos">Atendimentos (serviços executados)</a></li>
+    <li><a href="#comissoes">Comissões V2 (pagamento aos profissionais)</a></li>
+    <li><a href="#regras">Regras de comissão</a></li>
+    <li><a href="#prioridade">Prioridade em regras</a></li>
+    <li><a href="#pagamento">Pagamento em lote</a></li>
+    <li><a href="#caixa">Caixa diário</a></li>
+    <li><a href="#despesas">Despesas (saída de dinheiro)</a></li>
+    <li><a href="#fechamento">Fechamento</a></li>
+    <li><a href="#financeiro">Financeiro (DRE)</a></li>
+    <li><a href="#relatorios">Relatórios estratégicos</a></li>
+    <li><a href="#fluxo-completo">Fluxo financeiro completo</a></li>
+    <li><a href="#troubleshooting">Problemas comuns</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="visao-geral">
+  <h2>1. Visão geral e como tudo conecta</h2>
+
+  <p>O financeiro do SoftHair é dividido em <strong>7 módulos</strong> que conversam entre si. Nada existe isolado:</p>
+
+  <table>
+    <thead>
+      <tr><th>Módulo</th><th>O que mede</th><th>Onde aparece</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Vendas</strong></td><td>Dinheiro entrando</td><td>Faturamento bruto</td></tr>
+      <tr><td><strong>Atendimentos</strong></td><td>Serviços prestados</td><td>Histórico do cliente, base de comissão</td></tr>
+      <tr><td><strong>Comissões V2</strong></td><td>Quanto deve aos profissionais</td><td>Despesa de pessoal</td></tr>
+      <tr><td><strong>Caixa</strong></td><td>Dinheiro físico no balcão</td><td>Sangria, abertura, fechamento</td></tr>
+      <tr><td><strong>Despesas</strong></td><td>Custos operacionais</td><td>Aluguel, conta de luz, fornecedor</td></tr>
+      <tr><td><strong>Fechamento</strong></td><td>Recibo consolidado por atendimento</td><td>Conferência diária</td></tr>
+      <tr><td><strong>Financeiro (DRE)</strong></td><td>Receita − Despesa = Lucro</td><td>Visão mensal</td></tr>
+      <tr><td><strong>Relatórios</strong></td><td>Análises (top serviços, pico, ranking)</td><td>Decisão estratégica</td></tr>
+    </tbody>
+  </table>
+
+  <div class="flow">
+[CLIENTE]
+   │
+   ▼
+[ATENDIMENTO]──┐
+   │           │ serviços/produtos consumidos
+   ▼           │
+[VENDA] ───────┘  valor cobrado
+   │
+   ├──→ [CAIXA]            (entrou dinheiro/cartão/pix)
+   │
+   ├──→ [COMISSÕES V2]     (gerado automaticamente conforme regra)
+   │       │
+   │       ▼
+   │   [PAGAMENTO LOTE]    (admin paga em lote ao fim do mês)
+   │
+   ▼
+[FINANCEIRO (DRE)]
+   │
+   ├──[+] Receita (vendas)
+   ├──[−] Despesas (aluguel, fornecedor, contas)
+   ├──[−] Comissões pagas
+   └──[=] Lucro líquido
+   │
+   ▼
+[RELATÓRIOS]               (top serviços, ranking, picos)
+  </div>
+
+  <div class="card">
+    <h4>🔑 Regra mental</h4>
+    <p><strong>Venda</strong> = quem trouxe o dinheiro. <strong>Despesa</strong> = quem levou o dinheiro. <strong>Comissão</strong> = quanto do que entrou vai pro funcionário. <strong>DRE</strong> = soma de tudo e mostra o resultado.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="vendas">
+  <h2>2. Vendas (entrada de dinheiro)</h2>
+
+  <p>Toda transação onde o cliente paga vira uma <strong>venda</strong>. Pode ser:</p>
+  <ul>
+    <li><strong>Venda de serviço:</strong> cliente fez corte/coloração e pagou</li>
+    <li><strong>Venda de produto:</strong> cliente comprou shampoo na loja</li>
+    <li><strong>Venda mista:</strong> serviço + produto no mesmo recibo</li>
+  </ul>
+
+  <h3>Onde criar</h3>
+  <p>Tela <code>/vendas</code> → botão <strong>Nova Venda</strong>. Você seleciona cliente, profissional principal, itens e forma de pagamento.</p>
+
+  <h3>Campos importantes</h3>
+  <table>
+    <thead><tr><th>Campo</th><th>O que significa</th></tr></thead>
+    <tbody>
+      <tr><td><code>cliente_id</code></td><td>Quem pagou. Vincula ao histórico da cliente.</td></tr>
+      <tr><td><code>profissional_id</code></td><td>Quem atendeu. Base do cálculo de comissão.</td></tr>
+      <tr><td><code>valor_total</code></td><td>Valor antes do desconto</td></tr>
+      <tr><td><code>desconto</code></td><td>Desconto dado (R$)</td></tr>
+      <tr><td><code>valor_final</code></td><td>Valor cobrado de fato (entra no caixa)</td></tr>
+      <tr><td><code>forma_pagamento</code></td><td>dinheiro, cartão, pix, etc.</td></tr>
+      <tr><td><code>status</code></td><td><span class="badge info">pendente</span> → <span class="badge paga">concluida</span> ou <span class="badge estornada">cancelada</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>O que acontece quando uma venda é finalizada</h3>
+  <ol>
+    <li>Status muda pra <code>concluida</code></li>
+    <li>Estoque dos produtos vendidos é decrementado</li>
+    <li><strong>CommissionTriggers</strong> dispara: pra cada item + profissional, calcula comissão usando as regras vigentes</li>
+    <li>Linhas em <code>comissoes</code> são criadas com status <span class="badge pendente">pendente</span></li>
+    <li>Caixa do dia recebe o valor</li>
+    <li>Financeiro (DRE) soma na receita do mês</li>
+  </ol>
+
+  <div class="card warn">
+    <h4>⚠️ Importante</h4>
+    <p>Venda <strong>cancelada</strong> automaticamente:</p>
+    <ul>
+      <li>Cancela comissões pendentes daquela venda (status → <code>cancelada</code>)</li>
+      <li>Se já tinha comissão paga, gera <strong>ajuste negativo</strong> (não muda o histórico)</li>
+      <li>Devolve estoque ao produto</li>
+      <li>Subtrai do faturamento mensal</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="atendimentos">
+  <h2>3. Atendimentos (serviços executados)</h2>
+
+  <p>Atendimento é o registro do <strong>serviço prestado fisicamente</strong>, independente de já ter sido cobrado ou não. Tem ciclo de vida próprio.</p>
+
+  <h3>Estados</h3>
+  <table>
+    <thead><tr><th>Status</th><th>Significa</th><th>Pode editar?</th></tr></thead>
+    <tbody>
+      <tr><td><code>agendado</code></td><td>Marcado, ainda não começou</td><td>Sim</td></tr>
+      <tr><td><code>em_andamento</code></td><td>Cliente está sendo atendido</td><td>Sim</td></tr>
+      <tr><td><code>finalizado</code></td><td>Serviço concluído</td><td><strong>Não</strong> (gera comissão)</td></tr>
+      <tr><td><code>cancelado</code></td><td>Não foi feito</td><td><strong>Não</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Quando vira comissão</h3>
+  <p>Quando o status muda pra <code>finalizado</code>, o <strong>CommissionTriggers.onAtendimentoFechado</strong> é disparado:</p>
+  <ul>
+    <li>Lê cada <code>servico_id</code> em <code>atendimentos_servicos</code></li>
+    <li>Pra cada serviço executado, busca a regra de comissão aplicável</li>
+    <li>Se houver <strong>auxiliar</strong> no atendimento, gera comissão pra ele também (regra "assistente")</li>
+    <li>Insere as comissões com idempotency_key único (não duplica)</li>
+  </ul>
+
+  <h3>Diferença Atendimento × Venda</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h4>Atendimento</h4>
+      <p><strong>O que aconteceu fisicamente.</strong></p>
+      <p>Vincula serviços ao profissional. Gera comissão de SERVIÇO quando finaliza.</p>
+    </div>
+    <div class="card">
+      <h4>Venda</h4>
+      <p><strong>A cobrança.</strong></p>
+      <p>Quem paga, com qual método, valor exato. Gera comissão de PRODUTO + serviços não-atrelados.</p>
+    </div>
+  </div>
+
+  <p>No fluxo ideal: <em>cliente entra → cria atendimento → conclui atendimento → vira venda → cliente paga</em>.</p>
+</section>
+
+<!-- 4 -->
+<section id="comissoes">
+  <h2>4. Comissões V2 (pagamento aos profissionais)</h2>
+
+  <p>Sistema completo que controla quanto cada profissional ganha por venda/serviço. <strong>Tudo automático</strong> assim que houver regra ativa.</p>
+
+  <h3>Ciclo de vida de uma comissão</h3>
+  <div class="flow">
+[VENDA/ATENDIMENTO FINALIZADO]
+        │
+        ▼
+  Engine resolve regra (hierarquia)
+        │
+        ▼
+  Calcula valor (base × percentual)
+        │
+        ▼
+  Salva snapshot da regra (imutável)
+        │
+        ▼
+  INSERT comissao status=pendente
+        │
+        ├─→ Admin paga em lote no fim do mês ─→ status=paga
+        │
+        ├─→ Venda cancelada ─→ status=cancelada (se pendente)
+        │                       OU ajuste negativo (se paga)
+        │
+        └─→ Admin estorna manualmente ─→ status=estornada
+  </div>
+
+  <h3>Status possíveis</h3>
+  <table>
+    <thead><tr><th>Status</th><th>Significa</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge pendente">pendente</span></td><td>Calculada, esperando pagamento</td></tr>
+      <tr><td><span class="badge paga">paga</span></td><td>Já transferida pro profissional</td></tr>
+      <tr><td><span class="badge estornada">estornada</span></td><td>Cancelada pelo admin (motivo obrigatório)</td></tr>
+      <tr><td><span class="badge info">cancelada</span></td><td>Cancelada porque a venda foi cancelada</td></tr>
+      <tr><td><span class="badge info">bloqueada</span></td><td>Admin bloqueou pagamento manualmente</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Onde ver</h3>
+  <p>Menu <code>/comissoes-v2</code>:</p>
+  <ul>
+    <li><strong>Dashboard</strong>: cards com totais (pendente, pago, estornado)</li>
+    <li><strong>Lista</strong>: cada comissão com cliente, item, valor, status</li>
+    <li><strong>Ranking</strong>: top 10 profissionais do período</li>
+    <li><strong>Exportar CSV</strong>: pra contabilidade externa</li>
+  </ul>
+
+  <h3>Snapshot imutável</h3>
+  <p>Cada comissão guarda a regra <strong>congelada no momento da criação</strong> (campo <code>regra_snapshot_json</code>). Se você mudar a regra depois, comissões antigas <strong>NÃO mudam</strong>. Isso garante auditoria e justiça com o profissional.</p>
+</section>
+
+<!-- 5 -->
+<section id="regras">
+  <h2>5. Regras de comissão</h2>
+
+  <p>Configura COMO calcular comissão. O sistema suporta <strong>12 tipos</strong> de regra. Em <code>/comissoes/regras</code>.</p>
+
+  <h3>Tipos disponíveis</h3>
+  <table>
+    <thead><tr><th>Tipo</th><th>Aplica em</th><th>Exemplo</th></tr></thead>
+    <tbody>
+      <tr><td><code>global</code></td><td>Todo mundo, qualquer item</td><td>30% padrão do salão</td></tr>
+      <tr><td><code>profissional</code></td><td>1 profissional, qualquer item</td><td>Maria recebe 40% em tudo</td></tr>
+      <tr><td><code>servico</code></td><td>1 serviço, qualquer profissional</td><td>Coloração paga 50%</td></tr>
+      <tr><td><code>produto</code></td><td>1 produto</td><td>Shampoo X paga 15% pra vendedor</td></tr>
+      <tr><td><code>categoria_servico</code></td><td>Todos serviços daquela categoria</td><td>Categoria "Corte" = 35%</td></tr>
+      <tr><td><code>categoria_produto</code></td><td>Idem produtos</td><td>Categoria "Esmalte" = 20%</td></tr>
+      <tr><td><code>profissional_servico</code></td><td>Combinação específica</td><td>Maria fazendo Coloração = 60%</td></tr>
+      <tr><td><code>profissional_produto</code></td><td>Idem</td><td>João vendendo Shampoo = 25%</td></tr>
+      <tr><td><code>assistente</code></td><td>Auxiliar do atendimento</td><td>Assistente sempre ganha 10%</td></tr>
+      <tr><td><code>meta</code></td><td>Por faixa de faturamento</td><td>30%→35%→40% conforme bate meta</td></tr>
+      <tr><td><code>dia_semana</code></td><td>Promocional</td><td>Segunda paga 50% pra impulsionar</td></tr>
+      <tr><td><code>horario</code></td><td>Promocional</td><td>Antes das 11h = 50%</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Base de cálculo</h3>
+  <p>Define <strong>sobre qual valor</strong> aplica a porcentagem:</p>
+  <ul>
+    <li><code>valor_bruto</code>: preço cheio antes de desconto</li>
+    <li><code>valor_com_desconto</code>: depois do desconto que o cliente recebeu</li>
+    <li><code>valor_liquido</code>: depois de desconto + taxa de cartão</li>
+    <li><code>valor_liquido_sem_taxas</code>: depois de desconto, ignora taxa</li>
+    <li><code>lucro_bruto</code>: <em>(só produto)</em> preço − custo</li>
+  </ul>
+
+  <div class="card">
+    <h4>Exemplo prático</h4>
+    <p><strong>Cliente:</strong> Coloração R$ 200, desconto R$ 20, pagou cartão (taxa 3% = R$ 5,40)</p>
+    <ul>
+      <li><code>valor_bruto</code> = R$ 200,00</li>
+      <li><code>valor_com_desconto</code> = R$ 180,00</li>
+      <li><code>valor_liquido</code> = R$ 174,60</li>
+    </ul>
+    <p>Profissional ganha 40%? Resultado depende da base escolhida:</p>
+    <ul>
+      <li>40% sobre bruto = R$ 80,00</li>
+      <li>40% sobre líquido = R$ 69,84</li>
+    </ul>
+  </div>
+
+  <h3>Percentual vs Valor fixo</h3>
+  <p>Cada regra pode pagar:</p>
+  <ul>
+    <li><strong>Percentual</strong> (0-100%): comum, escala com o preço</li>
+    <li><strong>Valor fixo</strong> (centavos): paga sempre o mesmo, independente do preço</li>
+  </ul>
+  <p>Exemplo de fixo: "toda venda de pacote anual paga R$ 50 fixo pro vendedor".</p>
+
+  <h3>Vigência (data início / fim)</h3>
+  <ul>
+    <li><strong>Data início</strong>: a partir de quando a regra começa a valer</li>
+    <li><strong>Data fim</strong> (opcional): quando expira. Deixa vazio = sem fim</li>
+  </ul>
+  <p>Comissões criadas DENTRO da vigência usam essa regra. Fora da vigência: regra ignorada.</p>
+</section>
+
+<!-- 6 -->
+<section id="prioridade">
+  <h2>6. Prioridade em regras (importante!)</h2>
+
+  <p>Pra que serve o campo <strong>"Prioridade"</strong> (número, default 0)?</p>
+
+  <h3>Hierarquia padrão (sem prioridade)</h3>
+  <p>O Engine resolve qual regra usar nessa ordem:</p>
+  <ol>
+    <li><code>profissional_servico</code> ou <code>profissional_produto</code> (mais específica)</li>
+    <li><code>servico</code> ou <code>produto</code></li>
+    <li><code>categoria_servico</code> ou <code>categoria_produto</code></li>
+    <li><code>profissional</code></li>
+    <li><code>assistente</code> ou <code>meta</code></li>
+    <li><code>dia_semana</code> ou <code>horario</code></li>
+    <li><code>global</code></li>
+  </ol>
+
+  <h3>Quando usar prioridade</h3>
+  <p>Quando você quer <strong>quebrar essa hierarquia</strong>. Exemplo:</p>
+
+  <div class="card">
+    <h4>Cenário: promoção de Black Friday</h4>
+    <p>Regras existentes:</p>
+    <ul>
+      <li><code>global</code> 30% (prioridade 0)</li>
+      <li><code>profissional</code> Maria 40% (prioridade 0)</li>
+    </ul>
+    <p>Você quer: <strong>na Black Friday (24/11), TODO mundo ganha 50%</strong>, mesmo a Maria.</p>
+    <p>Cria:</p>
+    <ul>
+      <li><code>global</code> 50% — <strong>prioridade 100</strong> — data_inicio=24/11, data_fim=24/11</li>
+    </ul>
+    <p>Resultado: na hierarquia normal, "profissional" (Maria 40%) venceria "global" (30%). Mas a nova regra com prioridade 100 sobrescreve TUDO no dia 24/11.</p>
+  </div>
+
+  <h3>Ordem de resolução completa</h3>
+  <ol>
+    <li><strong>Prioridade manual</strong> (campo, maior vence)</li>
+    <li>Tipo da regra (hierarquia acima)</li>
+    <li><code>data_inicio</code> mais recente desempata</li>
+  </ol>
+
+  <p>Em código: <code>RuleResolver.js</code> ordena exatamente nessa sequência.</p>
+
+  <div class="card warn">
+    <h4>⚠️ Dica</h4>
+    <p>Use prioridade <strong>com moderação</strong>. Se cria muita regra com prioridade alta, fica difícil de entender por que comissão saiu de um jeito. Default (0) cobre 95% dos casos.</p>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="pagamento">
+  <h2>7. Pagamento em lote</h2>
+
+  <p>No final do mês (ou semana, ou quando o admin decidir) você paga todas as comissões pendentes de cada profissional em <strong>1 transação só</strong>.</p>
+
+  <h3>Onde</h3>
+  <p>Menu <code>/comissoes/pagamento</code> — wizard de 3 passos:</p>
+
+  <h3>Passo 1: Selecionar profissional + período</h3>
+  <ul>
+    <li>Escolhe profissional no dropdown</li>
+    <li>Define data início e data fim do período (ex: 1 a 30 do mês)</li>
+  </ul>
+
+  <h3>Passo 2: Selecionar comissões</h3>
+  <p>Sistema lista todas comissões <span class="badge pendente">pendente</span> daquele profissional no período. Você marca quais incluir (ou clica "Marcar todas").</p>
+  <p>Cada linha mostra:</p>
+  <ul>
+    <li>Data, cliente, item</li>
+    <li>Valor da comissão</li>
+  </ul>
+  <p>Total selecionado aparece em destaque no rodapé.</p>
+
+  <h3>Passo 3: Confirmar</h3>
+  <ul>
+    <li>Campo <strong>"Valor confirmado"</strong>: digita o valor que você TEM CERTEZA que vai pagar</li>
+    <li>Se digitar diferente do total selecionado → botão bloqueia (proteção contra erro)</li>
+    <li>Forma de pagamento: PIX, transferência, dinheiro, cheque</li>
+    <li>Observação livre</li>
+    <li>Clica <strong>Confirmar Pagamento</strong></li>
+  </ul>
+
+  <h3>O que acontece no banco</h3>
+  <ol>
+    <li>Transação ACID começa</li>
+    <li>Lock pessimista no idempotency_key (não pode rodar 2x igual)</li>
+    <li>UPDATE em todas comissões selecionadas: <code>status='paga'</code>, vincula ao lote</li>
+    <li>INSERT em <code>comissoes_pagamentos_v2</code> com total, período, forma</li>
+    <li>Audit log</li>
+    <li>COMMIT</li>
+  </ol>
+
+  <div class="card ok">
+    <h4>✅ Garantias</h4>
+    <ul>
+      <li><strong>Idempotente</strong>: se você clicar 2x no botão, paga só 1 vez</li>
+      <li><strong>Atômico</strong>: ou paga TUDO ou não paga NADA (sem half-paid)</li>
+      <li><strong>Auditável</strong>: tabela <code>comissoes_pagamentos_v2</code> guarda quem pagou, quando, quanto</li>
+      <li><strong>Reconciliado</strong>: bloqueia se valor digitado divergir do calculado</li>
+    </ul>
+  </div>
+
+  <h3>Estorno após pagamento</h3>
+  <p>Se você pagou e depois precisa estornar (ex: cliente cancelou serviço depois):</p>
+  <ul>
+    <li>Comissão paga <strong>nunca é alterada</strong> diretamente (preserva histórico)</li>
+    <li>Sistema cria um <strong>ajuste negativo</strong> no profissional</li>
+    <li>No próximo pagamento, o ajuste desconta do valor total</li>
+  </ul>
+</section>
+
+<!-- 8 -->
+<section id="caixa">
+  <h2>8. Caixa diário</h2>
+
+  <p>Controla o <strong>dinheiro físico no balcão</strong>. Útil pra recepcionistas / quem fica no caixa.</p>
+
+  <h3>Fluxo padrão</h3>
+  <ol>
+    <li><strong>Manhã</strong>: abre caixa com saldo inicial (ex: R$ 100 troco)</li>
+    <li><strong>Durante o dia</strong>: vendas entram automaticamente, sangrias/suprimentos são registradas</li>
+    <li><strong>Fim do expediente</strong>: fecha o caixa, sistema mostra:
+      <ul>
+        <li>Saldo inicial</li>
+        <li>+ Entradas (vendas em dinheiro)</li>
+        <li>− Saídas (sangrias)</li>
+        <li>= Saldo esperado</li>
+        <li>Você confere com a gaveta e fecha com o valor real</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h3>Diferença pra DRE</h3>
+  <p><strong>Caixa</strong> = dinheiro físico (notas, moedas).<br>
+  <strong>DRE</strong> = todo o financeiro (cartão, pix, transferência, fiado, etc).</p>
+  <p>Caixa só rastreia dinheiro vivo. Vendas em cartão NÃO entram no caixa físico.</p>
+
+  <div class="card">
+    <h4>Quando usar</h4>
+    <p>Se seu salão lida com dinheiro em espécie e quer evitar "sumiço de troco". Salões 100% cartão/pix podem ignorar o módulo.</p>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="despesas">
+  <h2>9. Despesas (saída de dinheiro)</h2>
+
+  <p>Tudo que o salão GASTA. Sem isso, DRE não fecha.</p>
+
+  <h3>Tipos comuns</h3>
+  <ul>
+    <li><strong>Fixas</strong>: aluguel, água, luz, internet, software</li>
+    <li><strong>Variáveis</strong>: fornecedor (shampoo, esmalte), conta esporádica</li>
+    <li><strong>Pessoal</strong>: salário, comissões (essas o sistema gera automaticamente, não precisa lançar aqui)</li>
+    <li><strong>Investimento</strong>: equipamento novo, reforma</li>
+  </ul>
+
+  <h3>Onde lançar</h3>
+  <p>Tela <code>/despesas</code> → <strong>Nova Despesa</strong>:</p>
+  <table>
+    <thead><tr><th>Campo</th><th>Exemplo</th></tr></thead>
+    <tbody>
+      <tr><td>Descrição</td><td>"Aluguel março"</td></tr>
+      <tr><td>Categoria</td><td>aluguel / contas / fornecedor / pessoal</td></tr>
+      <tr><td>Valor</td><td>R$ 2.500,00</td></tr>
+      <tr><td>Data</td><td>05/03/2026</td></tr>
+      <tr><td>Pago?</td><td>sim / não (pendente)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Resumo mensal</h3>
+  <p>Tela mostra:</p>
+  <ul>
+    <li>Total gasto no mês</li>
+    <li>Despesas por categoria (pizza)</li>
+    <li>Pago vs pendente</li>
+  </ul>
+
+  <p>Esses dados alimentam o DRE no módulo <strong>Financeiro</strong>.</p>
+</section>
+
+<!-- 10 -->
+<section id="fechamento">
+  <h2>10. Fechamento</h2>
+
+  <p>"Fechamento" é o <strong>recibo consolidado de um atendimento + venda</strong>. É onde se junta tudo que foi feito + tudo que foi vendido + forma de pagamento, num único documento.</p>
+
+  <h3>Quando usar</h3>
+  <ul>
+    <li>Cliente terminou: corte + escova + shampoo</li>
+    <li>Você abre o fechamento dela</li>
+    <li>Confere itens, aplica desconto se houver</li>
+    <li>Escolhe forma de pagamento</li>
+    <li>Fecha → gera venda → gera comissões</li>
+  </ul>
+
+  <h3>Diferença</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h4>Atendimento</h4>
+      <p>Foco no <strong>serviço</strong> e profissional</p>
+    </div>
+    <div class="card">
+      <h4>Fechamento</h4>
+      <p>Foco na <strong>cobrança consolidada</strong> (vários itens, total, pagamento)</p>
+    </div>
+  </div>
+
+  <p>Salões pequenos podem pular o fechamento e ir direto pro módulo Vendas. Salões maiores usam pra conferir 2x antes de cobrar.</p>
+</section>
+
+<!-- 11 -->
+<section id="financeiro">
+  <h2>11. Financeiro (DRE)</h2>
+
+  <p>O <strong>DRE</strong> (Demonstrativo de Resultados do Exercício) é a visão MENSAL do salão. Mostra se você ganhou ou perdeu dinheiro no mês.</p>
+
+  <h3>Fórmula básica</h3>
+  <div class="flow">
+RECEITA            (vendas do mês, status concluida)
+  −  COMISSÕES     (pagas no mês)
+  −  DESPESAS      (lançadas no mês)
+  =  LUCRO LÍQUIDO
+  </div>
+
+  <h3>Onde</h3>
+  <p>Menu <code>/financeiro</code>. Filtros: mês, ano.</p>
+
+  <h3>O que mostra</h3>
+  <ul>
+    <li><strong>Receita bruta</strong>: soma de <code>valor_final</code> de todas vendas não-canceladas</li>
+    <li><strong>Comissões pagas</strong>: total da tabela <code>comissoes_pagamentos_v2</code> no mês</li>
+    <li><strong>Despesas</strong>: soma de <code>despesas</code> pagas no mês, agrupado por categoria</li>
+    <li><strong>Lucro líquido</strong>: receita − comissões − despesas</li>
+    <li><strong>Margem</strong>: lucro ÷ receita × 100%</li>
+    <li><strong>Projeção</strong>: estimativa do mês seguinte baseado no histórico</li>
+  </ul>
+
+  <div class="card warn">
+    <h4>⚠️ Atenção: comissões pendentes não entram</h4>
+    <p>O DRE só conta comissões <strong>já pagas</strong>. Se você tem R$ 5.000 em comissões pendentes não pagas no fim do mês, elas <strong>vão entrar no DRE do mês seguinte</strong> quando você pagar.</p>
+    <p>Pra ter visão precisa: pague comissões mensalmente, sempre antes de fechar o mês.</p>
+  </div>
+</section>
+
+<!-- 12 -->
+<section id="relatorios">
+  <h2>12. Relatórios estratégicos</h2>
+
+  <p>Análises pra responder perguntas estratégicas. Menu <code>/relatorios</code>.</p>
+
+  <h3>Relatórios disponíveis</h3>
+  <table>
+    <thead><tr><th>Relatório</th><th>Responde</th></tr></thead>
+    <tbody>
+      <tr><td>Serviços mais executados</td><td>"O que o salão mais faz?"</td></tr>
+      <tr><td>Horários de pico</td><td>"Quando contratar mais staff?"</td></tr>
+      <tr><td>Ranking profissionais</td><td>"Quem produz mais?"</td></tr>
+      <tr><td>Top clientes</td><td>"Quem gasta mais?"</td></tr>
+      <tr><td>Produtos mais vendidos</td><td>"O que repor primeiro?"</td></tr>
+      <tr><td>Inadimplência</td><td>"Quem deve?"</td></tr>
+    </tbody>
+  </table>
+
+  <p>Todos relatórios cruzam <strong>vendas + atendimentos + clientes + profissionais</strong>. Usam queries SQL agregadas em tempo real, sem cache.</p>
+</section>
+
+<!-- 13 -->
+<section id="fluxo-completo">
+  <h2>13. Fluxo financeiro completo (exemplo real)</h2>
+
+  <p>Vamos simular 1 dia inteiro:</p>
+
+  <h3>08:00 — Abertura</h3>
+  <ul>
+    <li>Recepcionista abre o <strong>caixa</strong> com R$ 100 de troco</li>
+  </ul>
+
+  <h3>10:30 — Cliente Maria chega</h3>
+  <ul>
+    <li>Cria <strong>atendimento</strong> para Maria com Paula (profissional)</li>
+    <li>Adiciona serviço "Coloração" R$ 200 + "Hidratação" R$ 80</li>
+    <li>Status: <code>em_andamento</code></li>
+  </ul>
+
+  <h3>12:00 — Paula termina, Maria vai pagar</h3>
+  <ul>
+    <li>No <strong>fechamento</strong>: adiciona produto "Shampoo Reparador" R$ 60</li>
+    <li>Total: R$ 340</li>
+    <li>Cliente paga R$ 300 em PIX + R$ 40 em dinheiro</li>
+    <li>Fecha → gera venda</li>
+    <li><strong>Atendimento</strong>: status <code>finalizado</code></li>
+    <li><strong>Venda</strong>: status <code>concluida</code></li>
+  </ul>
+
+  <h3>12:00:05 — Automático (CommissionTriggers)</h3>
+  <p>Regras vigentes:</p>
+  <ul>
+    <li><code>servico</code> Coloração: 40% (prioridade 0)</li>
+    <li><code>global</code>: 30% (prioridade 0)</li>
+  </ul>
+
+  <p>Sistema gera:</p>
+  <ul>
+    <li>Comissão Paula × Coloração R$ 200: <strong>40% = R$ 80</strong> (regra "servico" venceu)</li>
+    <li>Comissão Paula × Hidratação R$ 80: <strong>30% = R$ 24</strong> (caiu pra "global")</li>
+    <li>Comissão Paula × Shampoo R$ 60: <strong>30% = R$ 18</strong> (idem "global")</li>
+  </ul>
+
+  <p>Total comissão Paula nesse atendimento: <strong>R$ 122</strong>. Status: <span class="badge pendente">pendente</span>.</p>
+
+  <h3>12:00:06 — Caixa atualizado</h3>
+  <ul>
+    <li>+ R$ 40 dinheiro</li>
+    <li>(R$ 300 PIX não entra no caixa físico, vai direto pro banco)</li>
+  </ul>
+
+  <h3>14:00 — Despesa</h3>
+  <ul>
+    <li>Lança despesa "Fornecedor Tigi" R$ 850 (paga)</li>
+  </ul>
+
+  <h3>18:00 — Fim do dia</h3>
+  <ul>
+    <li>Recepcionista fecha caixa</li>
+    <li>Confere R$ 140 na gaveta (100 inicial + 40 da Maria)</li>
+  </ul>
+
+  <h3>Fim do mês (dia 30)</h3>
+  <ul>
+    <li>Admin abre <code>/comissoes/pagamento</code></li>
+    <li>Seleciona Paula, período 01-30</li>
+    <li>Sistema lista todas comissões pendentes (incluindo as R$ 122 do dia 5)</li>
+    <li>Total: R$ 4.200</li>
+    <li>Admin paga via PIX</li>
+    <li>Sistema marca todas como <span class="badge paga">paga</span></li>
+  </ul>
+
+  <h3>DRE do mês</h3>
+  <div class="flow">
+RECEITA          R$ 38.500,00
+  −  Comissões   R$  4.200,00  (Paula) + outras
+  −  Despesas    R$  6.350,00  (aluguel, contas, fornecedor)
+  =  LUCRO       R$ 27.950,00
+
+Margem: 72,6%
+  </div>
+</section>
+
+<!-- 14 -->
+<section id="troubleshooting">
+  <h2>14. Problemas comuns</h2>
+
+  <h3>Venda finalizada mas comissão não apareceu</h3>
+  <p>Causas:</p>
+  <ol>
+    <li><strong>Nenhuma regra vigente cobre esse item</strong> → vai em <code>/comissoes/regras</code> e cria pelo menos uma <code>global</code></li>
+    <li><strong>Status não é <code>concluida</code></strong> → confere o status da venda</li>
+    <li><strong>Profissional não vinculado</strong> → venda sem profissional não gera comissão</li>
+    <li><strong>AUTO_COMISSAO=false</strong> no env do servidor → reativa</li>
+  </ol>
+
+  <h3>Comissão veio com valor errado</h3>
+  <ol>
+    <li>Abre a comissão na lista, vê o <strong>regra_snapshot_json</strong></li>
+    <li>Confere qual regra foi aplicada e qual percentual</li>
+    <li>Se a regra está errada: edita a regra (afeta novas comissões, não as antigas)</li>
+    <li>Se quer corrigir essa específica: cria um <strong>ajuste</strong> (positivo ou negativo)</li>
+  </ol>
+
+  <h3>Não consigo pagar (botão bloqueado)</h3>
+  <p>Causa: o <strong>Valor confirmado</strong> que você digitou não bate com a soma das comissões selecionadas.</p>
+  <p>Solução: confere a soma. Se diverge, marca/desmarca itens ou ajusta o valor digitado.</p>
+
+  <h3>DRE com lucro estranho</h3>
+  <ol>
+    <li>Tem despesa não lançada? → adiciona no módulo <code>/despesas</code></li>
+    <li>Tem comissão pendente não paga? → paga antes de fechar o mês</li>
+    <li>Tem venda cancelada que ainda aparece? → confere status no banco</li>
+  </ol>
+
+  <h3>Profissional reclama que pagou comissão errada</h3>
+  <ol>
+    <li>Abre extrato dele em <code>/comissoes/extrato/:id</code></li>
+    <li>Confere mês a mês: quanto pendente, quanto pago, ajustes</li>
+    <li>Snapshot da regra mostra exatamente que % foi aplicado</li>
+    <li>Se foi erro de configuração: cria ajuste positivo pro próximo pagamento</li>
+  </ol>
+</section>
+
+<footer>
+  <p><strong>Manual Financeiro — SoftHair</strong></p>
+  <p>Repositório: <code>github.com/guijoioj/MONEY</code></p>
+  <p>Última atualização: 2026-05</p>
+</footer>
+
+</div>
+
+</body>
+</html>
