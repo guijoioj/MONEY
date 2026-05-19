@@ -7,14 +7,17 @@
  *   - onVendaEditada(vendaAntiga, vendaNova, client)
  *   - onAtendimentoFechado(atendimento, client)
  *
- * Cada função:
- *   - é resiliente: erros não derrubam a transação principal da venda
- *     (log warn + retorna { ok: false }); não usa throw fora do escopo da
- *     transação que ela mesma cria.
- *   - é idempotente: rodar 2x = mesmo resultado (ON CONFLICT na key).
- *   - audita: cria entry em audit_log pra rastreabilidade.
+ * Comportamento de erro:
+ *   - dev/test → best-effort (loga e retorna { ok: false }). Não derruba venda.
+ *   - production → STRICT por padrão: erro propaga (throw), rollback da venda.
+ *     Garante zero "venda sem comissão" em prod.
+ *   - Override: STRICT_COMISSAO=true força strict, =false força best-effort.
  *
- * Feature flag: `process.env.AUTO_COMISSAO !== 'false'` (default = ligado).
+ * Cada função:
+ *   - é idempotente: rodar 2x = mesmo resultado (ON CONFLICT na idempotency_key)
+ *   - audita: logAction em audit_log pra rastreabilidade
+ *
+ * Feature flag: AUTO_COMISSAO=false desativa tudo (default = ligado).
  *
  * @module services/CommissionTriggers
  */
