@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { profissionaisAPI } from '../services/api';
 import { useAdminPin } from '../context/AdminPinContext';
-import { Search, Plus, Edit2, Trash2, X, User, Phone, Mail, MapPin, AlertCircle } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, X, User, Phone, Mail, MapPin, AlertCircle, Users, Heart, DollarSign } from 'lucide-react';
+import PainelProfissional from '../components/PainelProfissional';
+import FavoritosCliente from '../components/FavoritosCliente';
 
 export default function Profissionais() {
   const { requestPin } = useAdminPin();
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState('lista'); // 'lista' | 'painel' | 'favoritos'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProfissional, setEditingProfissional] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, profissional: null });
@@ -113,12 +116,53 @@ export default function Profissionais() {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Profissionais</h1>
-        <button onClick={() => openModal()} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
-          <Plus size={20} />
-          Novo Profissional
+        {activeTab === 'lista' && (
+          <button onClick={() => openModal()} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+            <Plus size={20} />
+            Novo Profissional
+          </button>
+        )}
+      </div>
+
+      {/* Tabs internas */}
+      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 mb-4 overflow-x-auto">
+        <button
+          onClick={() => setActiveTab('lista')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'lista'
+              ? 'border-indigo-600 text-indigo-700 dark:text-indigo-300'
+              : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+          }`}
+        >
+          <Users size={16} /> Lista
+        </button>
+        <button
+          onClick={() => setActiveTab('painel')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'painel'
+              ? 'border-indigo-600 text-indigo-700 dark:text-indigo-300'
+              : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+          }`}
+        >
+          <DollarSign size={16} /> Comissões / Painel
+        </button>
+        <button
+          onClick={() => setActiveTab('favoritos')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'favoritos'
+              ? 'border-indigo-600 text-indigo-700 dark:text-indigo-300'
+              : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+          }`}
+        >
+          <Heart size={16} /> Favoritos
         </button>
       </div>
 
+      {activeTab === 'painel' && <PainelProfissional />}
+      {activeTab === 'favoritos' && <FavoritosCliente />}
+
+      {activeTab === 'lista' && (
+      <>
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
@@ -186,6 +230,9 @@ export default function Profissionais() {
           )}
         </div>
       )}
+      </>
+      )}
+      {/* fim activeTab === 'lista' */}
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

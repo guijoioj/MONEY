@@ -116,6 +116,11 @@ export const profissionaisAPI = {
   create: (data) => api.post('/profissionais', data),
   update: (id, data) => api.put(`/profissionais/${id}`, data),
   delete: (id) => api.delete(`/profissionais/${id}`),
+  // Painel interno: comissões + vendas + atendimentos + top clientes/serviços/produtos
+  getPainel: (id, params) => api.get(`/profissionais/${id}/painel`, { params }),
+  // Favoritos de um cliente específico
+  getClienteFavoritos: (profId, clienteId) =>
+    api.get(`/profissionais/${profId}/painel/clientes/${clienteId}/favoritos`),
 };
 
 export const atendimentosAPI = {

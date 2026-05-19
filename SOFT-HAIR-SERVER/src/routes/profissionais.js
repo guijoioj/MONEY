@@ -151,4 +151,213 @@ router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   }
 });
 
+// ============================================================================
+// GET /api/profissionais/:id/painel
+// Dashboard interno do profissional: comissões agregadas + status + vendas +
+// atendimentos + top clientes + top serviços/produtos favoritos dos clientes.
+// ============================================================================
+router.get('/:id/painel', authMiddleware, async (req, res) => {
+  try {
+    const { pool } = require('../config/database');
+    const { sendError } = require('../utils/sendError');
+    const profId = Number(req.params.id);
+    const { data_inicio, data_fim } = req.query;
+
+    // Tenancy
+    const tenancy = await pool.query(
+      'SELECT id, nome, especialidade, comissao_percentual, ativo FROM profissionais WHERE id=$1 AND salao_id=$2',
+      [profId, req.salaoId]
+    );
+    if (!tenancy.rows.length) {
+      return res.status(404).json({ success: false, error: 'Profissional não encontrado' });
+    }
+
+    const periodoFilter = data_inicio && data_fim
+      ? 'AND c.created_at BETWEEN $3 AND $4'
+      : '';
+    const periodoFilterV = data_inicio && data_fim
+      ? 'AND v.created_at BETWEEN $3 AND $4'
+      : '';
+    const periodoFilterA = data_inicio && data_fim
+      ? 'AND a.created_at BETWEEN $3 AND $4'
+      : '';
+    const params = data_inicio && data_fim
+      ? [profId, req.salaoId, data_inicio, data_fim]
+      : [profId, req.salaoId];
+
+    const [resumoComissoes, vendas, atendimentos, topClientes, topServicos, topProdutos] = await Promise.all([
+      // Resumo de comissões (V1 + V2)
+      pool.query(`
+        SELECT
+          COUNT(*)::int AS qtd_total,
+          COUNT(*) FILTER (WHERE COALESCE(c.status,'pendente') IN ('pendente','paga'))::int AS qtd_validas,
+          COUNT(*) FILTER (WHERE COALESCE(c.status,'pendente')='pendente')::int AS qtd_pendente,
+          COUNT(*) FILTER (WHERE COALESCE(c.status,'pendente')='paga')::int AS qtd_paga,
+          COUNT(*) FILTER (WHERE COALESCE(c.status,'pendente')='estornada')::int AS qtd_estornada,
+          COALESCE(SUM(c.valor_comissao_cents) FILTER (WHERE COALESCE(c.status,'pendente')='pendente'),0)::bigint AS pendente_cents,
+          COALESCE(SUM(c.valor_comissao_cents) FILTER (WHERE COALESCE(c.status,'pendente')='paga'),0)::bigint AS pago_cents,
+          COALESCE(SUM(c.valor_comissao_cents) FILTER (WHERE COALESCE(c.status,'pendente')='estornada'),0)::bigint AS estornada_cents,
+          COALESCE(SUM(c.valor_comissao_cents),0)::bigint AS total_cents,
+          MAX(c.created_at) AS ultima_comissao_em
+        FROM comissoes c
+        WHERE c.profissional_id=$1 AND c.salao_id=$2 ${periodoFilter}
+      `, params),
+
+      // Vendas
+      pool.query(`
+        SELECT COUNT(*)::int AS qtd,
+               COALESCE(SUM(v.valor_final),0)::numeric AS total_faturado
+          FROM vendas v
+         WHERE v.profissional_id=$1 AND v.salao_id=$2
+           AND COALESCE(v.status,'concluida') != 'cancelada'
+           ${periodoFilterV}
+      `, params),
+
+      // Atendimentos
+      pool.query(`
+        SELECT COUNT(*)::int AS qtd,
+               COUNT(*) FILTER (WHERE a.status='finalizado')::int AS qtd_finalizados,
+               COUNT(DISTINCT a.cliente_id)::int AS clientes_unicos
+          FROM atendimentos a
+         WHERE a.profissional_id=$1 AND a.salao_id=$2
+           ${periodoFilterA}
+      `, params),
+
+      // Top 10 clientes (por nº de atendimentos)
+      pool.query(`
+        SELECT cl.id, cl.nome, cl.telefone,
+               COUNT(a.id)::int AS qtd_atendimentos,
+               MAX(a.created_at) AS ultimo_atendimento
+          FROM atendimentos a
+          JOIN clientes cl ON cl.id = a.cliente_id
+         WHERE a.profissional_id=$1 AND a.salao_id=$2
+           ${periodoFilterA}
+         GROUP BY cl.id, cl.nome, cl.telefone
+         ORDER BY qtd_atendimentos DESC
+         LIMIT 10
+      `, params),
+
+      // Top serviços (mais executados pelo profissional)
+      pool.query(`
+        SELECT s.id, s.nome, s.categoria,
+               COUNT(asv.id)::int AS qtd
+          FROM atendimentos_servicos asv
+          JOIN atendimentos a ON a.id = asv.atendimento_id
+          JOIN servicos s ON s.id = asv.servico_id
+         WHERE a.profissional_id=$1 AND a.salao_id=$2
+           ${periodoFilterA}
+         GROUP BY s.id, s.nome, s.categoria
+         ORDER BY qtd DESC
+         LIMIT 10
+      `, params).catch(() => ({ rows: [] })),
+
+      // Top produtos vendidos pelo profissional
+      pool.query(`
+        SELECT p.id, p.nome, p.categoria,
+               COUNT(vi.id)::int AS qtd_vendas,
+               COALESCE(SUM(vi.quantidade),0)::int AS qtd_unidades,
+               COALESCE(SUM(vi.valor_total),0)::numeric AS total_vendido
+          FROM venda_itens vi
+          JOIN vendas v ON v.id = vi.venda_id
+          JOIN produtos p ON p.id = vi.produto_id
+         WHERE v.profissional_id=$1 AND v.salao_id=$2
+           AND COALESCE(v.status,'concluida') != 'cancelada'
+           ${periodoFilterV}
+         GROUP BY p.id, p.nome, p.categoria
+         ORDER BY qtd_vendas DESC
+         LIMIT 10
+      `, params).catch(() => ({ rows: [] })),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        profissional: tenancy.rows[0],
+        periodo: { data_inicio, data_fim },
+        resumo_comissoes: resumoComissoes.rows[0],
+        vendas: vendas.rows[0],
+        atendimentos: atendimentos.rows[0],
+        top_clientes: topClientes.rows,
+        top_servicos: topServicos.rows,
+        top_produtos: topProdutos.rows,
+      },
+    });
+  } catch (error) {
+    require('../utils/sendError').sendError(res, 500, 'Erro montando painel', error);
+  }
+});
+
+// ============================================================================
+// GET /api/profissionais/:id/painel/clientes/:clienteId/favoritos
+// Favoritos de UM cliente específico (serviços e produtos preferidos).
+// ============================================================================
+router.get('/:id/painel/clientes/:clienteId/favoritos', authMiddleware, async (req, res) => {
+  try {
+    const { pool } = require('../config/database');
+    const profId = Number(req.params.id);
+    const clienteId = Number(req.params.clienteId);
+
+    // Tenancy: profissional E cliente devem pertencer ao salão
+    const checks = await Promise.all([
+      pool.query('SELECT 1 FROM profissionais WHERE id=$1 AND salao_id=$2', [profId, req.salaoId]),
+      pool.query('SELECT id, nome, telefone, email FROM clientes WHERE id=$1 AND salao_id=$2', [clienteId, req.salaoId]),
+    ]);
+    if (!checks[0].rows.length) return res.status(404).json({ success: false, error: 'Profissional não encontrado' });
+    if (!checks[1].rows.length) return res.status(404).json({ success: false, error: 'Cliente não encontrado' });
+
+    const [servicosFav, produtosFav, ultimasVisitas] = await Promise.all([
+      // Top 5 serviços do cliente (qualquer profissional)
+      pool.query(`
+        SELECT s.id, s.nome, s.categoria, s.preco,
+               COUNT(asv.id)::int AS qtd,
+               MAX(a.created_at) AS ultimo_uso
+          FROM atendimentos_servicos asv
+          JOIN atendimentos a ON a.id = asv.atendimento_id
+          JOIN servicos s ON s.id = asv.servico_id
+         WHERE a.cliente_id=$1 AND a.salao_id=$2
+         GROUP BY s.id, s.nome, s.categoria, s.preco
+         ORDER BY qtd DESC
+         LIMIT 5
+      `, [clienteId, req.salaoId]).catch(() => ({ rows: [] })),
+
+      // Top 5 produtos do cliente
+      pool.query(`
+        SELECT p.id, p.nome, p.categoria, p.preco_venda,
+               COUNT(vi.id)::int AS qtd_compras,
+               COALESCE(SUM(vi.quantidade),0)::int AS qtd_unidades,
+               MAX(v.created_at) AS ultima_compra
+          FROM venda_itens vi
+          JOIN vendas v ON v.id = vi.venda_id
+          JOIN produtos p ON p.id = vi.produto_id
+         WHERE v.cliente_id=$1 AND v.salao_id=$2
+           AND COALESCE(v.status,'concluida') != 'cancelada'
+         GROUP BY p.id, p.nome, p.categoria, p.preco_venda
+         ORDER BY qtd_compras DESC
+         LIMIT 5
+      `, [clienteId, req.salaoId]).catch(() => ({ rows: [] })),
+
+      // Últimas 5 visitas do cliente com esse profissional
+      pool.query(`
+        SELECT a.id, a.created_at, a.valor, a.status
+          FROM atendimentos a
+         WHERE a.cliente_id=$1 AND a.profissional_id=$2 AND a.salao_id=$3
+         ORDER BY a.created_at DESC
+         LIMIT 5
+      `, [clienteId, profId, req.salaoId]).catch(() => ({ rows: [] })),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        cliente: checks[1].rows[0],
+        servicos_favoritos: servicosFav.rows,
+        produtos_favoritos: produtosFav.rows,
+        ultimas_visitas: ultimasVisitas.rows,
+      },
+    });
+  } catch (error) {
+    require('../utils/sendError').sendError(res, 500, 'Erro buscando favoritos', error);
+  }
+});
+
 module.exports = router;
