@@ -80,8 +80,8 @@ Backend (API):          http://localhost:3001
 -----------------------
 Após a primeira instalação, use:
 
-  E-mail:    admin@salao.com
-  Senha:     admin123
+  E-mail:    <REDACTED_EMAIL>
+  Senha:     <REDACTED_PASSWORD>
 
 2.2 RECUPERAÇÃO DE SENHA
 -------------------------

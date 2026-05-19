@@ -70,10 +70,12 @@ npm run dev
 # opens at http://localhost:3000
 ```
 
-### Default admin credentials (first deploy)
-- Email: admin@softhair.com
-- Password: admin123
-- ⚠️ Change immediately after first login
+### Admin credentials
+- Configurar via env vars no Render: `DEFAULT_ADMIN_EMAIL` e `DEFAULT_ADMIN_PASSWORD`
+- Sem essas vars, server NÃO cria admin default em produção (proteção em
+  `securityInitService.createDefaultAdmin`)
+- Em dev/test, fallback usa email do `.env.local` (sem credencial hardcoded aqui)
+- ⚠️ Trocar imediatamente após primeiro login. Nunca commitar senha real.
 
 ---
 

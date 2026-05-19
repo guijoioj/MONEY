@@ -44,8 +44,8 @@ const { queryOne, queryRun } = require('../config/database');
 
 const DEFAULT_JWT_SECRET = 'softHair-dev-jwt-secret-change-me';
 const DEFAULT_JWT_EXPIRES_IN = '7d';
-const DEFAULT_ADMIN_EMAIL = 'admin@salao.com';
-const DEFAULT_ADMIN_PASSWORD = 'admin123';
+const DEFAULT_ADMIN_EMAIL = '<REDACTED_EMAIL>';
+const DEFAULT_ADMIN_PASSWORD = '<REDACTED_PASSWORD>';
 const DEFAULT_ADMIN_NAME = 'Administrador';
 const DEFAULT_SALON_NAME = 'Meu Salão';
 

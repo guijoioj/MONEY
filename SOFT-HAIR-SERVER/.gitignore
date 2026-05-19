@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Build / dist
+dist/
+
+# DB / dumps / backups
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.dump
+*.bak
+*.backup
+backups/
+
+# Exports / uploads (dados reais)
+exports/
+uploads/
+*.csv
+*.xlsx
+*.xls
+*.parquet
+
+# Certs / keys
+*.pem
+*.key
+*.p12
+*.crt
+*.cert
+
+# Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Misc
+*.tgz

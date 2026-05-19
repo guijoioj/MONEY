@@ -66,9 +66,9 @@ Arquivos auditados:
 
 ## ALTOS
 
-### [E8] Senhas admin default `'admin123'` semeadas em código + sem flag de "trocar no primeiro login" — FIXADO
+### [E8] Senhas admin default `'<REDACTED_PASSWORD>'` semeadas em código + sem flag de "trocar no primeiro login" — FIXADO
 - **Arquivo:** `SoftHair/backend/src/config/initDb.js:204-205`; `SoftHair/electron/main.js:65`
-- **Descrição:** Banco local nasce com `admin@salao.com` / `admin123` (hash bcrypt cost 10). Não há fluxo de troca obrigatória no primeiro login. O usuário comum (dono de salão) provavelmente nunca troca.
+- **Descrição:** Banco local nasce com `<REDACTED_EMAIL>` / `<REDACTED_PASSWORD>` (hash bcrypt cost 10). Não há fluxo de troca obrigatória no primeiro login. O usuário comum (dono de salão) provavelmente nunca troca.
 - **Exploração:** Acesso físico ao computador → login no app local → todos os dados, e botão "Sincronizar com cloud" entrega credenciais cloud também se o sync estiver ativo. Ex-funcionário que sabe a default tem acesso.
 - **Fix:** Gerar senha aleatória no primeiro boot (12+ caracteres), exibir uma única vez na UI do Electron com botão "copiar" + warning persistente; OU forçar fluxo de "trocar senha" no primeiro login com flag `must_change_password` na tabela `usuarios`. Pelo menos não logar a senha no console (`initDb.js:215` faz `console.log(... ${adminSenha})`).
 
@@ -255,7 +255,7 @@ Arquivos auditados:
 
 1. **Sync está fundamentalmente quebrado em contrato** (E5) — o client envia `{tabela: [rows]}`, o server espera `[{table, operation, data}]`. O sync provavelmente NUNCA funcionou de fato em produção. Qualquer fix apressado sem alinhar IDs locais/remotos vai corromper dados cross-salão.
 
-2. **Cadeia de credenciais frágil**: JWT_SECRET com fallback dev (E1) + token cloud em plaintext no JSON sem chmod (E2) + senha admin default `admin123` (E8) + toggle off não limpa nada (E9). Um malware infostealer simples drena tudo.
+2. **Cadeia de credenciais frágil**: JWT_SECRET com fallback dev (E1) + token cloud em plaintext no JSON sem chmod (E2) + senha admin default `<REDACTED_PASSWORD>` (E8) + toggle off não limpa nada (E9). Um malware infostealer simples drena tudo.
 
 3. **Sem HTTPS forçado, sem cert pinning, com `rejectUnauthorized:false`** (E3) — o sync é MITM-able trivialmente. Em rede de café/aeroporto, atacante captura todos os clientes e profissionais do salão.
 

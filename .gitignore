@@ -12,10 +12,35 @@ jspm_packages/
 
 # env files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+!.env.sample
+
+# Banco / dumps / backups
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.dump
+*.bak
+*.backup
+backups/
+
+# Dados reais (exports)
+exports/
+uploads/
+*.csv
+*.xlsx
+*.xls
+*.parquet
+
+# Certificados / chaves
+*.pem
+*.key
+*.p12
+*.crt
+*.cert
 
 # Build files
 dist/

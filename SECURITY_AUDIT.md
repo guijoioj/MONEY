@@ -24,8 +24,8 @@
 ### [C1] ✅ FIXADO — Senha padrão de admin embarcada no código + criação automática em produção
 
 - **Arquivo:** `SOFT-HAIR-SERVER/src/services/securityInitService.js:50-77`
-- **Descrição:** Toda inicialização do servidor cria um usuário admin se ele não existir, usando `admin@softhair.com` / `admin123` (do código) caso `DEFAULT_ADMIN_PASSWORD` não esteja definido. O salt rounds usado é 10. O alerta só aparece no console e não bloqueia. Como esse runtime executa em produção (Render), qualquer pessoa pode tentar credenciais default contra `/api/auth/login` (ainda mais grave porque o IP do servidor é público e documentado no próprio CLAUDE.md). O `CLAUDE.md` confirma: "Default admin credentials: admin@softhair.com / admin123 — Change immediately after first login".
-- **Exploração:** `POST /api/auth/login` com `{email:"admin@softhair.com", senha:"admin123"}` → token JWT admin de um salão real. Se ainda não tiverem alterado, ataque conclusivo.
+- **Descrição:** Toda inicialização do servidor cria um usuário admin se ele não existir, usando `<REDACTED_EMAIL>` / `<REDACTED_PASSWORD>` (do código) caso `DEFAULT_ADMIN_PASSWORD` não esteja definido. O salt rounds usado é 10. O alerta só aparece no console e não bloqueia. Como esse runtime executa em produção (Render), qualquer pessoa pode tentar credenciais default contra `/api/auth/login` (ainda mais grave porque o IP do servidor é público e documentado no próprio CLAUDE.md). O `CLAUDE.md` confirma: "Default admin credentials: <REDACTED_EMAIL> / <REDACTED_PASSWORD> — Change immediately after first login".
+- **Exploração:** `POST /api/auth/login` com `{email:"<REDACTED_EMAIL>", senha:"<REDACTED_PASSWORD>"}` → token JWT admin de um salão real. Se ainda não tiverem alterado, ataque conclusivo.
 - **Fix:** (1) Falhar boot em produção se `DEFAULT_ADMIN_PASSWORD` não estiver setado. (2) Forçar troca de senha no primeiro login (flag `must_change_password`). (3) Não criar admin automaticamente em produção; isso deve ser via script manual de bootstrap.
 - **Código seguro:**
 ```js
@@ -355,7 +355,7 @@ Comportamento correto. Sem ação.
 ### Principais riscos sistêmicos
 
 1. **Modelo multi-tenant frágil** ([C2], [C3], [A3], [M3]): IDs de tenant não são consistentemente validados entre as três stacks (web, cliente mobile, profissional mobile). Cliente JWT sem `salaoId`, profissional não filtrando `salao_id` em queries, rotas confiando em URL params para tenant. Vetor sério para vazamento de dados entre salões.
-2. **Credenciais default em produção** ([C1]): senha admin `admin123` criada automaticamente se env não definida. Render expõe IP publicamente.
+2. **Credenciais default em produção** ([C1]): senha admin `<REDACTED_PASSWORD>` criada automaticamente se env não definida. Render expõe IP publicamente.
 3. **Token storage e cycle** ([A1], [A2], [A7]): localStorage no web, AsyncStorage no mobile, sem refresh token, expiração de 7 dias, sem revogação. Um XSS = uma semana de acesso.
 4. **CORS permissivo + credentials** ([C5]): config permite `*` na env com `credentials:true` — porta dos fundos para ataques de origem cruzada se operador errar.
 5. **AI executa mutations diretamente** ([A4]): Groq/Anthropic output cria agendamentos sem confirmação humana, vulnerável a prompt injection.

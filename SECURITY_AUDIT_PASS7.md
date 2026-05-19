@@ -101,13 +101,13 @@
 
 ### 🟢 BAIXOS
 
-#### [P7-B1] `scripts/createAdmin.js` tem senha default `admin123` hardcoded
+#### [P7-B1] `scripts/createAdmin.js` tem senha default `<REDACTED_PASSWORD>` hardcoded
 - **Arquivo:** `SOFT-HAIR-SERVER/src/scripts/createAdmin.js:10`
-- **Descrição:** Script CLI de bootstrap aceita senha via env `SOFTHAIR_DEFAULT_ADMIN_PASSWORD`, mas se ausente cai em `'admin123'` (8 chars, sem matriz, fraca). Comentário do `CLAUDE.md` umbrella **avisa** mudar após primeiro login mas:
+- **Descrição:** Script CLI de bootstrap aceita senha via env `SOFTHAIR_DEFAULT_ADMIN_PASSWORD`, mas se ausente cai em `'<REDACTED_PASSWORD>'` (8 chars, sem matriz, fraca). Comentário do `CLAUDE.md` umbrella **avisa** mudar após primeiro login mas:
   - Script não verifica força mínima (8+).
   - Script não força reset-on-first-login.
-  - Em dev/staging onde o operador esquece, fica `admin/admin123` exposto. `securityInitService.createDefaultAdmin` já tem proteção decente em prod (não cria sem `DEFAULT_ADMIN_PASSWORD`), mas o **script CLI manual** ignora essa proteção.
-- **Exploração:** Ambiente de staging exposto na internet com defaults → atacante tenta `admin@salao.com / admin123` → ganha admin de salão padrão. Cenário menos provável que P5-A4 mas não-zero.
+  - Em dev/staging onde o operador esquece, fica `admin/<REDACTED_PASSWORD>` exposto. `securityInitService.createDefaultAdmin` já tem proteção decente em prod (não cria sem `DEFAULT_ADMIN_PASSWORD`), mas o **script CLI manual** ignora essa proteção.
+- **Exploração:** Ambiente de staging exposto na internet com defaults → atacante tenta `<REDACTED_EMAIL> / <REDACTED_PASSWORD>` → ganha admin de salão padrão. Cenário menos provável que P5-A4 mas não-zero.
 - **Fix:** Em `createAdmin.js`:
   ```js
   if (!process.argv[3] && !process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD) {

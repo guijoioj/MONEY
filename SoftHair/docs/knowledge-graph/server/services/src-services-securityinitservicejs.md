@@ -88,12 +88,12 @@ class SecurityInitService {
 
   static async createDefaultAdmin() {
     const bcrypt = require('bcryptjs');
-    const email = process.env.DEFAULT_ADMIN_EMAIL || 'admin@softhair.com';
+    const email = process.env.DEFAULT_ADMIN_EMAIL || '<REDACTED_EMAIL>';
 
     const exists = await pool.query('SELECT 1 FROM usuarios WHERE email = $1', [email]);
 
     if (exists.rows.length === 0) {
-      const password = process.env.DEFAULT_ADMIN_PASSWORD || 'admin123';
+      const password = process.env.DEFAULT_ADMIN_PASSWORD || '<REDACTED_PASSWORD>';
       const hash = await bcrypt.hash(password, 10);
 
       // Criar salão padrão

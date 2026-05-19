@@ -76,21 +76,21 @@ async function createDefaultAdmin() {
       const salao = await client.query(
         `INSERT INTO saloes (nome, email)
          VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING *`,
-        ['SoftHair Dev', 'admin@softhair.com']
+        ['SoftHair Dev', '<REDACTED_EMAIL>']
       );
       
       if (salao.rows.length > 0) {
-        const hashedPassword = await bcrypt.hash(process.env.DEFAULT_ADMIN_PASSWORD || 'admin123', 10);
+        const hashedPassword = await bcrypt.hash(process.env.DEFAULT_ADMIN_PASSWORD || '<REDACTED_PASSWORD>', 10);
         
         await client.query(
           `INSERT INTO usuarios (nome, email, senha_hash, salao_id, tipo)
            VALUES ($1, $2, $3, $4, $5)`,
-          ['Administrador', 'admin@softhair.com', hashedPassword, salao.rows[0].id, 'admin']
+          ['Administrador', '<REDACTED_EMAIL>', hashedPassword, salao.rows[0].id, 'admin']
         );
       }
     });
     
-    console.log('✅ Admin padrão criado (admin@softhair.com)');
+    console.log('✅ Admin padrão criado (<REDACTED_EMAIL>)');
   } catch (error) {
     console.warn('⚠️ Admin padrão já existe ou erro ao criar:', error.message);
   }

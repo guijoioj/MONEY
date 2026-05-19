@@ -64,7 +64,7 @@ function startBackend() {
       JWT_SECRET: process.env.JWT_SECRET || require('crypto').randomBytes(32).toString('hex'),
       JWT_EXPIRES_IN: '30d',
       SOFTHAIR_DEFAULT_ADMIN_EMAIL: process.env.SOFTHAIR_DEFAULT_ADMIN_EMAIL || 'admin@salao.com',
-      SOFTHAIR_DEFAULT_ADMIN_PASSWORD: process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD || 'admin123',
+      SOFTHAIR_DEFAULT_ADMIN_PASSWORD: process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD || 'TROQUE_NA_PRIMEIRA_LOGIN',
     },
     stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
   });

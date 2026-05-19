@@ -57,12 +57,13 @@ cd SoftHair/frontend && npm run dev
 cd SoftHair && npm run dev
 ```
 
-Login padrão (criado automaticamente no primeiro start):
+Login padrão:
+Configurar via env vars antes do primeiro start:
+- `DEFAULT_ADMIN_EMAIL`
+- `DEFAULT_ADMIN_PASSWORD`
 
-- Email: `admin@salao.com`
-- Senha: `admin123`
-
-> Altere imediatamente após o primeiro login.
+> Sem env vars setadas, server NÃO cria admin em produção (proteção).
+> Nunca commitar credenciais reais. Trocar senha após primeiro login.
 
 ## 4. Gerar instalador para os PCs do salão
 
@@ -150,8 +151,8 @@ HOST=127.0.0.1
 DATABASE_TYPE=sqlite
 JWT_SECRET=<gera com: openssl rand -hex 32>
 JWT_EXPIRES_IN=30d
-SOFTHAIR_DEFAULT_ADMIN_EMAIL=admin@salao.com
-SOFTHAIR_DEFAULT_ADMIN_PASSWORD=admin123
+SOFTHAIR_DEFAULT_ADMIN_EMAIL=<REDACTED_EMAIL>
+SOFTHAIR_DEFAULT_ADMIN_PASSWORD=<REDACTED_PASSWORD>
 SYNC_INTERVAL_MS=30000
 ```
 

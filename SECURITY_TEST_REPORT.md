@@ -41,7 +41,7 @@ Observações:
 - ✅ JWT com payload modificado mas sem assinatura válida: `invalid signature`
 - ✅ Login com credenciais válidas retorna JWT HS256 com `jti`, `tokenVersion`, `exp`
 - ✅ Account lockout após 3 tentativas falhas (30min bloqueio) — confirmado em produção
-- 🔴 **Default admin (`admin@softhair.com` / `admin123`) FUNCIONA em produção** — login bem-sucedido obtido
+- 🔴 **Default admin (`<REDACTED_EMAIL>` / `<REDACTED_PASSWORD>`) FUNCIONA em produção** — login bem-sucedido obtido
 
 #### SQL Injection
 Testes executados (todos como admin autenticado):
@@ -129,7 +129,7 @@ Detalhes:
 
 #### Git history scan
 - Strings tipo `JWT_SECRET = 'a'.repeat(32)` são fixtures de teste em `__tests__/` ✅
-- `const DEFAULT_ADMIN_PASSWORD = 'admin123'` aparece em arquivos do worktree (`SoftHair/backend/src/lib/passwords.js` — está dentro de uma lista de senhas FRACAS proibidas, ou seja, defesa, não secret) ✅
+- `const DEFAULT_ADMIN_PASSWORD = '<REDACTED_PASSWORD>'` aparece em arquivos do worktree (`SoftHair/backend/src/lib/passwords.js` — está dentro de uma lista de senhas FRACAS proibidas, ou seja, defesa, não secret) ✅
 - Nenhum secret real (JWT_SECRET, DATABASE_URL completa, API keys de terceiros) commitado ✅
 
 ### 1.4 Static analysis — padrões inseguros
@@ -177,7 +177,7 @@ Já auditado em 7 passes anteriores (`ELECTRON_AUDIT_PASS1-7.md`). Estado atual 
 | **A02: Cryptographic Failures** | ✅ PASS | bcrypt rounds=12, JWT HS256 com `jti`+`tokenVersion` (revocation), HTTPS forçado (HSTS preload), TLS termination no Cloudflare/Render. |
 | **A03: Injection** | ✅ PASS | Parameterized queries (pg `$1`,`$2`), `escapeLike` para wildcards LIKE/ILIKE, validação `express-validator`, sem `eval`/`new Function`, sem shell `exec` arbitrário. |
 | **A04: Insecure Design** | ✅ PASS | Defesa em profundidade: WAF Cloudflare + helmet + rate limit + account lockout + audit log com hash chain. Threat model documentado nos PASS audits. |
-| **A05: Security Misconfiguration** | ⚠️ PARCIAL | Headers hardened ✅. CORS allowlist ✅. **MAS** default admin (`admin@softhair.com` / `admin123`) ativo em produção ⚠️ (deveria ter sido trocado após primeiro login). |
+| **A05: Security Misconfiguration** | ⚠️ PARCIAL | Headers hardened ✅. CORS allowlist ✅. **MAS** default admin (`<REDACTED_EMAIL>` / `<REDACTED_PASSWORD>`) ativo em produção ⚠️ (deveria ter sido trocado após primeiro login). |
 | **A06: Vulnerable Components** | ✅ PASS | Apenas 3 moderates totais (ws, brace-expansion). Zero criticals/highs. Fix disponível via `npm audit fix`. |
 | **A07: Identification/Auth Failures** | ✅ PASS | Account lockout (3 falhas → 30min). Rate limit (5 req/15min em /auth). bcrypt constant-time compare. JWT com `exp=24h` + revogação via blacklist `jwt_blacklist`. |
 | **A08: Software/Data Integrity** | ✅ PASS | `audit_log` com hash chain (`previous_hash`, `current_hash`) — tamper-evident. JWT signature. Sync com HMAC. |
@@ -195,14 +195,14 @@ Já auditado em 7 passes anteriores (`ELECTRON_AUDIT_PASS1-7.md`). Estado atual 
 #### C1. Default admin credentials ativas em produção
 - **Severidade**: 🔴 CRITICAL
 - **Onde**: https://money-f5rz.onrender.com
-- **Evidência**: `POST /api/auth/login` com `{"email":"admin@softhair.com","senha":"admin123"}` retorna **HTTP 200** com JWT válido de admin (`tipo:"admin"`, `salaoId:1`)
+- **Evidência**: `POST /api/auth/login` com `{"email":"<REDACTED_EMAIL>","senha":"<REDACTED_PASSWORD>"}` retorna **HTTP 200** com JWT válido de admin (`tipo:"admin"`, `salaoId:1`)
 - **Impacto**: Qualquer atacante pode obter acesso administrativo total ao salão padrão. Como o servidor é multi-tenant mas o admin do salão 1 só vê próprio salão, o impacto é limitado a esse tenant, MAS:
   - Atacante pode criar profissionais, alterar serviços, ver clientes do salão padrão
   - Atacante pode exfiltrar dados de **15.577+ clientes reais** (confirmado pela listagem)
   - Histórico completo de vendas/comissões do salão padrão exposto
-- **Causa**: O guard em `securityInitService.js:172-178` impede CRIAR admin/admin123 em produção SE `DEFAULT_ADMIN_PASSWORD` não estiver setada. Mas o admin já existe (provavelmente criado em deploy anterior antes do guard, ou `DEFAULT_ADMIN_PASSWORD=admin123` foi setado na Render por engano)
+- **Causa**: O guard em `securityInitService.js:172-178` impede CRIAR admin/ <REDACTED_PASSWORD> em produção SE `DEFAULT_ADMIN_PASSWORD` não estiver setada. Mas o admin já existe (provavelmente criado em deploy anterior antes do guard, ou `DEFAULT_ADMIN_PASSWORD=<REDACTED_PASSWORD>` foi setado na Render por engano)
 - **Mitigação imediata**:
-  1. Trocar a senha do `admin@softhair.com` no banco (via SQL direto ou rota `/auth/change-password`)
+  1. Trocar a senha do `<REDACTED_EMAIL>` no banco (via SQL direto ou rota `/auth/change-password`)
   2. Remover env var `DEFAULT_ADMIN_PASSWORD` se setada
   3. Ativar enforcement de troca de senha no primeiro login para admin novo
   4. Adicionar audit log entry e alertar
@@ -242,7 +242,7 @@ Nenhum issue ALTO **novo** detectado nos testes. Todas as vulnerabilidades clás
 
 ### 4.1 Pronto para produção?
 
-**SIM, COM 1 BLOCKER**: o servidor está MUITO bem hardened (~98% das categorias OWASP cobertas com excelência), mas o **default admin com senha `admin123` ativa** em produção é um blocker crítico que precisa ser resolvido **antes** de qualquer escalada de uso.
+**SIM, COM 1 BLOCKER**: o servidor está MUITO bem hardened (~98% das categorias OWASP cobertas com excelência), mas o **default admin com senha `<REDACTED_PASSWORD>` ativa** em produção é um blocker crítico que precisa ser resolvido **antes** de qualquer escalada de uso.
 
 ### 4.2 Pontos fortes (já implementados, parabéns)
 
@@ -260,8 +260,8 @@ Nenhum issue ALTO **novo** detectado nos testes. Todas as vulnerabilidades clás
 ### 4.3 Backlog crítico (ordem de prioridade)
 
 1. 🔴 **[C1] Trocar senha do default admin em produção AGORA**
-   - Login em `admin@softhair.com`, ir em configurações, trocar para senha forte (>=12 chars, mixed case + número + símbolo)
-   - Ou direto via SQL: `UPDATE usuarios SET senha_hash = '<bcrypt(NEW_PASS)>' WHERE email = 'admin@softhair.com'`
+   - Login em `<REDACTED_EMAIL>`, ir em configurações, trocar para senha forte (>=12 chars, mixed case + número + símbolo)
+   - Ou direto via SQL: `UPDATE usuarios SET senha_hash = '<bcrypt(NEW_PASS)>' WHERE email = '<REDACTED_EMAIL>'`
    - Remover `DEFAULT_ADMIN_PASSWORD` da env Render se setada
 2. 🟡 **[M1] `npm audit fix`** nos 3 repos afetados (SOFT-HAIR-SERVER, softhair-mobile)
 3. 🟢 **[L2]** Submeter `money-f5rz.onrender.com` em https://hstspreload.org

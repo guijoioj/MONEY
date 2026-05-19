@@ -202,7 +202,7 @@ function initDb() {
     const salaoId = info.lastInsertRowid;
 
     const adminEmail = process.env.SOFTHAIR_DEFAULT_ADMIN_EMAIL || 'admin@salao.com';
-    const adminSenha = process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD || 'admin123';
+    const adminSenha = process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD || 'TROQUE_NA_PRIMEIRA_LOGIN';
     const adminNome = 'Administrador';
     const senhaHash = bcrypt.hashSync(adminSenha, 10);
 

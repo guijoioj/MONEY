@@ -44,8 +44,8 @@ const { pool } = require('../config/database');
 const { initDb } = require('../config/initDb');
 
 async function createAdmin() {
-  const email = process.argv[2] || process.env.SOFTHAIR_DEFAULT_ADMIN_EMAIL || 'admin@salao.com';
-  const password = process.argv[3] || process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD || 'admin123';
+  const email = process.argv[2] || process.env.SOFTHAIR_DEFAULT_ADMIN_EMAIL || '<REDACTED_EMAIL>';
+  const password = process.argv[3] || process.env.SOFTHAIR_DEFAULT_ADMIN_PASSWORD || '<REDACTED_PASSWORD>';
   const name = process.argv[4] || 'Administrador';
 
   try {

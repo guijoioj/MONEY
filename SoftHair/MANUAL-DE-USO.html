@@ -343,8 +343,8 @@ npm run dev
     <tr><td><code>JWT_SECRET</code></td><td>chave interna</td><td>Chave de segurança dos tokens. Altere em produção.</td></tr>
     <tr><td><code>JWT_EXPIRES_IN</code></td><td><code>7d</code></td><td>Tempo de expiração do login</td></tr>
     <tr><td><code>SOFTHAIR_ROOT_DIR</code></td><td>pasta do usuário</td><td>Caminho onde o banco de dados é armazenado</td></tr>
-    <tr><td><code>SOFTHAIR_DEFAULT_ADMIN_EMAIL</code></td><td><code>admin@salao.com</code></td><td>E-mail do administrador criado automaticamente</td></tr>
-    <tr><td><code>SOFTHAIR_DEFAULT_ADMIN_PASSWORD</code></td><td><code>admin123</code></td><td>Senha inicial do administrador</td></tr>
+    <tr><td><code>SOFTHAIR_DEFAULT_ADMIN_EMAIL</code></td><td><code><REDACTED_EMAIL></code></td><td>E-mail do administrador criado automaticamente</td></tr>
+    <tr><td><code>SOFTHAIR_DEFAULT_ADMIN_PASSWORD</code></td><td><code><REDACTED_PASSWORD></code></td><td>Senha inicial do administrador</td></tr>
 </table>
 
 <div class="warning-box">
@@ -356,8 +356,8 @@ npm run dev
 
 <h2>2.1 Credenciais Padrão</h2>
 <div class="info-box">
-    <strong>E-mail:</strong> admin@salao.com<br>
-    <strong>Senha:</strong> admin123
+    <strong>E-mail:</strong> <REDACTED_EMAIL><br>
+    <strong>Senha:</strong> <REDACTED_PASSWORD>
 </div>
 
 <h2>2.2 Recuperação de Senha</h2>
@@ -1037,8 +1037,8 @@ npm start</code></pre>
 <h2>19.5 Criação Automática do Administrador</h2>
 <p>Na primeira execução, se não houver nenhum usuário cadastrado, o sistema cria automaticamente o administrador padrão:</p>
 <div class="info-box">
-    <strong>E-mail:</strong> admin@salao.com<br>
-    <strong>Senha:</strong> admin123<br><br>
+    <strong>E-mail:</strong> <REDACTED_EMAIL><br>
+    <strong>Senha:</strong> <REDACTED_PASSWORD><br><br>
     Isso acontece tanto no Electron quanto no modo navegador.
 </div>
 
@@ -1115,7 +1115,7 @@ npm start</code></pre>
     </tr>
     <tr>
         <td>Admin padrão não existe / não consegue fazer login</td>
-        <td>O sistema cria o admin automaticamente na primeira execução. Se o banco foi criado sem o admin, reinicie o sistema — ele detectará a ausência e criará o usuário <code>admin@salao.com</code> / <code>admin123</code> automaticamente.</td>
+        <td>O sistema cria o admin automaticamente na primeira execução. Se o banco foi criado sem o admin, reinicie o sistema — ele detectará a ausência e criará o usuário <code><REDACTED_EMAIL></code> / <code><REDACTED_PASSWORD></code> automaticamente.</td>
     </tr>
 </table>
 

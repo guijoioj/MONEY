@@ -112,8 +112,8 @@ npm run dev
 **Acesse:** http://localhost:3000
 
 **Login padrão (ambiente de primeiro acesso):**
-- Email: `admin@salao.com`
-- Senha: `admin123`
+- Email: `<REDACTED_EMAIL>`
+- Senha: `<REDACTED_PASSWORD>`
 
 > Esses valores são usados apenas se você não alterar `SOFTHAIR_DEFAULT_ADMIN_*` e se não existir nenhum usuário no banco.
 
