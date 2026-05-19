@@ -129,6 +129,7 @@ export default function Layout() {
     { to: '/profissionais', icon: User, label: 'Profissionais' },
     { to: '/atendimentos', icon: ClipboardCheck, label: 'Atendimentos' },
     { to: '/vendas', icon: ShoppingCart, label: 'Vendas' },
+    { to: '/comissoes-v2', icon: DollarSign, label: 'Comissões' },
     { to: '/fechamento', icon: ClipboardCheck, label: 'Fechamento' },
     { to: '/financeiro', icon: BarChart3, label: 'Financeiro' },
     { to: '/despesas', icon: DollarSign, label: 'Despesas' },
