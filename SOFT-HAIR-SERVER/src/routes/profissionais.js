@@ -185,8 +185,15 @@ router.get('/:id/painel', authMiddleware, async (req, res) => {
       ? [profId, req.salaoId, data_inicio, data_fim]
       : [profId, req.salaoId];
 
+    const COMISSOES_DEFAULT = { rows: [{
+      qtd_total: 0, qtd_validas: 0, qtd_pendente: 0, qtd_paga: 0, qtd_estornada: 0,
+      pendente_cents: 0, pago_cents: 0, estornada_cents: 0, total_cents: 0, ultima_comissao_em: null,
+    }] };
+    const VENDAS_DEFAULT = { rows: [{ qtd: 0, total_faturado: 0 }] };
+    const ATEND_DEFAULT  = { rows: [{ qtd: 0, qtd_finalizados: 0, clientes_unicos: 0 }] };
+
     const [resumoComissoes, vendas, atendimentos, topClientes, topServicos, topProdutos] = await Promise.all([
-      // Resumo de comissões (V1 + V2)
+      // Resumo de comissões — fallback para banco sem colunas V2
       pool.query(`
         SELECT
           COUNT(*)::int AS qtd_total,
@@ -201,7 +208,7 @@ router.get('/:id/painel', authMiddleware, async (req, res) => {
           MAX(c.created_at) AS ultima_comissao_em
         FROM comissoes c
         WHERE c.profissional_id=$1 AND c.salao_id=$2 ${periodoFilter}
-      `, params),
+      `, params).catch((err) => { console.warn('[painel] comissoes V2 indisponivel, retornando zeros:', err.message); return COMISSOES_DEFAULT; }),
 
       // Vendas
       pool.query(`
@@ -211,7 +218,7 @@ router.get('/:id/painel', authMiddleware, async (req, res) => {
          WHERE v.profissional_id=$1 AND v.salao_id=$2
            AND COALESCE(v.status,'concluida') != 'cancelada'
            ${periodoFilterV}
-      `, params),
+      `, params).catch(() => VENDAS_DEFAULT),
 
       // Atendimentos
       pool.query(`
@@ -221,7 +228,7 @@ router.get('/:id/painel', authMiddleware, async (req, res) => {
           FROM atendimentos a
          WHERE a.profissional_id=$1 AND a.salao_id=$2
            ${periodoFilterA}
-      `, params),
+      `, params).catch(() => ATEND_DEFAULT),
 
       // Top 10 clientes (por nº de atendimentos)
       pool.query(`
@@ -235,7 +242,7 @@ router.get('/:id/painel', authMiddleware, async (req, res) => {
          GROUP BY cl.id, cl.nome, cl.telefone
          ORDER BY qtd_atendimentos DESC
          LIMIT 10
-      `, params),
+      `, params).catch(() => ({ rows: [] })),
 
       // Top serviços (mais executados pelo profissional)
       pool.query(`
@@ -305,7 +312,16 @@ router.get('/:id/painel/clientes/:clienteId/favoritos', authMiddleware, async (r
     if (!checks[0].rows.length) return res.status(404).json({ success: false, error: 'Profissional não encontrado' });
     if (!checks[1].rows.length) return res.status(404).json({ success: false, error: 'Cliente não encontrado' });
 
-    const [servicosFav, produtosFav, ultimasVisitas] = await Promise.all([
+    // Profissional selecionado (pra incluir no payload)
+    const profSelRow = await pool.query(
+      'SELECT id, nome, especialidade FROM profissionais WHERE id=$1 AND salao_id=$2',
+      [profId, req.salaoId]
+    ).catch(() => ({ rows: [{ id: profId, nome: null }] }));
+
+    const [
+      servicosFav, produtosFav, ultimasVisitas,
+      profFavorito, servicosComProf, produtosComProf,
+    ] = await Promise.all([
       // Top 5 serviços do cliente (qualquer profissional)
       pool.query(`
         SELECT s.id, s.nome, s.categoria, s.preco,
@@ -344,15 +360,62 @@ router.get('/:id/painel/clientes/:clienteId/favoritos', authMiddleware, async (r
          ORDER BY a.created_at DESC
          LIMIT 5
       `, [clienteId, profId, req.salaoId]).catch(() => ({ rows: [] })),
+
+      // Profissional favorito da cliente (mais frequente em atendimentos finalizados)
+      pool.query(`
+        SELECT p.id, p.nome,
+               COUNT(a.id)::int AS qtd_atendimentos,
+               MAX(a.created_at) AS ultima_visita
+          FROM atendimentos a
+          JOIN profissionais p ON p.id = a.profissional_id
+         WHERE a.cliente_id=$1 AND a.salao_id=$2
+           AND a.status IN ('finalizado','concluido','concluida')
+         GROUP BY p.id, p.nome
+         ORDER BY qtd_atendimentos DESC, ultima_visita DESC
+         LIMIT 1
+      `, [clienteId, req.salaoId]).catch(() => ({ rows: [] })),
+
+      // Serviços que a cliente fez COM ESTE profissional específico
+      pool.query(`
+        SELECT s.id, s.nome, s.categoria,
+               COUNT(asv.id)::int AS qtd,
+               MAX(a.created_at) AS ultimo_uso
+          FROM atendimentos_servicos asv
+          JOIN atendimentos a ON a.id = asv.atendimento_id
+          JOIN servicos s ON s.id = asv.servico_id
+         WHERE a.cliente_id=$1 AND a.profissional_id=$2 AND a.salao_id=$3
+         GROUP BY s.id, s.nome, s.categoria
+         ORDER BY qtd DESC
+         LIMIT 5
+      `, [clienteId, profId, req.salaoId]).catch(() => ({ rows: [] })),
+
+      // Produtos comprados em vendas ligadas a ESTE profissional
+      pool.query(`
+        SELECT p.id, p.nome, p.categoria,
+               COUNT(vi.id)::int AS qtd_compras,
+               COALESCE(SUM(vi.quantidade),0)::int AS qtd_unidades
+          FROM venda_itens vi
+          JOIN vendas v ON v.id = vi.venda_id
+          JOIN produtos p ON p.id = vi.produto_id
+         WHERE v.cliente_id=$1 AND v.profissional_id=$2 AND v.salao_id=$3
+           AND COALESCE(v.status,'concluida') != 'cancelada'
+         GROUP BY p.id, p.nome, p.categoria
+         ORDER BY qtd_compras DESC
+         LIMIT 5
+      `, [clienteId, profId, req.salaoId]).catch(() => ({ rows: [] })),
     ]);
 
     res.json({
       success: true,
       data: {
         cliente: checks[1].rows[0],
+        profissional_selecionado: profSelRow.rows[0] || null,
+        profissional_favorito: profFavorito.rows[0] || null,
         servicos_favoritos: servicosFav.rows,
         produtos_favoritos: produtosFav.rows,
-        ultimas_visitas: ultimasVisitas.rows,
+        servicos_com_este_profissional: servicosComProf.rows,
+        produtos_com_este_profissional: produtosComProf.rows,
+        ultimas_visitas_com_este_profissional: ultimasVisitas.rows,
       },
     });
   } catch (error) {

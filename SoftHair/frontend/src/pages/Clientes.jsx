@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clientesAPI, vendasAPI, fechamentosAPI } from '../services/api';
 import { Search, Plus, Edit2, Trash2, X, Phone, Mail, Calendar, AlertCircle, User, Clock, Package, Scissors, DollarSign, Star, TrendingUp, ShoppingCart, ShoppingBag, Gift } from 'lucide-react';
+import PerfilCliente from '../components/PerfilCliente';
 
 export default function Clientes() {
   const [search, setSearch] = useState('');
@@ -377,6 +378,10 @@ export default function Clientes() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
+              {/* Perfil consolidado (calculado server-side) */}
+              <div className="mb-6">
+                <PerfilCliente clienteId={profileModal.cliente?.id} />
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 mb-1">

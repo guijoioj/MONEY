@@ -1,18 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, User, Heart, Scissors, Package, Clock } from 'lucide-react';
+import { Search, User, Heart, Scissors, Package, Clock, AlertCircle } from 'lucide-react';
 import { clientesAPI, profissionaisAPI } from '../services/api';
 
 function formatBRL(value) {
   if (value == null) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
-    .format(Number(value));
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
 }
 
 function formatDate(iso) {
   if (!iso) return '—';
   try { return new Date(iso).toLocaleDateString('pt-BR'); }
   catch { return '—'; }
+}
+
+function toArr(val) {
+  if (Array.isArray(val)) return val;
+  // resposta paginada: { data: [...], total: N }
+  if (val && Array.isArray(val.data)) return val.data;
+  return [];
 }
 
 export default function FavoritosCliente() {
@@ -28,23 +34,33 @@ export default function FavoritosCliente() {
     enabled: searchProf.length >= 1,
     placeholderData: (prev) => prev,
   });
-  const profissionais = profsData?.data?.data || profsData?.data || [];
+  const profissionais = toArr(profsData?.data?.data);
 
-  // Busca cliente
+  // Busca cliente — resposta paginada { data: [...], total: N }
   const { data: clisData } = useQuery({
     queryKey: ['busca-cli-favoritos', searchCli],
     queryFn: () => clientesAPI.getAll({ search: searchCli || undefined }),
     enabled: searchCli.length >= 1,
     placeholderData: (prev) => prev,
   });
-  const clientes = clisData?.data?.data || clisData?.data || [];
+  const clientes = toArr(clisData?.data?.data);
 
   // Carrega favoritos quando ambos selecionados
-  const { data: favData, isLoading } = useQuery({
+  const { data: favData, isLoading, isError } = useQuery({
     queryKey: ['favoritos-cliente', selectedProfId, selectedCliId],
     queryFn: () => profissionaisAPI.getClienteFavoritos(selectedProfId, selectedCliId).then(r => r.data?.data),
     enabled: !!selectedProfId && !!selectedCliId,
+    retry: 1,
   });
+
+  const cliente             = favData?.cliente ?? {};
+  const profissionalFav     = favData?.profissional_favorito ?? null;
+  const servicosFav         = toArr(favData?.servicos_favoritos);
+  const produtosFav         = toArr(favData?.produtos_favoritos);
+  const servicosComProf     = toArr(favData?.servicos_com_este_profissional);
+  const produtosComProf     = toArr(favData?.produtos_com_este_profissional);
+  // Compat com payload antigo (ultimas_visitas) e novo (ultimas_visitas_com_este_profissional)
+  const ultimasVisitas      = toArr(favData?.ultimas_visitas_com_este_profissional || favData?.ultimas_visitas);
 
   return (
     <div className="space-y-4">
@@ -53,15 +69,13 @@ export default function FavoritosCliente() {
           <Heart size={16} /> Favoritos do Cliente
         </h3>
         <p className="text-xs text-pink-700 dark:text-pink-300 mt-1">
-          Busca o profissional + cliente. Mostra serviços e produtos preferidos da cliente.
+          Selecione profissional e cliente para ver serviços e produtos preferidos.
         </p>
       </div>
 
       {/* Busca profissional */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          1. Profissional
-        </label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">1. Profissional</label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input
@@ -89,18 +103,14 @@ export default function FavoritosCliente() {
           </div>
         )}
         {selectedProfId && (
-          <div className="mt-2 text-xs text-green-700 dark:text-green-400">
-            ✓ Profissional selecionado
-          </div>
+          <div className="mt-2 text-xs text-green-700 dark:text-green-400">✓ Profissional selecionado</div>
         )}
       </div>
 
-      {/* Busca cliente (só aparece após profissional selecionado) */}
+      {/* Busca cliente */}
       {selectedProfId && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            2. Cliente
-          </label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">2. Cliente</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
@@ -123,64 +133,84 @@ export default function FavoritosCliente() {
                     <Heart size={14} className="text-pink-600" />
                     <div>
                       <div className="text-sm font-medium">{c.nome}</div>
-                      {c.telefone && (
-                        <div className="text-xs text-gray-500">{c.telefone}</div>
-                      )}
+                      {c.telefone && <div className="text-xs text-gray-500">{c.telefone}</div>}
                     </div>
                   </div>
                 </button>
               ))}
             </div>
           )}
+          {selectedCliId && (
+            <div className="mt-2 text-xs text-green-700 dark:text-green-400">✓ Cliente selecionado</div>
+          )}
         </div>
       )}
 
-      {/* Resultados */}
+      {/* Estados */}
       {selectedProfId && selectedCliId && isLoading && (
         <div className="text-center py-6 text-gray-500">Carregando favoritos...</div>
       )}
 
-      {favData && (
+      {selectedProfId && selectedCliId && isError && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-center gap-3">
+          <AlertCircle size={20} className="text-red-500 flex-shrink-0" />
+          <p className="text-sm text-red-700 dark:text-red-300">Erro ao carregar favoritos. Tente novamente.</p>
+        </div>
+      )}
+
+      {/* Resultados */}
+      {favData && !isError && (
         <>
           <div className="bg-pink-50 dark:bg-pink-900/20 rounded-lg p-4 border border-pink-200 dark:border-pink-800">
             <h3 className="text-lg font-bold text-pink-900 dark:text-pink-200 flex items-center gap-2">
               <User size={20} />
-              {favData.cliente.nome}
+              {cliente.nome || '—'}
             </h3>
-            {favData.cliente.telefone && (
-              <p className="text-sm text-pink-700 dark:text-pink-300">{favData.cliente.telefone}</p>
+            {cliente.telefone && (
+              <p className="text-sm text-pink-700 dark:text-pink-300">{cliente.telefone}</p>
             )}
           </div>
 
+          {/* Profissional favorito da cliente (no salão inteiro) */}
+          {profissionalFav && (
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+              <p className="text-xs text-amber-700 dark:text-amber-300 uppercase font-semibold mb-1">
+                Profissional favorito da cliente (no salão)
+              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-lg font-bold text-amber-900 dark:text-amber-200">
+                  {profissionalFav.nome}
+                </p>
+                <span className="text-sm text-amber-800 dark:text-amber-300">
+                  {profissionalFav.qtd_atendimentos}× · último em {formatDate(profissionalFav.ultima_visita)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <p className="text-xs text-gray-500 px-1">
+            Favoritos da cliente <strong>no salão inteiro</strong>:
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Serviços favoritos */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                <Scissors size={16} className="text-blue-500" />
-                Serviços Preferidos
+                <Scissors size={16} className="text-blue-500" /> Serviços Preferidos
               </h4>
-              {!favData.servicos_favoritos?.length ? (
+              {servicosFav.length === 0 ? (
                 <p className="text-xs text-gray-500">Sem serviços registrados</p>
               ) : (
                 <div className="space-y-2">
-                  {favData.servicos_favoritos.map((s, i) => (
+                  {servicosFav.map((s, i) => (
                     <div key={s.id} className="border-b border-gray-100 dark:border-gray-700 last:border-b-0 pb-2 last:pb-0">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                            {i + 1}
-                          </span>
-                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {s.nome}
-                          </span>
+                          <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{s.nome}</span>
                         </div>
-                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
-                          {s.qtd}× · {formatBRL(s.preco)}
-                        </span>
+                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{s.qtd}× · {formatBRL(s.preco)}</span>
                       </div>
-                      {s.categoria && (
-                        <p className="text-xs text-gray-400 ml-7">{s.categoria}</p>
-                      )}
+                      {s.categoria && <p className="text-xs text-gray-400 ml-7">{s.categoria}</p>}
                       <p className="text-xs text-gray-500 ml-7 flex items-center gap-1">
                         <Clock size={10} /> Último: {formatDate(s.ultimo_uso)}
                       </p>
@@ -193,31 +223,22 @@ export default function FavoritosCliente() {
             {/* Produtos favoritos */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                <Package size={16} className="text-purple-500" />
-                Produtos Preferidos
+                <Package size={16} className="text-purple-500" /> Produtos Preferidos
               </h4>
-              {!favData.produtos_favoritos?.length ? (
+              {produtosFav.length === 0 ? (
                 <p className="text-xs text-gray-500">Sem produtos comprados</p>
               ) : (
                 <div className="space-y-2">
-                  {favData.produtos_favoritos.map((p, i) => (
+                  {produtosFav.map((p, i) => (
                     <div key={p.id} className="border-b border-gray-100 dark:border-gray-700 last:border-b-0 pb-2 last:pb-0">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                            {i + 1}
-                          </span>
-                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {p.nome}
-                          </span>
+                          <span className="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{p.nome}</span>
                         </div>
-                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
-                          {p.qtd_unidades}u · {formatBRL(p.preco_venda)}
-                        </span>
+                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{p.qtd_unidades}u · {formatBRL(p.preco_venda)}</span>
                       </div>
-                      {p.categoria && (
-                        <p className="text-xs text-gray-400 ml-7">{p.categoria}</p>
-                      )}
+                      {p.categoria && <p className="text-xs text-gray-400 ml-7">{p.categoria}</p>}
                       <p className="text-xs text-gray-500 ml-7 flex items-center gap-1">
                         <Clock size={10} /> Última: {formatDate(p.ultima_compra)}
                       </p>
@@ -228,15 +249,54 @@ export default function FavoritosCliente() {
             </div>
           </div>
 
-          {/* Últimas visitas */}
-          {favData.ultimas_visitas?.length > 0 && (
+          {/* Com este profissional específico */}
+          {(servicosComProf.length > 0 || produtosComProf.length > 0) && (
+            <>
+              <p className="text-xs text-gray-500 px-1">
+                Histórico da cliente <strong>com este profissional</strong>:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {servicosComProf.length > 0 && (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-indigo-500">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                      <Scissors size={16} className="text-indigo-500" /> Serviços feitos com este profissional
+                    </h4>
+                    <div className="space-y-1">
+                      {servicosComProf.map((s, i) => (
+                        <div key={s.id} className="flex items-center justify-between text-sm">
+                          <span className="text-gray-900 dark:text-gray-100 truncate">{i + 1}. {s.nome}</span>
+                          <span className="text-xs text-gray-500 ml-2">{s.qtd}×</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {produtosComProf.length > 0 && (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-indigo-500">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                      <Package size={16} className="text-indigo-500" /> Produtos vendidos por este profissional
+                    </h4>
+                    <div className="space-y-1">
+                      {produtosComProf.map((p, i) => (
+                        <div key={p.id} className="flex items-center justify-between text-sm">
+                          <span className="text-gray-900 dark:text-gray-100 truncate">{i + 1}. {p.nome}</span>
+                          <span className="text-xs text-gray-500 ml-2">{p.qtd_unidades}u</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {ultimasVisitas.length > 0 && (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                <Clock size={16} />
-                Últimas visitas com você
+                <Clock size={16} /> Últimas visitas com este profissional
               </h4>
               <div className="space-y-1">
-                {favData.ultimas_visitas.map((v) => (
+                {ultimasVisitas.map((v) => (
                   <div key={v.id} className="flex justify-between text-sm border-b border-gray-100 dark:border-gray-700 last:border-b-0 pb-1 last:pb-0">
                     <span className="text-gray-700 dark:text-gray-300">{formatDate(v.created_at)}</span>
                     <span className="text-xs text-gray-500">{v.status}</span>

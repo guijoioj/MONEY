@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, User, DollarSign, TrendingUp, Users, Scissors, Package, Calendar, Clock } from 'lucide-react';
+import { Search, User, DollarSign, TrendingUp, Users, Scissors, Package, Calendar, AlertCircle } from 'lucide-react';
 import { profissionaisAPI } from '../services/api';
 
 function formatBRL(value) {
   if (value == null) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
-    .format(Number(value));
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
 }
 
 function formatCents(cents) {
@@ -26,6 +25,10 @@ function StatusBadge({ ativo }) {
   );
 }
 
+const COMISSOES_VAZIO = { qtd_total: 0, qtd_validas: 0, qtd_pendente: 0, qtd_paga: 0, qtd_estornada: 0, pendente_cents: 0, pago_cents: 0, estornada_cents: 0, total_cents: 0, ultima_comissao_em: null };
+const VENDAS_VAZIO    = { qtd: 0, total_faturado: 0 };
+const ATEND_VAZIO     = { qtd: 0, qtd_finalizados: 0, clientes_unicos: 0 };
+
 export default function PainelProfissional() {
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState(null);
@@ -38,7 +41,6 @@ export default function PainelProfissional() {
     };
   });
 
-  // Busca em tempo real
   const { data: lista } = useQuery({
     queryKey: ['profissionais-busca', search],
     queryFn: () => profissionaisAPI.getAll({ search: search || undefined, ativo: true }),
@@ -46,22 +48,32 @@ export default function PainelProfissional() {
     placeholderData: (prev) => prev,
   });
 
-  const profissionais = lista?.data?.data || lista?.data || [];
+  const raw = lista?.data?.data;
+  const profissionais = Array.isArray(raw) ? raw : [];
 
-  // Painel completo
-  const { data: painelData, isLoading: loadingPainel } = useQuery({
+  const { data: painelData, isLoading: loadingPainel, isError: painelError } = useQuery({
     queryKey: ['profissional-painel', selectedId, periodo],
     queryFn: () => profissionaisAPI.getPainel(selectedId, periodo).then(r => r.data?.data),
     enabled: !!selectedId,
     placeholderData: (prev) => prev,
+    retry: 1,
   });
+
+  // Acesso seguro ao payload
+  const prof      = painelData?.profissional ?? {};
+  const comissoes = painelData?.resumo_comissoes ?? COMISSOES_VAZIO;
+  const vendas    = painelData?.vendas ?? VENDAS_VAZIO;
+  const atend     = painelData?.atendimentos ?? ATEND_VAZIO;
+  const topCli    = Array.isArray(painelData?.top_clientes)  ? painelData.top_clientes  : [];
+  const topSrv    = Array.isArray(painelData?.top_servicos)  ? painelData.top_servicos  : [];
+  const topProd   = Array.isArray(painelData?.top_produtos)  ? painelData.top_produtos  : [];
 
   return (
     <div className="space-y-4">
       {/* Busca */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Buscar profissional por nome (em tempo real)
+          Buscar profissional por nome
         </label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -88,9 +100,7 @@ export default function PainelProfissional() {
                   <User size={16} className="text-indigo-600 dark:text-indigo-400" />
                   <div>
                     <div className="font-medium text-gray-900 dark:text-gray-100">{p.nome}</div>
-                    {p.especialidade && (
-                      <div className="text-xs text-gray-500">{p.especialidade}</div>
-                    )}
+                    {p.especialidade && <div className="text-xs text-gray-500">{p.especialidade}</div>}
                   </div>
                 </div>
                 <StatusBadge ativo={p.ativo} />
@@ -110,7 +120,14 @@ export default function PainelProfissional() {
         <div className="text-center py-8 text-gray-500">Carregando painel...</div>
       )}
 
-      {selectedId && painelData && (
+      {selectedId && painelError && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-center gap-3">
+          <AlertCircle size={20} className="text-red-500 flex-shrink-0" />
+          <p className="text-sm text-red-700 dark:text-red-300">Erro ao carregar painel. Tente novamente.</p>
+        </div>
+      )}
+
+      {selectedId && painelData && !painelError && (
         <>
           {/* Filtro de período */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex items-end gap-3 flex-wrap">
@@ -142,18 +159,14 @@ export default function PainelProfissional() {
                   <User size={24} className="text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                    {painelData.profissional.nome}
-                  </h3>
-                  {painelData.profissional.especialidade && (
-                    <p className="text-sm text-gray-500">{painelData.profissional.especialidade}</p>
-                  )}
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{prof.nome || '—'}</h3>
+                  {prof.especialidade && <p className="text-sm text-gray-500">{prof.especialidade}</p>}
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <StatusBadge ativo={painelData.profissional.ativo} />
+                <StatusBadge ativo={prof.ativo} />
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Comissão padrão: <strong>{Number(painelData.profissional.comissao_percentual || 0).toFixed(2)}%</strong>
+                  Comissão padrão: <strong>{Number(prof.comissao_percentual || 0).toFixed(2)}%</strong>
                 </span>
               </div>
             </div>
@@ -166,40 +179,32 @@ export default function PainelProfissional() {
                 <DollarSign size={16} className="text-amber-500" />
                 <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">Pendente</span>
               </div>
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                {formatCents(painelData.resumo_comissoes.pendente_cents)}
-              </p>
-              <p className="text-xs text-gray-500">{painelData.resumo_comissoes.qtd_pendente} comissões</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatCents(comissoes.pendente_cents)}</p>
+              <p className="text-xs text-gray-500">{comissoes.qtd_pendente} comissões</p>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-green-500">
               <div className="flex items-center gap-2 mb-1">
                 <DollarSign size={16} className="text-green-500" />
                 <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">Pago</span>
               </div>
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                {formatCents(painelData.resumo_comissoes.pago_cents)}
-              </p>
-              <p className="text-xs text-gray-500">{painelData.resumo_comissoes.qtd_paga} comissões</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatCents(comissoes.pago_cents)}</p>
+              <p className="text-xs text-gray-500">{comissoes.qtd_paga} comissões</p>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-red-500">
               <div className="flex items-center gap-2 mb-1">
                 <DollarSign size={16} className="text-red-500" />
                 <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">Estornado</span>
               </div>
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                {formatCents(painelData.resumo_comissoes.estornada_cents)}
-              </p>
-              <p className="text-xs text-gray-500">{painelData.resumo_comissoes.qtd_estornada} comissões</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatCents(comissoes.estornada_cents)}</p>
+              <p className="text-xs text-gray-500">{comissoes.qtd_estornada} comissões</p>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-indigo-500">
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp size={16} className="text-indigo-500" />
                 <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">Total</span>
               </div>
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                {formatCents(painelData.resumo_comissoes.total_cents)}
-              </p>
-              <p className="text-xs text-gray-500">{painelData.resumo_comissoes.qtd_total} comissões</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatCents(comissoes.total_cents)}</p>
+              <p className="text-xs text-gray-500">{comissoes.qtd_total} comissões</p>
             </div>
           </div>
 
@@ -207,73 +212,55 @@ export default function PainelProfissional() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <TrendingUp size={16} />
-                Vendas
+                <TrendingUp size={16} /> Vendas
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-xs text-gray-500">Quantidade</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    {painelData.vendas.qtd}
-                  </p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{vendas.qtd}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Faturado</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    {formatBRL(painelData.vendas.total_faturado)}
-                  </p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{formatBRL(vendas.total_faturado)}</p>
                 </div>
               </div>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <Calendar size={16} />
-                Atendimentos
+                <Calendar size={16} /> Atendimentos
               </h4>
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <p className="text-xs text-gray-500">Total</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    {painelData.atendimentos.qtd}
-                  </p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{atend.qtd}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Finalizados</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    {painelData.atendimentos.qtd_finalizados}
-                  </p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{atend.qtd_finalizados}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Clientes únicos</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    {painelData.atendimentos.clientes_unicos}
-                  </p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{atend.clientes_unicos}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Top 10 clientes / serviços / produtos */}
+          {/* Top clientes / serviços / produtos */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            {/* Clientes favoritos */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                <Users size={16} className="text-pink-500" />
-                Top Clientes
+                <Users size={16} className="text-pink-500" /> Top Clientes
               </h4>
-              {painelData.top_clientes.length === 0 ? (
+              {topCli.length === 0 ? (
                 <p className="text-xs text-gray-500">Sem atendimentos no período</p>
               ) : (
                 <div className="space-y-2">
-                  {painelData.top_clientes.map((c, i) => (
+                  {topCli.map((c, i) => (
                     <div key={c.id} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 flex items-center justify-center text-xs font-bold">
-                          {i + 1}
-                        </span>
-                        <span className="text-gray-900 dark:text-gray-100 truncate" title={c.nome}>
-                          {c.nome}
-                        </span>
+                        <span className="w-5 h-5 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                        <span className="text-gray-900 dark:text-gray-100 truncate" title={c.nome}>{c.nome}</span>
                       </div>
                       <span className="text-xs text-gray-500">{c.qtd_atendimentos}×</span>
                     </div>
@@ -282,25 +269,19 @@ export default function PainelProfissional() {
               )}
             </div>
 
-            {/* Serviços favoritos */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                <Scissors size={16} className="text-blue-500" />
-                Top Serviços
+                <Scissors size={16} className="text-blue-500" /> Top Serviços
               </h4>
-              {painelData.top_servicos.length === 0 ? (
+              {topSrv.length === 0 ? (
                 <p className="text-xs text-gray-500">Sem dados</p>
               ) : (
                 <div className="space-y-2">
-                  {painelData.top_servicos.map((s, i) => (
+                  {topSrv.map((s, i) => (
                     <div key={s.id} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                          {i + 1}
-                        </span>
-                        <span className="text-gray-900 dark:text-gray-100 truncate" title={s.nome}>
-                          {s.nome}
-                        </span>
+                        <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
+                        <span className="text-gray-900 dark:text-gray-100 truncate" title={s.nome}>{s.nome}</span>
                       </div>
                       <span className="text-xs text-gray-500 flex-shrink-0">{s.qtd}×</span>
                     </div>
@@ -309,25 +290,19 @@ export default function PainelProfissional() {
               )}
             </div>
 
-            {/* Produtos favoritos */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                <Package size={16} className="text-purple-500" />
-                Top Produtos
+                <Package size={16} className="text-purple-500" /> Top Produtos
               </h4>
-              {painelData.top_produtos.length === 0 ? (
+              {topProd.length === 0 ? (
                 <p className="text-xs text-gray-500">Sem dados</p>
               ) : (
                 <div className="space-y-2">
-                  {painelData.top_produtos.map((p, i) => (
+                  {topProd.map((p, i) => (
                     <div key={p.id} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                          {i + 1}
-                        </span>
-                        <span className="text-gray-900 dark:text-gray-100 truncate" title={p.nome}>
-                          {p.nome}
-                        </span>
+                        <span className="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
+                        <span className="text-gray-900 dark:text-gray-100 truncate" title={p.nome}>{p.nome}</span>
                       </div>
                       <span className="text-xs text-gray-500 flex-shrink-0">{p.qtd_unidades}u</span>
                     </div>

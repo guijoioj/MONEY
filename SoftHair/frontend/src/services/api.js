@@ -66,6 +66,8 @@ export const clientesAPI = {
   create: (data) => api.post('/clientes', data),
   update: (id, data) => api.put(`/clientes/${id}`, data),
   delete: (id) => api.delete(`/clientes/${id}`),
+  // Perfil consolidado: favoritos + resumo + últimas atividades
+  getPerfil: (id) => api.get(`/clientes/${id}/perfil`),
 };
 
 export const servicosAPI = {
