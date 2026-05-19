@@ -318,6 +318,9 @@ app.use('/api/fidelidade', require('./routes/fidelidade'));
 // ─── API v2 (novos endpoints, paralelo a v1 — não quebra nada) ───
 app.use('/api/v2', require('./routes/v2'));
 
+// ─── Mobile (endpoints leves pro app React Native) ───
+app.use('/api/mobile', require('./routes/mobile'));
+
 // ─── 404 Handler ───
 app.use((req, res) => {
   res.status(404).json({
