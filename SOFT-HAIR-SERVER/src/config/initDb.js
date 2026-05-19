@@ -799,7 +799,54 @@ async function runMigrations() {
     END $$;
   `);
 
+  // ---------------------------------------------------------------------------
+  // Aplica migrations versionadas (.sql files) — banco limpo ganha V2 no boot
+  // ---------------------------------------------------------------------------
+  await applySqlMigrations();
+
   console.log('✅ Migrations aplicadas');
+}
+
+async function applySqlMigrations() {
+  const fs = require('fs');
+  const path = require('path');
+  const dir = path.resolve(__dirname, '../migrations');
+  if (!fs.existsSync(dir)) return;
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS migrations (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) UNIQUE NOT NULL,
+      executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  const { rows } = await query('SELECT name FROM migrations');
+  const executed = new Set(rows.map(r => r.name));
+
+  const files = fs.readdirSync(dir).filter(f => f.endsWith('.sql')).sort();
+  const pending = files.filter(f => !executed.has(f));
+  if (pending.length === 0) return;
+
+  console.log(`🔄 Aplicando ${pending.length} migration(s) SQL: ${pending.join(', ')}`);
+  const { pool } = require('./database');
+  for (const file of pending) {
+    const sql = fs.readFileSync(path.join(dir, file), 'utf8');
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(sql);
+      await client.query('INSERT INTO migrations (name) VALUES ($1)', [file]);
+      await client.query('COMMIT');
+      console.log(`  ✅ ${file}`);
+    } catch (err) {
+      await client.query('ROLLBACK');
+      console.error(`  ❌ ${file}: ${err.message}`);
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 module.exports = { initDb, runMigrations };

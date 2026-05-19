@@ -24,6 +24,10 @@ const { logAction } = require('../utils/auditLog');
 const { toCents, assertCents } = require('../utils/money');
 
 const ENABLED = () => process.env.AUTO_COMISSAO !== 'false';
+// STRICT_COMISSAO=true → falha de trigger faz rollback da venda inteira.
+// Default em produção = strict. Em dev/test = best-effort.
+const STRICT = () => process.env.STRICT_COMISSAO === 'true'
+  || (process.env.NODE_ENV === 'production' && process.env.STRICT_COMISSAO !== 'false');
 
 /**
  * Converte uma venda do schema atual (linhas + itens) para o formato esperado
@@ -152,7 +156,8 @@ async function onVendaCriada(venda, client, opts = {}) {
 
     return { ok: true, inserted, errors, total_calculadas: resultados.length };
   } catch (err) {
-    console.warn('[CommissionTriggers] onVendaCriada erro:', err.message);
+    console.error('[CommissionTriggers] onVendaCriada erro:', err.message);
+    if (STRICT()) throw err; // strict: rollback da venda
     return { ok: false, inserted: 0, errors: [{ error: err.message }] };
   }
 }
@@ -218,7 +223,8 @@ async function onVendaCancelada(venda, client, motivo = 'Venda cancelada') {
 
     return { ok: true, canceladas: canceladas.length, ajustesCriados };
   } catch (err) {
-    console.warn('[CommissionTriggers] onVendaCancelada erro:', err.message);
+    console.error('[CommissionTriggers] onVendaCancelada erro:', err.message);
+    if (STRICT()) throw err;
     return { ok: false, canceladas: 0, ajustesCriados: 0, error: err.message };
   }
 }
@@ -272,7 +278,8 @@ async function onVendaEditada(vendaAntiga, vendaNova, client) {
     const versao = Number(vendaAntiga._comissao_versao || 1) + 1;
     return await onVendaCriada(vendaNova, client, { versao });
   } catch (err) {
-    console.warn('[CommissionTriggers] onVendaEditada erro:', err.message);
+    console.error('[CommissionTriggers] onVendaEditada erro:', err.message);
+    if (STRICT()) throw err;
     return { ok: false, action: 'error', error: err.message };
   }
 }
@@ -366,7 +373,8 @@ async function onAtendimentoFechado(atendimento, client) {
 
     return { ok: true, inserted };
   } catch (err) {
-    console.warn('[CommissionTriggers] onAtendimentoFechado erro:', err.message);
+    console.error('[CommissionTriggers] onAtendimentoFechado erro:', err.message);
+    if (STRICT()) throw err;
     return { ok: false, error: err.message };
   }
 }
@@ -378,4 +386,5 @@ module.exports = {
   onAtendimentoFechado,
   enrichVendaForEngine,
   ENABLED,
+  STRICT,
 };
