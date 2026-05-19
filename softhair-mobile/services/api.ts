@@ -1,17 +1,41 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { tokenStorage } from '../store/authStore';
+import { getServerConfig } from './serverConfig';
 
+// Default fallback (env > render). Sobrescrito por loadServerBaseURL no startup.
 export const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? 'http://192.168.15.185:3001';
+  process.env.EXPO_PUBLIC_API_URL ?? 'https://money-f5rz.onrender.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+/**
+ * Carrega configuração persistida e aplica no axios.
+ * Chamar no _layout.tsx root.
+ */
+export async function loadServerBaseURL(): Promise<string> {
+  try {
+    const cfg = await getServerConfig();
+    if (cfg?.url) {
+      api.defaults.baseURL = cfg.url;
+      return cfg.url;
+    }
+  } catch (_) { /* noop */ }
+  return api.defaults.baseURL || API_BASE_URL;
+}
+
+/**
+ * Atualiza baseURL em runtime (após user salvar nova config).
+ */
+export function setApiBaseURL(url: string): void {
+  api.defaults.baseURL = url;
+}
 
 api.interceptors.request.use(
   async (config) => {

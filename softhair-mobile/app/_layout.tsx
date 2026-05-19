@@ -8,6 +8,7 @@ import { View, Text, ScrollView } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 import { wsManager } from '../services/websocket';
 import { Loading } from '../components/ui/Loading';
+import { loadServerBaseURL } from '../services/api';
 import * as Notifications from 'expo-notifications';
 
 Notifications.setNotificationHandler({
@@ -54,7 +55,8 @@ function RootLayoutNav() {
     useAuthStore();
 
   useEffect(() => {
-    loadFromStorage();
+    // Carrega URL do servidor persistida ANTES de qualquer request
+    loadServerBaseURL().then(() => loadFromStorage());
   }, []);
 
   useEffect(() => {
@@ -78,6 +80,8 @@ function RootLayoutNav() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(cliente)" />
       <Stack.Screen name="(profissional)" />
+      <Stack.Screen name="(admin)" />
+      <Stack.Screen name="configurar-servidor" options={{ headerShown: true, title: 'Configurar Servidor' }} />
     </Stack>
   );
 }
