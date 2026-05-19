@@ -35,6 +35,7 @@ const ComissoesV2 = lazy(() => import('./pages/ComissoesV2'));
 const RegrasComissao = lazy(() => import('./pages/RegrasComissao'));
 const ExtratoProfissional = lazy(() => import('./pages/ExtratoProfissional'));
 const PagamentoComissao = lazy(() => import('./pages/PagamentoComissao'));
+const ConfigurarServidor = lazy(() => import('./pages/ConfigurarServidor'));
 
 function PageFallback() {
   return (
@@ -125,6 +126,7 @@ export default function App() {
         <Route path="comissoes/regras" element={lazyEl(RegrasComissao)} />
         <Route path="comissoes/extrato/:id" element={lazyEl(ExtratoProfissional)} />
         <Route path="comissoes/pagamento" element={lazyEl(PagamentoComissao)} />
+        <Route path="configurar-servidor" element={lazyEl(ConfigurarServidor)} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />

@@ -1,0 +1,28 @@
+[Unit]
+Description=SoftHair Backend (Node.js + Express + PostgreSQL)
+Documentation=https://github.com/guijoioj/MONEY
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=softhair
+Group=softhair
+WorkingDirectory=/opt/softhair/SOFT-HAIR-SERVER
+ExecStart=/usr/bin/node src/server.js
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/softhair/out.log
+StandardError=append:/var/log/softhair/err.log
+EnvironmentFile=/opt/softhair/SOFT-HAIR-SERVER/.env
+
+# Limits e hardening
+LimitNOFILE=65536
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/softhair /var/log/softhair
+
+[Install]
+WantedBy=multi-user.target

@@ -11,12 +11,13 @@
  *   - frontend é servido pelo Vite em http://localhost:3000
  */
 
-const { app, BrowserWindow, shell, Menu, dialog } = require('electron');
+const { app, BrowserWindow, shell, Menu, dialog, ipcMain } = require('electron');
 const path = require('path');
 const { fork } = require('child_process');
 const fs = require('fs');
 const http = require('http');
 const { setupAutoUpdater } = require('./updater');
+const serverConfig = require('./serverConfig');
 
 let mainWindow;
 let backendProcess;
@@ -207,13 +208,29 @@ function createWindow() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
+// IPC: tela "Configurar Servidor" lê/escreve serverConfig
+ipcMain.handle('server-config:get', () => serverConfig.load());
+ipcMain.handle('server-config:set', (_e, cfg) => {
+  const ok = serverConfig.save(cfg);
+  return { ok };
+});
+ipcMain.handle('server-config:presets', () => serverConfig.PRESETS);
+
 app.whenReady().then(() => {
-  if (!isDev) {
+  const useEmbeddedBackend = serverConfig.shouldStartEmbeddedBackend();
+
+  if (!isDev && useEmbeddedBackend) {
+    // Modo embarcado: sobe backend SQLite local
     startBackend();
     waitForBackend(60, 500, () => {
       createWindow();
       setupAutoUpdater(mainWindow);
     });
+  } else if (!isDev && !useEmbeddedBackend) {
+    // Modo central (cérebro local / Render): só frontend, sem backend embarcado
+    console.log('[Electron] Modo central — backend NÃO embarcado. URL:', serverConfig.getApiUrl());
+    createWindow();
+    setupAutoUpdater(mainWindow);
   } else {
     createWindow();
   }

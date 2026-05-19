@@ -18,4 +18,10 @@ contextBridge.exposeInMainWorld('electron', {
     ipcRenderer.on('navigate', listener);
     return () => ipcRenderer.removeListener('navigate', listener);
   },
+  // Configuração do servidor (modo embarcado / cérebro local / Render)
+  serverConfig: {
+    get: () => ipcRenderer.invoke('server-config:get'),
+    set: (cfg) => ipcRenderer.invoke('server-config:set', cfg),
+    presets: () => ipcRenderer.invoke('server-config:presets'),
+  },
 });
