@@ -14,6 +14,30 @@ const { authMiddleware } = require('../../middleware/auth');
 const { pool } = require('../../config/database');
 const { sendError } = require('../../utils/sendError');
 
+/**
+ * Resolve profissional_id efetivo a partir do user + query.
+ * Profissional não-admin → força próprio ID.
+ * Admin com ?profissional_id=X → valida que X pertence ao salão.
+ * Lança 403 se admin tentar acessar prof de outro salão.
+ *
+ * @returns {Promise<number|null>}
+ */
+async function resolveProfId(req, res) {
+  if (!req.user?.is_admin) return req.user?.profissional_id || null;
+  const requested = req.query.profissional_id;
+  if (!requested) return req.user?.profissional_id || null;
+  // Validar tenancy
+  const r = await pool.query(
+    'SELECT id FROM profissionais WHERE id=$1 AND salao_id=$2',
+    [requested, req.salaoId]
+  );
+  if (!r.rows.length) {
+    res.status(403).json({ success: false, error: 'profissional_id não pertence ao salão' });
+    return null;
+  }
+  return Number(requested);
+}
+
 // ─── GET /api/mobile/me ─────────────────────────────────────
 // Retorna info do usuário logado + salão + dia atual de info útil.
 router.get('/me', authMiddleware, async (req, res) => {
@@ -121,7 +145,8 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 router.get('/agenda', authMiddleware, async (req, res) => {
   try {
     const data = req.query.data || new Date().toISOString().slice(0, 10);
-    const profId = req.user?.is_admin ? req.query.profissional_id : req.user?.profissional_id;
+    const profId = await resolveProfId(req, res);
+    if (res.headersSent) return;
 
     let sql = `
       SELECT a.id, a.data_inicio, a.data_fim, a.status,
@@ -145,10 +170,8 @@ router.get('/agenda', authMiddleware, async (req, res) => {
 // ─── GET /api/mobile/comissoes/resumo ───────────────────────
 router.get('/comissoes/resumo', authMiddleware, async (req, res) => {
   try {
-    const profId = req.user?.is_admin
-      ? (req.query.profissional_id || req.user?.profissional_id)
-      : req.user?.profissional_id;
-
+    const profId = await resolveProfId(req, res);
+    if (res.headersSent) return;
     if (!profId) return res.status(400).json({ success: false, error: 'profissional_id obrigatório' });
 
     const { competencia } = req.query;
@@ -174,9 +197,8 @@ router.get('/comissoes/resumo', authMiddleware, async (req, res) => {
 // ─── GET /api/mobile/comissoes/extrato ──────────────────────
 router.get('/comissoes/extrato', authMiddleware, async (req, res) => {
   try {
-    const profId = req.user?.is_admin
-      ? (req.query.profissional_id || req.user?.profissional_id)
-      : req.user?.profissional_id;
+    const profId = await resolveProfId(req, res);
+    if (res.headersSent) return;
     if (!profId) return res.status(400).json({ success: false, error: 'profissional_id obrigatório' });
 
     const limit = Math.min(Number(req.query.limit) || 30, 50);

@@ -63,8 +63,12 @@ router.get('/', authMiddleware, async (req, res) => {
     if (papel_profissional)     { sql += ` AND c.papel_profissional = $${p++}`; params.push(papel_profissional); }
     if (origem)                 { sql += ` AND c.origem = $${p++}`; params.push(origem); }
 
+    // [SEC] Cappear limit e offset pra prevenir DoS via paginação extrema
     sql += ` ORDER BY c.data_geracao DESC LIMIT $${p++} OFFSET $${p++}`;
-    params.push(Math.min(Number(limit) || 100, 500), Number(offset) || 0);
+    params.push(
+      Math.min(Math.max(Number(limit) || 100, 1), 500),
+      Math.min(Math.max(Number(offset) || 0, 0), 100000),
+    );
 
     const { rows } = await pool.query(sql, params);
     res.json({ success: true, data: rows, count: rows.length });
@@ -314,20 +318,17 @@ router.post('/pagar', authMiddleware, requireAdmin, async (req, res) => {
       return res.status(400).json({ success: false, error: 'idempotency_key obrigatório' });
     }
 
-    // Idempotência: já existe pagamento com esse key?
-    const existing = await pool.query(
-      'SELECT * FROM comissoes_pagamentos_v2 WHERE salao_id = $1 AND idempotency_key = $2',
-      [req.salaoId, idempotency_key]
-    );
-    if (existing.rows.length > 0) {
-      return res.status(200).json({
-        success: true,
-        data: existing.rows[0],
-        idempotent_replay: true,
-      });
-    }
-
     const result = await withTransaction(async (client) => {
+      // [SEC] Idempotência atômica: SELECT FOR UPDATE dentro da transação
+      // garante que requests concorrentes serializem. Combinado com UNIQUE
+      // INDEX em (salao_id, idempotency_key), zero risco de duplo pagamento.
+      const existing = await client.query(
+        'SELECT * FROM comissoes_pagamentos_v2 WHERE salao_id = $1 AND idempotency_key = $2 FOR UPDATE',
+        [req.salaoId, idempotency_key]
+      );
+      if (existing.rows.length > 0) {
+        return { code: 200, body: { success: true, data: existing.rows[0], idempotent_replay: true } };
+      }
       // Tenancy do profissional
       const profOk = await client.query(
         'SELECT 1 FROM profissionais WHERE id = $1 AND salao_id = $2',
