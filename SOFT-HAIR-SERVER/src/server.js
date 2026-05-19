@@ -315,6 +315,9 @@ app.use('/api/metas', require('./routes/metas'));
 app.use('/api/relatorios', require('./routes/relatorios'));
 app.use('/api/fidelidade', require('./routes/fidelidade'));
 
+// ─── API v2 (novos endpoints, paralelo a v1 — não quebra nada) ───
+app.use('/api/v2', require('./routes/v2'));
+
 // ─── 404 Handler ───
 app.use((req, res) => {
   res.status(404).json({
