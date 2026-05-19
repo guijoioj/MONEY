@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit2, Copy, Trash2, X } from 'lucide-react';
-import { regrasComissaoAPI, comissoesV2API } from '../services/api';
+import { regrasComissaoAPI, comissoesV2API, profissionaisAPI, servicosAPI, produtosAPI } from '../services/api';
+
+function toArr(v) {
+  if (Array.isArray(v)) return v;
+  if (Array.isArray(v?.data)) return v.data;
+  if (Array.isArray(v?.data?.data)) return v.data.data;
+  return [];
+}
 
 const TIPOS = [
   { v: 'global', l: 'Global do salão' },
@@ -44,6 +51,32 @@ function FormModal({ open, onClose, regra, onSave }) {
     condicoes_json: {},
   });
   const [usaFixo, setUsaFixo] = useState(!!regra?.valor_fixo_cents);
+
+  // Carrega listas para os selects (só quando modal abre)
+  const { data: profsData } = useQuery({
+    queryKey: ['regras-modal-profs'],
+    queryFn: () => profissionaisAPI.getAll({ ativo: true }),
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: servsData } = useQuery({
+    queryKey: ['regras-modal-servs'],
+    queryFn: () => servicosAPI.getAll(),
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: prodsData } = useQuery({
+    queryKey: ['regras-modal-prods'],
+    queryFn: () => produtosAPI.getAll(),
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+  const profissionais = toArr(profsData?.data).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'));
+  const servicos      = toArr(servsData?.data).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'));
+  const produtos      = toArr(prodsData?.data).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'));
+  // Lista de categorias únicas baseadas em serviços/produtos
+  const categoriasServico = [...new Set(servicos.map(s => s.categoria).filter(Boolean))].sort();
+  const categoriasProduto = [...new Set(produtos.map(p => p.categoria).filter(Boolean))].sort();
 
   if (!open) return null;
 
@@ -151,37 +184,91 @@ function FormModal({ open, onClose, regra, onSave }) {
 
           {(form.tipo === 'profissional' || form.tipo === 'profissional_servico' || form.tipo === 'profissional_produto' || form.tipo === 'assistente') && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Profissional ID</label>
-              <input
-                type="number"
-                value={form.profissional_id || ''}
-                onChange={e => setForm(f => ({ ...f, profissional_id: Number(e.target.value) || null }))}
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Profissional</label>
+              <select
+                value={form.profissional_id ?? ''}
+                onChange={e => setForm(f => ({ ...f, profissional_id: e.target.value ? Number(e.target.value) : null }))}
                 className="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:border-gray-600"
-              />
+              >
+                <option value="">— Selecione —</option>
+                {profissionais.map(p => <option key={p.id} value={p.id}>{p.nome}{p.especialidade ? ` · ${p.especialidade}` : ''}</option>)}
+              </select>
             </div>
           )}
 
           {(form.tipo === 'servico' || form.tipo === 'profissional_servico') && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Serviço ID</label>
-              <input
-                type="number"
-                value={form.servico_id || ''}
-                onChange={e => setForm(f => ({ ...f, servico_id: Number(e.target.value) || null }))}
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Serviço</label>
+              <select
+                value={form.servico_id ?? ''}
+                onChange={e => setForm(f => ({ ...f, servico_id: e.target.value ? Number(e.target.value) : null }))}
                 className="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:border-gray-600"
-              />
+              >
+                <option value="">— Selecione —</option>
+                {servicos.map(s => <option key={s.id} value={s.id}>{s.nome}{s.categoria ? ` · ${s.categoria}` : ''}</option>)}
+              </select>
             </div>
           )}
 
           {(form.tipo === 'produto' || form.tipo === 'profissional_produto') && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Produto ID</label>
-              <input
-                type="number"
-                value={form.produto_id || ''}
-                onChange={e => setForm(f => ({ ...f, produto_id: Number(e.target.value) || null }))}
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Produto</label>
+              <select
+                value={form.produto_id ?? ''}
+                onChange={e => setForm(f => ({ ...f, produto_id: e.target.value ? Number(e.target.value) : null }))}
                 className="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:border-gray-600"
-              />
+              >
+                <option value="">— Selecione —</option>
+                {produtos.map(p => <option key={p.id} value={p.id}>{p.nome}{p.categoria ? ` · ${p.categoria}` : ''}</option>)}
+              </select>
+            </div>
+          )}
+
+          {form.tipo === 'categoria_servico' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria de serviço</label>
+              {categoriasServico.length > 0 ? (
+                <select
+                  value={form.categoria ?? ''}
+                  onChange={e => setForm(f => ({ ...f, categoria: e.target.value || null }))}
+                  className="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:border-gray-600"
+                >
+                  <option value="">— Selecione —</option>
+                  {categoriasServico.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={form.categoria ?? ''}
+                  onChange={e => setForm(f => ({ ...f, categoria: e.target.value || null }))}
+                  className="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:border-gray-600"
+                  placeholder="Ex: Corte, Coloração"
+                />
+              )}
+            </div>
+          )}
+
+          {form.tipo === 'categoria_produto' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria de produto</label>
+              {categoriasProduto.length > 0 ? (
+                <select
+                  value={form.categoria ?? ''}
+                  onChange={e => setForm(f => ({ ...f, categoria: e.target.value || null }))}
+                  className="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:border-gray-600"
+                >
+                  <option value="">— Selecione —</option>
+                  {categoriasProduto.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={form.categoria ?? ''}
+                  onChange={e => setForm(f => ({ ...f, categoria: e.target.value || null }))}
+                  className="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:border-gray-600"
+                  placeholder="Ex: Shampoo, Esmalte"
+                />
+              )}
             </div>
           )}
 
