@@ -821,7 +821,7 @@ async function applySqlMigrations() {
     )
   `);
 
-  const { rows } = await query('SELECT name FROM migrations');
+  const rows = await query('SELECT name FROM migrations');
   const executed = new Set(rows.map(r => r.name));
 
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.sql')).sort();
