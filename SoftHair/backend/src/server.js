@@ -60,9 +60,29 @@ app.use('/api/atendimentos', require('./routes/atendimentos'));
 app.use('/api/vendas', require('./routes/vendas'));
 app.use('/api/sync', require('./routes/sync'));
 
+// COMISSÕES OFFLINE BLOQUEADAS — operação financeira não tolera regras
+// desatualizadas. Retorna 503 explícito; frontend mostra banner.
+// (Veja docs/comissoes-v2/COMISSOES-V2-DESIGN.md §2 — decisão "Opção B")
+app.use('/api/comissoes', (req, res) => {
+  res.status(503).json({
+    success: false,
+    error: 'comissoes_offline_indisponivel',
+    message: 'Comissões exigem conexão com o servidor central. Modo offline não calcula nem persiste comissões.',
+    docs: 'https://github.com/guijoioj/MONEY/blob/main/SOFT-HAIR-SERVER/docs/comissoes-v2/COMISSOES-V2-DESIGN.md',
+  });
+});
+// Idem pra v2
+app.use('/api/v2/comissoes', (req, res) => {
+  res.status(503).json({
+    success: false,
+    error: 'comissoes_offline_indisponivel',
+    message: 'Comissões exigem conexão com o servidor central.',
+  });
+});
+
 // Stub para endpoints ainda não portados — sempre retorna array vazio.
-// Evita 404 em telas legadas (notificações, fechamento, comissões etc.).
-['notificacoes', 'fechamentos', 'comissoes', 'creditos', 'historico', 'saloes', 'backup'].forEach((rota) => {
+// Evita 404 em telas legadas.
+['notificacoes', 'fechamentos', 'creditos', 'historico', 'saloes', 'backup'].forEach((rota) => {
   app.use(`/api/${rota}`, (req, res) => {
     if (req.method === 'GET') {
       if (rota === 'notificacoes' && req.path === '/count') {

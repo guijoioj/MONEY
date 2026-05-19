@@ -33,6 +33,20 @@ api.interceptors.response.use(
       localStorage.removeItem(USER_KEY);
       window.location.href = isFileProtocol ? '/#/login' : '/login';
     }
+    // V2: 503 com error='comissoes_offline_indisponivel' → dispatch evento
+    // pra Layout exibir banner. Backend Electron emite isso quando offline.
+    if (
+      error.response?.status === 503 &&
+      error.response?.data?.error === 'comissoes_offline_indisponivel' &&
+      typeof window !== 'undefined' &&
+      typeof window.dispatchEvent === 'function'
+    ) {
+      try {
+        window.dispatchEvent(new CustomEvent('softhair:comissoes-offline', {
+          detail: { message: error.response?.data?.message, timestamp: Date.now() },
+        }));
+      } catch (_) { /* noop */ }
+    }
     return Promise.reject(error);
   }
 );
@@ -209,6 +223,34 @@ export const despesasAPI = {
 export const financeiroAPI = {
   getDre: (params) => api.get('/financeiro/dre', { params }),
   getProjecao: () => api.get('/financeiro/projecao'),
+};
+
+// ─── COMISSÕES V2 ───────────────────────────────────────────
+// Endpoints novos paralelos a v1. Server: /api/v2/comissoes/*
+// Electron offline retorna 503 — frontend mostra banner.
+export const comissoesV2API = {
+  list: (params) => api.get('/v2/comissoes', { params }),
+  dashboard: (params) => api.get('/v2/comissoes/dashboard', { params }),
+  extrato: (profissionalId, params) =>
+    api.get(`/v2/comissoes/profissional/${profissionalId}/extrato`, { params }),
+  simulador: (data) => api.post('/v2/comissoes/simulador', data),
+  pagar: (data) => api.post('/v2/comissoes/pagar', data),
+  estornar: (data) => api.post('/v2/comissoes/estornar', data),
+};
+
+export const regrasComissaoAPI = {
+  list: (params) => api.get('/v2/comissoes/regras', { params }),
+  getById: (id) => api.get(`/v2/comissoes/regras/${id}`),
+  create: (data) => api.post('/v2/comissoes/regras', data),
+  update: (id, data) => api.put(`/v2/comissoes/regras/${id}`, data),
+  delete: (id) => api.delete(`/v2/comissoes/regras/${id}`),
+  clonar: (id) => api.post(`/v2/comissoes/regras/${id}/clonar`),
+};
+
+export const ajustesComissaoAPI = {
+  list: (params) => api.get('/v2/comissoes/ajustes', { params }),
+  create: (data) => api.post('/v2/comissoes/ajustes', data),
+  cancelar: (id) => api.put(`/v2/comissoes/ajustes/${id}/cancelar`),
 };
 
 export default api;

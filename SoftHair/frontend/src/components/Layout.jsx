@@ -32,6 +32,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../services/api';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useTheme } from '../context/ThemeContext';
+import ComissoesOfflineBanner from './ComissoesOfflineBanner';
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -143,6 +144,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
+      <ComissoesOfflineBanner />
       {/* Popups de solicitação em tempo real */}
       <div className="fixed top-4 right-4 z-50 flex flex-col gap-3" style={{ maxWidth: 360 }}>
         {popups.map((popup) => (
