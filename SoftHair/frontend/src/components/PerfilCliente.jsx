@@ -39,8 +39,43 @@ export default function PerfilCliente({ clienteId }) {
     );
   }
 
-  const resumo = data.resumo || {};
-  const fav = data.favoritos || {};
+  // Helper: backend usa middleware camelize, mas .catch fallback retorna snake.
+  // Lê em qualquer um dos 2 formatos.
+  const g = (obj, snake) => {
+    if (!obj) return undefined;
+    if (obj[snake] !== undefined) return obj[snake];
+    const camel = snake.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+    return obj[camel];
+  };
+  const rawResumo = data.resumo || {};
+  const resumo = {
+    total_atendimentos:    g(rawResumo, 'total_atendimentos') ?? 0,
+    total_vendas:          g(rawResumo, 'total_vendas') ?? 0,
+    total_gasto:           g(rawResumo, 'total_gasto') ?? 0,
+    ticket_medio:          g(rawResumo, 'ticket_medio') ?? 0,
+    ultima_visita:         g(rawResumo, 'ultima_visita') ?? null,
+    frequencia_dias_media: g(rawResumo, 'frequencia_dias_media') ?? null,
+  };
+  const rawFav = data.favoritos || {};
+  const normProf = (p) => p ? ({
+    nome: p.nome,
+    qtd_atendimentos: g(p, 'qtd_atendimentos') ?? 0,
+    ultima_visita: g(p, 'ultima_visita') ?? null,
+  }) : null;
+  const normServ = (s) => s ? ({
+    nome: s.nome, preco: s.preco,
+    qtd: g(s, 'qtd') ?? 0,
+  }) : null;
+  const normProd = (p) => p ? ({
+    nome: p.nome,
+    qtd_unidades: g(p, 'qtd_unidades') ?? 0,
+    preco_venda: g(p, 'preco_venda') ?? 0,
+  }) : null;
+  const fav = {
+    profissional: normProf(rawFav.profissional),
+    servico: normServ(rawFav.servico),
+    produto: normProd(rawFav.produto),
+  };
 
   return (
     <div className="space-y-3">

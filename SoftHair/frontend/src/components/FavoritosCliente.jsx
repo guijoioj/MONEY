@@ -53,14 +53,34 @@ export default function FavoritosCliente() {
     retry: 1,
   });
 
-  const cliente             = favData?.cliente ?? {};
-  const profissionalFav     = favData?.profissional_favorito ?? null;
-  const servicosFav         = toArr(favData?.servicos_favoritos);
-  const produtosFav         = toArr(favData?.produtos_favoritos);
-  const servicosComProf     = toArr(favData?.servicos_com_este_profissional);
-  const produtosComProf     = toArr(favData?.produtos_com_este_profissional);
-  // Compat com payload antigo (ultimas_visitas) e novo (ultimas_visitas_com_este_profissional)
-  const ultimasVisitas      = toArr(favData?.ultimas_visitas_com_este_profissional || favData?.ultimas_visitas);
+  // Backend tem middleware camelize → converte snake → camel.
+  // JSX abaixo usa snake_case. Normaliza pra snake antes de usar.
+  const snakeize = (v) => {
+    if (Array.isArray(v)) return v.map(snakeize);
+    if (v && typeof v === 'object' && !(v instanceof Date)) {
+      const out = {};
+      for (const k of Object.keys(v)) {
+        const snk = k.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase());
+        out[snk] = snakeize(v[k]);
+      }
+      return out;
+    }
+    return v;
+  };
+
+  const cliente             = snakeize(favData?.cliente ?? {});
+  // Payload pode vir como profissional_favorito (catch) OU profissionalFavorito (camelize)
+  const profissionalFav     = snakeize(favData?.profissional_favorito ?? favData?.profissionalFavorito ?? null);
+  const servicosFav         = snakeize(toArr(favData?.servicos_favoritos ?? favData?.servicosFavoritos));
+  const produtosFav         = snakeize(toArr(favData?.produtos_favoritos ?? favData?.produtosFavoritos));
+  const servicosComProf     = snakeize(toArr(favData?.servicos_com_este_profissional ?? favData?.servicosComEsteProfissional));
+  const produtosComProf     = snakeize(toArr(favData?.produtos_com_este_profissional ?? favData?.produtosComEsteProfissional));
+  const ultimasVisitas      = snakeize(toArr(
+    favData?.ultimas_visitas_com_este_profissional
+    ?? favData?.ultimasVisitasComEsteProfissional
+    ?? favData?.ultimas_visitas
+    ?? favData?.ultimasVisitas
+  ));
 
   return (
     <div className="space-y-4">

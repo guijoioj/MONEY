@@ -59,14 +59,44 @@ export default function PainelProfissional() {
     retry: 1,
   });
 
-  // Acesso seguro ao payload
+  // Acesso dual: backend tem middleware camelize, mas .catch fallback retorna
+  // snake_case literal. Helper pega em qualquer um dos 2 formatos.
+  const g = (obj, snake) => {
+    if (!obj) return undefined;
+    if (obj[snake] !== undefined) return obj[snake];
+    const camel = snake.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+    return obj[camel];
+  };
+
   const prof      = painelData?.profissional ?? {};
-  const comissoes = painelData?.resumo_comissoes ?? COMISSOES_VAZIO;
-  const vendas    = painelData?.vendas ?? VENDAS_VAZIO;
-  const atend     = painelData?.atendimentos ?? ATEND_VAZIO;
-  const topCli    = Array.isArray(painelData?.top_clientes)  ? painelData.top_clientes  : [];
-  const topSrv    = Array.isArray(painelData?.top_servicos)  ? painelData.top_servicos  : [];
-  const topProd   = Array.isArray(painelData?.top_produtos)  ? painelData.top_produtos  : [];
+  const rawCom    = painelData?.resumoComissoes ?? painelData?.resumo_comissoes ?? COMISSOES_VAZIO;
+  const rawVendas = painelData?.vendas ?? VENDAS_VAZIO;
+  const rawAtend  = painelData?.atendimentos ?? ATEND_VAZIO;
+  // Normaliza pra snake_case (forma usada no JSX)
+  const comissoes = {
+    qtd_total:        g(rawCom, 'qtd_total') ?? 0,
+    qtd_validas:      g(rawCom, 'qtd_validas') ?? 0,
+    qtd_pendente:     g(rawCom, 'qtd_pendente') ?? 0,
+    qtd_paga:         g(rawCom, 'qtd_paga') ?? 0,
+    qtd_estornada:    g(rawCom, 'qtd_estornada') ?? 0,
+    pendente_cents:   g(rawCom, 'pendente_cents') ?? 0,
+    pago_cents:       g(rawCom, 'pago_cents') ?? 0,
+    estornada_cents:  g(rawCom, 'estornada_cents') ?? 0,
+    total_cents:      g(rawCom, 'total_cents') ?? 0,
+    ultima_comissao_em: g(rawCom, 'ultima_comissao_em') ?? null,
+  };
+  const vendas = {
+    qtd: g(rawVendas, 'qtd') ?? 0,
+    total_faturado: g(rawVendas, 'total_faturado') ?? 0,
+  };
+  const atend = {
+    qtd: g(rawAtend, 'qtd') ?? 0,
+    qtd_finalizados: g(rawAtend, 'qtd_finalizados') ?? 0,
+    clientes_unicos: g(rawAtend, 'clientes_unicos') ?? 0,
+  };
+  const topCli    = Array.isArray(painelData?.topClientes)  ? painelData.topClientes  : (Array.isArray(painelData?.top_clientes)  ? painelData.top_clientes  : []);
+  const topSrv    = Array.isArray(painelData?.topServicos)  ? painelData.topServicos  : (Array.isArray(painelData?.top_servicos)  ? painelData.top_servicos  : []);
+  const topProd   = Array.isArray(painelData?.topProdutos)  ? painelData.topProdutos  : (Array.isArray(painelData?.top_produtos)  ? painelData.top_produtos  : []);
 
   return (
     <div className="space-y-4">
