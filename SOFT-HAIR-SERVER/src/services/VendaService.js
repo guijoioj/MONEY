@@ -1,5 +1,7 @@
 const { query, queryOne, withTransaction } = require('../config/database');
 const { logAction } = require('../utils/auditLog');
+// [V2] Trigger automático de comissões. Resiliente: erros não derrubam venda.
+const CommissionTriggers = require('./CommissionTriggers');
 
 // [P8-A1] State machine de status de venda — transições válidas:
 //   pendente   → concluida | finalizada | cancelada
@@ -168,7 +170,13 @@ class VendaService {
           }
         }
 
-        return { success: true, data: venda };
+        // [V2] Gera comissões automáticas (best-effort, não bloqueia venda)
+        const trig = await CommissionTriggers.onVendaCriada(venda, client);
+        if (!trig.ok && trig.errors?.length) {
+          console.warn('[VendaService.criar] trigger comissão falhou:', trig.errors);
+        }
+
+        return { success: true, data: venda, comissoes_geradas: trig.inserted || 0 };
       });
     } catch (error) {
       return { success: false, error: error.message };
@@ -292,7 +300,17 @@ class VendaService {
           );
         }
 
-        return { success: true, data: venda, message: 'Venda cancelada' };
+        // [V2] Cancela comissões pendentes / cria ajuste negativo pra pagas
+        const trig = await CommissionTriggers.onVendaCancelada(venda, client, 'Venda cancelada');
+        if (!trig.ok) {
+          console.warn('[VendaService.cancelar] trigger comissão falhou:', trig.error);
+        }
+
+        return {
+          success: true, data: venda, message: 'Venda cancelada',
+          comissoes_canceladas: trig.canceladas || 0,
+          ajustes_estorno_criados: trig.ajustesCriados || 0,
+        };
       });
     } catch (error) {
       return { success: false, error: error.message };

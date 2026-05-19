@@ -1,5 +1,6 @@
-const { query, queryOne, withTransaction } = require('../config/database');
+const { query, queryOne, withTransaction, pool } = require('../config/database');
 const { logAction } = require('../utils/auditLog');
+const CommissionTriggers = require('./CommissionTriggers');
 
 // [P8-A2] State machine de status de atendimento — transições válidas:
 //   agendado     → em_andamento | cancelado
@@ -168,6 +169,26 @@ class AtendimentoService {
           after: { status: data.status },
           salaoId,
         }).catch(() => {});
+
+        // [V2] Atendimento finalizado → gera comissões automaticamente
+        if (data.status === 'finalizado') {
+          const client = await pool.connect();
+          try {
+            await client.query('BEGIN');
+            const trig = await CommissionTriggers.onAtendimentoFechado(result, client);
+            await client.query('COMMIT');
+            if (!trig.ok) {
+              console.warn('[AtendimentoService] trigger comissão falhou:', trig.error);
+            } else {
+              result._comissoes_geradas = trig.inserted;
+            }
+          } catch (e) {
+            await client.query('ROLLBACK').catch(() => {});
+            console.warn('[AtendimentoService] trigger transaction rollback:', e.message);
+          } finally {
+            client.release();
+          }
+        }
       }
 
       return { success: true, data: result };
