@@ -30,6 +30,11 @@ const Caixa = lazy(() => import('./pages/Caixa'));
 const Metas = lazy(() => import('./pages/Metas'));
 const Relatorios = lazy(() => import('./pages/Relatorios'));
 const Sync = lazy(() => import('./pages/Sync'));
+// V2: Comissões reescritas
+const ComissoesV2 = lazy(() => import('./pages/ComissoesV2'));
+const RegrasComissao = lazy(() => import('./pages/RegrasComissao'));
+const ExtratoProfissional = lazy(() => import('./pages/ExtratoProfissional'));
+const PagamentoComissao = lazy(() => import('./pages/PagamentoComissao'));
 
 function PageFallback() {
   return (
@@ -115,6 +120,11 @@ export default function App() {
         <Route path="metas" element={lazyEl(Metas)} />
         <Route path="relatorios" element={<RequireAdminPin>{lazyEl(Relatorios)}</RequireAdminPin>} />
         <Route path="sync" element={lazyEl(Sync)} />
+        {/* V2 Comissões */}
+        <Route path="comissoes-v2" element={lazyEl(ComissoesV2)} />
+        <Route path="comissoes/regras" element={lazyEl(RegrasComissao)} />
+        <Route path="comissoes/extrato/:id" element={lazyEl(ExtratoProfissional)} />
+        <Route path="comissoes/pagamento" element={lazyEl(PagamentoComissao)} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
