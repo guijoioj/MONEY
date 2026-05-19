@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS regras_comissao (
 
   condicoes_json  JSONB NOT NULL DEFAULT '{}',
 
-  criado_por      INTEGER REFERENCES users(id),
+  criado_por      TEXT REFERENCES users(id),
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
@@ -223,10 +223,10 @@ CREATE TABLE IF NOT EXISTS comissoes_pagamentos_v2 (
   forma_pagamento      TEXT,
   idempotency_key      TEXT,
 
-  criado_por           INTEGER REFERENCES users(id),
+  criado_por           TEXT REFERENCES users(id),
   created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   revertido_em         TIMESTAMPTZ,
-  revertido_por        INTEGER REFERENCES users(id),
+  revertido_por        TEXT REFERENCES users(id),
   motivo_reversao      TEXT,
 
   CONSTRAINT pag_periodo_fim_apos_inicio CHECK (periodo_fim >= periodo_inicio),
@@ -273,7 +273,7 @@ CREATE TABLE IF NOT EXISTS comissoes_ajustes (
                         status IN ('pendente','aplicado','cancelado')
                       ),
 
-  criado_por          INTEGER REFERENCES users(id),
+  criado_por          TEXT REFERENCES users(id),
   created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at          TIMESTAMPTZ DEFAULT NOW(),
 
