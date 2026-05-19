@@ -16,6 +16,7 @@ const path = require('path');
 const { fork } = require('child_process');
 const fs = require('fs');
 const http = require('http');
+const { setupAutoUpdater } = require('./updater');
 
 let mainWindow;
 let backendProcess;
@@ -209,7 +210,10 @@ function createWindow() {
 app.whenReady().then(() => {
   if (!isDev) {
     startBackend();
-    waitForBackend(60, 500, createWindow);
+    waitForBackend(60, 500, () => {
+      createWindow();
+      setupAutoUpdater(mainWindow);
+    });
   } else {
     createWindow();
   }

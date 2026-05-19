@@ -16,6 +16,9 @@
     "build:win": "npm run build:frontend && electron-builder --win",
     "build:linux": "npm run build:frontend && electron-builder --linux",
     "build:mac": "npm run build:frontend && electron-builder --mac",
+    "release:win": "npm run build:frontend && electron-builder --win --publish=always",
+    "release:linux": "npm run build:frontend && electron-builder --linux --publish=always",
+    "release:mac": "npm run build:frontend && electron-builder --mac --publish=always",
     "dist": "npm run build:frontend && electron-builder --publish=never",
     "postinstall": "npm run backend:install && npm run frontend:install"
   },
@@ -36,14 +39,19 @@
       {
         "from": "backend",
         "to": "backend",
-        "filter": ["**/*", "!node_modules/.cache/**"]
+        "filter": [
+          "**/*",
+          "!node_modules/.cache/**"
+        ]
       }
     ],
     "asarUnpack": [
       "**/node_modules/better-sqlite3/**"
     ],
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "build/icon.ico"
     },
     "mac": {
@@ -51,7 +59,9 @@
       "icon": "build/icon.icns"
     },
     "linux": {
-      "target": ["AppImage"],
+      "target": [
+        "AppImage"
+      ],
       "icon": "build/icon.png",
       "category": "Office"
     },
@@ -61,13 +71,32 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "SoftHair"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "guijoioj",
+        "repo": "MONEY",
+        "releaseType": "release"
+      }
+    ]
   },
-  "keywords": ["beauty", "salon", "management", "desktop", "electron", "sqlite"],
+  "keywords": [
+    "beauty",
+    "salon",
+    "management",
+    "desktop",
+    "electron",
+    "sqlite"
+  ],
   "author": "SoftHair",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^28.3.3",
-    "electron-builder": "^24.13.3"
+    "electron": "^33.4.11",
+    "electron-builder": "^26.8.1"
+  },
+  "dependencies": {
+    "electron-log": "^5.4.4",
+    "electron-updater": "^6.8.3"
   }
 }
