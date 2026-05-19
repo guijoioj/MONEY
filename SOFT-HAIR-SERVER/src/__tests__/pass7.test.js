@@ -16,7 +16,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { Pool } = require('pg');
 
-const DEFAULT_DATABASE_URL = 'postgresql://db_softhair_user:HIRdZdaglLmErrqqvQP86LQjLcMzFThv@dpg-d7o0fcdckfvc73fabqlg-a.ohio-postgres.render.com/db_softhair';
+const DEFAULT_DATABASE_URL = 'postgresql://db_softhair_user:<REDACTED_DB_PASSWORD>@dpg-d7o0fcdckfvc73fabqlg-a.ohio-postgres.render.com/db_softhair';
 
 const databaseUrl = process.env.DATABASE_URL || DEFAULT_DATABASE_URL;
 const port = process.env.JEST_PASS7_PORT || String(5500 + (process.pid % 1000));

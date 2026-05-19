@@ -12,7 +12,7 @@
 
 const { Pool } = require('pg');
 
-const DB_URL = 'postgresql://db_softhair_user:HIRdZdaglLmErrqqvQP86LQjLcMzFThv@dpg-d7o0fcdckfvc73fabqlg-a.ohio-postgres.render.com/db_softhair';
+const DB_URL = 'postgresql://db_softhair_user:<REDACTED_DB_PASSWORD>@dpg-d7o0fcdckfvc73fabqlg-a.ohio-postgres.render.com/db_softhair';
 
 const pool = new Pool({
   connectionString: DB_URL,

@@ -2,7 +2,7 @@ const { spawn } = require('child_process');
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
 
-const DEFAULT_DATABASE_URL = 'postgresql://db_softhair_user:HIRdZdaglLmErrqqvQP86LQjLcMzFThv@dpg-d7o0fcdckfvc73fabqlg-a.ohio-postgres.render.com/db_softhair';
+const DEFAULT_DATABASE_URL = 'process.env.DATABASE_URL_TEST_FALLBACK or use env';
 
 const databaseUrl = process.env.DATABASE_URL || DEFAULT_DATABASE_URL;
 const port = process.env.JEST_SMOKE_PORT || String(4500 + (process.pid % 1000));
