@@ -33,7 +33,15 @@ jobs:
           cache-dependency-path: SoftHair/package-lock.json
 
       - name: Install root deps
+        run: npm install --legacy-peer-deps --ignore-scripts
+
+      - name: Install backend deps (production)
+        run: npm install --omit=dev
+        working-directory: ./SoftHair/backend
+
+      - name: Install frontend deps
         run: npm install --legacy-peer-deps
+        working-directory: ./SoftHair/frontend
 
       - name: Build frontend
         run: npm run build:frontend
