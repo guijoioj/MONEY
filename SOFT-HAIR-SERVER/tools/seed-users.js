@@ -102,7 +102,9 @@ async function upsertUsuario({ email, nome, tipo, senha, salaoId, profissionalId
   const credenciais = [];
 
   for (const salao of saloes) {
-    const dominio = slugify(salao.nome) || `salao${salao.id}`;
+    // Sufixo .local pra TLD válido (validator de email exige TLD).
+    const base = slugify(salao.nome) || `salao${salao.id}`;
+    const dominio = `${base}.local`;
     console.log(`Salão #${salao.id} — ${salao.nome}  (dom: ${dominio})`);
 
     // Profissionais ativos
