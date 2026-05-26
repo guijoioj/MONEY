@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { roleHome } from '../components/RequireRole';
 import { Eye, EyeOff, Scissors } from 'lucide-react';
 
 export default function Login() {
@@ -18,8 +19,9 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await login(email, password);
-      navigate('/clientes');
+      const { user } = await login(email, password);
+      // Redireciona pra home do role (admin → /dashboard, recepcao → /agenda, profissional → /minha-agenda).
+      navigate(roleHome(user?.role), { replace: true });
     } catch (err) {
       setError(err.response?.data?.error || 'Erro ao fazer login');
     } finally {

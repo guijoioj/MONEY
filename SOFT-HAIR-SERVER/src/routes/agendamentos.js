@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, query: queryValidator, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { isProfissionalScope } = require('../middleware/role');
 const { AgendamentoService } = require('../services');
 const { sendPush } = require('../services/pushService');
 const { pool } = require('../config/database');
@@ -12,7 +13,15 @@ const service = new AgendamentoService();
 // Listar agendamentos (com filtros)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { status, data_inicio, data_fim, cliente_id, profissional_id } = req.query;
+    const { status, data_inicio, data_fim, cliente_id } = req.query;
+    // Scoping: profissional só vê os próprios; admin/recepção podem filtrar livremente.
+    let profissional_id = req.query.profissional_id;
+    if (isProfissionalScope(req)) {
+      if (!req.user.profissionalId) {
+        return res.status(403).json({ success: false, error: 'Usuário profissional sem vínculo. Contate o administrador.' });
+      }
+      profissional_id = req.user.profissionalId;
+    }
     const result = await service.listar(req.salaoId, { status, data_inicio, data_fim, cliente_id, profissional_id });
 
     if (result.success) {

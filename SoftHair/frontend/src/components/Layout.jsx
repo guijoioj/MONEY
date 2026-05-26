@@ -119,29 +119,38 @@ export default function Layout() {
     return () => document.removeEventListener('keydown', handler);
   }, [launcherOpen]);
 
-  const navItems = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/administrativo', icon: BarChart3, label: 'Administrativo' },
-    { to: '/agenda', icon: Calendar, label: 'Agenda' },
-    { to: '/solicitacoes', icon: Inbox, label: 'Solicitações', badge: solicitacoesCount },
-    { to: '/clientes', icon: Users, label: 'Clientes' },
-    { to: '/servicos-e-produtos', icon: Scissors, label: 'Serviços e Produtos' },
-    { to: '/profissionais', icon: User, label: 'Profissionais' },
-    { to: '/atendimentos', icon: ClipboardCheck, label: 'Atendimentos' },
-    { to: '/vendas', icon: ShoppingCart, label: 'Vendas' },
-    { to: '/comissoes-v2', icon: DollarSign, label: 'Comissões' },
-    { to: '/fechamento', icon: ClipboardCheck, label: 'Fechamento' },
-    { to: '/financeiro', icon: BarChart3, label: 'Financeiro' },
-    { to: '/despesas', icon: DollarSign, label: 'Despesas' },
-    { to: '/caixa', icon: DollarSign, label: 'Caixa' },
-    { to: '/metas', icon: Target, label: 'Metas' },
-    { to: '/relatorios', icon: BarChart3, label: 'Relatórios' },
-    { to: '/backup', icon: Database, label: 'Backup' },
-    { to: '/notificacoes', icon: Bell, label: 'Notificações', badge: notifCount },
-    { to: '/sync', icon: Cloud, label: 'Sync Cloud' },
-    { to: '/customizacao', icon: Palette, label: 'Personalizar' },
-    { to: '/configuracoes', icon: Settings, label: 'Configurações' },
+  // Itens com `roles` — Layout filtra pelo role do user logado.
+  // `roles: undefined` significa visível para todos (raro). Usar sempre array.
+  const ALL_ITEMS = [
+    { to: '/dashboard',            icon: LayoutDashboard, label: 'Dashboard',           roles: ['admin'] },
+    { to: '/administrativo',       icon: BarChart3,       label: 'Administrativo',      roles: ['admin'] },
+    { to: '/agenda',               icon: Calendar,        label: 'Agenda',              roles: ['admin', 'recepcao'] },
+    { to: '/minha-agenda',         icon: Calendar,        label: 'Minha agenda',        roles: ['profissional'] },
+    { to: '/solicitacoes',         icon: Inbox,           label: 'Solicitações',        roles: ['admin', 'recepcao'], badge: solicitacoesCount },
+    { to: '/clientes',             icon: Users,           label: 'Clientes',            roles: ['admin', 'recepcao'] },
+    { to: '/servicos-e-produtos',  icon: Scissors,        label: 'Serviços e Produtos', roles: ['admin', 'recepcao'] },
+    { to: '/profissionais',        icon: User,            label: 'Profissionais',       roles: ['admin', 'recepcao'] },
+    { to: '/atendimentos',         icon: ClipboardCheck,  label: 'Atendimentos',        roles: ['admin', 'recepcao'] },
+    { to: '/meus-atendimentos',    icon: ClipboardCheck,  label: 'Meus atendimentos',   roles: ['profissional'] },
+    { to: '/vendas',               icon: ShoppingCart,    label: 'Vendas',              roles: ['admin', 'recepcao'] },
+    { to: '/comissoes-v2',         icon: DollarSign,      label: 'Comissões',           roles: ['admin'] },
+    { to: '/minhas-comissoes',     icon: DollarSign,      label: 'Minhas comissões',    roles: ['profissional'] },
+    { to: '/fechamento',           icon: ClipboardCheck,  label: 'Fechamento',          roles: ['admin'] },
+    { to: '/financeiro',           icon: BarChart3,       label: 'Financeiro',          roles: ['admin'] },
+    { to: '/despesas',             icon: DollarSign,      label: 'Despesas',            roles: ['admin'] },
+    { to: '/caixa',                icon: DollarSign,      label: 'Caixa',               roles: ['admin'] },
+    { to: '/metas',                icon: Target,          label: 'Metas',               roles: ['admin'] },
+    { to: '/relatorios',           icon: BarChart3,       label: 'Relatórios',          roles: ['admin'] },
+    { to: '/backup',               icon: Database,        label: 'Backup',              roles: ['admin'] },
+    { to: '/usuarios',             icon: Users,           label: 'Usuários',            roles: ['admin'] },
+    { to: '/notificacoes',         icon: Bell,            label: 'Notificações',        roles: ['admin', 'recepcao', 'profissional'], badge: notifCount },
+    { to: '/sync',                 icon: Cloud,           label: 'Sync Cloud',          roles: ['admin'] },
+    { to: '/customizacao',         icon: Palette,         label: 'Personalizar',        roles: ['admin'] },
+    { to: '/configuracoes',        icon: Settings,        label: 'Configurações',       roles: ['admin'] },
   ];
+
+  const userRole = user?.role || user?.tipo || 'admin';
+  const navItems = ALL_ITEMS.filter(it => !it.roles || it.roles.includes(userRole));
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>

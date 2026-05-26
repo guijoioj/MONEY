@@ -94,8 +94,11 @@ class AuthService {
         email: user.email,
         nome: user.nome,
         tipo: user.tipo,
+        role: user.tipo,                       // alias semântico — frontend usa "role"
+        profissional_id: user.profissional_id || null,
+        profissionalId: user.profissional_id || null,
         salao_id: user.salao_id,
-        salao_nome: user.salao_nome
+        salao_nome: user.salao_nome,
       }
     };
   }
@@ -116,6 +119,8 @@ class AuthService {
         userId: user.id,
         email: user.email,
         tipo: user.tipo,
+        // Vínculo profissional (apenas tipo='profissional' tem valor) — usado no scoping de listas.
+        profissionalId: user.profissional_id || null,
         salaoId: user.salao_id,
         // [P6-M2] tokenVersion no payload — invalidação por troca de senha
         tokenVersion: user.token_version || 0,

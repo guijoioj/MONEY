@@ -2,7 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { requireAnyRole } = require('../middleware/role');
 const { ProdutoService } = require('../services');
+
+// Recepção pode criar/editar produtos (operação de salão).
+// Apenas admin pode desativar/excluir (DELETE).
+const requireAdminOrRecepcao = requireAnyRole(['admin', 'recepcao']);
 
 const service = new ProdutoService();
 
@@ -78,9 +83,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Criar
-// [P6-A3] requireAdmin + whitelist
-router.post('/', authMiddleware, requireAdmin, [
+// Criar — admin + recepção
+router.post('/', authMiddleware, requireAdminOrRecepcao, [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
   body('preco_venda').isFloat({ min: 0 }).withMessage('Preço de venda deve ser positivo'),
   body('quantidade_estoque').optional().isInt({ min: 0 }).withMessage('Estoque deve ser inteiro positivo'),
@@ -101,9 +105,8 @@ router.post('/', authMiddleware, requireAdmin, [
   }
 });
 
-// Atualizar
-// [P6-A3] requireAdmin + whitelist
-router.put('/:id', authMiddleware, requireAdmin, [
+// Atualizar — admin + recepção
+router.put('/:id', authMiddleware, requireAdminOrRecepcao, [
   body('nome').optional().isLength({ min: 2 }),
   body('preco_venda').optional().isFloat({ min: 0 }),
 ], async (req, res) => {

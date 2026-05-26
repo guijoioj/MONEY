@@ -314,6 +314,7 @@ app.use('/api/caixa', require('./routes/caixa'));
 app.use('/api/metas', require('./routes/metas'));
 app.use('/api/relatorios', require('./routes/relatorios'));
 app.use('/api/fidelidade', require('./routes/fidelidade'));
+app.use('/api/usuarios', require('./routes/usuarios'));
 
 // ─── API v2 (novos endpoints, paralelo a v1 — não quebra nada) ───
 app.use('/api/v2', require('./routes/v2'));

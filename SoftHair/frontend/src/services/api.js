@@ -125,6 +125,15 @@ export const vendasAPI = {
   getEstatisticas: (params) => api.get('/vendas/estatisticas', { params }),
 };
 
+export const usuariosAPI = {
+  getAll: () => api.get('/usuarios'),
+  getById: (id) => api.get(`/usuarios/${id}`),
+  create: (data) => api.post('/usuarios', data),
+  update: (id, data) => api.put(`/usuarios/${id}`, data),
+  updateSenha: (id, senha) => api.put(`/usuarios/${id}/senha`, { senha }),
+  delete: (id) => api.delete(`/usuarios/${id}`),
+};
+
 export const profissionaisAPI = {
   getAll: (params) => api.get('/profissionais', { params }),
   getById: (id) => api.get(`/profissionais/${id}`),

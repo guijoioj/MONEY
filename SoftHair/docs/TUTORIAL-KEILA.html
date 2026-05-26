@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SoftHair · Guia Completo para Keila — Instalação & Uso</title>
+<style>
+  :root {
+    --primary: #6366f1; --primary-dark: #4338ca;
+    --bg: #f8fafc; --surface: #fff; --text: #1e293b; --muted: #64748b;
+    --border: #e2e8f0; --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+    --code-bg: #1e293b; --code-text: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+  }
+  .container { max-width: 880px; margin: 0 auto; padding: 40px 24px; }
+  header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff; padding: 48px 24px; text-align: center;
+  }
+  header h1 { margin: 0 0 8px; font-size: 2.2rem; }
+  header p { margin: 0; opacity: 0.92; font-size: 1.05rem; }
+  h2 {
+    margin-top: 48px; font-size: 1.55rem; padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary); color: var(--primary-dark);
+  }
+  h3 { margin-top: 28px; font-size: 1.18rem; color: var(--text); }
+  p { margin: 12px 0; }
+  code {
+    background: #eef2ff; color: #4338ca; padding: 2px 6px; border-radius: 4px;
+    font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 0.92em;
+  }
+  pre {
+    background: var(--code-bg); color: var(--code-text); padding: 16px 20px;
+    border-radius: 10px; overflow-x: auto; font-size: 0.88rem; line-height: 1.5;
+  }
+  pre code { background: transparent; color: inherit; padding: 0; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; margin: 20px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .callout {
+    border-left: 4px solid var(--primary); padding: 14px 18px;
+    background: #eef2ff; border-radius: 8px; margin: 18px 0;
+  }
+  .callout.warning { border-color: var(--warning); background: #fffbeb; }
+  .callout.danger { border-color: var(--danger); background: #fef2f2; }
+  .callout.success { border-color: var(--success); background: #ecfdf5; }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 0.78rem; font-weight: 600; margin-right: 6px;
+  }
+  .badge-admin    { background: #ede9fe; color: #6d28d9; }
+  .badge-recepcao { background: #dbeafe; color: #1d4ed8; }
+  .badge-prof     { background: #d1fae5; color: #047857; }
+  table {
+    width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 0.93rem;
+  }
+  th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; }
+  th { background: #f1f5f9; font-weight: 600; }
+  ul.checklist { list-style: none; padding-left: 0; }
+  ul.checklist li { padding: 6px 0; padding-left: 28px; position: relative; }
+  ul.checklist li::before {
+    content: '✓'; position: absolute; left: 4px; color: var(--success); font-weight: bold;
+  }
+  ol { padding-left: 20px; }
+  ol > li { margin: 10px 0; }
+  .step {
+    counter-increment: step;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 20px 18px 60px; margin: 14px 0; position: relative;
+  }
+  .step::before {
+    content: counter(step);
+    position: absolute; left: 18px; top: 18px;
+    background: var(--primary); color: #fff; width: 28px; height: 28px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.95rem;
+  }
+  .steps { counter-reset: step; }
+  .toc {
+    background: #f1f5f9; border-radius: 12px; padding: 18px 24px; margin: 24px 0 32px;
+  }
+  .toc ol { margin: 6px 0; padding-left: 22px; }
+  .toc a { color: var(--primary-dark); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  footer {
+    text-align: center; padding: 32px; color: var(--muted); font-size: 0.88rem;
+  }
+  .keys {
+    background: #fefce8; border: 1px solid #facc15; padding: 12px 16px;
+    border-radius: 8px; font-family: monospace; font-size: 0.93rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SoftHair — Guia da Keila</h1>
+  <p>Instalação no PC do salão · acesso remoto · uso diário · perfis e permissões</p>
+</header>
+
+<div class="container">
+
+<div class="toc">
+  <strong>Sumário</strong>
+  <ol>
+    <li><a href="#visao">Visão geral do sistema</a></li>
+    <li><a href="#install">Instalar o SoftHair no PC do salão</a></li>
+    <li><a href="#remoto">Configurar acesso remoto da sua casa</a></li>
+    <li><a href="#perfis">Perfis de acesso (admin · recepção · profissional)</a></li>
+    <li><a href="#primeiro-uso">Primeiro uso — criar/distribuir senhas</a></li>
+    <li><a href="#dia-a-dia">Dia a dia da equipe</a></li>
+    <li><a href="#admin">O que SÓ a Keila pode fazer</a></li>
+    <li><a href="#trouble">Resolução de problemas</a></li>
+    <li><a href="#updates">Atualizações automáticas</a></li>
+  </ol>
+</div>
+
+<!-- ─── 1 · VISÃO GERAL ─────────────────────────────── -->
+<h2 id="visao">1 · Visão geral do sistema</h2>
+
+<p>O SoftHair é o sistema de gestão do seu salão. Hoje ele tem <strong>três tipos de usuário</strong>:</p>
+
+<div class="card">
+  <p><span class="badge badge-admin">Administrador</span> <strong>Você (Keila).</strong> Vê tudo: dashboard, financeiro, comissões, fechamentos, relatórios, configurações, usuários, backup. É quem cria os outros logins.</p>
+  <p><span class="badge badge-recepcao">Recepção</span> Quem fica no balcão. Vê agenda, clientes, profissionais, atendimentos, vendas, serviços e produtos. <strong>Não vê</strong> financeiro nem comissões.</p>
+  <p><span class="badge badge-prof">Profissional</span> Cabeleireiras/manicures. Cada uma vê <strong>somente</strong> a própria agenda, próprios atendimentos e próprias comissões. Não consegue ver o que as outras estão ganhando.</p>
+</div>
+
+<div class="callout">
+  <strong>Por que isso é importante</strong>
+  Antes o sistema tinha um PIN único para "áreas restritas". Quem soubesse o PIN entrava em tudo. Agora cada pessoa tem seu próprio login e senha, e cada tela só aparece para quem tem direito. Mais seguro, e mais simples de usar.
+</div>
+
+<!-- ─── 2 · INSTALAÇÃO ──────────────────────────────── -->
+<h2 id="install">2 · Instalar o SoftHair no PC do salão</h2>
+
+<p>O sistema é um programa que abre como qualquer outro (Word, Chrome, etc.). Você vai instalar no <strong>PC do salão</strong> (aquele que fica na recepção).</p>
+
+<div class="steps">
+
+  <div class="step">
+    <strong>Baixe o instalador.</strong> Abra o navegador no PC do salão e vá em:
+    <pre><code>https://github.com/guijoioj/MONEY/releases/latest</code></pre>
+    Procure o arquivo <code>SoftHair-Setup-X.X.X.exe</code> (Windows) ou <code>SoftHair-X.X.X.AppImage</code> (Linux).
+  </div>
+
+  <div class="step">
+    <strong>Execute o instalador.</strong>
+    <ul>
+      <li><strong>Windows:</strong> dê 2 cliques no <code>.exe</code>. Se aparecer "Windows protegeu seu computador", clique em <em>Mais informações</em> → <em>Executar assim mesmo</em>.</li>
+      <li><strong>Linux:</strong> abra o terminal na pasta do arquivo e rode <code>chmod +x SoftHair-*.AppImage && ./SoftHair-*.AppImage</code>.</li>
+    </ul>
+  </div>
+
+  <div class="step">
+    <strong>Aguarde a tela de login.</strong> Na primeira abertura, o SoftHair vai abrir uma tela perguntando seu email e senha.
+  </div>
+
+  <div class="step">
+    <strong>Entre como admin.</strong>
+    <div class="keys">
+      Email: <code>admin@softhair.com</code><br>
+      Senha: <em>a senha que você definiu na instalação inicial</em>
+    </div>
+    <p style="margin-top:10px;color:var(--muted);font-size:0.9em">Se for a primeira vez de tudo (sistema novo), use a senha que o desenvolvedor te passou e <strong>troque imediatamente</strong> em <em>Usuários → Editar → Trocar senha</em>.</p>
+  </div>
+
+</div>
+
+<div class="callout success">
+  <strong>Pronto, está instalado!</strong>
+  A partir daqui, todos os logins (recepção, profissionais) vão usar o mesmo PC, ou qualquer outro com SoftHair instalado.
+</div>
+
+<!-- ─── 3 · ACESSO REMOTO ──────────────────────────── -->
+<h2 id="remoto">3 · Configurar acesso remoto da sua casa</h2>
+
+<p>Você quer acessar o PC do salão de casa. Existem dois jeitos: <strong>(A)</strong> entrar no PC do salão pela internet (controle total), ou <strong>(B)</strong> instalar o SoftHair também no seu PC de casa e logar como admin.</p>
+
+<h3>Opção A — AnyDesk ou RustDesk (controle total da tela)</h3>
+
+<p>Você vê e mexe no PC do salão como se estivesse lá. Útil para quando algo dá errado e a recepção precisa de ajuda.</p>
+
+<div class="steps">
+  <div class="step">
+    <strong>No PC do salão, instale o AnyDesk:</strong> baixe em <code>https://anydesk.com/pt/downloads</code> e instale.
+  </div>
+  <div class="step">
+    <strong>Configure senha fixa.</strong> Abra o AnyDesk → menu lateral → <em>Definir senha para acesso não vigiado</em>. Escolha uma senha forte (mín 12 caracteres). Anote.
+  </div>
+  <div class="step">
+    <strong>Anote o endereço do PC do salão</strong> (número de 9 dígitos que aparece bem grande no AnyDesk).
+  </div>
+  <div class="step">
+    <strong>No seu PC de casa</strong>, instale o AnyDesk também. Abra, digite o endereço do PC do salão e a senha. Pronto.
+  </div>
+</div>
+
+<div class="callout warning">
+  <strong>Antes de fechar o salão</strong> verifique se: (1) o PC fica <em>ligado</em>, (2) está conectado na internet, (3) AnyDesk está iniciando junto com o Windows. Sem essas três coisas, você não consegue entrar de casa.
+</div>
+
+<h3>Opção B — Instalar SoftHair também no PC de casa</h3>
+
+<p>Repita os passos da <a href="#install">instalação</a>, agora no seu PC de casa. Faça login com seu email de administradora. Você vai ver os mesmos dados (eles ficam no servidor, não no PC).</p>
+
+<div class="callout">
+  <strong>Recomendação:</strong> use Opção A + Opção B. AnyDesk é para emergências (resetar senha de alguém, ver tela). SoftHair direto é o dia a dia.
+</div>
+
+<!-- ─── 4 · PERFIS ───────────────────────────────────── -->
+<h2 id="perfis">4 · Perfis de acesso</h2>
+
+<p>Cada pessoa que loga no sistema tem um <strong>perfil</strong>. O perfil decide o que ela vê:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tela</th>
+      <th>Administrador (Keila)</th>
+      <th>Recepção</th>
+      <th>Profissional</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Dashboard / Administrativo</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    <tr><td>Agenda do salão</td><td>✅</td><td>✅</td><td>❌ (só a própria)</td></tr>
+    <tr><td>Minha agenda</td><td>—</td><td>—</td><td>✅</td></tr>
+    <tr><td>Solicitações (app cliente)</td><td>✅</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Clientes</td><td>✅</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Profissionais</td><td>✅</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Serviços e Produtos</td><td>✅ (incl. excluir)</td><td>✅ (criar/editar)</td><td>❌</td></tr>
+    <tr><td>Atendimentos do salão</td><td>✅</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Meus atendimentos</td><td>—</td><td>—</td><td>✅</td></tr>
+    <tr><td>Vendas</td><td>✅</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Comissões (todas)</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    <tr><td>Minhas comissões</td><td>—</td><td>—</td><td>✅</td></tr>
+    <tr><td>Fechamento / Financeiro / Caixa / Despesas</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    <tr><td>Relatórios / Metas</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    <tr><td>Usuários (criar logins)</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    <tr><td>Backup / Configurações</td><td>✅</td><td>❌</td><td>❌</td></tr>
+  </tbody>
+</table>
+
+<!-- ─── 5 · PRIMEIRO USO ─────────────────────────────── -->
+<h2 id="primeiro-uso">5 · Primeiro uso — criar/distribuir senhas</h2>
+
+<p>Você precisa criar um login para cada pessoa da sua equipe. Tem dois jeitos:</p>
+
+<h3>Jeito 1 — automático (recomendado)</h3>
+
+<p>Peça ao desenvolvedor para rodar o script de seed. Ele lê todos os profissionais que já estão cadastrados e cria um login pra cada um automaticamente:</p>
+
+<pre><code># pelo terminal do servidor
+DATABASE_URL="postgres://..." node tools/seed-users.js</code></pre>
+
+<p>No final ele imprime uma tabela com os emails e senhas iniciais. Padrões:</p>
+
+<ul class="checklist">
+  <li><strong>Profissional</strong> — email <code>primeironome@dominio</code>, senha <code>profissional_123</code></li>
+  <li><strong>Recepção</strong> — email <code>recepcao@dominio</code>, senha <code>MT_recepção</code></li>
+</ul>
+
+<div class="callout warning">
+  <strong>Imediatamente após criar:</strong> distribua as senhas e peça que <em>cada pessoa troque a senha no primeiro acesso</em>. Senha padrão é só pra começar.
+</div>
+
+<h3>Jeito 2 — manual (uma a uma)</h3>
+
+<div class="steps">
+  <div class="step">No SoftHair, entre como admin e clique em <strong>Usuários</strong> no menu lateral.</div>
+  <div class="step">Clique em <strong>+ Novo usuário</strong>.</div>
+  <div class="step">
+    Preencha:
+    <ul>
+      <li><strong>Nome</strong>: nome completo da pessoa</li>
+      <li><strong>Email</strong>: pode usar email pessoal ou um interno (ex: <code>paula@meusalao</code>)</li>
+      <li><strong>Perfil</strong>: escolha entre Administrador, Recepção ou Profissional</li>
+      <li><strong>Profissional vinculado</strong>: aparece só se você escolheu "Profissional" — selecione o registro correspondente</li>
+      <li><strong>Senha inicial</strong>: mínimo 6 caracteres</li>
+    </ul>
+  </div>
+  <div class="step">Clique em <strong>Salvar</strong>. Entregue email + senha pra pessoa.</div>
+</div>
+
+<!-- ─── 6 · DIA A DIA ────────────────────────────────── -->
+<h2 id="dia-a-dia">6 · Dia a dia da equipe</h2>
+
+<h3>Recepção</h3>
+<ul class="checklist">
+  <li>Ao abrir o salão, loga no PC da recepção</li>
+  <li>Cria/edita agendamentos quando o cliente liga ou aparece</li>
+  <li>Cadastra clientes novos</li>
+  <li>Quando o cliente termina o atendimento, registra a venda/pagamento</li>
+  <li>Pode adicionar serviços e produtos novos se aparecer um item novo na loja</li>
+  <li>Ao final do expediente — <em>não fecha caixa</em> (isso é só admin)</li>
+</ul>
+
+<h3>Profissional</h3>
+<ul class="checklist">
+  <li>Loga em qualquer PC do salão (ou em casa pelo navegador, se você ativar)</li>
+  <li>Abre <strong>Minha agenda</strong> — vê só os horários dela</li>
+  <li>Vê <strong>Meus atendimentos</strong> com o que ela atendeu</li>
+  <li>Confere <strong>Minhas comissões</strong> — pagas e estornadas</li>
+</ul>
+
+<h3>Você (admin)</h3>
+<ul class="checklist">
+  <li>Abre o Dashboard para ver os números do dia/mês</li>
+  <li>Faz fechamento de caixa no fim do dia</li>
+  <li>Paga comissões dos profissionais semanalmente/quinzenalmente</li>
+  <li>Acompanha despesas e metas</li>
+  <li>Cria login pra qualquer pessoa nova</li>
+</ul>
+
+<!-- ─── 7 · O QUE SÓ O ADMIN PODE ───────────────────── -->
+<h2 id="admin">7 · O que SÓ a Keila pode fazer</h2>
+
+<div class="card">
+  <h3 style="margin-top:0">Trocar a senha de alguém que esqueceu</h3>
+  <ol>
+    <li>Usuários → encontrar a pessoa</li>
+    <li>Clicar no ícone da chave 🔑</li>
+    <li>Digitar a nova senha (mín 6 caracteres)</li>
+    <li>Avisar a pessoa</li>
+  </ol>
+  <p style="color:var(--muted);font-size:0.9em">Trocar a senha invalida os tokens antigos — se ela estiver logada em outro lugar, vai precisar entrar de novo. É o comportamento desejado.</p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Desativar alguém que saiu do salão</h3>
+  <ol>
+    <li>Usuários → encontrar a pessoa</li>
+    <li>Clicar no botão vermelho de desativar</li>
+  </ol>
+  <p style="color:var(--muted);font-size:0.9em">Os dados ficam, só o login para de funcionar. Você pode reativar depois se ela voltar.</p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Mudar o perfil de uma pessoa</h3>
+  <p>Exemplo: a recepção virou gerente e agora deve ver financeiro. Editar usuário → mudar perfil de Recepção pra Administrador → Salvar.</p>
+</div>
+
+<div class="callout danger">
+  <strong>Importante</strong>
+  Não desative seu <em>próprio</em> usuário, nem rebaixe seu próprio perfil — o sistema bloqueia, mas se de alguma forma você ficar sem admin, vai precisar do desenvolvedor pra recuperar.
+</div>
+
+<!-- ─── 8 · TROUBLESHOOTING ────────────────────────── -->
+<h2 id="trouble">8 · Resolução de problemas</h2>
+
+<table>
+  <thead>
+    <tr><th>Sintoma</th><th>O que fazer</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>"Credenciais inválidas" ao logar</td>
+      <td>Confira email + senha. Se esqueceu, peça pra Keila trocar (Usuários → 🔑). Email é case-insensitive.</td>
+    </tr>
+    <tr>
+      <td>"Acesso restrito" ao abrir uma tela</td>
+      <td>O perfil dessa pessoa não permite. Veja a tabela da seção 4. Se for engano, mude o perfil em Usuários.</td>
+    </tr>
+    <tr>
+      <td>Profissional vê dados zerados</td>
+      <td>Pode estar sem vínculo com a tabela de profissionais. Em Usuários → editar → selecionar o profissional certo.</td>
+    </tr>
+    <tr>
+      <td>SoftHair não abre / fica em branco</td>
+      <td>Fecha tudo (Alt+F4). Abre de novo. Se persistir, reinicia o PC. Se persistir, AnyDesk + chama o desenvolvedor.</td>
+    </tr>
+    <tr>
+      <td>"Sem conexão" / "Não conectou no servidor"</td>
+      <td>Confirma se a internet do salão está funcionando (abre o Google no navegador). Se sim, aguarda 1 min e tenta de novo.</td>
+    </tr>
+    <tr>
+      <td>Quer ver o que outra pessoa vê</td>
+      <td>Faz logout (canto inferior da sidebar) e loga com o email dela. Depois loga de volta no seu.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ─── 9 · UPDATES ────────────────────────────────── -->
+<h2 id="updates">9 · Atualizações automáticas</h2>
+
+<p>O SoftHair se atualiza sozinho. Quando o desenvolvedor lança uma versão nova:</p>
+
+<ol>
+  <li>Na próxima vez que você abrir o sistema, ele baixa a atualização em segundo plano</li>
+  <li>Aparece um aviso "Atualização disponível — reiniciar agora?"</li>
+  <li>Você clica em <em>Sim</em>, o sistema fecha e reabre na versão nova</li>
+</ol>
+
+<p>Se algum PC não atualizou automaticamente:</p>
+<pre><code># abre o SoftHair → menu superior → Ajuda → Verificar atualizações</code></pre>
+
+<div class="callout">
+  <strong>Verificar versão instalada:</strong> dentro do SoftHair, vai em <em>Configurações</em> — a versão aparece no rodapé.
+</div>
+
+<footer>
+  SoftHair · Gestão de Salão de Beleza · Guia da Keila<br>
+  Em caso de dúvida, fale com o desenvolvedor pelo WhatsApp.
+</footer>
+
+</div>
+
+</body>
+</html>

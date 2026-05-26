@@ -2,7 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { requireAnyRole } = require('../middleware/role');
 const { ServicoService } = require('../services');
+
+// Recepção pode criar/editar serviços. DELETE permanece admin-only.
+const requireAdminOrRecepcao = requireAnyRole(['admin', 'recepcao']);
 
 const service = new ServicoService();
 
@@ -66,9 +70,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Criar serviço
-// [P6-A3] requireAdmin + whitelist
-router.post('/', authMiddleware, requireAdmin, [
+// Criar serviço — admin + recepção
+router.post('/', authMiddleware, requireAdminOrRecepcao, [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
   body('preco').isFloat({ min: 0 }).withMessage('Preço deve ser um número positivo'),
   body('duracao_minutos').optional().isInt({ min: 1 }).withMessage('Duração deve ser em minutos'),
@@ -89,9 +92,8 @@ router.post('/', authMiddleware, requireAdmin, [
   }
 });
 
-// Atualizar
-// [P6-A3] requireAdmin + whitelist
-router.put('/:id', authMiddleware, requireAdmin, [
+// Atualizar — admin + recepção
+router.put('/:id', authMiddleware, requireAdminOrRecepcao, [
   body('nome').optional().isLength({ min: 2 }),
   body('preco').optional().isFloat({ min: 0 }),
 ], async (req, res) => {

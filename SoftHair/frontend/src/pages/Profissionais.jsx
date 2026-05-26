@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { profissionaisAPI } from '../services/api';
-import { useAdminPin } from '../context/AdminPinContext';
 import { Search, Plus, Edit2, Trash2, X, User, Phone, Mail, MapPin, AlertCircle, Users, Heart, DollarSign } from 'lucide-react';
 import PainelProfissional from '../components/PainelProfissional';
 import FavoritosCliente from '../components/FavoritosCliente';
 
 export default function Profissionais() {
-  const { requestPin } = useAdminPin();
+  // Acesso já garantido pelo RequireRole em App.jsx (admin/recepção).
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('lista'); // 'lista' | 'painel' | 'favoritos'
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,11 +50,7 @@ export default function Profissionais() {
   });
 
   const openModal = async (profissional = null) => {
-    // Editar sempre pede PIN; criar não precisa de PIN
-    if (profissional) {
-      const ok = await requestPin();
-      if (!ok) return;
-    }
+    // Permissões já são validadas pelo backend (admin/recepção podem editar; DELETE é admin-only).
     if (profissional) {
       setEditingProfissional(profissional);
       setFormData({
@@ -96,9 +91,8 @@ export default function Profissionais() {
     }
   };
 
-  const handleDeleteClick = async (profissional) => {
-    const ok = await requestPin();
-    if (!ok) return;
+  const handleDeleteClick = (profissional) => {
+    // Backend retorna 403 se não-admin tentar deletar — mostramos modal de confirmação aqui.
     setDeleteModal({ open: true, profissional });
   };
 

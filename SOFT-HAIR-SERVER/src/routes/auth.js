@@ -156,11 +156,41 @@ router.post('/apikey', authMiddleware, requireAdmin, async (req, res) => {
 });
 
 // Me (informações do usuário logado)
+// Retorna dados frescos do DB (nome, tipo, profissional_id, ativo) — JWT pode estar stale.
 router.get('/me', authMiddleware, async (req, res) => {
-  res.json({
-    success: true,
-    data: req.user || req.device
-  });
+  try {
+    if (!req.user) {
+      return res.json({ success: true, data: req.device || null });
+    }
+    const userId = req.user.userId || req.user.id;
+    let dbUser = null;
+    if (userId) {
+      const { queryOne } = require('../config/database');
+      dbUser = await queryOne(
+        `SELECT u.id, u.email, u.nome, u.tipo, u.salao_id, u.profissional_id, u.ativo,
+                p.nome AS profissional_nome
+           FROM usuarios u
+           LEFT JOIN profissionais p ON p.id = u.profissional_id
+          WHERE u.id = $1`,
+        [userId]
+      );
+    }
+    const base = dbUser || req.user;
+    res.json({
+      success: true,
+      data: {
+        ...req.user,
+        ...base,
+        // Aliases para uniformizar com o frontend.
+        role: base.tipo,
+        profissionalId: base.profissional_id || null,
+        salaoId: base.salao_id || req.salaoId,
+      },
+    });
+  } catch (error) {
+    console.error('Erro em /auth/me:', error);
+    res.status(500).json({ success: false, error: 'Erro ao buscar dados do usuário' });
+  }
 });
 
 // Logout — revoga o JWT atual via blacklist

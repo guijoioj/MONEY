@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
-import RequireAdminPin from './components/RequireAdminPin';
+import RequireRole, { roleHome } from './components/RequireRole';
 
 // Eager: auth pages (lightweight, first-paint critical)
 import Login from './pages/Login';
@@ -30,6 +30,10 @@ const Caixa = lazy(() => import('./pages/Caixa'));
 const Metas = lazy(() => import('./pages/Metas'));
 const Relatorios = lazy(() => import('./pages/Relatorios'));
 const Sync = lazy(() => import('./pages/Sync'));
+const Usuarios = lazy(() => import('./pages/Usuarios'));
+const MinhaAgenda = lazy(() => import('./pages/MinhaAgenda'));
+const MeusAtendimentos = lazy(() => import('./pages/MeusAtendimentos'));
+const MinhasComissoes = lazy(() => import('./pages/MinhasComissoes'));
 // V2: Comissões reescritas
 const ComissoesV2 = lazy(() => import('./pages/ComissoesV2'));
 const RegrasComissao = lazy(() => import('./pages/RegrasComissao'));
@@ -53,9 +57,9 @@ function lazyEl(Component) {
   );
 }
 
+/** Guarda autenticação. RequireRole faz autorização. */
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -63,17 +67,12 @@ function ProtectedRoute({ children }) {
       </div>
     );
   }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
+  if (!user) return <Navigate to="/login" replace />;
   return children;
 }
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -81,13 +80,21 @@ function PublicRoute({ children }) {
       </div>
     );
   }
-
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
+  if (user) return <Navigate to={roleHome(user.role)} replace />;
   return children;
 }
+
+/** Redireciona "/" para a home do role logado. */
+function RoleHomeRedirect() {
+  const { user } = useAuth();
+  return <Navigate to={roleHome(user?.role)} replace />;
+}
+
+// Helpers de role-guard
+const onlyAdmin = (el) => <RequireRole roles="admin">{el}</RequireRole>;
+const adminOrRecepcao = (el) => <RequireRole roles={['admin', 'recepcao']}>{el}</RequireRole>;
+const onlyProfissional = (el) => <RequireRole roles="profissional">{el}</RequireRole>;
+const anyAuthed = (el) => <RequireRole roles={['admin', 'recepcao', 'profissional']}>{el}</RequireRole>;
 
 export default function App() {
   return (
@@ -98,35 +105,47 @@ export default function App() {
       <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={lazyEl(Dashboard)} />
-        <Route path="administrativo" element={<RequireAdminPin>{lazyEl(Administrativo)}</RequireAdminPin>} />
-        <Route path="agenda" element={lazyEl(Agenda)} />
-        <Route path="solicitacoes" element={lazyEl(Solicitacoes)} />
-        <Route path="clientes" element={lazyEl(Clientes)} />
-        <Route path="servicos-e-produtos" element={<RequireAdminPin>{lazyEl(ServicosEProdutos)}</RequireAdminPin>} />
-        <Route path="servicos" element={<Navigate to="/servicos-e-produtos" replace />} />
-        <Route path="produtos" element={<Navigate to="/servicos-e-produtos" replace />} />
-        <Route path="profissionais" element={lazyEl(Profissionais)} />
-        <Route path="atendimentos" element={lazyEl(Atendimentos)} />
-        <Route path="vendas" element={<RequireAdminPin>{lazyEl(Vendas)}</RequireAdminPin>} />
-        <Route path="fechamento" element={<RequireAdminPin>{lazyEl(Fechamento)}</RequireAdminPin>} />
-        <Route path="backup" element={<RequireAdminPin>{lazyEl(Backup)}</RequireAdminPin>} />
-        <Route path="despesas" element={<RequireAdminPin>{lazyEl(Despesas)}</RequireAdminPin>} />
-        <Route path="financeiro" element={<RequireAdminPin>{lazyEl(Financeiro)}</RequireAdminPin>} />
-        <Route path="customizacao" element={lazyEl(Customizacao)} />
-        <Route path="configuracoes" element={lazyEl(Configuracoes)} />
-        <Route path="notificacoes" element={lazyEl(Notificacoes)} />
-        <Route path="caixa" element={<RequireAdminPin>{lazyEl(Caixa)}</RequireAdminPin>} />
-        <Route path="metas" element={lazyEl(Metas)} />
-        <Route path="relatorios" element={<RequireAdminPin>{lazyEl(Relatorios)}</RequireAdminPin>} />
-        <Route path="sync" element={lazyEl(Sync)} />
-        {/* V2 Comissões — financeiro, exige PIN admin */}
-        <Route path="comissoes-v2" element={<RequireAdminPin>{lazyEl(ComissoesV2)}</RequireAdminPin>} />
-        <Route path="comissoes/regras" element={<RequireAdminPin>{lazyEl(RegrasComissao)}</RequireAdminPin>} />
-        <Route path="comissoes/extrato/:id" element={<RequireAdminPin>{lazyEl(ExtratoProfissional)}</RequireAdminPin>} />
-        <Route path="comissoes/pagamento" element={<RequireAdminPin>{lazyEl(PagamentoComissao)}</RequireAdminPin>} />
-        <Route path="configurar-servidor" element={<RequireAdminPin>{lazyEl(ConfigurarServidor)}</RequireAdminPin>} />
+        {/* Home redireciona conforme role */}
+        <Route index element={<RoleHomeRedirect />} />
+
+        {/* Admin-only */}
+        <Route path="dashboard"           element={onlyAdmin(lazyEl(Dashboard))} />
+        <Route path="administrativo"      element={onlyAdmin(lazyEl(Administrativo))} />
+        <Route path="comissoes-v2"        element={onlyAdmin(lazyEl(ComissoesV2))} />
+        <Route path="comissoes/regras"    element={onlyAdmin(lazyEl(RegrasComissao))} />
+        <Route path="comissoes/extrato/:id" element={onlyAdmin(lazyEl(ExtratoProfissional))} />
+        <Route path="comissoes/pagamento" element={onlyAdmin(lazyEl(PagamentoComissao))} />
+        <Route path="fechamento"          element={onlyAdmin(lazyEl(Fechamento))} />
+        <Route path="financeiro"          element={onlyAdmin(lazyEl(Financeiro))} />
+        <Route path="despesas"            element={onlyAdmin(lazyEl(Despesas))} />
+        <Route path="caixa"               element={onlyAdmin(lazyEl(Caixa))} />
+        <Route path="metas"               element={onlyAdmin(lazyEl(Metas))} />
+        <Route path="relatorios"          element={onlyAdmin(lazyEl(Relatorios))} />
+        <Route path="backup"              element={onlyAdmin(lazyEl(Backup))} />
+        <Route path="usuarios"            element={onlyAdmin(lazyEl(Usuarios))} />
+        <Route path="sync"                element={onlyAdmin(lazyEl(Sync))} />
+        <Route path="customizacao"        element={onlyAdmin(lazyEl(Customizacao))} />
+        <Route path="configuracoes"       element={onlyAdmin(lazyEl(Configuracoes))} />
+        <Route path="configurar-servidor" element={onlyAdmin(lazyEl(ConfigurarServidor))} />
+
+        {/* Admin + Recepção */}
+        <Route path="agenda"              element={adminOrRecepcao(lazyEl(Agenda))} />
+        <Route path="solicitacoes"        element={adminOrRecepcao(lazyEl(Solicitacoes))} />
+        <Route path="clientes"            element={adminOrRecepcao(lazyEl(Clientes))} />
+        <Route path="servicos-e-produtos" element={adminOrRecepcao(lazyEl(ServicosEProdutos))} />
+        <Route path="servicos"            element={<Navigate to="/servicos-e-produtos" replace />} />
+        <Route path="produtos"            element={<Navigate to="/servicos-e-produtos" replace />} />
+        <Route path="profissionais"       element={adminOrRecepcao(lazyEl(Profissionais))} />
+        <Route path="atendimentos"        element={adminOrRecepcao(lazyEl(Atendimentos))} />
+        <Route path="vendas"              element={adminOrRecepcao(lazyEl(Vendas))} />
+
+        {/* Profissional */}
+        <Route path="minha-agenda"        element={onlyProfissional(lazyEl(MinhaAgenda))} />
+        <Route path="meus-atendimentos"   element={onlyProfissional(lazyEl(MeusAtendimentos))} />
+        <Route path="minhas-comissoes"    element={onlyProfissional(lazyEl(MinhasComissoes))} />
+
+        {/* Qualquer role autenticada */}
+        <Route path="notificacoes"        element={anyAuthed(lazyEl(Notificacoes))} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />

@@ -560,6 +560,31 @@ async function runMigrations() {
     ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0;
     ALTER TABLE clientes ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0;
     ALTER TABLE profissionais ADD COLUMN IF NOT EXISTS token_version INTEGER DEFAULT 0;
+
+    -- Sistema de Perfis (admin/recepcao/profissional)
+    -- 'tipo' já existia com default 'admin' — agora aceita 3 valores.
+    -- profissional_id liga o usuário a um profissional físico (apenas para tipo='profissional').
+    ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS profissional_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL;
+    -- Constraint para garantir somente roles válidas (tolera valores legados).
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'usuarios_tipo_check'
+      ) THEN
+        ALTER TABLE usuarios
+          ADD CONSTRAINT usuarios_tipo_check
+          CHECK (tipo IN ('admin','recepcao','profissional'));
+      END IF;
+    EXCEPTION
+      WHEN check_violation THEN
+        -- Há linhas com valores antigos. Promove tudo que não bate para 'admin' e tenta de novo.
+        UPDATE usuarios SET tipo='admin' WHERE tipo NOT IN ('admin','recepcao','profissional');
+        ALTER TABLE usuarios
+          ADD CONSTRAINT usuarios_tipo_check
+          CHECK (tipo IN ('admin','recepcao','profissional'));
+    END $$;
+    CREATE INDEX IF NOT EXISTS idx_usuarios_profissional_id ON usuarios(profissional_id);
+    CREATE INDEX IF NOT EXISTS idx_usuarios_tipo ON usuarios(tipo);
   `);
 
   // Caixa diário

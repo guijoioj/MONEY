@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { isProfissionalScope } = require('../middleware/role');
 const { AtendimentoService } = require('../services');
 
 const service = new AtendimentoService();
@@ -9,7 +10,15 @@ const service = new AtendimentoService();
 // Listar
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { status, profissional_id, data_inicio, data_fim, limit } = req.query;
+    const { status, data_inicio, data_fim, limit } = req.query;
+    // Scoping: profissional só vê os próprios.
+    let profissional_id = req.query.profissional_id;
+    if (isProfissionalScope(req)) {
+      if (!req.user.profissionalId) {
+        return res.status(403).json({ success: false, error: 'Usuário profissional sem vínculo. Contate o administrador.' });
+      }
+      profissional_id = req.user.profissionalId;
+    }
     const result = await service.listar(req.salaoId, { status, profissional_id, data_inicio, data_fim, limit });
     res.json({ success: result.success, data: result.data || [], error: result.error });
   } catch (error) {

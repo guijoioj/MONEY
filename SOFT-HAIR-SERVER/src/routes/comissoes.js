@@ -1,13 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { isProfissionalScope } = require('../middleware/role');
 const { ComissaoService } = require('../services');
 
 const service = new ComissaoService();
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { profissional_id, pago, data_inicio, data_fim } = req.query;
+    const { pago, data_inicio, data_fim } = req.query;
+    // Scoping: profissional só vê as próprias comissões.
+    let profissional_id = req.query.profissional_id;
+    if (isProfissionalScope(req)) {
+      if (!req.user.profissionalId) {
+        return res.status(403).json({ success: false, error: 'Usuário profissional sem vínculo. Contate o administrador.' });
+      }
+      profissional_id = req.user.profissionalId;
+    }
     const result = await service.listar(req.salaoId, { profissional_id, pago, data_inicio, data_fim });
     res.json({ success: result.success, data: result.data || [], error: result.error });
   } catch (error) {
@@ -15,36 +24,53 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Comissões pagas
+// Comissões pagas — profissional só vê as próprias.
 router.get('/pagas', authMiddleware, async (req, res) => {
   try {
     const { pool } = require('../config/database');
+    const params = [req.salaoId];
+    let where = 'cp.salao_id = $1';
+    if (isProfissionalScope(req)) {
+      if (!req.user.profissionalId) {
+        return res.status(403).json({ success: false, error: 'Usuário profissional sem vínculo. Contate o administrador.' });
+      }
+      where += ' AND cp.profissional_id = $2';
+      params.push(req.user.profissionalId);
+    }
     const { rows } = await pool.query(
       `SELECT cp.*, p.nome AS profissional_nome
        FROM comissoes_pagas cp
        LEFT JOIN profissionais p ON p.id = cp.profissional_id
-       WHERE cp.salao_id = $1
+       WHERE ${where}
        ORDER BY cp.created_at DESC`,
-      [req.salaoId]
+      params
     );
     res.json({ success: true, data: rows });
   } catch (error) {
-    // tabela pode não existir — devolve lista vazia em vez de 500
     res.json({ success: true, data: [] });
   }
 });
 
-// Comissões estornadas
+// Comissões estornadas — profissional só vê as próprias.
 router.get('/estornos', authMiddleware, async (req, res) => {
   try {
     const { pool } = require('../config/database');
+    const params = [req.salaoId];
+    let where = 'ce.salao_id = $1';
+    if (isProfissionalScope(req)) {
+      if (!req.user.profissionalId) {
+        return res.status(403).json({ success: false, error: 'Usuário profissional sem vínculo. Contate o administrador.' });
+      }
+      where += ' AND ce.profissional_id = $2';
+      params.push(req.user.profissionalId);
+    }
     const { rows } = await pool.query(
       `SELECT ce.*, p.nome AS profissional_nome
        FROM comissoes_estornos ce
        LEFT JOIN profissionais p ON p.id = ce.profissional_id
-       WHERE ce.salao_id = $1
+       WHERE ${where}
        ORDER BY ce.created_at DESC`,
-      [req.salaoId]
+      params
     );
     res.json({ success: true, data: rows });
   } catch (error) {

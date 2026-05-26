@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicosAPI, produtosAPI } from '../services/api';
-import { useAdminPin } from '../context/AdminPinContext';
 import {
   Search, Plus, Edit2, Trash2, X, Clock, DollarSign,
   AlertCircle, Package, AlertTriangle, Scissors, Percent
@@ -21,7 +20,7 @@ const formatDuration = (minutes) => {
 // ─── Serviços ────────────────────────────────────────────────────────────────
 
 function AbaServicos() {
-  const { requestPin } = useAdminPin();
+  // Acesso controlado por role no roteamento (admin/recepção podem editar).
   const [search, setSearch] = useState('');
   const [categoria, setCategoria] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,8 +57,6 @@ function AbaServicos() {
 
   const openModal = async (servico = null) => {
     if (servico) {
-      const ok = await requestPin();
-      if (!ok) return;
       setEditingServico(servico);
       setFormData({
         nome: servico.nome || '',
@@ -78,9 +75,8 @@ function AbaServicos() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteServico = async (servico) => {
-    const ok = await requestPin();
-    if (!ok) return;
+  const handleDeleteServico = (servico) => {
+    // Backend retorna 403 se não-admin tentar deletar.
     setDeleteModal({ open: true, servico });
   };
 
@@ -298,7 +294,7 @@ function AbaServicos() {
 // ─── Produtos ─────────────────────────────────────────────────────────────────
 
 function AbaProdutos() {
-  const { requestPin } = useAdminPin();
+  // Acesso controlado por role no roteamento (admin/recepção podem editar).
   const [search, setSearch] = useState('');
   const [categoria, setCategoria] = useState('');
   const [estoqueBaixo, setEstoqueBaixo] = useState(false);
@@ -339,8 +335,6 @@ function AbaProdutos() {
 
   const openModal = async (produto = null) => {
     if (produto) {
-      const ok = await requestPin();
-      if (!ok) return;
       setEditingProduto(produto);
       setFormData({
         nome: produto.nome || '',
@@ -362,9 +356,8 @@ function AbaProdutos() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteProduto = async (produto) => {
-    const ok = await requestPin();
-    if (!ok) return;
+  const handleDeleteProduto = (produto) => {
+    // Backend retorna 403 se não-admin tentar deletar.
     setDeleteModal({ open: true, produto });
   };
 

@@ -27,7 +27,8 @@ const authMiddleware = async (req, res, next) => {
         if (await AuthService.isTokenRevoked(decoded)) {
           return res.status(401).json({ success: false, error: 'Token revogado' });
         }
-        req.user = decoded;
+        // Alias semântico: `role` ≡ `tipo`. Frontend e middleware/role.js usam `role`/`tipo`.
+        req.user = { ...decoded, role: decoded.tipo };
         req.token = token;
         req.salaoId = decoded.salaoId;
         req.salonId = decoded.salaoId;
