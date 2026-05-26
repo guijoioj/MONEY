@@ -17,33 +17,156 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Fechamentos em aberto: lista atendimentos finalizados ainda não fechados (agrupados por cliente)
+// Fechamentos em aberto: agrupa atendimentos + vendas em aberto por cliente.
+// Frontend (pages/Fechamento.jsx) espera: [{ clienteId, clienteNome, clienteTelefone, atendimentos:[], vendas:[], totalGeral }]
 router.get('/em-aberto', authMiddleware, async (req, res) => {
   try {
     const { pool } = require('../config/database');
-    const { profissionalId, clienteId } = req.query;
+    const { profissionalId, clienteId, clienteNome } = req.query;
 
-    const params = [req.salaoId];
-    let where = `a.salao_id = $1 AND a.status = 'finalizado' AND NOT EXISTS (
-      SELECT 1 FROM fechamentos f WHERE f.salao_id = a.salao_id
-        AND f.cliente_id = a.cliente_id
-        AND a.created_at::date BETWEEN f.data_inicio AND f.data_fim
-    )`;
-    let p = 2;
-    if (profissionalId) { where += ` AND a.profissional_id = $${p++}`; params.push(profissionalId); }
-    if (clienteId) { where += ` AND a.cliente_id = $${p++}`; params.push(clienteId); }
+    // Predicado: atendimento finalizado/concluido sem fechamento ainda. Filtros opcionais.
+    const aParams = [req.salaoId];
+    let aWhere = `a.salao_id = $1
+      AND a.status IN ('finalizado','concluido','concluida')
+      AND NOT EXISTS (
+        SELECT 1 FROM fechamentos f
+         WHERE f.salao_id = a.salao_id
+           AND f.cliente_id = a.cliente_id
+           AND COALESCE(f.deleted_at, NULL) IS NULL
+           AND a.created_at::date BETWEEN f.data_inicio AND f.data_fim
+      )`;
+    let ap = 2;
+    if (profissionalId) { aWhere += ` AND a.profissional_id = $${ap++}`; aParams.push(profissionalId); }
+    if (clienteId)      { aWhere += ` AND a.cliente_id = $${ap++}`;      aParams.push(clienteId); }
+    if (clienteNome)    { aWhere += ` AND c.nome ILIKE '%' || $${ap++} || '%'`; aParams.push(clienteNome); }
 
-    const { rows } = await pool.query(`
-      SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome, s.nome as servico_nome
-      FROM atendimentos a
-      LEFT JOIN clientes c ON c.id = a.cliente_id
-      LEFT JOIN profissionais p ON p.id = a.profissional_id
-      LEFT JOIN servicos s ON s.id = a.servico_id
-      WHERE ${where}
-      ORDER BY a.created_at DESC
-    `, params);
+    const atendQuery = pool.query(`
+      SELECT a.id, a.cliente_id, a.profissional_id, a.valor AS total_geral,
+             a.created_at AS data, a.observacoes,
+             c.nome  AS cliente_nome, c.telefone AS cliente_telefone,
+             p.nome  AS profissional_nome
+        FROM atendimentos a
+        LEFT JOIN clientes c       ON c.id = a.cliente_id
+        LEFT JOIN profissionais p  ON p.id = a.profissional_id
+       WHERE ${aWhere}
+       ORDER BY a.created_at DESC
+    `, aParams);
 
-    res.json({ success: true, data: rows });
+    // Vendas em aberto: status != cancelada, sem fechamento que cubra a data.
+    const vParams = [req.salaoId];
+    let vWhere = `v.salao_id = $1
+      AND COALESCE(v.status,'concluida') != 'cancelada'
+      AND NOT EXISTS (
+        SELECT 1 FROM fechamentos f
+         WHERE f.salao_id = v.salao_id
+           AND f.cliente_id = v.cliente_id
+           AND COALESCE(f.deleted_at, NULL) IS NULL
+           AND v.created_at::date BETWEEN f.data_inicio AND f.data_fim
+      )`;
+    let vp = 2;
+    if (profissionalId) { vWhere += ` AND v.profissional_id = $${vp++}`; vParams.push(profissionalId); }
+    if (clienteId)      { vWhere += ` AND v.cliente_id = $${vp++}`;      vParams.push(clienteId); }
+    if (clienteNome)    { vWhere += ` AND c.nome ILIKE '%' || $${vp++} || '%'`; vParams.push(clienteNome); }
+
+    const vendasQuery = pool.query(`
+      SELECT v.id, v.cliente_id, v.profissional_id AS vendedor_id,
+             v.valor_final AS total, v.created_at AS data,
+             c.nome AS cliente_nome, c.telefone AS cliente_telefone,
+             p.nome AS vendedor_nome
+        FROM vendas v
+        LEFT JOIN clientes c      ON c.id = v.cliente_id
+        LEFT JOIN profissionais p ON p.id = v.profissional_id
+       WHERE ${vWhere}
+       ORDER BY v.created_at DESC
+    `, vParams).catch((err) => {
+      console.error('em-aberto vendas query falhou:', err.message);
+      return { rows: [] };
+    });
+
+    const [atendRes, vendasRes] = await Promise.all([atendQuery, vendasQuery]);
+
+    // Servicos por atendimento (uma só query)
+    const atendIds = atendRes.rows.map(r => r.id).filter(Boolean);
+    let servicosPorAtend = {};
+    if (atendIds.length > 0) {
+      try {
+        const { rows: svcRows } = await pool.query(`
+          SELECT asv.atendimento_id, s.id AS servico_id, s.nome AS servico_nome, asv.preco
+            FROM atendimentos_servicos asv
+            LEFT JOIN servicos s ON s.id = asv.servico_id
+           WHERE asv.atendimento_id = ANY($1::text[])
+        `, [atendIds]);
+        svcRows.forEach(r => {
+          const k = r.atendimento_id;
+          if (!servicosPorAtend[k]) servicosPorAtend[k] = [];
+          servicosPorAtend[k].push(r);
+        });
+      } catch (_) { /* tabela pode não existir em ambiente antigo */ }
+    }
+
+    // Itens por venda
+    const vendaIds = vendasRes.rows.map(r => r.id).filter(Boolean);
+    let itensPorVenda = {};
+    if (vendaIds.length > 0) {
+      try {
+        const { rows: itRows } = await pool.query(`
+          SELECT vi.venda_id, vi.produto_id, vi.quantidade, vi.preco_unitario,
+                 p.nome AS item_nome
+            FROM venda_itens vi
+            LEFT JOIN produtos p ON p.id = vi.produto_id
+           WHERE vi.venda_id = ANY($1::text[])
+        `, [vendaIds]);
+        itRows.forEach(r => {
+          const k = r.venda_id;
+          if (!itensPorVenda[k]) itensPorVenda[k] = [];
+          itensPorVenda[k].push(r);
+        });
+      } catch (_) { /* noop */ }
+    }
+
+    // Agrupa por cliente
+    const grupos = new Map();
+    const ensure = (cid, nome, telefone) => {
+      const key = cid || 'sem-cliente';
+      if (!grupos.has(key)) {
+        grupos.set(key, {
+          cliente_id: cid || null,
+          cliente_nome: nome || 'Cliente sem cadastro',
+          cliente_telefone: telefone || null,
+          atendimentos: [],
+          vendas: [],
+          total_geral: 0,
+        });
+      }
+      return grupos.get(key);
+    };
+
+    atendRes.rows.forEach(a => {
+      const g = ensure(a.cliente_id, a.cliente_nome, a.cliente_telefone);
+      const total = Number(a.total_geral || 0);
+      g.atendimentos.push({
+        ...a,
+        servicos: servicosPorAtend[a.id] || [],
+        produtos: [],
+        total_produtos_calc: 0,
+      });
+      g.total_geral += total;
+    });
+
+    vendasRes.rows.forEach(v => {
+      const g = ensure(v.cliente_id, v.cliente_nome, v.cliente_telefone);
+      const total = Number(v.total || 0);
+      g.vendas.push({
+        ...v,
+        itens: itensPorVenda[v.id] || [],
+      });
+      g.total_geral += total;
+    });
+
+    // Filtra grupos vazios (não deveria ocorrer, mas defesa)
+    const data = [...grupos.values()].filter(g => (g.atendimentos.length + g.vendas.length) > 0);
+
+    res.json({ success: true, data });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }

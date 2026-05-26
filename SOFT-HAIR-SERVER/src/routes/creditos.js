@@ -120,7 +120,8 @@ router.get('/cliente/:clienteId', authMiddleware, async (req, res) => {
 });
 
 router.post('/', authMiddleware, [
-  body('cliente_id').isInt().withMessage('cliente_id obrigatório'),
+  // IDs são TEXT (UUID/string) no schema → não usar isInt
+  body('cliente_id').exists({ checkFalsy: true }).withMessage('cliente_id obrigatório'),
   body('valor').isFloat({ min: 0.01 }).withMessage('Valor deve ser positivo'),
   body('tipo').isIn(['credito', 'uso']).withMessage('Tipo deve ser credito ou uso'),
 ], async (req, res) => {

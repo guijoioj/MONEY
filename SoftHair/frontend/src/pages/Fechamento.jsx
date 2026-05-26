@@ -50,11 +50,6 @@ export default function Fechamento() {
   const { data: configData } = useQuery({
     queryKey: ['salao-me'],
     queryFn: () => saloesAPI.getMe(),
-    onSuccess: (res) => {
-      if (res.data?.data?.chavePix) {
-        setChavePix(res.data.data.chavePix);
-      }
-    },
   });
 
   useEffect(() => {
@@ -270,7 +265,7 @@ export default function Fechamento() {
             {searchCliente.length >= 2 && clientesData?.data?.data?.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border rounded-xl shadow-lg z-10 max-h-60 overflow-y-auto">
                 {clientesData.data.data
-                  .filter(c => c.nome.toLowerCase().includes(searchCliente.toLowerCase()))
+                  .filter(c => (c?.nome || '').toLowerCase().includes(searchCliente.toLowerCase()))
                   .slice(0, 10)
                   .map(c => (
                     <button

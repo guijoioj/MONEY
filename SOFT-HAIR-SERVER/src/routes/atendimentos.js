@@ -30,9 +30,10 @@ router.get('/:id', authMiddleware, async (req, res) => {
 
 // Criar
 router.post('/', authMiddleware, [
-  body('cliente_id').isInt().withMessage('cliente_id é obrigatório'),
-  body('profissional_id').isInt().withMessage('profissional_id é obrigatório'),
-  body('servico_id').isInt().withMessage('servico_id é obrigatório'),
+  // IDs são TEXT (UUID/string) no schema → não usar isInt
+  body('cliente_id').exists({ checkFalsy: true }).withMessage('cliente_id é obrigatório'),
+  body('profissional_id').exists({ checkFalsy: true }).withMessage('profissional_id é obrigatório'),
+  body('servico_id').optional({ nullable: true }),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);

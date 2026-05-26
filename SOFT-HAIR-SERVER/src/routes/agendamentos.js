@@ -79,8 +79,11 @@ router.get('/:id', authMiddleware, async (req, res) => {
 
 // Criar agendamento
 router.post('/', authMiddleware, [
-  body('cliente_id').isInt().withMessage('cliente_id é obrigatório'),
-  body('servico_id').isInt().withMessage('servico_id é obrigatório'),
+  // IDs são TEXT (UUID/string) no schema → não usar isInt
+  body('cliente_id').exists({ checkFalsy: true }).withMessage('cliente_id é obrigatório'),
+  body('servico_id').exists({ checkFalsy: true }).withMessage('servico_id é obrigatório'),
+  body('profissional_id').optional({ nullable: true }),
+  body('auxiliar_id').optional({ nullable: true }),
   body('data_hora').isISO8601().withMessage('data_hora deve ser ISO 8601')
     // [P3-M5] data_hora deve ser razoavelmente futura (tolera 60s de clock skew para trás
     // — também previne ano 1970 / passado distante que bagunça relatórios). Permite até
