@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 const isFileProtocol = typeof window !== 'undefined' && window.location.protocol === 'file:';
-// Dentro do Electron (file://) usa backend embarcado em 127.0.0.1:3001.
-// Em dev sem VITE_API_URL definida, aponta pro backend embarcado.
-const apiBaseURL = import.meta.env.VITE_API_URL || (isFileProtocol ? 'http://127.0.0.1:3001/api' : 'http://127.0.0.1:3001/api');
+
+// Default fallback. Real URL vem do serverConfig do Electron (ver loadServerConfigURL abaixo).
+const apiBaseURL = import.meta.env.VITE_API_URL
+  || (isFileProtocol ? 'http://127.0.0.1:3001/api' : 'http://127.0.0.1:3001/api');
 
 const api = axios.create({
   baseURL: apiBaseURL,
@@ -12,6 +13,18 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// No Electron, lê config persistida ANTES das requests começarem.
+// IPC bridge expõe window.electron.serverConfig.get().
+if (typeof window !== 'undefined' && window.electron?.serverConfig?.get) {
+  window.electron.serverConfig.get().then((cfg) => {
+    if (cfg?.url) {
+      const baseUrl = cfg.url.endsWith('/api') ? cfg.url : `${cfg.url}/api`;
+      api.defaults.baseURL = baseUrl;
+      console.log('[api] baseURL ajustada pra:', baseUrl);
+    }
+  }).catch(() => { /* mantém fallback */ });
+}
 
 // Token key unificado — usado por api.js, syncManager e todo o app
 export const TOKEN_KEY = 'token';
