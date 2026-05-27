@@ -2,9 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
+const { requireAnyRole } = require('../middleware/role');
 const { NotificacaoService } = require('../services');
 
 const service = new NotificacaoService();
+
+// Notificações: leitura para todos os 3 roles (cada um vê as próprias).
+// POST/DELETE restritos a admin+recepção via guard explícito.
+router.use(authMiddleware, requireAnyRole(['admin', 'recepcao', 'profissional']));
+const writeGuard = requireAnyRole(['admin', 'recepcao']);
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
@@ -25,7 +31,7 @@ router.get('/count', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, [
+router.post('/', authMiddleware, writeGuard, [
   body('tipo').notEmpty().withMessage('Tipo obrigatório'),
   body('titulo').notEmpty().withMessage('Título obrigatório'),
   body('mensagem').notEmpty().withMessage('Mensagem obrigatória'),
@@ -89,7 +95,7 @@ router.put('/marcar-todas-lidas', authMiddleware, async (req, res) => {
   }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, writeGuard, async (req, res) => {
   try {
     const result = await service.deletar(req.params.id, req.salaoId);
     if (result.success) res.json({ success: true, message: result.message });

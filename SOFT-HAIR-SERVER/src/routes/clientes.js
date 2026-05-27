@@ -2,10 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { requireAnyRole } = require('../middleware/role');
 const { ClienteService } = require('../services');
 const { invalidateClienteCache } = require('../middleware/clienteAuth');
 
 const clienteService = new ClienteService();
+
+// Clientes: admin + recepção. Profissional NÃO vê clientes do salão (escopo próprio é via /historico).
+// DELETE permanece com requireAdmin individual.
+router.use(authMiddleware, requireAnyRole(['admin', 'recepcao']));
 
 // Listar clientes
 router.get('/', authMiddleware, async (req, res) => {
@@ -145,7 +150,7 @@ function pickWhitelist(body, allowed) {
   return out;
 }
 
-router.put('/:id', authMiddleware, requireAdmin, [
+router.put('/:id', authMiddleware, /* admin+recepcao via router.use no topo */ [
   body('nome').optional().isLength({ min: 2 }).withMessage('Nome deve ter pelo menos 2 caracteres'),
   body('telefone').optional().isMobilePhone('pt-BR').withMessage('Telefone inválido'),
   body('email').optional().isEmail().withMessage('Email inválido'),

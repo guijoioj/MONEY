@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 const { query } = require('../config/database');
+
+// Relatórios gerenciais: admin-only.
+router.use(authMiddleware, requireRole('admin'));
 
 // GET /api/relatorios/servicos-mais-vendidos?dias=30
 router.get('/servicos-mais-vendidos', authMiddleware, async (req, res) => {

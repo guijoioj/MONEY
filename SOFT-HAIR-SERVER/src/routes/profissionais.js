@@ -3,10 +3,14 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { requireAnyRole } = require('../middleware/role');
 const { ProfissionalService } = require('../services');
 const { invalidateProfissionalCache } = require('../middleware/profissionalAuth');
 
 const service = new ProfissionalService();
+
+// Profissionais: admin + recepção (CRUD operacional). DELETE permanece admin-only individual.
+router.use(authMiddleware, requireAnyRole(['admin', 'recepcao']));
 
 // [P3-A4] Whitelist explícita de campos editáveis em profissionais (impede mass-assignment).
 // Campos NUNCA aceitos via body: id, salao_id, senha_hash (direto), usuario_id, created_at, push_token (vai por rota dedicada).
@@ -69,7 +73,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // [P2-C4] Criar profissional — exige admin (não-admins não podem criar/setar senha_app)
-router.post('/', authMiddleware, requireAdmin, [
+router.post('/', authMiddleware, /* admin+recepcao via router.use */ [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
   body('email').optional().isEmail().withMessage('Email inválido'),
   body('comissao_percentual').optional().isFloat({ min: 0, max: 100 }).withMessage('Comissão deve ser entre 0 e 100'),
@@ -100,7 +104,7 @@ router.post('/', authMiddleware, requireAdmin, [
 });
 
 // [P2-C4] Atualizar — exige admin (impede reset de senha_app por outros usuários)
-router.put('/:id', authMiddleware, requireAdmin, [
+router.put('/:id', authMiddleware, /* admin+recepcao via router.use */ [
   body('nome').optional().isLength({ min: 2 }).withMessage('Nome deve ter pelo menos 2 caracteres'),
   body('email').optional().isEmail().withMessage('Email inválido'),
 ], async (req, res) => {

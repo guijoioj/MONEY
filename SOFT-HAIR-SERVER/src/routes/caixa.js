@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 const { query } = require('../config/database');
+
+// Caixa do salão: admin-only.
+router.use(authMiddleware, requireRole('admin'));
 
 // GET /api/caixa/hoje
 router.get('/hoje', authMiddleware, async (req, res) => {

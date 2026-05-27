@@ -2,9 +2,13 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
+const { requireAnyRole } = require('../middleware/role');
 const { CreditoService } = require('../services');
 
 const service = new CreditoService();
+
+// Créditos: admin + recepção (operação de salão).
+router.use(authMiddleware, requireAnyRole(['admin', 'recepcao']));
 
 // Listar todas as movimentações do salão
 router.get('/', authMiddleware, async (req, res) => {

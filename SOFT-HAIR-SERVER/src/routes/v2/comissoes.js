@@ -7,16 +7,22 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, requireAdmin } = require('../../middleware/auth');
+const { requireRole, requireAnyRole } = require('../../middleware/role');
 const { pool, withTransaction } = require('../../config/database');
 const { logAction } = require('../../utils/auditLog');
 const { sendError } = require('../../utils/sendError');
 const Engine = require('../../services/CommissionEngine');
 const { addCents, assertCents, equalCents } = require('../../utils/money');
 
+// V2 comissões: admin (todas) e profissional (próprio extrato).
+// Recepção NÃO vê comissões.
+const adminOrProf = requireAnyRole(['admin', 'profissional']);
+const adminOnly = requireRole('admin');
+
 // ============================================================================
 // GET /api/v2/comissoes — lista com filtros expandidos
 // ============================================================================
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, adminOnly, async (req, res) => {
   try {
     const {
       profissional_id,
@@ -80,7 +86,7 @@ router.get('/', authMiddleware, async (req, res) => {
 // ============================================================================
 // GET /api/v2/comissoes/dashboard — agregados
 // ============================================================================
-router.get('/dashboard', authMiddleware, async (req, res) => {
+router.get('/dashboard', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { competencia, data_inicio, data_fim } = req.query;
 
@@ -161,13 +167,16 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 // ============================================================================
 // GET /api/v2/comissoes/profissional/:id/extrato — holerite
 // ============================================================================
-router.get('/profissional/:id/extrato', authMiddleware, async (req, res) => {
+router.get('/profissional/:id/extrato', authMiddleware, adminOrProf, async (req, res) => {
   try {
     const profId = Number(req.params.id);
     const { competencia, data_inicio, data_fim } = req.query;
 
-    // Authz: profissional só vê próprio extrato; admin vê todos
-    if (!req.user?.is_admin && req.user?.profissional_id !== profId) {
+    // Authz: profissional só vê próprio extrato; admin vê todos.
+    // Hot-fix: JWT atual usa `tipo`/`profissionalId` (camelCase).
+    const isAdmin = req.user?.tipo === 'admin' || req.user?.is_admin === true;
+    const ownProfId = req.user?.profissionalId ?? req.user?.profissional_id ?? null;
+    if (!isAdmin && ownProfId !== profId) {
       return res.status(403).json({ success: false, error: 'Acesso negado ao extrato' });
     }
 
@@ -255,7 +264,7 @@ router.get('/profissional/:id/extrato', authMiddleware, async (req, res) => {
 // ============================================================================
 // POST /api/v2/comissoes/simulador — simula sem persistir
 // ============================================================================
-router.post('/simulador', authMiddleware, async (req, res) => {
+router.post('/simulador', authMiddleware, adminOnly, async (req, res) => {
   try {
     const ctx = {
       salaoId: req.salaoId,

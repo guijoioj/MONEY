@@ -2,8 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { body, query: queryValidator, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
-const { isProfissionalScope } = require('../middleware/role');
+const { isProfissionalScope, requireAnyRole } = require('../middleware/role');
 const { AgendamentoService } = require('../services');
+
+// Agendamentos:
+//   GET (lista, pendentes, proximos, disponiveis, por id) → todos os 3 roles
+//       (profissional automaticamente scopado para os próprios via isProfissionalScope)
+//   POST/PUT/DELETE → admin + recepção (profissional NÃO cria nem altera).
+const writeGuard = requireAnyRole(['admin', 'recepcao']);
 const { sendPush } = require('../services/pushService');
 const { pool } = require('../config/database');
 const wsService = require('../services/websocketService');
@@ -87,7 +93,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // Criar agendamento
-router.post('/', authMiddleware, [
+router.post('/', authMiddleware, writeGuard, [
   // IDs são TEXT (UUID/string) no schema → não usar isInt
   body('cliente_id').exists({ checkFalsy: true }).withMessage('cliente_id é obrigatório'),
   body('servico_id').exists({ checkFalsy: true }).withMessage('servico_id é obrigatório'),
@@ -141,7 +147,8 @@ router.post('/', authMiddleware, [
 
 // Atualizar agendamento
 // [P9-A1] requireAdmin + validator isIn + state machine (service-level)
-router.put('/:id', authMiddleware, requireAdmin, [
+// PUT: admin + recepção (confirmar, remarcar, cancelar, mudar status).
+router.put('/:id', authMiddleware, writeGuard, [
   body('status').optional().isIn(['agendado', 'confirmado', 'em_andamento', 'cancelado', 'concluido', 'no_show'])
     .withMessage('Status inválido (use: agendado, confirmado, em_andamento, cancelado, concluido, no_show)'),
   body('observacoes').optional().isString().isLength({ max: 1000 }),
@@ -200,7 +207,7 @@ router.put('/:id', authMiddleware, requireAdmin, [
 });
 
 // Cancelar agendamento
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, writeGuard, async (req, res) => {
   try {
     const result = await service.deletar(req.params.id, req.salaoId);
     if (result.success) {

@@ -2,10 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 const { FechamentoService } = require('../services');
 const { logAction } = require('../utils/auditLog');
 
 const service = new FechamentoService();
+
+// Fechamento financeiro: admin-only. (Fechar caixa do cliente, se existir como
+// rota, deve viver em outro endpoint adminOrRecepcao.)
+router.use(authMiddleware, requireRole('admin'));
 
 router.get('/', authMiddleware, async (req, res) => {
   try {

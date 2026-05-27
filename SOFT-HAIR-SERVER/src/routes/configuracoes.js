@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { query, queryOne } = require('../config/database');
 const { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 
-router.use(authMiddleware);
+// Configurações do salão: admin-only (mudanças sensíveis).
+router.use(authMiddleware, requireRole('admin'));
 
 // [P4-A4] Whitelist explícita de chaves de configuração aceitas via PUT.
 // Qualquer outra chave é rejeitada — impede mass-assignment para chaves sensíveis

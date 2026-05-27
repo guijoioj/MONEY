@@ -23,9 +23,13 @@ const { sendError } = require('../../utils/sendError');
  * @returns {Promise<number|null>}
  */
 async function resolveProfId(req, res) {
-  if (!req.user?.is_admin) return req.user?.profissional_id || null;
+  // Hot-fix: JWT atual usa `tipo` ('admin'|'recepcao'|'profissional') e `profissionalId` (camelCase),
+  // não `is_admin` / `profissional_id`. Mantém fallback nos snake_case por compat com tokens legados.
+  const isAdmin = req.user?.tipo === 'admin' || req.user?.is_admin === true;
+  const ownProfId = req.user?.profissionalId ?? req.user?.profissional_id ?? null;
+  if (!isAdmin) return ownProfId;
   const requested = req.query.profissional_id;
-  if (!requested) return req.user?.profissional_id || null;
+  if (!requested) return ownProfId;
   // Validar tenancy
   const r = await pool.query(
     'SELECT id FROM profissionais WHERE id=$1 AND salao_id=$2',
@@ -42,17 +46,18 @@ async function resolveProfId(req, res) {
 // Retorna info do usuário logado + salão + dia atual de info útil.
 router.get('/me', authMiddleware, async (req, res) => {
   try {
+    // Tabela real é `usuarios` e a coluna de papel é `tipo`, não `is_admin`.
     const { rows: usr } = await pool.query(
-      `SELECT u.id, u.nome, u.email, u.is_admin, u.profissional_id,
+      `SELECT u.id, u.nome, u.email, u.tipo, u.profissional_id,
               s.id AS salao_id, s.nome AS salao_nome
-         FROM users u
+         FROM usuarios u
          LEFT JOIN saloes s ON s.id = u.salao_id
         WHERE u.id = $1`,
       [req.user.userId]
     );
     if (!usr.length) return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
-
-    res.json({ success: true, data: usr[0] });
+    const u = usr[0];
+    res.json({ success: true, data: { ...u, role: u.tipo, is_admin: u.tipo === 'admin' } });
   } catch (error) { sendError(res, 500, 'Erro', error); }
 });
 
@@ -60,8 +65,9 @@ router.get('/me', authMiddleware, async (req, res) => {
 // Cards de admin/profissional resumidos.
 router.get('/dashboard', authMiddleware, async (req, res) => {
   try {
-    const isAdmin = req.user?.is_admin;
-    const profissionalId = req.user?.profissional_id;
+    // Hot-fix: usar `tipo`/`profissionalId` (camelCase do JWT atual) — `is_admin` não existe.
+    const isAdmin = req.user?.tipo === 'admin';
+    const profissionalId = req.user?.profissionalId ?? req.user?.profissional_id ?? null;
     const hoje = new Date().toISOString().slice(0, 10);
 
     if (isAdmin) {

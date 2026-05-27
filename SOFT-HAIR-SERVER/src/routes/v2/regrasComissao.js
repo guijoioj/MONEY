@@ -7,9 +7,13 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, requireAdmin } = require('../../middleware/auth');
+const { requireRole } = require('../../middleware/role');
 const { pool, withTransaction } = require('../../config/database');
 const { logAction } = require('../../utils/auditLog');
 const { sendError } = require('../../utils/sendError');
+
+// Regras de comissão (V2): admin-only.
+router.use(authMiddleware, requireRole('admin'));
 
 const TIPOS_VALIDOS = [
   'global','profissional','servico','produto',

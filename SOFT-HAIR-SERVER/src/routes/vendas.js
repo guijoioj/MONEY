@@ -2,9 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { requireAnyRole } = require('../middleware/role');
 const { VendaService } = require('../services');
 
 const service = new VendaService();
+
+// Vendas: admin + recepção. Profissional não vê vendas (sem necessidade operacional).
+// DELETE permanece admin-only via requireAdmin individual.
+router.use(authMiddleware, requireAnyRole(['admin', 'recepcao']));
 
 // Listar vendas
 router.get('/', authMiddleware, async (req, res) => {
@@ -61,7 +66,7 @@ router.post('/', authMiddleware, [
 
 // Atualizar venda
 // [P8-A1] requireAdmin + validator isIn + state machine (service-level)
-router.put('/:id', authMiddleware, requireAdmin, [
+router.put('/:id', authMiddleware, /* admin+recepcao via router.use no topo */ [
   body('status').optional().isIn(['pendente', 'concluida', 'finalizada', 'cancelada'])
     .withMessage('Status inválido (use: pendente, concluida, finalizada, cancelada)'),
   body('forma_pagamento').optional().isString().isLength({ max: 50 }),

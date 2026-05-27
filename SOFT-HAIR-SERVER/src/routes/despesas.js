@@ -2,7 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 const { query } = require('../config/database');
+
+// Despesas: admin-only (registro financeiro sensível).
+router.use(authMiddleware, requireRole('admin'));
 
 const CATEGORIAS = ['Aluguel','Energia','Água','Produtos','Equipamentos','Marketing','Salário','Impostos','Outros'];
 

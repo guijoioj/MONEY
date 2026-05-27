@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { query } = require('../config/database');
 const { authMiddleware } = require('../middleware/auth');
+const { requireAnyRole } = require('../middleware/role');
+
+// Bloqueios de horário: admin + recepção.
+router.use(authMiddleware, requireAnyRole(['admin', 'recepcao']));
 
 // GET /?data=YYYY-MM-DD
 // [P4-C2] Sempre filtrar por salao_id do JWT — nunca vazar bloqueios de outros salões.

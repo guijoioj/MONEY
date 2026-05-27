@@ -2,10 +2,16 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
-const { isProfissionalScope } = require('../middleware/role');
+const { isProfissionalScope, requireAnyRole } = require('../middleware/role');
 const { AtendimentoService } = require('../services');
 
 const service = new AtendimentoService();
+
+// Atendimentos:
+//   GET → todos os 3 roles (profissional scopado via isProfissionalScope)
+//   POST/PUT → admin + recepção
+//   DELETE → admin-only via requireAdmin individual.
+const writeGuard = requireAnyRole(['admin', 'recepcao']);
 
 // Listar
 router.get('/', authMiddleware, async (req, res) => {
@@ -38,7 +44,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // Criar
-router.post('/', authMiddleware, [
+router.post('/', authMiddleware, writeGuard, [
   // IDs são TEXT (UUID/string) no schema → não usar isInt
   body('cliente_id').exists({ checkFalsy: true }).withMessage('cliente_id é obrigatório'),
   body('profissional_id').exists({ checkFalsy: true }).withMessage('profissional_id é obrigatório'),
@@ -58,7 +64,8 @@ router.post('/', authMiddleware, [
 
 // Atualizar
 // [P8-A2] requireAdmin + validator isIn + state machine (service-level)
-router.put('/:id', authMiddleware, requireAdmin, [
+// PUT: admin + recepção (finalizar, alterar status do atendimento).
+router.put('/:id', authMiddleware, writeGuard, [
   body('status').optional().isIn(['agendado', 'em_andamento', 'finalizado', 'cancelado'])
     .withMessage('Status inválido (use: agendado, em_andamento, finalizado, cancelado)'),
   body('observacoes').optional().isString().isLength({ max: 1000 }),
@@ -80,7 +87,7 @@ router.put('/:id', authMiddleware, requireAdmin, [
 });
 
 // Deletar
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const result = await service.deletar(req.params.id, req.salaoId);
     if (result.success) res.json({ success: true, message: result.message });

@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
-const { isProfissionalScope } = require('../middleware/role');
+const { isProfissionalScope, requireAnyRole } = require('../middleware/role');
 const { ComissaoService } = require('../services');
 
 const service = new ComissaoService();
+
+// Comissões: visíveis para admin (todas) e profissional (próprias).
+// Recepção NÃO vê comissões. Escrita (pagar/estornar) é admin-only via requireAdmin.
+router.use(authMiddleware, requireAnyRole(['admin', 'profissional']));
 
 router.get('/', authMiddleware, async (req, res) => {
   try {

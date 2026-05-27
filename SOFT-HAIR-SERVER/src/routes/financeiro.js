@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 const { query } = require('../config/database');
+
+// Toda rota deste arquivo é admin-only (DRE, projeções, financeiro do salão).
+router.use(authMiddleware, requireRole('admin'));
 
 // DRE mensal
 router.get('/dre', authMiddleware, async (req, res) => {

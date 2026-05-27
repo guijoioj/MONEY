@@ -2,7 +2,11 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 const { query } = require('../config/database');
+
+// AI: admin-only (consome créditos LLM, vetor de custo).
+router.use(authMiddleware, requireRole('admin'));
 
 // [A4] Rate limit específico — AI é caro e abre vetor de prompt injection
 const aiLimiter = rateLimit({

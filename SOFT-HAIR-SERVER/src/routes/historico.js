@@ -3,8 +3,10 @@ const router = express.Router();
 const ClienteHistorico = require('../models/ClienteHistorico');
 const Cliente = require('../models/Cliente');
 const { authMiddleware } = require('../middleware/auth');
+const { requireAnyRole } = require('../middleware/role');
 
-router.use(authMiddleware);
+// Histórico de cliente: admin + recepção (cliente já tem rota mobile separada).
+router.use(authMiddleware, requireAnyRole(['admin', 'recepcao']));
 
 router.get('/cliente/:id/resumo', async (req, res) => {
   try {

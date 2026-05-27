@@ -8,9 +8,13 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, requireAdmin } = require('../../middleware/auth');
+const { requireRole } = require('../../middleware/role');
 const { pool } = require('../../config/database');
 const { logAction } = require('../../utils/auditLog');
 const { sendError } = require('../../utils/sendError');
+
+// Ajustes de comissão (V2): admin-only.
+router.use(authMiddleware, requireRole('admin'));
 
 const TIPOS = ['bonus','desconto','adiantamento','correcao','meta_retroativa','estorno'];
 

@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 const { query } = require('../config/database');
+
+// Metas dos profissionais: admin-only.
+router.use(authMiddleware, requireRole('admin'));
 
 // POST /api/metas — upsert meta
 router.post('/', authMiddleware, async (req, res) => {

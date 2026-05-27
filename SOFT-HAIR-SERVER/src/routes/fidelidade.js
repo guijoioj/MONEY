@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { requireAnyRole } = require('../middleware/role');
 const { query, withTransaction } = require('../config/database');
+
+// Fidelidade: admin + recepção (operação de salão — dar/resgatar pontos).
+router.use(authMiddleware, requireAnyRole(['admin', 'recepcao']));
 
 // Limites de pontos por operação manual.
 const PONTOS_MIN = 1;
@@ -32,7 +36,7 @@ router.get('/historico/:clienteId', authMiddleware, async (req, res) => {
 // POST /api/fidelidade/adicionar
 // [P4-C3] Apenas admin pode atribuir pontos manualmente. Validar tenancy do cliente e range de pontos.
 // Pontos NUNCA aceitos cegamente do payload — sempre verificados server-side.
-router.post('/adicionar', authMiddleware, requireAdmin, async (req, res) => {
+router.post('/adicionar', authMiddleware, /* admin+recepcao via router.use */ async (req, res) => {
   const { clienteId, pontos, descricao, referenciaId, referenciaTipo } = req.body;
   try {
     // [P4-C3] Validar `pontos` server-side (positivo, range).
@@ -66,7 +70,7 @@ router.post('/adicionar', authMiddleware, requireAdmin, async (req, res) => {
 // [P4-C4] Transação + SELECT FOR UPDATE em pontos do cliente para evitar double-spend
 // em requisições concorrentes (cliente.pontos lidos com lock; INSERT só ocorre se saldo
 // real >= solicitado dentro da transação).
-router.post('/resgatar', authMiddleware, requireAdmin, async (req, res) => {
+router.post('/resgatar', authMiddleware, /* admin+recepcao via router.use */ async (req, res) => {
   const { clienteId, pontos, descricao } = req.body;
   try {
     // [P4-C4] Validação de range também no resgate.

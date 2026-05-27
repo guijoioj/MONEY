@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 const { query, withTransaction } = require('../config/database');
+
+// Sync: admin-only (export/import massivo de dados do salão).
+router.use(authMiddleware, requireRole('admin'));
 
 // ─── Whitelist de tabelas permitidas para sync ───
 const ALLOWED_TABLES = [
