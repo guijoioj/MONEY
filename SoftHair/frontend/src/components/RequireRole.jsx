@@ -75,6 +75,6 @@ export function labelRole(r) {
 
 export function roleHome(role) {
   if (role === 'profissional') return '/minha-agenda';
-  if (role === 'recepcao')     return '/agendamentos';
-  return '/'; // admin
+  if (role === 'recepcao')     return '/agenda';
+  return '/'; // admin → RoleHomeRedirect cai em /dashboard
 }
