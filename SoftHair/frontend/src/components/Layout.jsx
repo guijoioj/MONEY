@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { applyTheme, loadTheme } from '../utils/tema';
+import { applyTheme, loadTheme, loadSalaoNome } from '../utils/tema';
 import {
   Users,
   Scissors,
@@ -46,6 +46,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState('');
+  const [salaoNome, setSalaoNome] = useState(() => loadSalaoNome());
   const [notifCount, setNotifCount] = useState(0);
   const [solicitacoesCount, setSolicitacoesCount] = useState(0);
   const [popups, setPopups] = useState([]);
@@ -62,6 +63,17 @@ export default function Layout() {
       const theme = JSON.parse(savedTheme);
       if (theme.logoUrl) setLogoUrl(theme.logoUrl);
     }
+  }, []);
+
+  // Nome do salão: atualiza na hora quando salvam na Personalização.
+  useEffect(() => {
+    const upd = () => setSalaoNome(loadSalaoNome());
+    window.addEventListener('salao-nome-changed', upd);
+    window.addEventListener('storage', upd);
+    return () => {
+      window.removeEventListener('salao-nome-changed', upd);
+      window.removeEventListener('storage', upd);
+    };
   }, []);
 
   useEffect(() => {
@@ -210,7 +222,7 @@ export default function Layout() {
           {logoUrl ? <img src={logoUrl} alt="Logo" className="h-7 w-auto" /> : (
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--color-primary)' }}><Scissors size={14} className="text-white" /></div>
           )}
-          <span className="font-semibold text-sm hidden md:inline" style={{ color: 'var(--color-text)', letterSpacing: '-0.01em' }}>Salão de Beleza</span>
+          <span className="font-semibold text-sm hidden md:inline" style={{ color: 'var(--color-text)', letterSpacing: '-0.01em' }}>{salaoNome}</span>
         </div>
 
         {/* Trigger Raycast */}

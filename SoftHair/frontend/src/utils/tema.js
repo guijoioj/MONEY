@@ -23,6 +23,28 @@ export function themeKey(userId) {
   return userId ? `theme_config_${userId}` : 'theme_config';
 }
 
+// Nome do salão: identidade do salão (global, não por usuário).
+// Aparece ao lado da logo no topo. Editável na Personalização.
+export const DEFAULT_SALAO_NOME = 'Salão de Beleza';
+const SALAO_NOME_KEY = 'salao_nome';
+
+export function loadSalaoNome() {
+  try {
+    return localStorage.getItem(SALAO_NOME_KEY) || DEFAULT_SALAO_NOME;
+  } catch {
+    return DEFAULT_SALAO_NOME;
+  }
+}
+
+export function saveSalaoNome(nome) {
+  try {
+    const v = (nome && nome.trim()) || DEFAULT_SALAO_NOME;
+    localStorage.setItem(SALAO_NOME_KEY, v);
+    // Avisa o Layout (mesma aba) pra atualizar na hora.
+    window.dispatchEvent(new CustomEvent('salao-nome-changed', { detail: v }));
+  } catch {}
+}
+
 export function loadTheme(userId) {
   try {
     const s = localStorage.getItem(themeKey(userId)) || localStorage.getItem('theme_config');

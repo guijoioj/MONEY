@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Save, Upload, RotateCcw, Eye, Code, Palette, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { DEFAULT_THEME as defaultTheme, loadTheme, saveTheme, applyTheme } from '../utils/tema';
+import { DEFAULT_THEME as defaultTheme, loadTheme, saveTheme, applyTheme, loadSalaoNome, saveSalaoNome } from '../utils/tema';
 
 export default function Customizacao() {
   const { user } = useAuth();
   const [theme, setTheme] = useState(() => loadTheme(user?.id));
+  const [salaoNome, setSalaoNome] = useState(() => loadSalaoNome());
   const [showPreview, setShowPreview] = useState(false);
   const [activeTab, setActiveTab] = useState('colors');
   const [saving, setSaving] = useState(false);
@@ -28,6 +29,7 @@ export default function Customizacao() {
   const handleSave = () => {
     setSaving(true);
     saveTheme(user?.id, theme);
+    saveSalaoNome(salaoNome);
     setTimeout(() => {
       setSaving(false);
       setSaved(true);
@@ -277,6 +279,17 @@ export default function Customizacao() {
 
           {activeTab === 'logo' && (
             <div>
+              <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3">Nome do Salão</h3>
+              <input
+                type="text"
+                value={salaoNome}
+                onChange={(e) => setSalaoNome(e.target.value)}
+                placeholder="Salão de Beleza"
+                maxLength={40}
+                className="w-full px-3 py-2 mb-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
+              />
+              <p className="text-sm text-gray-400 dark:text-gray-500 mb-8">Aparece no topo, ao lado da logo. Clique em "Salvar" pra aplicar.</p>
+
               <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3">Logo do Sistema</h3>
               
               {theme.logoUrl && (
