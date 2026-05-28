@@ -359,7 +359,7 @@ export default function Agenda() {
   const convertingRef = useRef(new Set());
   
   const COL_WIDTH = 96;
-  const TIME_COL_WIDTH = 56;
+  const TIME_COL_WIDTH = 80; // = w-20 (coluna de hora). Cards usam isso no left → alinha com as colunas dos profissionais.
 
   const [formData, setFormData] = useState({
     clienteId: '',
