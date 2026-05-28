@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { applyTheme, loadTheme } from '../utils/tema';
 import {
   Users,
   Scissors,
@@ -36,6 +37,11 @@ import ComissoesOfflineBanner from './ComissoesOfflineBanner';
 
 export default function Layout() {
   const { user, logout } = useAuth();
+
+  // Aplica o tema do usuário (cores + foto de fundo) ao montar / trocar de usuário.
+  useEffect(() => {
+    applyTheme(loadTheme(user?.id));
+  }, [user?.id]);
   const { theme, toggle: toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -148,7 +154,7 @@ export default function Layout() {
     { to: '/usuarios',             icon: Users,           label: 'Usuários',            roles: ['admin'] },
     { to: '/notificacoes',         icon: Bell,            label: 'Notificações',        roles: ['admin', 'recepcao', 'profissional'], badge: notifCount },
     { to: '/sync',                 icon: Cloud,           label: 'Sync Cloud',          roles: ['admin'] },
-    { to: '/customizacao',         icon: Palette,         label: 'Personalizar',        roles: ['admin'] },
+    { to: '/customizacao',         icon: Palette,         label: 'Personalizar',        roles: ['admin', 'recepcao', 'profissional'] },
     { to: '/configuracoes',        icon: Settings,        label: 'Configurações',       roles: ['admin'] },
   ];
 
@@ -156,7 +162,7 @@ export default function Layout() {
   const navItems = ALL_ITEMS.filter(it => !it.roles || it.roles.includes(userRole));
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
+    <div className="app-root min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <ComissoesOfflineBanner />
       {/* Popups de solicitação em tempo real */}
       <div className="fixed top-4 right-4 z-50 flex flex-col gap-3" style={{ maxWidth: 360 }}>

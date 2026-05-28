@@ -643,3 +643,7 @@ html.dark .chart-card button.bg-indigo-100 {
   background-color: rgb(67 56 202) !important;
   color: white !important;
 }
+
+/* Foto de fundo (sistema de temas): app-root transparente pra revelar a foto no body. */
+html.has-bg-image .app-root { background-color: transparent !important; }
+html.has-bg-image.dark body, html.has-bg-image body { background-color: transparent; }

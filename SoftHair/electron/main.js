@@ -139,8 +139,6 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => mainWindow.show());
 
-  // TEMP DEBUG: abrir DevTools sempre pra capturar erro de tela branca.
-  mainWindow.webContents.openDevTools();
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000').catch((err) => {
       dialog.showErrorBox('SoftHair', `Erro ao carregar dev URL: ${err.message}`);

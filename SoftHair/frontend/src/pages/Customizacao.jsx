@@ -1,27 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Save, Upload, RotateCcw, Eye, Code, Palette } from 'lucide-react';
-
-const defaultTheme = {
-  primary: '#db2777',
-  primaryLight: '#f472b6',
-  secondary: '#6366f1',
-  background: '#f3f4f6',
-  surface: '#ffffff',
-  text: '#1f2937',
-  textLight: '#6b7280',
-  success: '#10b981',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  border: '#e5e7eb',
-  logoUrl: '',
-  customCss: '',
-};
+import { useState, useEffect } from 'react';
+import { Save, Upload, RotateCcw, Eye, Code, Palette, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { DEFAULT_THEME as defaultTheme, loadTheme, saveTheme, applyTheme } from '../utils/tema';
 
 export default function Customizacao() {
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('theme_config');
-    return saved ? JSON.parse(saved) : defaultTheme;
-  });
+  const { user } = useAuth();
+  const [theme, setTheme] = useState(() => loadTheme(user?.id));
   const [showPreview, setShowPreview] = useState(false);
   const [activeTab, setActiveTab] = useState('colors');
   const [saving, setSaving] = useState(false);
@@ -37,58 +21,38 @@ export default function Customizacao() {
     { name: 'Vermelho', primary: '#dc2626', secondary: '#ef4444' },
   ];
 
-  const applyTheme = useCallback((themeConfig) => {
-    const root = document.documentElement;
-    root.style.setProperty('--color-primary', themeConfig.primary);
-    root.style.setProperty('--color-primary-light', themeConfig.primaryLight);
-    root.style.setProperty('--color-secondary', themeConfig.secondary);
-    root.style.setProperty('--color-background', themeConfig.background);
-    root.style.setProperty('--color-surface', themeConfig.surface);
-    root.style.setProperty('--color-text', themeConfig.text);
-    root.style.setProperty('--color-text-light', themeConfig.textLight);
-    root.style.setProperty('--color-success', themeConfig.success);
-    root.style.setProperty('--color-warning', themeConfig.warning);
-    root.style.setProperty('--color-error', themeConfig.error);
-    root.style.setProperty('--color-border', themeConfig.border);
-
-    if (themeConfig.logoUrl) {
-      const logoElements = document.querySelectorAll('.app-logo');
-      logoElements.forEach(el => {
-        el.src = themeConfig.logoUrl;
-      });
-    }
-
-    if (themeConfig.customCss) {
-      let customStyleEl = document.getElementById('custom-theme-css');
-      if (!customStyleEl) {
-        customStyleEl = document.createElement('style');
-        customStyleEl.id = 'custom-theme-css';
-        document.head.appendChild(customStyleEl);
-      }
-      customStyleEl.textContent = themeConfig.customCss;
-    }
-  }, []);
-
   useEffect(() => {
     applyTheme(theme);
-  }, [theme, applyTheme]);
+  }, [theme]);
 
   const handleSave = () => {
     setSaving(true);
-    localStorage.setItem('theme_config', JSON.stringify(theme));
+    saveTheme(user?.id, theme);
     setTimeout(() => {
       setSaving(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    }, 500);
+    }, 400);
   };
 
   const handleReset = () => {
     if (window.confirm('Tem certeza que deseja redefinir o tema para o padrão?')) {
-      setTheme(defaultTheme);
-      localStorage.removeItem('theme_config');
+      const novo = { ...defaultTheme };
+      setTheme(novo);
+      saveTheme(user?.id, novo);
     }
   };
+
+  const handleBgUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) { alert('A imagem deve ter no máximo 4MB'); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => setTheme(t => ({ ...t, backgroundImage: ev.target.result }));
+    reader.readAsDataURL(file);
+  };
+
+  const removerBg = () => setTheme(t => ({ ...t, backgroundImage: '' }));
 
   const handlePreset = (preset) => {
     setTheme({ ...theme, primary: preset.primary, primaryLight: preset.secondary });
@@ -218,7 +182,7 @@ export default function Customizacao() {
               className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'colors' ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
             >
               <Palette size={18} />
-              Cores
+              Tema
             </button>
             <button
               onClick={() => setActiveTab('css')}
@@ -232,7 +196,7 @@ export default function Customizacao() {
               className={`pb-2 px-1 flex items-center gap-2 ${activeTab === 'logo' ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}`}
             >
               <Upload size={18} />
-              Logo
+              Logo & Fundo
             </button>
           </div>
 
@@ -351,6 +315,50 @@ export default function Customizacao() {
                   className="mt-4 w-full px-4 py-2 border border-red-300 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:bg-red-900/30"
                 >
                   Remover Logo
+                </button>
+              )}
+
+              <hr className="my-8 border-gray-200 dark:border-gray-700" />
+
+              <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">
+                <ImageIcon size={18} /> Foto de Fundo
+              </h3>
+
+              {theme.backgroundImage && (
+                <div className="mb-6 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                  <img
+                    src={theme.backgroundImage}
+                    alt="Fundo atual"
+                    className="w-full h-40 object-cover"
+                  />
+                </div>
+              )}
+
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                <ImageIcon className="mx-auto text-gray-400 dark:text-gray-500 mb-4" size={48} />
+                <p className="text-gray-600 dark:text-gray-300 mb-4">Imagem que aparece atrás do sistema inteiro</p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBgUpload}
+                  className="hidden"
+                  id="bg-upload"
+                />
+                <label
+                  htmlFor="bg-upload"
+                  className="inline-block bg-indigo-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-indigo-700"
+                >
+                  Selecionar Foto
+                </label>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-4">PNG ou JPG. Máximo 4MB.</p>
+              </div>
+
+              {theme.backgroundImage && (
+                <button
+                  onClick={removerBg}
+                  className="mt-4 w-full px-4 py-2 border border-red-300 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:bg-red-900/30 flex items-center justify-center gap-2"
+                >
+                  <Trash2 size={16} /> Remover Foto de Fundo
                 </button>
               )}
             </div>

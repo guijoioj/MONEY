@@ -131,7 +131,7 @@ export default function App() {
         <Route path="relatorios-comerciais" element={onlyAdmin(lazyEl(RelatoriosComerciais))} />
         <Route path="usuarios"            element={onlyAdmin(lazyEl(Usuarios))} />
         <Route path="sync"                element={onlyAdmin(lazyEl(Sync))} />
-        <Route path="customizacao"        element={onlyAdmin(lazyEl(Customizacao))} />
+        <Route path="customizacao"        element={anyAuthed(lazyEl(Customizacao))} />
         <Route path="configuracoes"       element={onlyAdmin(lazyEl(Configuracoes))} />
         <Route path="configurar-servidor" element={onlyAdmin(lazyEl(ConfigurarServidor))} />
 
