@@ -1,17 +1,34 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  DollarSign, Receipt, Users, Package, Calculator, Calendar, 
+import {
+  DollarSign, Receipt, Users, Package, Calculator, Calendar,
   TrendingUp, CreditCard, FileText, ArrowLeft, Filter,
   ChevronDown, ChevronRight, Check, X, RefreshCw, Printer,
   AlertTriangle, Coins, BarChart3, ClipboardList, Gift, Edit3,
-  RotateCcw
+  RotateCcw, Database, Cloud, ShieldCheck, Loader2
 } from 'lucide-react';
-import { 
-  fechamentosAPI, atendimentosAPI, vendasAPI, clientesAPI, 
+import {
+  fechamentosAPI, atendimentosAPI, vendasAPI, clientesAPI,
   profissionaisAPI, produtosAPI, agendamentosAPI, creditosAPI,
-  comissoesAPI 
+  comissoesAPI
 } from '../services/api';
+
+// Páginas reaproveitadas como seções do hub (lazy — só carrega ao abrir a aba).
+const Financeiro = lazy(() => import('./Financeiro'));
+const RelatoriosComerciais = lazy(() => import('./RelatoriosComerciais'));
+const Usuarios = lazy(() => import('./Usuarios'));
+const Auditoria = lazy(() => import('./Auditoria'));
+const Backup = lazy(() => import('./Backup'));
+const BackupsAdmin = lazy(() => import('./BackupsAdmin'));
+const Sync = lazy(() => import('./Sync'));
+
+function SectionLoader() {
+  return (
+    <div className="flex items-center justify-center py-20 text-gray-400">
+      <Loader2 className="animate-spin mr-2" size={20} /> Carregando…
+    </div>
+  );
+}
 
 export default function Administrativo() {
   const [activeSection, setActiveSection] = useState('checkouts');
@@ -45,11 +62,58 @@ export default function Administrativo() {
                 icon={<Coins size={18} />}
                 title="Comissões"
               />
-              <MenuItem 
-                active={activeSection === 'relatorios'} 
+              <MenuItem
+                active={activeSection === 'relatorios'}
                 onClick={() => setActiveSection('relatorios')}
                 icon={<BarChart3 size={18} />}
                 title="Relatórios Gerais"
+              />
+              <MenuItem
+                active={activeSection === 'financeiro'}
+                onClick={() => setActiveSection('financeiro')}
+                icon={<Receipt size={18} />}
+                title="Financeiro"
+              />
+              <MenuItem
+                active={activeSection === 'painel-comercial'}
+                onClick={() => setActiveSection('painel-comercial')}
+                icon={<TrendingUp size={18} />}
+                title="Painel comercial"
+              />
+
+              <div className="my-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <p className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Sistema</p>
+              </div>
+
+              <MenuItem
+                active={activeSection === 'usuarios'}
+                onClick={() => setActiveSection('usuarios')}
+                icon={<Users size={18} />}
+                title="Usuários"
+              />
+              <MenuItem
+                active={activeSection === 'auditoria'}
+                onClick={() => setActiveSection('auditoria')}
+                icon={<ShieldCheck size={18} />}
+                title="Auditoria"
+              />
+              <MenuItem
+                active={activeSection === 'backup'}
+                onClick={() => setActiveSection('backup')}
+                icon={<Database size={18} />}
+                title="Backup"
+              />
+              <MenuItem
+                active={activeSection === 'backups'}
+                onClick={() => setActiveSection('backups')}
+                icon={<Database size={18} />}
+                title="Backups (auto)"
+              />
+              <MenuItem
+                active={activeSection === 'sync'}
+                onClick={() => setActiveSection('sync')}
+                icon={<Cloud size={18} />}
+                title="Sync Cloud"
               />
             </nav>
           </div>
@@ -60,6 +124,15 @@ export default function Administrativo() {
           {activeSection === 'faturamento' && <FaturamentoSection />}
           {activeSection === 'comissoes' && <ComissoesSection />}
           {activeSection === 'relatorios' && <RelatoriosSection />}
+          <Suspense fallback={<SectionLoader />}>
+            {activeSection === 'financeiro' && <Financeiro />}
+            {activeSection === 'painel-comercial' && <RelatoriosComerciais />}
+            {activeSection === 'usuarios' && <Usuarios />}
+            {activeSection === 'auditoria' && <Auditoria />}
+            {activeSection === 'backup' && <Backup />}
+            {activeSection === 'backups' && <BackupsAdmin />}
+            {activeSection === 'sync' && <Sync />}
+          </Suspense>
         </div>
       </div>
     </div>
@@ -94,13 +167,13 @@ function CheckOutSection() {
     queryFn: () => fechamentosAPI.getAll({ data: dataFiltro }),
   });
 
-  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0);
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '-';
 
   const fechamentos = (fechamentosData?.data?.data || []).filter(f => !estornadosSession.some(e => e.id === f.id));
 
   const totalFechamentos = useMemo(() => {
-    return fechamentos.reduce((sum, f) => sum + (f.totalGeral || 0), 0);
+    return fechamentos.reduce((sum, f) => sum + (Number(f.totalGeral) || 0), 0);
   }, [fechamentos]);
 
   const handleEstornar = (fechamento) => {
@@ -170,13 +243,13 @@ function CheckOutSection() {
               <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4">
                 <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Em Atendimentos</p>
                 <p className="text-2xl font-bold text-purple-700">
-                  {formatCurrency(fechamentos.reduce((sum, f) => sum + (f.totalAtendimentos || 0), 0))}
+                  {formatCurrency(fechamentos.reduce((sum, f) => sum + (Number(f.totalAtendimentos) || 0), 0))}
                 </p>
               </div>
               <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
                 <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">Em Vendas</p>
                 <p className="text-2xl font-bold text-orange-700">
-                  {formatCurrency(fechamentos.reduce((sum, f) => sum + (f.totalVendas || 0), 0))}
+                  {formatCurrency(fechamentos.reduce((sum, f) => sum + (Number(f.totalVendas) || 0), 0))}
                 </p>
               </div>
             </div>
@@ -246,7 +319,7 @@ function CheckOutSection() {
             <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 mb-6">
               <p className="text-sm text-red-600 dark:text-red-400 font-medium">Total Estornado</p>
               <p className="text-2xl font-bold text-red-700">
-                {formatCurrency(estornadosSession.reduce((sum, f) => sum + (f.totalGeral || 0), 0))}
+                {formatCurrency(estornadosSession.reduce((sum, f) => sum + (Number(f.totalGeral) || 0), 0))}
               </p>
             </div>
 
@@ -310,7 +383,7 @@ function EstornoModal({ fechamento, onClose, onSuccess }) {
     onSuccess();
   };
 
-  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -379,7 +452,7 @@ function FaturamentoSection() {
   });
   const [dataFim, setDataFim] = useState(new Date().toISOString().split('T')[0]);
 
-  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0);
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '-';
 
   const { data: fechamentosData, isLoading: loadingFechamentos } = useQuery({
@@ -405,22 +478,22 @@ function FaturamentoSection() {
   const vendas = vendasData?.data?.data || [];
 
   const totalFaturamento = useMemo(() => {
-    return fechamentos.reduce((sum, f) => sum + (f.totalGeral || 0), 0);
+    return fechamentos.reduce((sum, f) => sum + (Number(f.totalGeral) || 0), 0);
   }, [fechamentos]);
 
   const totalServicos = useMemo(() => {
-    return fechamentos.reduce((sum, f) => sum + (f.totalAtendimentos || 0), 0);
+    return fechamentos.reduce((sum, f) => sum + (Number(f.totalAtendimentos) || 0), 0);
   }, [fechamentos]);
 
   const totalProdutos = useMemo(() => {
-    return fechamentos.reduce((sum, f) => sum + (f.totalVendas || 0), 0);
+    return fechamentos.reduce((sum, f) => sum + (Number(f.totalVendas) || 0), 0);
   }, [fechamentos]);
 
   const porFormaPagamento = useMemo(() => {
     const map = {};
     fechamentos.forEach(f => {
       const forma = f.formaPagamento || 'não informado';
-      map[forma] = (map[forma] || 0) + (f.totalGeral || 0);
+      map[forma] = (map[forma] || 0) + (Number(f.totalGeral) || 0);
     });
     return map;
   }, [fechamentos]);
@@ -429,7 +502,7 @@ function FaturamentoSection() {
     const map = {};
     fechamentos.forEach(f => {
       const nome = f.profissionalNome || 'Não identificado';
-      map[nome] = (map[nome] || 0) + (f.totalGeral || 0);
+      map[nome] = (map[nome] || 0) + (Number(f.totalGeral) || 0);
     });
     return map;
   }, [fechamentos]);
@@ -598,13 +671,13 @@ function CreditosNaCasaSection() {
   });
 
 
-  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0);
 
   const clientesComSaldo = creditosData?.data?.data || [];
   const todosClientes = clientesData?.data?.data || [];
 
   const totalCreditos = useMemo(() => {
-    return clientesComSaldo.reduce((sum, c) => sum + (c.saldo > 0 ? c.saldo : 0), 0);
+    return clientesComSaldo.reduce((sum, c) => sum + (Number(c.saldo) > 0 ? Number(c.saldo) : 0), 0);
   }, [clientesComSaldo]);
 
   const handleAdicionarCredito = (cliente) => {
@@ -797,7 +870,7 @@ function ComissoesSection() {
   const [pagosSession, setPagosSession] = useState(new Set());
   const [estornosSession, setEstornosSession] = useState([]);
 
-  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+  const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0);
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '-';
 
   const queryClient = useQueryClient();
@@ -883,22 +956,22 @@ function ComissoesSection() {
           totalComissao: 0,
         };
       }
-      map[f.profissionalId].totalVendido += (f.totalAtendimentos || 0);
+      map[f.profissionalId].totalVendido += (Number(f.totalAtendimentos) || 0);
       map[f.profissionalId].totalComissao = map[f.profissionalId].totalVendido * (map[f.profissionalId].comissao / 100);
     });
     return Object.values(map);
   }, [fechamentos, profissionais]);
 
   const totalComissoes = useMemo(() => {
-    return comissoesPorProfissional.reduce((sum, c) => sum + c.totalComissao, 0);
+    return comissoesPorProfissional.reduce((sum, c) => sum + (Number(c.totalComissao) || 0), 0);
   }, [comissoesPorProfissional]);
 
   const totalPagas = useMemo(() => {
-    return comissoesPagas.reduce((sum, c) => sum + (c.valor || 0), 0);
+    return comissoesPagas.reduce((sum, c) => sum + (Number(c.valor) || 0), 0);
   }, [comissoesPagas]);
 
   const totalEstornos = useMemo(() => {
-    return comissoesEstornos.reduce((sum, e) => sum + (e.valor || 0), 0);
+    return comissoesEstornos.reduce((sum, e) => sum + (Number(e.valor) || 0), 0);
   }, [comissoesEstornos]);
 
   const handlePagar = (comissao) => {
