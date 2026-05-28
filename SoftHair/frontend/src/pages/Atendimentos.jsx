@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { atendimentosAPI, clientesAPI, produtosAPI, servicosAPI, profissionaisAPI } from '../services/api';
-import { Plus, X, Clock, Package, Scissors, Trash2, Eye, Edit2, Save, Calculator, User, AlertCircle, UserPlus } from 'lucide-react';
+import { atendimentosAPI, clientesAPI, produtosAPI, servicosAPI, profissionaisAPI, fechamentosAPI } from '../services/api';
+import { Plus, X, Clock, Package, Scissors, Trash2, Eye, Edit2, Save, Calculator, User, AlertCircle, UserPlus, DollarSign } from 'lucide-react';
 import ClienteSearchSelect from '../components/ClienteSearchSelect';
 
 const FRACOES = [
@@ -70,6 +70,9 @@ export default function Atendimentos() {
   const [buscaProduto, setBuscaProduto] = useState('');
   const [buscaServico, setBuscaServico] = useState('');
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
+  // Opção B: fechar conta (pagar) direto do atendimento.
+  const [fecharModal, setFecharModal] = useState(null); // atendimento sendo fechado
+  const [formaPagamento, setFormaPagamento] = useState('dinheiro');
 
   const { data: atendimentos, isLoading } = useQuery({
     queryKey: ['atendimentos', filtroData],
@@ -171,6 +174,37 @@ export default function Atendimentos() {
     onError: (err) => {
       console.error('Erro ao atualizar atendimento:', err);
       alert(err.response?.data?.error || err.message || 'Erro ao salvar atendimento');
+    },
+  });
+
+  // Fechar conta: cria fechamento (mesmo endpoint da tela Fechamento) com este
+  // atendimento → finaliza + registra pagamento no caixa.
+  const fecharContaMutation = useMutation({
+    mutationFn: ({ atendimento, forma }) => {
+      const total = Number(atendimento.totalGeral ?? atendimento.valor ?? 0);
+      return fechamentosAPI.create({
+        clienteId: atendimento.clienteId ?? atendimento.cliente_id ?? null,
+        profissionalId: atendimento.profissionalId ?? atendimento.profissional_id ?? null,
+        data: hojeLocal(),
+        totalAtendimentos: total,
+        totalVendas: 0,
+        totalProdutos: Number(atendimento.totalProdutos ?? 0),
+        descontoGeral: 0,
+        totalGeral: total,
+        formaPagamento: forma,
+        observacoes: null,
+        atendimentoIds: [atendimento.id],
+        vendaIds: [],
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['atendimentos']);
+      queryClient.invalidateQueries(['fechamentos-em-aberto']);
+      setFecharModal(null);
+    },
+    onError: (err) => {
+      console.error('Erro ao fechar conta:', err);
+      alert(err.response?.data?.error || err.message || 'Erro ao fechar conta');
     },
   });
 
@@ -502,6 +536,11 @@ export default function Atendimentos() {
                     <td className="px-6 py-4 font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(atendimento.totalGeral)}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
+                        {!['finalizado', 'cancelado'].includes((atendimento.status || '').toLowerCase()) && (
+                          <button onClick={() => { setFormaPagamento('dinheiro'); setFecharModal(atendimento); }} className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:bg-emerald-900/30 rounded" title="Fechar conta / Pagar">
+                            <DollarSign size={18} />
+                          </button>
+                        )}
                         <button onClick={() => viewDetails(atendimento)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded" title="Ver detalhes">
                           <Eye size={18} />
                         </button>
@@ -986,6 +1025,51 @@ export default function Atendimentos() {
                   {deleteMutation.isPending ? 'Excluindo...' : 'Excluir'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Fechar Conta / Pagar (opção B) */}
+      {fecharModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <DollarSign className="text-emerald-600 dark:text-emerald-400" />
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Fechar Conta</h2>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+              Cliente: <span className="font-medium">{fecharModal.clienteNome || 'Sem cliente'}</span>
+            </p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-4">
+              {formatCurrency(fecharModal.totalGeral ?? fecharModal.valor ?? 0)}
+            </p>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Forma de pagamento</label>
+            <select
+              value={formaPagamento}
+              onChange={(e) => setFormaPagamento(e.target.value)}
+              className="w-full px-4 py-2 mb-5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="dinheiro">Dinheiro</option>
+              <option value="pix">PIX</option>
+              <option value="cartao_credito">Cartão de Crédito</option>
+              <option value="cartao_debito">Cartão de Débito</option>
+            </select>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setFecharModal(null)}
+                disabled={fecharContaMutation.isPending}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => fecharContaMutation.mutate({ atendimento: fecharModal, forma: formaPagamento })}
+                disabled={fecharContaMutation.isPending}
+                className="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {fecharContaMutation.isPending ? 'Processando...' : 'Confirmar Pagamento'}
+              </button>
             </div>
           </div>
         </div>

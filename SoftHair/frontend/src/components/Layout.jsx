@@ -352,7 +352,7 @@ export default function Layout() {
       <div className="flex">
         <aside
           className={`${sidebarOpen ? 'flex' : 'hidden'} md:flex flex-col fixed inset-y-0 left-0 z-40 pt-16 pb-6 px-3`}
-          style={{ width: '72px' }}
+          style={{ width: '88px' }}
         >
           <nav
             className="flex flex-col gap-1 overflow-y-auto overflow-x-hidden custom-scrollbar"
@@ -365,7 +365,7 @@ export default function Layout() {
                 onClick={() => setSidebarOpen(false)}
                 title={item.label}
                 className={({ isActive }) =>
-                  `group relative flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-2xl transition-all duration-200 cursor-pointer ${
+                  `group relative flex flex-col items-center justify-center gap-1.5 px-2 py-3 rounded-2xl transition-all duration-200 cursor-pointer ${
                     isActive ? 'shadow-lg' : 'hover:scale-105'
                   }`
                 }
@@ -384,8 +384,8 @@ export default function Layout() {
                   color: isActive ? 'var(--color-primary)' : 'rgba(80,80,100,0.85)',
                 })}
               >
-                <item.icon size={20} />
-                <span style={{ fontSize: '9px', fontWeight: 500, letterSpacing: '0.02em', lineHeight: 1 }}>
+                <item.icon size={24} />
+                <span style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.01em', lineHeight: 1.1, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {item.label.split(' ')[0]}
                 </span>
                 {item.badge > 0 && (
@@ -398,7 +398,7 @@ export default function Layout() {
           </nav>
         </aside>
 
-        <main className="flex-1 px-6 pb-6 md:ml-20 pt-24 overflow-y-auto h-screen"><Outlet /></main>
+        <main className="flex-1 px-6 pb-6 md:ml-24 pt-24 overflow-y-auto h-screen"><Outlet /></main>
       </div>
     </div>
   );
