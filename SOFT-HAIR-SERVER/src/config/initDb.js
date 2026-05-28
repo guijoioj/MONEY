@@ -639,6 +639,21 @@ async function runMigrations() {
     -- Roda 1x por boot; após primeira execução nenhuma linha é tocada.
     UPDATE vendas SET status = 'paga' WHERE status IN ('concluida', 'finalizada');
 
+    -- Histórico de backups (manual + automático diário).
+    CREATE TABLE IF NOT EXISTS backups (
+      id              BIGSERIAL PRIMARY KEY,
+      salao_id        INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      tipo            VARCHAR(20) DEFAULT 'manual',
+      status          VARCHAR(20) DEFAULT 'pending',
+      tamanho_bytes   BIGINT,
+      checksum        VARCHAR(64),
+      dump_data       BYTEA,
+      erro            TEXT,
+      criado_por      INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+      created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_backups_salao_created ON backups(salao_id, created_at DESC);
+
     -- Fechamento POR CLIENTE (caixa do cliente). data_inicio/data_fim já existem.
     ALTER TABLE fechamentos ALTER COLUMN data_inicio DROP NOT NULL;
     ALTER TABLE fechamentos ALTER COLUMN data_fim DROP NOT NULL;

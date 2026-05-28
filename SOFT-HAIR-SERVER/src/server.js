@@ -315,6 +315,7 @@ app.use('/api/metas', require('./routes/metas'));
 app.use('/api/relatorios', require('./routes/relatorios'));
 app.use('/api/fidelidade', require('./routes/fidelidade'));
 app.use('/api/usuarios', require('./routes/usuarios'));
+app.use('/api/audit-log', require('./routes/auditLog'));
 
 // ─── API v2 (novos endpoints, paralelo a v1 — não quebra nada) ───
 app.use('/api/v2', require('./routes/v2'));
@@ -388,6 +389,15 @@ const PORT = process.env.PORT || 3000;
       console.log(`📡 Ambiente: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔐 Segurança: Ativada | Rate Limit Auth: ${process.env.AUTH_RATE_LIMIT_MAX || 10}/15min`);
       console.log(`📊 WebSocket: ${process.env.WS_ENABLED === 'true' ? 'Ativo' : 'Desativado'}`);
+      // Scheduler de backup automático diário (em produção apenas).
+      if (process.env.NODE_ENV === 'production' && process.env.BACKUP_AUTO !== 'false') {
+        try {
+          require('./services/BackupHistoryService').startScheduler();
+          console.log('🗄️  Backup automático diário: ativado');
+        } catch (e) {
+          console.error('[BACKUP] falha ao iniciar scheduler:', e.message);
+        }
+      }
     });
 
     // ─── Graceful Shutdown ───
