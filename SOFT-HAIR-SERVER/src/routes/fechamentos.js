@@ -37,7 +37,7 @@ router.get('/em-aberto', authMiddleware, adminOrRecepcao, async (req, res) => {
     // se for fechamento legado de período sem array, cai no fallback de data+cliente.
     const aParams = [req.salaoId];
     let aWhere = `a.salao_id = $1
-      AND a.status IN ('finalizado','concluido','concluida')
+      AND a.status IN ('em_andamento','aberto','finalizado','concluido','concluida')
       AND NOT EXISTS (
         SELECT 1 FROM fechamentos f
          WHERE f.salao_id = a.salao_id
