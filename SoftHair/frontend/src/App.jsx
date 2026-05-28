@@ -35,6 +35,9 @@ const MinhaAgenda = lazy(() => import('./pages/MinhaAgenda'));
 const MeusAtendimentos = lazy(() => import('./pages/MeusAtendimentos'));
 const MinhasComissoes = lazy(() => import('./pages/MinhasComissoes'));
 const PainelDia = lazy(() => import('./pages/PainelDia'));
+const BackupsAdmin = lazy(() => import('./pages/BackupsAdmin'));
+const Auditoria = lazy(() => import('./pages/Auditoria'));
+const RelatoriosComerciais = lazy(() => import('./pages/RelatoriosComerciais'));
 // V2: Comissões reescritas
 const ComissoesV2 = lazy(() => import('./pages/ComissoesV2'));
 const RegrasComissao = lazy(() => import('./pages/RegrasComissao'));
@@ -123,6 +126,9 @@ export default function App() {
         <Route path="metas"               element={onlyAdmin(lazyEl(Metas))} />
         <Route path="relatorios"          element={onlyAdmin(lazyEl(Relatorios))} />
         <Route path="backup"              element={onlyAdmin(lazyEl(Backup))} />
+        <Route path="backups"             element={onlyAdmin(lazyEl(BackupsAdmin))} />
+        <Route path="auditoria"           element={onlyAdmin(lazyEl(Auditoria))} />
+        <Route path="relatorios-comerciais" element={onlyAdmin(lazyEl(RelatoriosComerciais))} />
         <Route path="usuarios"            element={onlyAdmin(lazyEl(Usuarios))} />
         <Route path="sync"                element={onlyAdmin(lazyEl(Sync))} />
         <Route path="customizacao"        element={onlyAdmin(lazyEl(Customizacao))} />

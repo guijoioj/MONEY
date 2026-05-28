@@ -197,6 +197,28 @@ export const comissoesAPI = {
   estornar: (data) => api.post('/comissoes/estornar', data),
 };
 
+export const backupHistoryAPI = {
+  list: () => api.get('/backup/historico'),
+  create: () => api.post('/backup/historico'),
+  download: (id) => api.get(`/backup/historico/${id}/download`, { responseType: 'blob' }),
+  remove: (id) => api.delete(`/backup/historico/${id}`),
+};
+
+export const auditLogAPI = {
+  list: (params) => api.get('/audit-log', { params }),
+  actions: () => api.get('/audit-log/actions'),
+};
+
+export const relatoriosAPI = {
+  faturamento: (periodo = 'mes') => api.get('/relatorios/faturamento', { params: { periodo } }),
+  faturamentoDiario: (dias = 30) => api.get('/relatorios/faturamento-diario', { params: { dias } }),
+  rankingProfissionais: (dias = 30) => api.get('/relatorios/ranking-profissionais', { params: { dias } }),
+  topClientes: (dias = 90) => api.get('/relatorios/top-clientes', { params: { dias } }),
+  produtosVendidos: (dias = 30) => api.get('/relatorios/produtos-vendidos', { params: { dias } }),
+  comissoesPagar: () => api.get('/relatorios/comissoes-pagar'),
+  servicosMaisVendidos: (dias = 30) => api.get('/relatorios/servicos-mais-vendidos', { params: { dias } }),
+};
+
 export const pedidosAgendamentoAPI = {
   getSalao: (params) => api.get('/app/pedidos/salao', { params }),
   verificarDisponibilidade: (id) => api.get(`/app/pedidos/${id}/verificar-disponibilidade`),
