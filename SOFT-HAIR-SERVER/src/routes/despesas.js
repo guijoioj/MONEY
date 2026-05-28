@@ -55,8 +55,9 @@ router.get('/resumo', authMiddleware, async (req, res) => {
     res.json({
       success: true,
       data: {
-        categorias: result.rows,
-        total: parseFloat(totalResult.rows[0].total || 0)
+        // query() já retorna o array de linhas (result.rows), não um objeto {rows}.
+        categorias: result,
+        total: parseFloat(totalResult[0]?.total || 0)
       }
     });
   } catch (error) {

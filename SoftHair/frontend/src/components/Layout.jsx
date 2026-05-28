@@ -364,7 +364,7 @@ export default function Layout() {
                 onClick={() => setSidebarOpen(false)}
                 title={item.label}
                 className={({ isActive }) =>
-                  `group relative flex flex-col items-center justify-center gap-1.5 px-2 py-3 rounded-2xl transition-all duration-200 cursor-pointer ${
+                  `group relative flex flex-col items-center justify-center gap-1.5 px-1 py-3 rounded-2xl transition-all duration-200 cursor-pointer ${
                     isActive ? 'shadow-lg' : 'hover:scale-105'
                   }`
                 }
@@ -384,7 +384,7 @@ export default function Layout() {
                 })}
               >
                 <item.icon size={24} />
-                <span style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.01em', lineHeight: 1.1, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: '9px', fontWeight: 500, letterSpacing: '0', lineHeight: 1.05, textAlign: 'center', width: '100%', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {item.label.split(' ')[0]}
                 </span>
                 {item.badge > 0 && (
