@@ -628,6 +628,34 @@ async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_atend_servicos_salao ON atendimentos_servicos(salao_id);
     CREATE INDEX IF NOT EXISTS idx_atend_servicos_prof  ON atendimentos_servicos(profissional_id);
 
+    -- atendimentos_produtos: tabela legada era camelCase/TEXT. Se for o caso, dropa
+    -- e recria em snake_case/INTEGER no mesmo estilo de atendimentos_servicos.
+    DO $$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'atendimentos_produtos') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name = 'atendimentos_produtos' AND column_name = 'atendimentoId') THEN
+          DROP TABLE atendimentos_produtos CASCADE;
+        END IF;
+      END IF;
+    END $$;
+
+    CREATE TABLE IF NOT EXISTS atendimentos_produtos (
+      id              SERIAL PRIMARY KEY,
+      atendimento_id  INTEGER NOT NULL REFERENCES atendimentos(id) ON DELETE CASCADE,
+      produto_id      INTEGER REFERENCES produtos(id) ON DELETE SET NULL,
+      salao_id        INTEGER NOT NULL REFERENCES saloes(id) ON DELETE CASCADE,
+      nome_snapshot   TEXT NOT NULL,
+      quantidade_usada DECIMAL(10,3) NOT NULL DEFAULT 1,
+      unidade         TEXT DEFAULT 'un',
+      preco_unitario  DECIMAL(10,2) NOT NULL DEFAULT 0,
+      subtotal        DECIMAL(10,2) NOT NULL DEFAULT 0,
+      criado_por      INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+      created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_atend_produtos_atend ON atendimentos_produtos(atendimento_id);
+    CREATE INDEX IF NOT EXISTS idx_atend_produtos_salao ON atendimentos_produtos(salao_id);
+
     -- Audit log: usa a tabela audit_log singular que ja existe (schema com hash chain).
     -- utils/auditLog.js insere em audit_log. Removida criacao duplicada de audit_logs.
     CREATE INDEX IF NOT EXISTS idx_audit_log_salao_created

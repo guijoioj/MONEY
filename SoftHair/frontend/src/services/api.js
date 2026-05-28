@@ -169,6 +169,10 @@ export const atendimentosAPI = {
   listarServicos: (id) => api.get(`/atendimentos/${id}/servicos`),
   adicionarServico: (id, data) => api.post(`/atendimentos/${id}/servicos`, data),
   removerServico: (id, itemId) => api.delete(`/atendimentos/${id}/servicos/${itemId}`),
+  // Produtos usados no atendimento.
+  listarProdutos: (id) => api.get(`/atendimentos/${id}/produtos`),
+  adicionarProduto: (id, data) => api.post(`/atendimentos/${id}/produtos`, data),
+  removerProduto: (id, itemId) => api.delete(`/atendimentos/${id}/produtos/${itemId}`),
 };
 
 export const fechamentosAPI = {

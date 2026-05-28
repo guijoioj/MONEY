@@ -88,32 +88,67 @@ export default function Atendimentos() {
 
   const queryClient = useQueryClient();
 
+  // Persiste serviços e produtos via endpoints dedicados (backend deriva preço/comissão).
+  // Itens marcados _persisted (já no banco) são pulados pra não duplicar em edição.
+  const persistItens = async (atendimentoId, servicos = [], produtos = []) => {
+    for (const s of servicos) {
+      if (s._persisted) continue;
+      await atendimentosAPI.adicionarServico(atendimentoId, { servico_id: s.servicoId, quantidade: 1 });
+    }
+    for (const p of produtos) {
+      if (p._persisted) continue;
+      // Produto não bloqueia o atendimento se falhar (insumo, não receita).
+      try {
+        await atendimentosAPI.adicionarProduto(atendimentoId, {
+          produto_id: p.produtoId,
+          quantidade_usada: p.quantidadeUsada,
+          unidade: p.unidade,
+          preco_unitario: p.precoUnitario,
+          subtotal: p.subtotal,
+        });
+      } catch (e) {
+        console.warn('Produto não persistido:', e?.response?.data || e?.message);
+      }
+    }
+  };
+
   const createMutation = useMutation({
-    mutationFn: (data) => atendimentosAPI.create(data),
+    mutationFn: async (payload) => {
+      const res = await atendimentosAPI.create({
+        cliente_id: payload.clienteId,
+        profissional_id: payload.profissionalId,
+        status: 'em_andamento',
+        observacoes: payload.observacoes || null,
+      });
+      const id = res?.data?.data?.id;
+      if (!id) throw new Error('Falha ao criar atendimento (sem id)');
+      await persistItens(id, payload.servicos, payload.produtos);
+      return res;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['atendimentos']);
+      queryClient.invalidateQueries(['fechamentos-em-aberto']);
       closeModal();
+    },
+    onError: (err) => {
+      console.error('Erro ao criar atendimento:', err);
+      alert(err.response?.data?.error || err.message || 'Erro ao salvar atendimento');
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => {
-      console.log('Update mutation - id:', id);
-      console.log('Update mutation - data:', data);
-      return atendimentosAPI.update(id, data);
+    mutationFn: async ({ id, data }) => {
+      await atendimentosAPI.update(id, { observacoes: data.observacoes || null });
+      await persistItens(id, data.servicos, data.produtos);
+      return { id };
     },
-    onSuccess: (result) => {
-      console.log('Update mutation - success:', result);
-      console.log('Update mutation - status:', result?.status);
-      console.log('Update mutation - data:', result?.data);
+    onSuccess: () => {
       queryClient.invalidateQueries(['atendimentos']);
-      // Adicionar pequeno delay para garantir que os dados sejam processados
-      setTimeout(() => {
-        closeModal();
-      }, 100);
+      queryClient.invalidateQueries(['fechamentos-em-aberto']);
+      closeModal();
     },
     onError: (err) => {
-      console.error('Update mutation - error:', err);
+      console.error('Erro ao atualizar atendimento:', err);
       alert(err.response?.data?.error || err.message || 'Erro ao salvar atendimento');
     },
   });
@@ -132,8 +167,8 @@ export default function Atendimentos() {
     },
   });
 
-  const totalProdutos = produtosUsados.reduce((sum, item) => sum + (item.subtotal || 0), 0);
-  const totalServicos = servicosUsados.reduce((sum, item) => sum + (item.preco || 0), 0);
+  const totalProdutos = produtosUsados.reduce((sum, item) => sum + (Number(item.subtotal) || 0), 0);
+  const totalServicos = servicosUsados.reduce((sum, item) => sum + (Number(item.preco) || 0), 0);
   const subtotal = totalProdutos + totalServicos;
   const desconto = parseFloat(formData.desconto) || 0;
   const totalGeral = Math.max(0, subtotal - desconto);
@@ -196,23 +231,35 @@ export default function Atendimentos() {
         observacoes: atendimento.observacoes || ''
       });
 
-      setProdutosUsados(atendimento.produtos?.map(p => ({
-        produtoId: p.produtoId,
-        produtoNome: p.produtoNome,
-        quantidadeUsada: p.quantidadeUsada,
-        unidade: p.unidade,
-        precoUnitario: p.precoUnitario,
-        subtotal: p.subtotal
-      })) || []);
-
-      setServicosUsados(atendimento.servicos?.map(s => ({
-        servicoId: s.servicoId,
-        servicoNome: s.servicoNome,
-        horaInicio: s.horaInicio,
-        horaFim: s.horaFim,
-        preco: s.preco,
-        duracao: s.duracao
-      })) || []);
+      // Carrega serviços e produtos já persistidos (endpoints dedicados).
+      // _persisted=true → handleSubmit não reenvia (evita duplicar).
+      try {
+        const [svcRes, prodRes] = await Promise.all([
+          atendimentosAPI.listarServicos(id).catch(() => null),
+          atendimentosAPI.listarProdutos(id).catch(() => null),
+        ]);
+        setServicosUsados(toArr(svcRes?.data?.data).map(s => ({
+          _persisted: true,
+          servicoId: s.servico_id,
+          servicoNome: s.nome_snapshot,
+          horaInicio: '',
+          horaFim: '',
+          preco: Number(s.valor_snapshot ?? s.subtotal ?? 0),
+          duracao: 0,
+        })));
+        setProdutosUsados(toArr(prodRes?.data?.data).map(p => ({
+          _persisted: true,
+          produtoId: p.produto_id,
+          produtoNome: p.nome_snapshot,
+          quantidadeUsada: Number(p.quantidade_usada ?? 0),
+          unidade: p.unidade || 'un',
+          precoUnitario: Number(p.preco_unitario ?? 0),
+          subtotal: Number(p.subtotal ?? 0),
+        })));
+      } catch {
+        setServicosUsados([]);
+        setProdutosUsados([]);
+      }
 
       // IMPORTANTE: Abrir o modal após carregar todos os dados
       setIsModalOpen(true);
@@ -240,14 +287,15 @@ export default function Atendimentos() {
   };
 
   const addProduto = (produto) => {
+    const precoUnit = Number(produto.preco_venda ?? produto.precoVenda ?? 0);
     const newItem = {
       produtoId: produto.id,
       produtoNome: produto.nome,
       quantidadeUsada: 0.025,
       unidade: 'L',
       fracao: '25ml',
-      precoUnitario: produto.precoVenda,
-      subtotal: produto.precoVenda * 0.025
+      precoUnitario: precoUnit,
+      subtotal: precoUnit * 0.025
     };
     setProdutosUsados([...produtosUsados, newItem]);
   };
@@ -266,15 +314,16 @@ export default function Atendimentos() {
 
   const addServico = (servico) => {
     const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    const horaFimCalculada = calcularHoraFim(horaAtual, servico.duracao);
-    
+    const duracao = Number(servico.duracao_minutos ?? servico.duracao ?? 0);
+    const horaFimCalculada = calcularHoraFim(horaAtual, duracao);
+
     const newItem = {
       servicoId: servico.id,
       servicoNome: servico.nome,
       horaInicio: horaAtual,
       horaFim: horaFimCalculada,
-      preco: servico.preco,
-      duracao: servico.duracao
+      preco: Number(servico.preco ?? 0),
+      duracao
     };
     setServicosUsados([...servicosUsados, newItem]);
   };
@@ -295,8 +344,11 @@ export default function Atendimentos() {
   };
 
   const calcularHoraFim = (horaInicio, duracaoMinutos) => {
+    const dur = Number(duracaoMinutos);
+    if (!horaInicio || !horaInicio.includes(':') || Number.isNaN(dur)) return horaInicio || '';
     const [hours, minutes] = horaInicio.split(':').map(Number);
-    const totalMinutes = hours * 60 + minutes + duracaoMinutos;
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return horaInicio;
+    const totalMinutes = hours * 60 + minutes + dur;
     const newHours = Math.floor(totalMinutes / 60) % 24;
     const newMinutes = totalMinutes % 60;
     return `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
@@ -313,63 +365,25 @@ export default function Atendimentos() {
     e.preventDefault();
     e.stopPropagation();
 
-    // Debug: verificar dados antes de enviar
-    console.log('Submit - editingAtendimento:', editingAtendimento);
-    console.log('Submit - editingAtendimento.id:', editingAtendimento?.id);
-    console.log('Submit - formData:', formData);
-    console.log('Submit - produtosUsados:', produtosUsados);
-    console.log('Submit - servicosUsados:', servicosUsados);
-
-    // Validação básica
-    if (!formData.data) {
-      alert('Data é obrigatória');
+    if (!formData.clienteId) { alert('Selecione um cliente'); return; }
+    if (!formData.profissionalId) { alert('Selecione um profissional'); return; }
+    if (servicosUsados.length === 0 && produtosUsados.length === 0) {
+      alert('Adicione ao menos um serviço ou produto');
       return;
     }
 
-    // Validação adicional para edição
-    if (editingAtendimento && !editingAtendimento.id) {
-      alert('ID do atendimento não encontrado');
-      return;
-    }
-
-    const descontoNum = parseFloat(formData.desconto) || 0;
-
-    const data = {
-      clienteId: formData.clienteId || null,
-      profissionalId: formData.profissionalId || null,
-      auxiliarId: formData.auxiliarId || null,
-      data: formData.data,
-      horaInicio: formData.horaInicio || null,
-      horaFim: formData.horaFim || null,
-      desconto: descontoNum,
-      observacoes: formData.observacoes || null,
-      totalProdutos,
-      totalServicos,
-      totalGeral,
-      produtos: produtosUsados.map(p => ({
-        produtoId: p.produtoId,
-        quantidadeUsada: p.quantidadeUsada,
-        unidade: p.unidade,
-        precoUnitario: p.precoUnitario,
-        subtotal: p.subtotal
-      })),
-      servicos: servicosUsados.map(s => ({
-        servicoId: s.servicoId,
-        horaInicio: s.horaInicio,
-        horaFim: s.horaFim,
-        preco: s.preco,
-        duracao: s.duracao
-      }))
+    const payload = {
+      clienteId: formData.clienteId,
+      profissionalId: formData.profissionalId,
+      observacoes: formData.observacoes,
+      servicos: servicosUsados,
+      produtos: produtosUsados,
     };
 
-    console.log('Submit - data to send:', data);
-
     if (editingAtendimento && editingAtendimento.id) {
-      console.log('Updating atendimento:', editingAtendimento.id);
-      updateMutation.mutate({ id: editingAtendimento.id, data });
+      updateMutation.mutate({ id: editingAtendimento.id, data: payload });
     } else {
-      console.log('Creating new atendimento');
-      createMutation.mutate(data);
+      createMutation.mutate(payload);
     }
   };
 
@@ -573,16 +587,20 @@ export default function Atendimentos() {
                   <div className="col-span-2">
                     <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Selecionar Produto</label>
                     <div className="max-h-32 overflow-y-auto border rounded-lg p-2">
-                      {toArr(produtosData?.data?.data).filter(p => p.ativo && p.estoque > 0).map((produto) => (
-                        <button
-                          key={produto.id}
-                          type="button"
-                          onClick={() => addProduto(produto)}
-                          className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 rounded text-sm border-b last:border-b-0"
-                        >
-                          {produto.nome} - Estoque: {produto.estoque} {produto.unidade || 'un'} - {formatCurrency(produto.precoVenda)}/un
-                        </button>
-                      ))}
+                      {toArr(produtosData?.data?.data).filter(p => p.ativo !== false).map((produto) => {
+                        const estoque = produto.quantidade_estoque ?? produto.estoque ?? 0;
+                        const precoVenda = Number(produto.preco_venda ?? produto.precoVenda ?? 0);
+                        return (
+                          <button
+                            key={produto.id}
+                            type="button"
+                            onClick={() => addProduto(produto)}
+                            className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 rounded text-sm border-b last:border-b-0"
+                          >
+                            {produto.nome} - Estoque: {estoque} {produto.unidade || 'un'} - {formatCurrency(precoVenda)}/un
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -638,14 +656,14 @@ export default function Atendimentos() {
                   <div className="col-span-2">
                     <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Selecionar Serviço</label>
                     <div className="max-h-32 overflow-y-auto border rounded-lg p-2">
-                      {toArr(servicosData?.data?.data).filter(s => s.ativo).map((servico) => (
+                      {toArr(servicosData?.data?.data).filter(s => s.ativo !== false).map((servico) => (
                         <button
                           key={servico.id}
                           type="button"
                           onClick={() => addServico(servico)}
                           className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 rounded text-sm border-b last:border-b-0"
                         >
-                          {servico.nome} - {formatCurrency(servico.preco)} - {servico.duracao}min
+                          {servico.nome} - {formatCurrency(Number(servico.preco ?? 0))} - {servico.duracao_minutos ?? servico.duracao ?? 0}min
                         </button>
                       ))}
                     </div>

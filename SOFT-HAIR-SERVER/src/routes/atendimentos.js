@@ -254,6 +254,92 @@ router.delete('/:id/servicos/:itemId', authMiddleware, async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PRODUTOS DO ATENDIMENTO — adicionar / listar / remover. Mesmo escopo dos serviços.
+// Tabela: atendimentos_produtos (snapshot de nome/preço). Produtos são custo/insumo,
+// não somam ao valor (receita) do atendimento — esse vem dos serviços.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// GET lista produtos do atendimento
+router.get('/:id/produtos', authMiddleware, async (req, res) => {
+  try {
+    const at = await _loadAtendimentoForWrite(req, res);
+    if (!at) return;
+    const { pool } = require('../config/database');
+    const { rows } = await pool.query(
+      `SELECT id, produto_id, nome_snapshot, quantidade_usada, unidade, preco_unitario, subtotal, created_at
+         FROM atendimentos_produtos
+        WHERE atendimento_id = $1
+        ORDER BY created_at ASC`,
+      [at.id]
+    );
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    require("../utils/sendError").sendError(res, 500, "Erro ao listar produtos", error);
+  }
+});
+
+// POST adiciona produto ao atendimento (snapshot de nome/preço)
+router.post('/:id/produtos', authMiddleware, [
+  body('produto_id').exists({ checkFalsy: true }).withMessage('produto_id é obrigatório'),
+  body('quantidade_usada').optional().isFloat({ min: 0 }),
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
+    const at = await _loadAtendimentoForWrite(req, res);
+    if (!at) return;
+
+    const { pool } = require('../config/database');
+    const prodRow = await pool.query(
+      `SELECT id, nome, preco_venda FROM produtos WHERE id = $1 AND salao_id = $2`,
+      [req.body.produto_id, req.salaoId]
+    );
+    if (!prodRow.rows.length) {
+      return res.status(400).json({ success: false, error: 'Produto não encontrado' });
+    }
+    const prod = prodRow.rows[0];
+    const quantidade = Number(req.body.quantidade_usada || 1);
+    const unidade = req.body.unidade || 'un';
+    const precoUnit = Number(req.body.preco_unitario ?? prod.preco_venda ?? 0);
+    const subtotal = req.body.subtotal != null
+      ? Number(req.body.subtotal)
+      : +(precoUnit * quantidade).toFixed(2);
+
+    const ins = await pool.query(
+      `INSERT INTO atendimentos_produtos
+         (atendimento_id, produto_id, salao_id, nome_snapshot,
+          quantidade_usada, unidade, preco_unitario, subtotal, criado_por)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       RETURNING *`,
+      [at.id, prod.id, req.salaoId, prod.nome,
+       quantidade, unidade, precoUnit, subtotal, req.user?.userId || null]
+    );
+    res.status(201).json({ success: true, data: ins.rows[0] });
+  } catch (error) {
+    require("../utils/sendError").sendError(res, 500, "Erro ao adicionar produto", error);
+  }
+});
+
+// DELETE remove produto do atendimento
+router.delete('/:id/produtos/:itemId', authMiddleware, async (req, res) => {
+  try {
+    const at = await _loadAtendimentoForWrite(req, res);
+    if (!at) return;
+    const { pool } = require('../config/database');
+    const del = await pool.query(
+      `DELETE FROM atendimentos_produtos
+        WHERE id = $1 AND atendimento_id = $2 AND salao_id = $3 RETURNING id`,
+      [req.params.itemId, at.id, req.salaoId]
+    );
+    if (!del.rowCount) return res.status(404).json({ success: false, error: 'Item não encontrado' });
+    res.json({ success: true });
+  } catch (error) {
+    require("../utils/sendError").sendError(res, 500, "Erro ao remover produto", error);
+  }
+});
+
 // Deletar
 router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
