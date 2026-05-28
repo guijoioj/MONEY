@@ -108,7 +108,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // Criar cliente
 router.post('/', authMiddleware, [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
-  body('telefone').optional().isMobilePhone('pt-BR').withMessage('Telefone inválido'),
+  body('telefone').optional({ checkFalsy: true }).isString().isLength({ min: 8, max: 25 }).withMessage('Telefone inválido'),
   body('email').optional().isEmail().withMessage('Email inválido'),
   body('cpf').optional().isLength({ min: 11, max: 14 }).withMessage('CPF deve ter entre 11 e 14 caracteres'),
 ], async (req, res) => {
@@ -152,7 +152,7 @@ function pickWhitelist(body, allowed) {
 
 router.put('/:id', authMiddleware, /* admin+recepcao via router.use no topo */ [
   body('nome').optional().isLength({ min: 2 }).withMessage('Nome deve ter pelo menos 2 caracteres'),
-  body('telefone').optional().isMobilePhone('pt-BR').withMessage('Telefone inválido'),
+  body('telefone').optional({ checkFalsy: true }).isString().isLength({ min: 8, max: 25 }).withMessage('Telefone inválido'),
   body('email').optional().isEmail().withMessage('Email inválido'),
 ], async (req, res) => {
   try {

@@ -875,12 +875,18 @@ export default function Agenda() {
       return;
     }
 
+    // datetime-local não carrega timezone — converter pra ISO 8601 UTC pra evitar
+    // o backend (Render = UTC) interpretar "14:00 local" como "14:00 UTC" (= 11:00 BRT).
+    const isoDataHora = formData.dataHora
+      ? new Date(formData.dataHora).toISOString()
+      : null;
+
     const payload = {
       cliente_id: formData.clienteId,
       servico_id: formData.servicoId,
       profissional_id: formData.profissionalId,
       auxiliar_id: formData.auxiliarId || null,
-      data_hora: formData.dataHora,
+      data_hora: isoDataHora,
       observacoes: formData.observacoes,
       status: formData.status,
     };

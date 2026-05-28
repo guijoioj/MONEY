@@ -14,7 +14,7 @@ export default function Clientes() {
   const [deleteModal, setDeleteModal] = useState({ open: false, cliente: null });
   const [profileModal, setProfileModal] = useState({ open: false, cliente: null });
   const [comprasModal, setComprasModal] = useState({ open: false, cliente: null });
-  const [formData, setFormData] = useState({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', observacoes: '' });
+  const [formData, setFormData] = useState({ nome: '', email: '', telefone: '', cpf: '', data_nascimento: '', observacoes: '' });
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -108,12 +108,12 @@ export default function Clientes() {
         email: cliente.email || '',
         telefone: cliente.telefone || '',
         cpf: cliente.cpf || '',
-        dataNascimento: cliente.dataNascimento || cliente.data_nascimento || '',
+        data_nascimento: cliente.data_nascimento || cliente.data_nascimento || '',
         observacoes: cliente.observacoes || '',
       });
     } else {
       setEditingCliente(null);
-      setFormData({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', observacoes: '' });
+      setFormData({ nome: '', email: '', telefone: '', cpf: '', data_nascimento: '', observacoes: '' });
     }
     setIsModalOpen(true);
   };
@@ -121,7 +121,7 @@ export default function Clientes() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingCliente(null);
-    setFormData({ nome: '', email: '', telefone: '', cpf: '', dataNascimento: '', observacoes: '' });
+    setFormData({ nome: '', email: '', telefone: '', cpf: '', data_nascimento: '', observacoes: '' });
   };
 
   const handleSubmit = (e) => {
@@ -292,8 +292,8 @@ export default function Clientes() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nascimento</label>
                   <input
                     type="date"
-                    value={formData.dataNascimento}
-                    onChange={(e) => setFormData({ ...formData, dataNascimento: e.target.value })}
+                    value={formData.data_nascimento}
+                    onChange={(e) => setFormData({ ...formData, data_nascimento: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>

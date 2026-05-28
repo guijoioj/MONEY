@@ -585,6 +585,62 @@ async function runMigrations() {
     END $$;
     CREATE INDEX IF NOT EXISTS idx_usuarios_profissional_id ON usuarios(profissional_id);
     CREATE INDEX IF NOT EXISTS idx_usuarios_tipo ON usuarios(tipo);
+
+    -- Atendimentos: status do fluxo aberto.
+    ALTER TABLE atendimentos ADD COLUMN IF NOT EXISTS observacoes TEXT;
+    ALTER TABLE atendimentos ADD COLUMN IF NOT EXISTS finalizado_em TIMESTAMP;
+
+    -- Itens do atendimento em aberto: snapshot de nome/preço/comissão preservado.
+    -- Schema legado SQLite (text IDs, camelCase) é detectado e descartado.
+    DO $$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'atendimentos_servicos') THEN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+           WHERE table_name = 'atendimentos_servicos' AND column_name = 'atendimento_id'
+        ) THEN
+          DROP TABLE atendimentos_servicos CASCADE;
+        END IF;
+      END IF;
+    END $$;
+
+    CREATE TABLE IF NOT EXISTS atendimentos_servicos (
+      id              SERIAL PRIMARY KEY,
+      atendimento_id  INTEGER NOT NULL REFERENCES atendimentos(id) ON DELETE CASCADE,
+      servico_id      INTEGER REFERENCES servicos(id) ON DELETE SET NULL,
+      profissional_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL,
+      salao_id        INTEGER NOT NULL REFERENCES saloes(id) ON DELETE CASCADE,
+      nome_snapshot   TEXT NOT NULL,
+      valor_snapshot  DECIMAL(10,2) NOT NULL DEFAULT 0,
+      quantidade      INTEGER NOT NULL DEFAULT 1,
+      subtotal        DECIMAL(10,2) NOT NULL DEFAULT 0,
+      percentual_comissao_snapshot DECIMAL(5,2) DEFAULT 0,
+      valor_comissao  DECIMAL(10,2) DEFAULT 0,
+      observacao      TEXT,
+      criado_por      INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+      created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_atend_servicos_atend ON atendimentos_servicos(atendimento_id);
+    CREATE INDEX IF NOT EXISTS idx_atend_servicos_salao ON atendimentos_servicos(salao_id);
+    CREATE INDEX IF NOT EXISTS idx_atend_servicos_prof  ON atendimentos_servicos(profissional_id);
+
+    -- Fechamento POR CLIENTE (caixa do cliente). data_inicio/data_fim já existem.
+    ALTER TABLE fechamentos ALTER COLUMN data_inicio DROP NOT NULL;
+    ALTER TABLE fechamentos ALTER COLUMN data_fim DROP NOT NULL;
+    ALTER TABLE fechamentos ALTER COLUMN tipo DROP NOT NULL;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS cliente_id INTEGER REFERENCES clientes(id) ON DELETE SET NULL;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS profissional_id INTEGER REFERENCES profissionais(id) ON DELETE SET NULL;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS forma_pagamento VARCHAR(50);
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS desconto_geral DECIMAL(10,2) DEFAULT 0;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS credito_utilizado DECIMAL(10,2) DEFAULT 0;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS total_atendimentos DECIMAL(10,2) DEFAULT 0;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS total_geral DECIMAL(10,2) DEFAULT 0;
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS atendimento_ids INTEGER[];
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS venda_ids INTEGER[];
+    ALTER TABLE fechamentos ADD COLUMN IF NOT EXISTS data DATE DEFAULT CURRENT_DATE;
+    CREATE INDEX IF NOT EXISTS idx_fechamentos_cliente ON fechamentos(cliente_id);
+    CREATE INDEX IF NOT EXISTS idx_fechamentos_data ON fechamentos(data);
   `);
 
   // Caixa diário

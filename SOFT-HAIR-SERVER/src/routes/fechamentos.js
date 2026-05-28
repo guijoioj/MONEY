@@ -187,40 +187,120 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, [
-  body('data_inicio').isDate().withMessage('data_inicio obrigatória (YYYY-MM-DD)'),
-  body('data_fim').isDate().withMessage('data_fim obrigatória (YYYY-MM-DD)'),
-  body('tipo').optional().isIn(['diario', 'semanal', 'mensal']),
-  // [P9-M2] Validar bounds do período: data_inicio < data_fim, máx 365 dias,
-  // datas não no futuro (data_fim <= hoje).
-  body('data_fim').custom((v, { req }) => {
-    const di = new Date(req.body.data_inicio);
-    const df = new Date(v);
-    if (Number.isNaN(di.getTime()) || Number.isNaN(df.getTime())) {
-      throw new Error('Datas inválidas');
-    }
-    if (df < di) {
-      throw new Error('data_fim deve ser >= data_inicio');
-    }
-    const diffDays = (df.getTime() - di.getTime()) / (1000 * 60 * 60 * 24);
-    if (diffDays > 365) {
-      throw new Error('Período máximo: 365 dias');
-    }
-    // Não permitir data_fim no futuro (fechamentos só fazem sentido sobre período passado).
-    // Tolerância: fim do dia atual (UTC) — clock skew de timezone.
-    const hoje = new Date();
-    hoje.setUTCHours(23, 59, 59, 999);
-    if (df.getTime() > hoje.getTime()) {
-      throw new Error('data_fim não pode estar no futuro');
-    }
-    return true;
-  }),
-], async (req, res) => {
+// POST /api/fechamentos — aceita DUAS modalidades:
+//   (A) FECHAMENTO POR CLIENTE (caixa do cliente / Fechamento.jsx):
+//       { clienteId, profissionalId, data, totalAtendimentos, totalVendas,
+//         descontoGeral, totalGeral, formaPagamento, observacoes,
+//         atendimentoIds:[], vendaIds:[], creditoUtilizado }
+//   (B) FECHAMENTO FINANCEIRO DO SALÃO (admin period-based):
+//       { data_inicio, data_fim, tipo }
+// O handler discrimina pela presença de clienteId/cliente_id ou atendimentoIds.
+router.post('/', authMiddleware, async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+    const b = req.body || {};
+    // Normaliza camelCase → snake_case (frontend manda camel)
+    const clienteId = b.clienteId ?? b.cliente_id ?? null;
+    const atendimentoIds = b.atendimentoIds ?? b.atendimento_ids ?? null;
+    const vendaIds = b.vendaIds ?? b.venda_ids ?? null;
+    const isPerCliente = clienteId || (Array.isArray(atendimentoIds) && atendimentoIds.length > 0) || (Array.isArray(vendaIds) && vendaIds.length > 0);
 
-    const result = await service.gerar(req.salaoId, req.body.data_inicio, req.body.data_fim, req.body.tipo);
+    if (isPerCliente) {
+      // ──────────── Modo (A): por cliente ────────────
+      const { pool, withTransaction } = require('../config/database');
+      const profissionalId = b.profissionalId ?? b.profissional_id ?? null;
+      const data = b.data || new Date().toISOString().slice(0, 10);
+      const formaPagamento = b.formaPagamento ?? b.forma_pagamento ?? null;
+      const totalAtend = Number(b.totalAtendimentos ?? b.total_atendimentos ?? 0);
+      const totalVendas = Number(b.totalVendas ?? b.total_vendas ?? 0);
+      const totalProdutos = Number(b.totalProdutos ?? b.total_produtos ?? 0);
+      const descontoGeral = Number(b.descontoGeral ?? b.desconto_geral ?? 0);
+      const creditoUtilizado = Number(b.creditoUtilizado ?? b.credito_utilizado ?? 0);
+      const totalGeral = Number(b.totalGeral ?? b.total_geral ?? 0);
+      const observacoes = b.observacoes || null;
+      const atIds = Array.isArray(atendimentoIds) ? atendimentoIds.map(Number).filter(Boolean) : [];
+      const vdIds = Array.isArray(vendaIds) ? vendaIds.map(Number).filter(Boolean) : [];
+
+      if (!clienteId && atIds.length === 0 && vdIds.length === 0) {
+        return res.status(400).json({ success: false, error: 'clienteId ou atendimentos/vendas obrigatórios' });
+      }
+
+      const result = await withTransaction(async (client) => {
+        // Validar tenancy do cliente
+        if (clienteId) {
+          const ok = await client.query('SELECT 1 FROM clientes WHERE id=$1 AND salao_id=$2', [clienteId, req.salaoId]);
+          if (!ok.rows.length) return { code: 400, body: { success: false, error: 'cliente não pertence ao salão' } };
+        }
+        // Insert fechamento por cliente
+        const ins = await client.query(
+          `INSERT INTO fechamentos
+             (salao_id, cliente_id, profissional_id, data,
+              total_atendimentos, total_vendas, total_produtos,
+              desconto_geral, credito_utilizado, total_geral,
+              forma_pagamento, observacoes, status,
+              atendimento_ids, venda_ids, tipo, data_inicio, data_fim, total_liquido)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'fechado',
+                   $13::int[],$14::int[],'cliente',$4,$4,$10)
+           RETURNING id`,
+          [req.salaoId, clienteId, profissionalId, data,
+           totalAtend, totalVendas, totalProdutos,
+           descontoGeral, creditoUtilizado, totalGeral,
+           formaPagamento, observacoes,
+           atIds.length ? atIds : null, vdIds.length ? vdIds : null]
+        );
+        const fechId = ins.rows[0].id;
+
+        // Marca atendimentos como finalizados
+        if (atIds.length) {
+          await client.query(
+            `UPDATE atendimentos
+                SET status = 'finalizado', updated_at = CURRENT_TIMESTAMP
+              WHERE id = ANY($1::int[]) AND salao_id = $2`,
+            [atIds, req.salaoId]
+          );
+        }
+        // Marca vendas como pagas
+        if (vdIds.length) {
+          await client.query(
+            `UPDATE vendas
+                SET status = 'paga', forma_pagamento = COALESCE($3, forma_pagamento), updated_at = CURRENT_TIMESTAMP
+              WHERE id = ANY($1::int[]) AND salao_id = $2`,
+            [vdIds, req.salaoId, formaPagamento]
+          );
+        }
+        // Debita crédito utilizado (se houver)
+        if (creditoUtilizado > 0 && clienteId) {
+          await client.query(
+            `INSERT INTO creditos_cliente (cliente_id, salao_id, tipo, valor, observacoes)
+             VALUES ($1, $2, 'debito', $3, $4)`,
+            [clienteId, req.salaoId, creditoUtilizado, `Fechamento #${fechId}`]
+          ).catch(() => { /* tabela pode não existir em ambiente legado */ });
+        }
+        return { code: 201, body: { success: true, data: { id: fechId, totalAtendimentos: totalAtend, totalVendas, totalGeral, descontoGeral, formaPagamento } } };
+      });
+      return res.status(result.code).json(result.body);
+    }
+
+    // ──────────── Modo (B): financeiro do salão por período ────────────
+    const dataInicio = b.data_inicio;
+    const dataFim = b.data_fim;
+    const tipo = b.tipo || 'diario';
+    if (!dataInicio || !dataFim) {
+      return res.status(400).json({ success: false, error: 'data_inicio e data_fim obrigatórios para fechamento financeiro do salão' });
+    }
+    const di = new Date(dataInicio); const df = new Date(dataFim);
+    if (Number.isNaN(di.getTime()) || Number.isNaN(df.getTime())) {
+      return res.status(400).json({ success: false, error: 'Datas inválidas' });
+    }
+    if (df < di) return res.status(400).json({ success: false, error: 'data_fim deve ser >= data_inicio' });
+    const diffDays = (df.getTime() - di.getTime()) / 86_400_000;
+    if (diffDays > 365) return res.status(400).json({ success: false, error: 'Período máximo: 365 dias' });
+    const hoje = new Date(); hoje.setUTCHours(23, 59, 59, 999);
+    if (df.getTime() > hoje.getTime()) return res.status(400).json({ success: false, error: 'data_fim não pode estar no futuro' });
+    if (!['diario', 'semanal', 'mensal'].includes(tipo)) {
+      return res.status(400).json({ success: false, error: 'tipo deve ser diario, semanal ou mensal' });
+    }
+
+    const result = await service.gerar(req.salaoId, dataInicio, dataFim, tipo);
     if (result.success) res.status(201).json({ success: true, data: result.data });
     else res.status(400).json({ success: false, error: result.error });
   } catch (error) {
