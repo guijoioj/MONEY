@@ -653,6 +653,8 @@ async function runMigrations() {
       created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_backups_salao_created ON backups(salao_id, created_at DESC);
+    -- Mirror externo (S3/R2/B2) preenchido por tools/sync-backups-external.js.
+    ALTER TABLE backups ADD COLUMN IF NOT EXISTS arquivo_externo_url TEXT;
 
     -- Fechamento POR CLIENTE (caixa do cliente). data_inicio/data_fim já existem.
     ALTER TABLE fechamentos ALTER COLUMN data_inicio DROP NOT NULL;

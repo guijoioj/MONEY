@@ -137,7 +137,7 @@ router.get('/faturamento', authMiddleware, async (req, res) => {
           COUNT(DISTINCT v.cliente_id)::int        AS clientes_unicos
          FROM vendas v
         WHERE v.salao_id = $1
-          AND COALESCE(v.status,'pendente') NOT IN ('cancelada')
+          AND v.status IN ('paga', 'concluida', 'finalizada')
           AND v.created_at >= NOW() - ${intervalSql}`,
       [req.salaoId]
     );
@@ -155,7 +155,7 @@ router.get('/faturamento-diario', authMiddleware, async (req, res) => {
               COUNT(*)::int                            AS qtd
          FROM vendas v
         WHERE v.salao_id = $1
-          AND COALESCE(v.status,'pendente') NOT IN ('cancelada')
+          AND v.status IN ('paga', 'concluida', 'finalizada')
           AND v.created_at >= NOW() - ($2 || ' days')::interval
         GROUP BY DATE(v.created_at)
         ORDER BY dia ASC`,
@@ -165,24 +165,41 @@ router.get('/faturamento-diario', authMiddleware, async (req, res) => {
   } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro", e); }
 });
 
-// GET /ranking-profissionais?dias=30 — top profissionais por faturamento.
+// GET /ranking-profissionais?dias=30 — top por faturamento.
+// Usa CTEs separadas pra atendimentos/vendas (evita multiplicação no JOIN).
 router.get('/ranking-profissionais', authMiddleware, async (req, res) => {
   try {
     const dias = Math.min(Math.max(parseInt(req.query.dias) || 30, 1), 365);
     const r = await query(
-      `SELECT p.id, p.nome,
-              COUNT(DISTINCT a.id)::int                    AS qtd_atendimentos,
-              COALESCE(SUM(a.valor), 0)::numeric            AS total_atendimentos,
-              COALESCE(SUM(v.valor_final), 0)::numeric      AS total_vendas
+      `WITH ag_atend AS (
+         SELECT profissional_id,
+                COUNT(*)::int                AS qtd,
+                COALESCE(SUM(valor), 0)::numeric AS total
+           FROM atendimentos
+          WHERE salao_id = $1
+            AND created_at >= NOW() - ($2 || ' days')::interval
+          GROUP BY profissional_id
+       ),
+       ag_vendas AS (
+         SELECT profissional_id,
+                COUNT(*)::int                   AS qtd,
+                COALESCE(SUM(valor_final), 0)::numeric AS total
+           FROM vendas
+          WHERE salao_id = $1
+            AND status IN ('paga', 'concluida', 'finalizada')
+            AND created_at >= NOW() - ($2 || ' days')::interval
+          GROUP BY profissional_id
+       )
+       SELECT p.id, p.nome,
+              COALESCE(a.qtd, 0)            AS qtd_atendimentos,
+              COALESCE(a.total, 0)::numeric AS total_atendimentos,
+              COALESCE(v.qtd, 0)            AS qtd_vendas,
+              COALESCE(v.total, 0)::numeric AS total_vendas
          FROM profissionais p
-         LEFT JOIN atendimentos a ON a.profissional_id = p.id AND a.salao_id = p.salao_id
-              AND a.created_at >= NOW() - ($2 || ' days')::interval
-         LEFT JOIN vendas v ON v.profissional_id = p.id AND v.salao_id = p.salao_id
-              AND COALESCE(v.status,'pendente') NOT IN ('cancelada')
-              AND v.created_at >= NOW() - ($2 || ' days')::interval
+         LEFT JOIN ag_atend  a ON a.profissional_id = p.id
+         LEFT JOIN ag_vendas v ON v.profissional_id = p.id
         WHERE p.salao_id = $1 AND COALESCE(p.ativo, true) = true
-        GROUP BY p.id, p.nome
-        ORDER BY (COALESCE(SUM(a.valor),0) + COALESCE(SUM(v.valor_final),0)) DESC
+        ORDER BY (COALESCE(a.total, 0) + COALESCE(v.total, 0)) DESC
         LIMIT 20`,
       [req.salaoId, String(dias)]
     );
@@ -201,7 +218,7 @@ router.get('/top-clientes', authMiddleware, async (req, res) => {
               MAX(v.created_at)                        AS ultima_compra
          FROM clientes c
          JOIN vendas v ON v.cliente_id = c.id AND v.salao_id = c.salao_id
-              AND COALESCE(v.status,'pendente') NOT IN ('cancelada')
+              AND v.status IN ('paga', 'concluida', 'finalizada')
               AND v.created_at >= NOW() - ($2 || ' days')::interval
         WHERE c.salao_id = $1
         GROUP BY c.id, c.nome, c.telefone
@@ -223,7 +240,7 @@ router.get('/produtos-vendidos', authMiddleware, async (req, res) => {
               COALESCE(SUM(vi.valor_total), 0)::numeric AS faturado
          FROM venda_itens vi
          JOIN vendas v ON v.id = vi.venda_id
-              AND COALESCE(v.status,'pendente') NOT IN ('cancelada')
+              AND v.status IN ('paga', 'concluida', 'finalizada')
               AND v.created_at >= NOW() - ($2 || ' days')::interval
          JOIN produtos p ON p.id = vi.produto_id
         WHERE v.salao_id = $1
