@@ -354,7 +354,7 @@ export default function Layout() {
           className={`${sidebarOpen ? 'flex' : 'hidden'} md:flex flex-col fixed inset-y-0 left-0 z-40 pt-16 pb-6 px-3`}
           style={{ width: '72px' }}
         >
-          <nav className="flex flex-col gap-1 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
+          <nav className="flex flex-col gap-1 flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}

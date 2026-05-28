@@ -521,27 +521,35 @@ export default function Agenda() {
   // Mantém refs atualizados para uso no intervalo sem re-criar o efeito
   allAgendamentosRef.current = allAgendamentos;
 
-  // Auto-conversão: quando o horário do agendamento chega (hora <= agora),
-  // converte automaticamente em atendimento. Cancelados/concluídos/já em andamento
-  // são ignorados. Sempre ativo (sem depender de config).
+  // Auto-conversão: SÓ agendamentos de HOJE cujo horário já chegou viram atendimento.
+  // CRÍTICO: jamais converter dias passados — histórico legado (HairBeauty) tem
+  // milhares de agendamentos antigos; convertê-los geraria flood de requests (429).
+  // Janela: hora entre (agora - 2h) e agora, hoje, status agendado/confirmado.
   useEffect(() => {
     const check = () => {
       const now = new Date();
-      allAgendamentosRef.current.forEach(a => {
+      const hoje = getLocalDateStr(now.toISOString());
+      const limiteInferior = new Date(now.getTime() - 2 * 60 * 60 * 1000); // 2h atrás
+      let convertidosNestaRodada = 0;
+      for (const a of allAgendamentosRef.current) {
+        if (convertidosNestaRodada >= 5) break; // teto por rodada — nunca floodar
         const status = a.status;
-        if (status !== 'agendado' && status !== 'confirmado') return;
+        if (status !== 'agendado' && status !== 'confirmado') continue;
+        if (!a.dataHora) continue;
+        if (getLocalDateStr(a.dataHora) !== hoje) continue; // só HOJE
         const hora = new Date(a.dataHora);
-        if (Number.isNaN(hora.getTime())) return;
-        if (hora <= now && !convertingRef.current.has(a.id)) {
+        if (Number.isNaN(hora.getTime())) continue;
+        if (hora <= now && hora >= limiteInferior && !convertingRef.current.has(a.id)) {
           convertingRef.current.add(a.id);
+          convertidosNestaRodada++;
           converterUmMutation.mutate({ id: a.id }, {
             onSettled: () => convertingRef.current.delete(a.id),
           });
         }
-      });
+      }
     };
-    check(); // roda imediatamente ao montar
-    const interval = setInterval(check, 30000);
+    check();
+    const interval = setInterval(check, 60000);
     return () => clearInterval(interval);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

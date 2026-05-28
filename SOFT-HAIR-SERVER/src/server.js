@@ -149,7 +149,9 @@ function rateLimitKey(req) {
 // ─── Rate Limiting (geral) ───
 const generalLimiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 500,
+  // Key é por IP+token (cada usuário tem bucket próprio). App usa React Query com
+  // muitas invalidações/refetch → 500 é apertado em uso pesado. 2000/15min dá folga.
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 2000,
   message: { success: false, error: 'Muitas requisições. Tente novamente em alguns minutos.' },
   standardHeaders: true,
   legacyHeaders: false,
