@@ -9,8 +9,30 @@ const { invalidateProfissionalCache } = require('../middleware/profissionalAuth'
 
 const service = new ProfissionalService();
 
-// Profissionais: admin + recepção (CRUD operacional). DELETE permanece admin-only individual.
-router.use(authMiddleware, requireAnyRole(['admin', 'recepcao']));
+// PAINEL próprio do profissional — REGISTRADO ANTES do router.use blanket
+// para que o profissional logado consiga ver o próprio painel (id === profissionalId).
+// Admin/recepção também podem acessar qualquer painel.
+function _painelGuard(req, res, next) {
+  const role = req.user?.tipo;
+  if (role === 'admin' || role === 'recepcao') return next();
+  if (role === 'profissional') {
+    const idParam = Number(req.params.id);
+    const ownId = Number(req.user?.profissionalId);
+    if (idParam && ownId && idParam === ownId) return next();
+    return res.status(403).json({ success: false, error: 'Painel acessível apenas ao próprio profissional.' });
+  }
+  return res.status(403).json({ success: false, error: 'Acesso negado.' });
+}
+
+// Profissionais:
+//   GET  → admin + recepção (recepção precisa listar pra agenda/atendimento)
+//   POST/PUT/DELETE → ADMIN-ONLY (dados sensíveis: senha_app, comissão, ativo)
+//   /:id/painel* → admin + recepção + profissional (somente próprio painel)
+// Guard inteligente: rotas de painel bypassam o role-check blanket e usam _painelGuard.
+router.use(authMiddleware, (req, res, next) => {
+  if (/^\/\d+\/painel(\/|$)/.test(req.path)) return _painelGuard(req, res, next);
+  return requireAnyRole(['admin', 'recepcao'])(req, res, next);
+});
 
 // [P3-A4] Whitelist explícita de campos editáveis em profissionais (impede mass-assignment).
 // Campos NUNCA aceitos via body: id, salao_id, senha_hash (direto), usuario_id, created_at, push_token (vai por rota dedicada).
@@ -72,8 +94,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// [P2-C4] Criar profissional — exige admin (não-admins não podem criar/setar senha_app)
-router.post('/', authMiddleware, /* admin+recepcao via router.use */ [
+// Criar profissional — admin-only (senha_app, comissão).
+router.post('/', authMiddleware, requireAdmin, [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
   body('email').optional().isEmail().withMessage('Email inválido'),
   body('comissao_percentual').optional().isFloat({ min: 0, max: 100 }).withMessage('Comissão deve ser entre 0 e 100'),
@@ -103,8 +125,8 @@ router.post('/', authMiddleware, /* admin+recepcao via router.use */ [
   }
 });
 
-// [P2-C4] Atualizar — exige admin (impede reset de senha_app por outros usuários)
-router.put('/:id', authMiddleware, /* admin+recepcao via router.use */ [
+// Atualizar — admin-only (impede mudança de comissão/senha_app pela recepção).
+router.put('/:id', authMiddleware, requireAdmin, [
   body('nome').optional().isLength({ min: 2 }).withMessage('Nome deve ter pelo menos 2 caracteres'),
   body('email').optional().isEmail().withMessage('Email inválido'),
 ], async (req, res) => {

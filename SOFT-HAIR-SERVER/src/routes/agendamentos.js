@@ -40,17 +40,22 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Agendamentos pendentes (status = 'pendente')
+// Agendamentos pendentes (status = 'pendente') — profissional scopado.
 router.get('/pendentes', authMiddleware, async (req, res) => {
   try {
-    const result = await service.listar(req.salaoId, { status: 'pendente' });
+    const filtros = { status: 'pendente' };
+    if (isProfissionalScope(req)) {
+      if (!req.user.profissionalId) return res.status(403).json({ success: false, error: 'Usuário profissional sem vínculo. Contate o administrador.' });
+      filtros.profissional_id = req.user.profissionalId;
+    }
+    const result = await service.listar(req.salaoId, filtros);
     res.json({ success: result.success, data: result.data || [] });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
-// Próximos N dias
+// Próximos N dias — profissional scopado.
 router.get('/proximos', authMiddleware, async (req, res) => {
   try {
     const dias = parseInt(req.query.dias || '7', 10);
@@ -59,18 +64,26 @@ router.get('/proximos', authMiddleware, async (req, res) => {
     fim.setDate(hoje.getDate() + dias);
     const dataInicio = hoje.toISOString().split('T')[0];
     const dataFim = fim.toISOString().split('T')[0];
-    const result = await service.listar(req.salaoId, { data_inicio: dataInicio, data_fim: dataFim });
+    const filtros = { data_inicio: dataInicio, data_fim: dataFim };
+    if (isProfissionalScope(req)) {
+      if (!req.user.profissionalId) return res.status(403).json({ success: false, error: 'Usuário profissional sem vínculo. Contate o administrador.' });
+      filtros.profissional_id = req.user.profissionalId;
+    }
+    const result = await service.listar(req.salaoId, filtros);
     res.json({ success: result.success, data: result.data || [] });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
-// Horários disponíveis
+// Horários disponíveis — profissional só consulta os próprios.
 router.get('/disponiveis/:profissionalId', authMiddleware, async (req, res) => {
   try {
     const { data } = req.query;
     if (!data) return res.status(400).json({ success: false, error: 'Parâmetro "data" é obrigatório' });
+    if (isProfissionalScope(req) && Number(req.params.profissionalId) !== Number(req.user.profissionalId)) {
+      return res.status(403).json({ success: false, error: 'Acesso restrito (somente seus próprios horários).' });
+    }
     const result = await service.getHorariosDisponiveis(req.params.profissionalId, data, req.salaoId);
     res.json({ success: true, data: result.data });
   } catch (error) {
@@ -78,11 +91,14 @@ router.get('/disponiveis/:profissionalId', authMiddleware, async (req, res) => {
   }
 });
 
-// Buscar por ID
+// Buscar por ID — profissional só vê os próprios.
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const result = await service.buscarPorId(req.params.id, req.salaoId);
     if (result.success) {
+      if (isProfissionalScope(req) && Number(result.data?.profissional_id) !== Number(req.user.profissionalId)) {
+        return res.status(403).json({ success: false, error: 'Agendamento não pertence a você.' });
+      }
       res.json({ success: true, data: result.data });
     } else {
       res.status(404).json({ success: false, error: result.error });

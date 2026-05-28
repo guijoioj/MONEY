@@ -32,12 +32,18 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Buscar por ID
+// Buscar por ID — profissional só vê os próprios.
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const result = await service.buscarPorId(req.params.id, req.salaoId);
-    if (result.success) res.json({ success: true, data: result.data });
-    else res.status(404).json({ success: false, error: result.error });
+    if (result.success) {
+      if (isProfissionalScope(req) && Number(result.data?.profissional_id) !== Number(req.user.profissionalId)) {
+        return res.status(403).json({ success: false, error: 'Atendimento não pertence a você.' });
+      }
+      res.json({ success: true, data: result.data });
+    } else {
+      res.status(404).json({ success: false, error: result.error });
+    }
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }

@@ -2,17 +2,20 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
-const { requireRole } = require('../middleware/role');
+const { requireRole, requireAnyRole } = require('../middleware/role');
 const { FechamentoService } = require('../services');
 const { logAction } = require('../utils/auditLog');
 
 const service = new FechamentoService();
 
-// Fechamento financeiro: admin-only. (Fechar caixa do cliente, se existir como
-// rota, deve viver em outro endpoint adminOrRecepcao.)
-router.use(authMiddleware, requireRole('admin'));
+// Split: fechamento por CLIENTE (caixa do cliente) → admin + recepção (operação de salão).
+// Fechamento financeiro do salão (período) → admin-only.
+// Aplicado por rota; sem router.use blanket.
+const adminOrRecepcao = requireAnyRole(['admin', 'recepcao']);
+const adminOnly = requireRole('admin');
 
-router.get('/', authMiddleware, async (req, res) => {
+// GET / — lista fechamentos do salão (admin-only — agregação financeira).
+router.get('/', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { status, tipo } = req.query;
     const result = await service.listar(req.salaoId, { status, tipo });
@@ -22,23 +25,30 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Fechamentos em aberto: agrupa atendimentos + vendas em aberto por cliente.
+// Fechamentos em aberto — admin + recepção (operação de salão).
 // Frontend (pages/Fechamento.jsx) espera: [{ clienteId, clienteNome, clienteTelefone, atendimentos:[], vendas:[], totalGeral }]
-router.get('/em-aberto', authMiddleware, async (req, res) => {
+router.get('/em-aberto', authMiddleware, adminOrRecepcao, async (req, res) => {
   try {
     const { pool } = require('../config/database');
     const { profissionalId, clienteId, clienteNome } = req.query;
 
-    // Predicado: atendimento finalizado/concluido sem fechamento ainda. Filtros opcionais.
+    // Predicado: atendimento finalizado/concluido sem fechamento ainda.
+    // Considera fechado se está em fechamento.atendimento_ids (preferência), OU,
+    // se for fechamento legado de período sem array, cai no fallback de data+cliente.
     const aParams = [req.salaoId];
     let aWhere = `a.salao_id = $1
       AND a.status IN ('finalizado','concluido','concluida')
       AND NOT EXISTS (
         SELECT 1 FROM fechamentos f
          WHERE f.salao_id = a.salao_id
-           AND f.cliente_id = a.cliente_id
            AND COALESCE(f.deleted_at, NULL) IS NULL
-           AND a.created_at::date BETWEEN f.data_inicio AND f.data_fim
+           AND (
+             (f.atendimento_ids IS NOT NULL AND a.id = ANY(f.atendimento_ids))
+             OR
+             (f.atendimento_ids IS NULL AND f.cliente_id IS NOT NULL
+              AND f.cliente_id = a.cliente_id
+              AND a.created_at::date BETWEEN f.data_inicio AND f.data_fim)
+           )
       )`;
     let ap = 2;
     if (profissionalId) { aWhere += ` AND a.profissional_id = $${ap++}`; aParams.push(profissionalId); }
@@ -57,16 +67,21 @@ router.get('/em-aberto', authMiddleware, async (req, res) => {
        ORDER BY a.created_at DESC
     `, aParams);
 
-    // Vendas em aberto: status != cancelada, sem fechamento que cubra a data.
+    // Vendas em aberto: status != cancelada/paga, sem fechamento que cubra.
     const vParams = [req.salaoId];
     let vWhere = `v.salao_id = $1
-      AND COALESCE(v.status,'concluida') != 'cancelada'
+      AND COALESCE(v.status,'pendente') NOT IN ('cancelada', 'paga')
       AND NOT EXISTS (
         SELECT 1 FROM fechamentos f
          WHERE f.salao_id = v.salao_id
-           AND f.cliente_id = v.cliente_id
            AND COALESCE(f.deleted_at, NULL) IS NULL
-           AND v.created_at::date BETWEEN f.data_inicio AND f.data_fim
+           AND (
+             (f.venda_ids IS NOT NULL AND v.id = ANY(f.venda_ids))
+             OR
+             (f.venda_ids IS NULL AND f.cliente_id IS NOT NULL
+              AND f.cliente_id = v.cliente_id
+              AND v.created_at::date BETWEEN f.data_inicio AND f.data_fim)
+           )
       )`;
     let vp = 2;
     if (profissionalId) { vWhere += ` AND v.profissional_id = $${vp++}`; vParams.push(profissionalId); }
@@ -90,23 +105,28 @@ router.get('/em-aberto', authMiddleware, async (req, res) => {
 
     const [atendRes, vendasRes] = await Promise.all([atendQuery, vendasQuery]);
 
-    // Servicos por atendimento (uma só query)
+    // Servicos por atendimento — usa snapshot da nova tabela atendimentos_servicos.
     const atendIds = atendRes.rows.map(r => r.id).filter(Boolean);
     let servicosPorAtend = {};
     if (atendIds.length > 0) {
       try {
         const { rows: svcRows } = await pool.query(`
-          SELECT asv.atendimento_id, s.id AS servico_id, s.nome AS servico_nome, asv.preco
+          SELECT asv.atendimento_id,
+                 asv.servico_id,
+                 COALESCE(asv.nome_snapshot, s.nome) AS servico_nome,
+                 asv.valor_snapshot,
+                 asv.quantidade,
+                 asv.subtotal
             FROM atendimentos_servicos asv
             LEFT JOIN servicos s ON s.id = asv.servico_id
-           WHERE asv.atendimento_id = ANY($1::text[])
+           WHERE asv.atendimento_id = ANY($1::int[])
         `, [atendIds]);
         svcRows.forEach(r => {
           const k = r.atendimento_id;
           if (!servicosPorAtend[k]) servicosPorAtend[k] = [];
           servicosPorAtend[k].push(r);
         });
-      } catch (_) { /* tabela pode não existir em ambiente antigo */ }
+      } catch (e) { console.warn('[em-aberto] svc query falhou:', e.message); }
     }
 
     // Itens por venda
@@ -119,14 +139,14 @@ router.get('/em-aberto', authMiddleware, async (req, res) => {
                  p.nome AS item_nome
             FROM venda_itens vi
             LEFT JOIN produtos p ON p.id = vi.produto_id
-           WHERE vi.venda_id = ANY($1::text[])
+           WHERE vi.venda_id = ANY($1::int[])
         `, [vendaIds]);
         itRows.forEach(r => {
           const k = r.venda_id;
           if (!itensPorVenda[k]) itensPorVenda[k] = [];
           itensPorVenda[k].push(r);
         });
-      } catch (_) { /* noop */ }
+      } catch (e) { console.warn('[em-aberto] itens query falhou:', e.message); }
     }
 
     // Agrupa por cliente
@@ -177,7 +197,8 @@ router.get('/em-aberto', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/:id', authMiddleware, async (req, res) => {
+// GET /:id — detalhe de fechamento. Admin OU recepção (recepção pode rever fechamento que ela mesma fez).
+router.get('/:id', authMiddleware, adminOrRecepcao, async (req, res) => {
   try {
     const result = await service.buscarPorId(req.params.id, req.salaoId);
     if (result.success) res.json({ success: true, data: result.data });
@@ -187,100 +208,227 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// POST /api/fechamentos — aceita DUAS modalidades:
-//   (A) FECHAMENTO POR CLIENTE (caixa do cliente / Fechamento.jsx):
-//       { clienteId, profissionalId, data, totalAtendimentos, totalVendas,
-//         descontoGeral, totalGeral, formaPagamento, observacoes,
-//         atendimentoIds:[], vendaIds:[], creditoUtilizado }
-//   (B) FECHAMENTO FINANCEIRO DO SALÃO (admin period-based):
-//       { data_inicio, data_fim, tipo }
-// O handler discrimina pela presença de clienteId/cliente_id ou atendimentoIds.
+// POST /api/fechamentos — DUAS modalidades, com guards SEPARADOS.
+// (A) FECHAMENTO POR CLIENTE (admin + recepção): { clienteId, atendimentoIds, vendaIds, formaPagamento, descontoGeral, creditoUtilizado, observacoes }
+//     → Totais são RECALCULADOS pelo backend a partir dos IDs. Frontend NÃO pode injetar total.
+//     → IDs são validados: pertencem ao salão E ao clienteId E não estão cancelados/já fechados.
+// (B) FECHAMENTO FINANCEIRO DO SALÃO (admin-only): { data_inicio, data_fim, tipo }
+//     → Agregação de período pelo FechamentoService.
+//
+// O handler discrimina pela presença de clienteId/atendimentoIds/vendaIds e aplica o guard certo.
 router.post('/', authMiddleware, async (req, res) => {
+  const b = req.body || {};
+  const clienteId = b.clienteId ?? b.cliente_id ?? null;
+  const atendimentoIds = b.atendimentoIds ?? b.atendimento_ids ?? null;
+  const vendaIds = b.vendaIds ?? b.venda_ids ?? null;
+  const isPerCliente = !!clienteId
+    || (Array.isArray(atendimentoIds) && atendimentoIds.length > 0)
+    || (Array.isArray(vendaIds) && vendaIds.length > 0);
+
+  // Guard explícito por modo
+  const role = req.user?.tipo;
+  if (isPerCliente) {
+    if (!['admin', 'recepcao'].includes(role)) {
+      return res.status(403).json({ success: false, error: 'Acesso restrito (admin ou recepção).' });
+    }
+    return _postFechamentoCliente(req, res, b, clienteId, atendimentoIds, vendaIds);
+  }
+  if (role !== 'admin') {
+    return res.status(403).json({ success: false, error: 'Fechamento financeiro do salão é admin-only.' });
+  }
+  return _postFechamentoPeriodo(req, res, b);
+});
+
+async function _postFechamentoCliente(req, res, b, clienteId, atendimentoIdsRaw, vendaIdsRaw) {
   try {
-    const b = req.body || {};
-    // Normaliza camelCase → snake_case (frontend manda camel)
-    const clienteId = b.clienteId ?? b.cliente_id ?? null;
-    const atendimentoIds = b.atendimentoIds ?? b.atendimento_ids ?? null;
-    const vendaIds = b.vendaIds ?? b.venda_ids ?? null;
-    const isPerCliente = clienteId || (Array.isArray(atendimentoIds) && atendimentoIds.length > 0) || (Array.isArray(vendaIds) && vendaIds.length > 0);
+    const { pool, withTransaction } = require('../config/database');
+    const profissionalId = b.profissionalId ?? b.profissional_id ?? null;
+    const data = b.data || new Date().toISOString().slice(0, 10);
+    const formaPagamento = b.formaPagamento ?? b.forma_pagamento ?? null;
+    const observacoes = b.observacoes || null;
+    // SOMENTE valores que o usuário escolhe explicitamente são aceitos do frontend.
+    const descontoGeral = Math.max(0, Number(b.descontoGeral ?? b.desconto_geral ?? 0));
+    const creditoUtilizadoSolicitado = Math.max(0, Number(b.creditoUtilizado ?? b.credito_utilizado ?? 0));
+    const atIds = Array.isArray(atendimentoIdsRaw) ? [...new Set(atendimentoIdsRaw.map(Number).filter(Boolean))] : [];
+    const vdIds = Array.isArray(vendaIdsRaw) ? [...new Set(vendaIdsRaw.map(Number).filter(Boolean))] : [];
 
-    if (isPerCliente) {
-      // ──────────── Modo (A): por cliente ────────────
-      const { pool, withTransaction } = require('../config/database');
-      const profissionalId = b.profissionalId ?? b.profissional_id ?? null;
-      const data = b.data || new Date().toISOString().slice(0, 10);
-      const formaPagamento = b.formaPagamento ?? b.forma_pagamento ?? null;
-      const totalAtend = Number(b.totalAtendimentos ?? b.total_atendimentos ?? 0);
-      const totalVendas = Number(b.totalVendas ?? b.total_vendas ?? 0);
-      const totalProdutos = Number(b.totalProdutos ?? b.total_produtos ?? 0);
-      const descontoGeral = Number(b.descontoGeral ?? b.desconto_geral ?? 0);
-      const creditoUtilizado = Number(b.creditoUtilizado ?? b.credito_utilizado ?? 0);
-      const totalGeral = Number(b.totalGeral ?? b.total_geral ?? 0);
-      const observacoes = b.observacoes || null;
-      const atIds = Array.isArray(atendimentoIds) ? atendimentoIds.map(Number).filter(Boolean) : [];
-      const vdIds = Array.isArray(vendaIds) ? vendaIds.map(Number).filter(Boolean) : [];
-
-      if (!clienteId && atIds.length === 0 && vdIds.length === 0) {
-        return res.status(400).json({ success: false, error: 'clienteId ou atendimentos/vendas obrigatórios' });
-      }
-
-      const result = await withTransaction(async (client) => {
-        // Validar tenancy do cliente
-        if (clienteId) {
-          const ok = await client.query('SELECT 1 FROM clientes WHERE id=$1 AND salao_id=$2', [clienteId, req.salaoId]);
-          if (!ok.rows.length) return { code: 400, body: { success: false, error: 'cliente não pertence ao salão' } };
-        }
-        // Insert fechamento por cliente
-        const ins = await client.query(
-          `INSERT INTO fechamentos
-             (salao_id, cliente_id, profissional_id, data,
-              total_atendimentos, total_vendas, total_produtos,
-              desconto_geral, credito_utilizado, total_geral,
-              forma_pagamento, observacoes, status,
-              atendimento_ids, venda_ids, tipo, data_inicio, data_fim, total_liquido)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'fechado',
-                   $13::int[],$14::int[],'cliente',$4,$4,$10)
-           RETURNING id`,
-          [req.salaoId, clienteId, profissionalId, data,
-           totalAtend, totalVendas, totalProdutos,
-           descontoGeral, creditoUtilizado, totalGeral,
-           formaPagamento, observacoes,
-           atIds.length ? atIds : null, vdIds.length ? vdIds : null]
-        );
-        const fechId = ins.rows[0].id;
-
-        // Marca atendimentos como finalizados
-        if (atIds.length) {
-          await client.query(
-            `UPDATE atendimentos
-                SET status = 'finalizado', updated_at = CURRENT_TIMESTAMP
-              WHERE id = ANY($1::int[]) AND salao_id = $2`,
-            [atIds, req.salaoId]
-          );
-        }
-        // Marca vendas como pagas
-        if (vdIds.length) {
-          await client.query(
-            `UPDATE vendas
-                SET status = 'paga', forma_pagamento = COALESCE($3, forma_pagamento), updated_at = CURRENT_TIMESTAMP
-              WHERE id = ANY($1::int[]) AND salao_id = $2`,
-            [vdIds, req.salaoId, formaPagamento]
-          );
-        }
-        // Debita crédito utilizado (se houver)
-        if (creditoUtilizado > 0 && clienteId) {
-          await client.query(
-            `INSERT INTO creditos_cliente (cliente_id, salao_id, tipo, valor, observacoes)
-             VALUES ($1, $2, 'debito', $3, $4)`,
-            [clienteId, req.salaoId, creditoUtilizado, `Fechamento #${fechId}`]
-          ).catch(() => { /* tabela pode não existir em ambiente legado */ });
-        }
-        return { code: 201, body: { success: true, data: { id: fechId, totalAtendimentos: totalAtend, totalVendas, totalGeral, descontoGeral, formaPagamento } } };
-      });
-      return res.status(result.code).json(result.body);
+    if (!clienteId && atIds.length === 0 && vdIds.length === 0) {
+      return res.status(400).json({ success: false, error: 'clienteId ou atendimentos/vendas obrigatórios' });
     }
 
-    // ──────────── Modo (B): financeiro do salão por período ────────────
+    const result = await withTransaction(async (client) => {
+      // 1) Tenancy do cliente
+      if (clienteId) {
+        const ok = await client.query('SELECT 1 FROM clientes WHERE id=$1 AND salao_id=$2', [clienteId, req.salaoId]);
+        if (!ok.rows.length) return { code: 400, body: { success: false, error: 'cliente não pertence ao salão' } };
+      }
+
+      // 2) Carrega + valida atendimentos. Backend RECALCULA total — nada vem do frontend.
+      let totalAtend = 0;
+      if (atIds.length > 0) {
+        const r = await client.query(
+          `SELECT id, cliente_id, status, COALESCE(valor, 0)::numeric AS valor
+             FROM atendimentos
+            WHERE id = ANY($1::int[]) AND salao_id = $2`,
+          [atIds, req.salaoId]
+        );
+        if (r.rows.length !== atIds.length) {
+          return { code: 400, body: { success: false, error: 'Atendimento(s) não encontrado(s) ou de outro salão.' } };
+        }
+        for (const a of r.rows) {
+          if (clienteId && a.cliente_id !== Number(clienteId)) {
+            return { code: 400, body: { success: false, error: `Atendimento ${a.id} não pertence ao cliente informado.` } };
+          }
+          if ((a.status || '').toLowerCase() === 'cancelado') {
+            return { code: 400, body: { success: false, error: `Atendimento ${a.id} está cancelado.` } };
+          }
+        }
+        // Já-fechado? procura em fechamentos.atendimento_ids
+        const dup = await client.query(
+          `SELECT id FROM fechamentos
+            WHERE salao_id = $1 AND COALESCE(deleted_at, NULL) IS NULL
+              AND atendimento_ids IS NOT NULL
+              AND atendimento_ids && $2::int[]
+            LIMIT 1`,
+          [req.salaoId, atIds]
+        );
+        if (dup.rows.length) {
+          return { code: 409, body: { success: false, error: `Algum atendimento já consta em fechamento prévio (#${dup.rows[0].id}).` } };
+        }
+        // Total = SOMA dos valores reais dos atendimentos (a coluna valor é atualizada pelo
+        // endpoint de adicionar serviço, ver routes/atendimentos.js).
+        totalAtend = r.rows.reduce((s, a) => s + Number(a.valor || 0), 0);
+      }
+
+      // 3) Carrega + valida vendas. Backend RECALCULA.
+      let totalVendas = 0;
+      if (vdIds.length > 0) {
+        const r = await client.query(
+          `SELECT id, cliente_id, status, COALESCE(valor_final, valor_total, 0)::numeric AS valor
+             FROM vendas
+            WHERE id = ANY($1::int[]) AND salao_id = $2`,
+          [vdIds, req.salaoId]
+        );
+        if (r.rows.length !== vdIds.length) {
+          return { code: 400, body: { success: false, error: 'Venda(s) não encontrada(s) ou de outro salão.' } };
+        }
+        for (const v of r.rows) {
+          if (clienteId && v.cliente_id !== Number(clienteId)) {
+            return { code: 400, body: { success: false, error: `Venda ${v.id} não pertence ao cliente informado.` } };
+          }
+          if (['cancelada', 'paga'].includes((v.status || '').toLowerCase())) {
+            return { code: 400, body: { success: false, error: `Venda ${v.id} já está ${v.status}.` } };
+          }
+        }
+        const dup = await client.query(
+          `SELECT id FROM fechamentos
+            WHERE salao_id = $1 AND COALESCE(deleted_at, NULL) IS NULL
+              AND venda_ids IS NOT NULL
+              AND venda_ids && $2::int[]
+            LIMIT 1`,
+          [req.salaoId, vdIds]
+        );
+        if (dup.rows.length) {
+          return { code: 409, body: { success: false, error: `Alguma venda já consta em fechamento prévio (#${dup.rows[0].id}).` } };
+        }
+        totalVendas = r.rows.reduce((s, v) => s + Number(v.valor || 0), 0);
+      }
+
+      // 4) Crédito disponível do cliente (somatório histórico). Limita ao solicitado.
+      let creditoAplicado = 0;
+      if (creditoUtilizadoSolicitado > 0 && clienteId) {
+        try {
+          const credRow = await client.query(
+            `SELECT COALESCE(
+               SUM(CASE WHEN tipo = 'credito' THEN valor ELSE -valor END),
+               0
+             )::numeric AS saldo
+             FROM creditos_cliente WHERE cliente_id = $1 AND salao_id = $2`,
+            [clienteId, req.salaoId]
+          );
+          const saldo = Math.max(0, Number(credRow.rows[0]?.saldo || 0));
+          creditoAplicado = Math.min(creditoUtilizadoSolicitado, saldo);
+        } catch (_) { creditoAplicado = 0; }
+      }
+
+      const subTotal = totalAtend + totalVendas;
+      const descontoAplicado = Math.min(descontoGeral, subTotal); // não desconta além do total
+      const totalGeral = Math.max(0, subTotal - descontoAplicado - creditoAplicado);
+
+      // 5) Insert fechamento
+      const ins = await client.query(
+        `INSERT INTO fechamentos
+           (salao_id, cliente_id, profissional_id, data,
+            total_atendimentos, total_vendas, total_produtos,
+            desconto_geral, credito_utilizado, total_geral,
+            forma_pagamento, observacoes, status,
+            atendimento_ids, venda_ids, tipo, data_inicio, data_fim, total_liquido)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'fechado',
+                 $13::int[],$14::int[],'cliente',$4,$4,$10)
+         RETURNING id`,
+        [req.salaoId, clienteId, profissionalId, data,
+         totalAtend, totalVendas, 0,
+         descontoAplicado, creditoAplicado, totalGeral,
+         formaPagamento, observacoes,
+         atIds.length ? atIds : null, vdIds.length ? vdIds : null]
+      );
+      const fechId = ins.rows[0].id;
+
+      // 6) Marca atendimentos como finalizados
+      if (atIds.length) {
+        await client.query(
+          `UPDATE atendimentos
+              SET status = 'finalizado', updated_at = CURRENT_TIMESTAMP,
+                  finalizado_em = COALESCE(finalizado_em, CURRENT_TIMESTAMP)
+            WHERE id = ANY($1::int[]) AND salao_id = $2`,
+          [atIds, req.salaoId]
+        );
+      }
+      // 7) Marca vendas como pagas
+      if (vdIds.length) {
+        await client.query(
+          `UPDATE vendas
+              SET status = 'paga',
+                  forma_pagamento = COALESCE($3, forma_pagamento),
+                  updated_at = CURRENT_TIMESTAMP
+            WHERE id = ANY($1::int[]) AND salao_id = $2`,
+          [vdIds, req.salaoId, formaPagamento]
+        );
+      }
+      // 8) Debita crédito utilizado (movimento real)
+      if (creditoAplicado > 0 && clienteId) {
+        await client.query(
+          `INSERT INTO creditos_cliente (cliente_id, salao_id, tipo, valor, observacoes)
+           VALUES ($1, $2, 'debito', $3, $4)`,
+          [clienteId, req.salaoId, creditoAplicado, `Fechamento #${fechId}`]
+        ).catch(() => { /* tabela legada — tolera */ });
+      }
+
+      return {
+        code: 201,
+        body: {
+          success: true,
+          data: {
+            id: fechId,
+            totalAtendimentos: totalAtend,
+            totalVendas,
+            descontoGeral: descontoAplicado,
+            creditoUtilizado: creditoAplicado,
+            totalGeral,
+            formaPagamento,
+          },
+        },
+      };
+    });
+
+    return res.status(result.code).json(result.body);
+  } catch (error) {
+    require("../utils/sendError").sendError(res, 500, "Erro ao fechar conta", error);
+  }
+}
+
+async function _postFechamentoPeriodo(req, res, b) {
+  try {
     const dataInicio = b.data_inicio;
     const dataFim = b.data_fim;
     const tipo = b.tipo || 'diario';
@@ -306,7 +454,7 @@ router.post('/', authMiddleware, async (req, res) => {
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
-});
+}
 
 // [P5-C5] requireAdmin + motivo obrigatório (B10) + audit log com before/after
 router.put('/:id/reabrir', authMiddleware, requireAdmin, async (req, res) => {

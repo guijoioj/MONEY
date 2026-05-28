@@ -105,6 +105,25 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Normalizer explícito: frontend pode mandar camelCase, DB usa snake_case.
+// Whitelist + rename evita que coluna inexistente (ex: "dataNascimento") chegue ao SQL.
+const CLIENTE_WRITABLE = new Set([
+  'nome', 'telefone', 'email', 'cpf', 'data_nascimento',
+  'endereco', 'observacoes', 'foto_url', 'ativo',
+]);
+function normalizeClientePayload(body) {
+  if (!body || typeof body !== 'object') return {};
+  const out = {};
+  for (const [k, v] of Object.entries(body)) {
+    // camelCase → snake_case explícito
+    const key = k === 'dataNascimento' ? 'data_nascimento'
+              : k === 'fotoUrl' ? 'foto_url'
+              : k;
+    if (CLIENTE_WRITABLE.has(key)) out[key] = v;
+  }
+  return out;
+}
+
 // Criar cliente
 router.post('/', authMiddleware, [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
@@ -119,8 +138,11 @@ router.post('/', authMiddleware, [
     }
 
     const salaoId = req.salaoId;
-    
-    const result = await clienteService.criar(req.body, salaoId);
+    const safeBody = normalizeClientePayload(req.body);
+    if (!safeBody.nome) {
+      return res.status(400).json({ success: false, error: 'Nome é obrigatório' });
+    }
+    const result = await clienteService.criar(safeBody, salaoId);
 
     if (result.success) {
       res.status(201).json({ success: true, data: result.data });
@@ -164,8 +186,8 @@ router.put('/:id', authMiddleware, /* admin+recepcao via router.use no topo */ [
     const { id } = req.params;
     const salaoId = req.salaoId;
 
-    // [P6-A3] Filtrar body antes de chegar no service (mass-assignment defense)
-    const safeBody = pickWhitelist(req.body, CLIENTE_UPDATABLE_FIELDS);
+    // Normaliza camelCase → snake_case (mesma whitelist do POST) antes de gravar.
+    const safeBody = normalizeClientePayload(req.body);
     const result = await clienteService.atualizar(id, safeBody, salaoId);
 
     if (result.success) {
