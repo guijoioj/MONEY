@@ -395,7 +395,7 @@ export default function Layout() {
           </nav>
         </aside>
 
-        <main className="flex-1 px-6 pb-6 md:ml-20 pt-24"><Outlet /></main>
+        <main className="flex-1 px-6 pb-6 md:ml-20 pt-24 overflow-y-auto h-screen"><Outlet /></main>
       </div>
     </div>
   );
