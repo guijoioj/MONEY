@@ -259,22 +259,24 @@ export default function Atendimentos() {
           atendimentosAPI.listarServicos(id).catch(() => null),
           atendimentosAPI.listarProdutos(id).catch(() => null),
         ]);
+        // Resposta vem camelCase (middleware camelize): nomeSnapshot, valorSnapshot,
+        // precoUnitario, quantidadeUsada. Mantém fallback snake por segurança.
         setServicosUsados(toArr(svcRes?.data?.data).map(s => ({
           _persisted: true,
-          servicoId: s.servico_id,
-          servicoNome: s.nome_snapshot,
+          servicoId: s.servicoId ?? s.servico_id,
+          servicoNome: s.nomeSnapshot ?? s.nome_snapshot ?? '',
           horaInicio: '',
           horaFim: '',
-          preco: Number(s.valor_snapshot ?? s.subtotal ?? 0),
+          preco: Number(s.subtotal ?? s.valorSnapshot ?? s.valor_snapshot ?? 0),
           duracao: 0,
         })));
         setProdutosUsados(toArr(prodRes?.data?.data).map(p => ({
           _persisted: true,
-          produtoId: p.produto_id,
-          produtoNome: p.nome_snapshot,
-          quantidadeUsada: Number(p.quantidade_usada ?? 0),
+          produtoId: p.produtoId ?? p.produto_id,
+          produtoNome: p.nomeSnapshot ?? p.nome_snapshot ?? '',
+          quantidadeUsada: Number(p.quantidadeUsada ?? p.quantidade_usada ?? 0),
           unidade: p.unidade || 'un',
-          precoUnitario: Number(p.preco_unitario ?? 0),
+          precoUnitario: Number(p.precoUnitario ?? p.preco_unitario ?? 0),
           subtotal: Number(p.subtotal ?? 0),
         })));
       } catch {
