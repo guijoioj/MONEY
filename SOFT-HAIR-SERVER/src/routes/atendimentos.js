@@ -72,9 +72,9 @@ router.post('/', authMiddleware, writeGuard, [
 // [P8-A2] requireAdmin + validator isIn + state machine (service-level)
 // PUT: admin + recepção (finalizar, alterar status do atendimento).
 router.put('/:id', authMiddleware, writeGuard, [
-  body('status').optional().isIn(['agendado', 'em_andamento', 'finalizado', 'cancelado'])
+  body('status').optional({ nullable: true }).isIn(['agendado', 'em_andamento', 'finalizado', 'cancelado'])
     .withMessage('Status inválido (use: agendado, em_andamento, finalizado, cancelado)'),
-  body('observacoes').optional().isString().isLength({ max: 1000 }),
+  body('observacoes').optional({ nullable: true }).isString().isLength({ max: 1000 }),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);

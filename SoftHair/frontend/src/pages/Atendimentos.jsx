@@ -138,7 +138,9 @@ export default function Atendimentos() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      await atendimentosAPI.update(id, { observacoes: data.observacoes || null });
+      // Só faz PUT se houver observação (backend rejeita observacoes=null no validator).
+      const obs = (data.observacoes ?? '').trim();
+      if (obs) await atendimentosAPI.update(id, { observacoes: obs });
       await persistItens(id, data.servicos, data.produtos);
       return { id };
     },
