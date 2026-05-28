@@ -4,7 +4,7 @@ import { fechamentosAPI, clientesAPI, profissionaisAPI, saloesAPI, creditosAPI }
 import { 
   Search, User, Package, Scissors, CreditCard, QrCode, Building, CheckCircle, 
   X, ChevronDown, ChevronUp, Clock, Phone, ShoppingBag, Receipt, DollarSign,
-  Calendar, AlertCircle, Gift, Minus
+  Calendar, AlertCircle, Gift, Minus, Plus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -230,7 +230,13 @@ export default function Fechamento() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Fechamentos</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Atendimentos &amp; Fechamentos</h1>
+        <button
+          onClick={() => navigate('/atendimentos?new=1')}
+          className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+        >
+          <Plus size={20} /> Novo Atendimento
+        </button>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-1 inline-flex">
