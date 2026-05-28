@@ -27,13 +27,13 @@ function pickWhitelist(body, allowed) {
   return out;
 }
 
-// Projection por role: recepção NÃO recebe preco_custo, preco_venda original etc.
-// Admin recebe tudo.
-const PRODUTO_FIELDS_ADMIN = `id, salao_id, nome, descricao, categoria, marca,
+// Projection por role: recepção NÃO recebe preco_custo nem quantidade_minima.
+// Admin recebe tudo. Colunas que NÃO existem na tabela (marca, foto_url) foram removidas.
+const PRODUTO_FIELDS_ADMIN = `id, salao_id, nome, descricao, categoria,
   codigo_barras, preco_custo, preco_venda, quantidade_estoque, quantidade_minima,
-  foto_url, ativo, created_at, updated_at`;
-const PRODUTO_FIELDS_RECEP = `id, salao_id, nome, descricao, categoria, marca,
-  codigo_barras, preco_venda, quantidade_estoque, foto_url, ativo`;
+  ativo, created_at, updated_at`;
+const PRODUTO_FIELDS_RECEP = `id, salao_id, nome, descricao, categoria,
+  codigo_barras, preco_venda, quantidade_estoque, ativo`;
 
 // Listar produtos — projection por role.
 router.get('/', authMiddleware, async (req, res) => {
