@@ -34,7 +34,7 @@ function AbaServicos() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['servicos', search, categoria],
-    queryFn: () => servicosAPI.getAll({ search, categoria }),
+    queryFn: () => servicosAPI.getAll({ search, categoria, limit: 2000 }),
   });
 
   const queryClient = useQueryClient();
@@ -312,7 +312,7 @@ function AbaProdutos() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['produtos', search, categoria, estoqueBaixo],
-    queryFn: () => produtosAPI.getAll({ search, categoria, estoqueBaixo: estoqueBaixo || undefined }),
+    queryFn: () => produtosAPI.getAll({ search, categoria, estoqueBaixo: estoqueBaixo || undefined, limit: 2000 }),
   });
 
   const queryClient = useQueryClient();
@@ -344,8 +344,8 @@ function AbaProdutos() {
         precoVenda: produto.precoVenda ?? produto.preco_venda ?? '',
         baseComissao: produto.baseComissao ?? produto.base_comissao ?? '',
         comissaoPorcentagem: produto.comissaoPorcentagem ?? produto.comissao_porcentagem ?? '',
-        estoque: produto.estoque ?? produto.quantidade_estoque ?? 0,
-        estoqueMinimo: produto.estoqueMinimo ?? produto.quantidade_minima ?? 0,
+        estoque: produto.quantidadeEstoque ?? produto.quantidade_estoque ?? produto.estoque ?? 0,
+        estoqueMinimo: produto.quantidadeMinima ?? produto.quantidade_minima ?? produto.estoqueMinimo ?? 0,
         unidade: produto.unidade || 'un',
         ativo: produto.ativo !== undefined ? produto.ativo : true,
       });
@@ -451,7 +451,7 @@ function AbaProdutos() {
                       <td className="px-6 py-4 text-gray-600 dark:text-gray-300">-</td>
                       <td className="px-6 py-4 text-sm">-</td>
                       <td className="px-6 py-4">
-                        {(() => { const est = produto.quantidade_estoque ?? produto.estoque ?? 0; const min = produto.quantidade_minima ?? produto.estoqueMinimo ?? 0; return (
+                        {(() => { const est = produto.quantidadeEstoque ?? produto.quantidade_estoque ?? produto.estoque ?? 0; const min = produto.quantidadeMinima ?? produto.quantidade_minima ?? produto.estoqueMinimo ?? 0; return (
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded ${est <= min ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                           {est <= min && <AlertTriangle size={14} />}
                           {est} / {min}
