@@ -61,3 +61,4 @@ coverage/
 **/.claude/worktrees/
 **/.claude/settings.local.json
 .claude/settings.local.json
+SoftHair/dist-electron/

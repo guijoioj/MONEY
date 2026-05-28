@@ -73,8 +73,7 @@ router.get('/', authMiddleware, async (req, res) => {
     // admin recebe campos completos (sem hash de senha).
     const isAdmin = req.user?.tipo === 'admin';
     const adminFields = `id, salao_id, nome, telefone, email, cpf, especialidade,
-        comissao_percentual, comissao, foto_url, ativo, app_ativo,
-        data_admissao, data_nascimento, endereco, observacoes, created_at, updated_at`;
+        comissao_percentual, foto_url, ativo, app_ativo, created_at, updated_at`;
     const safeFields = `id, salao_id, nome, telefone, email, especialidade,
         foto_url, ativo`;
     const fields = isAdmin ? adminFields : safeFields;
@@ -97,8 +96,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
     const { queryOne } = require('../config/database');
     const fields = isAdmin
       ? `id, salao_id, nome, telefone, email, cpf, especialidade,
-         comissao_percentual, comissao, foto_url, ativo, app_ativo,
-         data_admissao, data_nascimento, endereco, observacoes, created_at, updated_at`
+         comissao_percentual, foto_url, ativo, app_ativo, created_at, updated_at`
       : `id, salao_id, nome, telefone, email, especialidade, foto_url, ativo`;
     const data = await queryOne(
       `SELECT ${fields} FROM profissionais WHERE id = $1 AND salao_id = $2`,
