@@ -149,7 +149,7 @@ router.post('/', authMiddleware, [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
   body('telefone').optional({ checkFalsy: true }).isString().isLength({ min: 8, max: 25 }).withMessage('Telefone inválido'),
   body('email').optional().isEmail().withMessage('Email inválido'),
-  body('cpf').optional().isLength({ min: 11, max: 14 }).withMessage('CPF deve ter entre 11 e 14 caracteres'),
+  body('cpf').optional({ checkFalsy: true }).isLength({ min: 11, max: 14 }).withMessage('CPF deve ter entre 11 e 14 caracteres'),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);

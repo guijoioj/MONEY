@@ -6,8 +6,9 @@ const { requireAnyRole } = require('../middleware/role');
 const { ProdutoService } = require('../services');
 
 // Recepção pode criar/editar produtos (operação de salão).
-// Apenas admin pode desativar/excluir (DELETE).
+// Profissional NÃO precisa de produtos. Apenas admin pode DELETE.
 const requireAdminOrRecepcao = requireAnyRole(['admin', 'recepcao']);
+router.use(authMiddleware, requireAdminOrRecepcao);
 
 const service = new ProdutoService();
 
