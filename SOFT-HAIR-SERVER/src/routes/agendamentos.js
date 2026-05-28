@@ -165,8 +165,8 @@ router.post('/', authMiddleware, writeGuard, [
 // [P9-A1] requireAdmin + validator isIn + state machine (service-level)
 // PUT: admin + recepção (confirmar, remarcar, cancelar, mudar status).
 router.put('/:id', authMiddleware, writeGuard, [
-  body('status').optional().isIn(['agendado', 'confirmado', 'em_andamento', 'cancelado', 'concluido', 'no_show'])
-    .withMessage('Status inválido (use: agendado, confirmado, em_andamento, cancelado, concluido, no_show)'),
+  // Não valida isIn aqui — service tem state machine + aceita status legado HairBeauty sem quebrar
+  body('status').optional().isString().isLength({ max: 50 }),
   body('observacoes').optional().isString().isLength({ max: 1000 }),
   body('data_hora').optional().isISO8601().withMessage('data_hora deve ser ISO 8601'),
 ], async (req, res) => {
@@ -238,13 +238,13 @@ async function _converterUmAgendamento(client, id, salaoId) {
   if ((a.status || '').toLowerCase() === 'cancelado') {
     return { ok: false, code: 400, body: { success: false, error: 'Agendamento cancelado não pode ser convertido', agendamento_id: id } };
   }
-  // Cria atendimento em em_andamento.
+  // Cria atendimento em em_andamento com a data do agendamento (não hoje).
   const ins = await client.query(
     `INSERT INTO atendimentos (salao_id, agendamento_id, cliente_id, profissional_id, servico_id,
                                 data_atendimento, status, valor)
-     VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, 'em_andamento', $6)
+     VALUES ($1, $2, $3, $4, $5, $6::date, 'em_andamento', $7)
      RETURNING id`,
-    [salaoId, id, a.cliente_id, a.profissional_id, a.servico_id, a.valor || 0]
+    [salaoId, id, a.cliente_id, a.profissional_id, a.servico_id, a.data_hora, a.valor || 0]
   );
   const atendimentoId = ins.rows[0].id;
   // Liga agendamento ao atendimento. Tolerante a DB sem a coluna.

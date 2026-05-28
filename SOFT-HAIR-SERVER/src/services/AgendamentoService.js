@@ -172,7 +172,7 @@ class AgendamentoService {
       // [P9-A1] Recupera estado atual — necessário para validar transição,
       // detectar mudança de slot (data_hora/profissional_id) e gerar audit log.
       const existing = await queryOne(
-        'SELECT id, status, data_hora, profissional_id, servico_id FROM agendamentos WHERE id = $1 AND salao_id = $2',
+        'SELECT id, status, data_hora, profissional_id, servico_id, cliente_id, auxiliar_id FROM agendamentos WHERE id = $1 AND salao_id = $2',
         [id, salaoId]
       );
       if (!existing) {
@@ -194,15 +194,21 @@ class AgendamentoService {
         }
       }
 
-      // [P3-A1] Validar tenancy das FKs no UPDATE (mesma proteção do criar/[P2-A7])
-      const checks = [
-        ['clientes', data.cliente_id, 'cliente_id'],
-        ['profissionais', data.profissional_id, 'profissional_id'],
-        ['servicos', data.servico_id, 'servico_id'],
-      ];
-      if (data.auxiliar_id) checks.push(['profissionais', data.auxiliar_id, 'auxiliar_id']);
+      // [P3-A1] Validar tenancy das FKs no UPDATE — só valida FKs que MUDARAM.
+      // Dados legados (HairBeauty) podem ter IDs válidos no salão mas que não passam
+      // no check sem motivo quando o valor não mudou.
+      const changed = (field, incoming) =>
+        incoming != null && String(incoming) !== String(existing[field] ?? '');
+      const checks = [];
+      if (changed('cliente_id', data.cliente_id))
+        checks.push(['clientes', data.cliente_id, 'cliente_id']);
+      if (changed('profissional_id', data.profissional_id))
+        checks.push(['profissionais', data.profissional_id, 'profissional_id']);
+      if (changed('servico_id', data.servico_id))
+        checks.push(['servicos', data.servico_id, 'servico_id']);
+      if (changed('auxiliar_id', data.auxiliar_id))
+        checks.push(['profissionais', data.auxiliar_id, 'auxiliar_id']);
       for (const [table, fk, label] of checks) {
-        if (!fk) continue;
         const ok = await queryOne(`SELECT 1 FROM ${table} WHERE id = $1 AND salao_id = $2`, [fk, salaoId]);
         if (!ok) {
           return { success: false, error: `${label} não pertence ao salão` };
