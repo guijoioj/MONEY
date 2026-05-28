@@ -389,14 +389,19 @@ const PORT = process.env.PORT || 3000;
       console.log(`📡 Ambiente: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔐 Segurança: Ativada | Rate Limit Auth: ${process.env.AUTH_RATE_LIMIT_MAX || 10}/15min`);
       console.log(`📊 WebSocket: ${process.env.WS_ENABLED === 'true' ? 'Ativo' : 'Desativado'}`);
-      // Scheduler de backup automático diário (em produção apenas).
-      if (process.env.NODE_ENV === 'production' && process.env.BACKUP_AUTO !== 'false') {
+      // Scheduler de backup automático: OPT-IN (env BACKUP_AUTO=true).
+      // Default desligado pra não estourar memória em planos pequenos
+      // — Render free tem 512MB e o dump em-memória de tabelas grandes (250k+ vendas)
+      // dispara OOM. Reabilitar após implementar dump em streaming (server-side cursor + gzip stream).
+      if (process.env.NODE_ENV === 'production' && process.env.BACKUP_AUTO === 'true') {
         try {
           require('./services/BackupHistoryService').startScheduler();
           console.log('🗄️  Backup automático diário: ativado');
         } catch (e) {
           console.error('[BACKUP] falha ao iniciar scheduler:', e.message);
         }
+      } else {
+        console.log('🗄️  Backup automático diário: DESATIVADO (BACKUP_AUTO != true)');
       }
     });
 
