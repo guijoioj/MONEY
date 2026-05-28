@@ -11,9 +11,11 @@ const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
 
 const formatDuration = (minutes) => {
-  if (minutes < 60) return `${minutes} min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+  const min = Number(minutes);
+  if (!Number.isFinite(min) || min <= 0) return '—';
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
   return m > 0 ? `${h}h ${m}min` : `${h}h`;
 };
 
@@ -61,7 +63,7 @@ function AbaServicos() {
       setFormData({
         nome: servico.nome || '',
         descricao: servico.descricao || '',
-        duracao: servico.duracao || servico.duracao_minutos || 30,
+        duracao: servico.duracaoMinutos ?? servico.duracao_minutos ?? servico.duracao ?? 30,
         preco: servico.preco || '',
         categoria: servico.categoria || '',
         baseComissao: servico.baseComissao || '',
@@ -157,7 +159,7 @@ function AbaServicos() {
                 {servico.descricao && <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm mb-3">{servico.descricao}</p>}
                 <div className="space-y-1 text-sm">
                   <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                    <div className="flex items-center gap-1"><Clock size={14} />{formatDuration(servico.duracao)}</div>
+                    <div className="flex items-center gap-1"><Clock size={14} />{formatDuration(servico.duracaoMinutos ?? servico.duracao_minutos ?? servico.duracao)}</div>
                     <div className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400">
                       <DollarSign size={14} />{formatCurrency(servico.preco)}
                     </div>
