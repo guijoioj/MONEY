@@ -9,14 +9,14 @@ const { invalidateProfissionalCache } = require('../middleware/profissionalAuth'
 
 const service = new ProfissionalService();
 
-// PAINEL próprio do profissional — REGISTRADO ANTES do router.use blanket
-// para que o profissional logado consiga ver o próprio painel (id === profissionalId).
-// Admin/recepção também podem acessar qualquer painel.
-function _painelGuard(req, res, next) {
+// PAINEL próprio do profissional — middleware extrai id direto do req.path
+// (req.params NÃO existe em middleware mounted em router.use).
+function _painelGuardFromPath(req, res, next) {
   const role = req.user?.tipo;
   if (role === 'admin' || role === 'recepcao') return next();
   if (role === 'profissional') {
-    const idParam = Number(req.params.id);
+    const m = req.path.match(/^\/(\d+)\/painel/);
+    const idParam = m ? Number(m[1]) : null;
     const ownId = Number(req.user?.profissionalId);
     if (idParam && ownId && idParam === ownId) return next();
     return res.status(403).json({ success: false, error: 'Painel acessível apenas ao próprio profissional.' });
@@ -28,9 +28,9 @@ function _painelGuard(req, res, next) {
 //   GET  → admin + recepção (recepção precisa listar pra agenda/atendimento)
 //   POST/PUT/DELETE → ADMIN-ONLY (dados sensíveis: senha_app, comissão, ativo)
 //   /:id/painel* → admin + recepção + profissional (somente próprio painel)
-// Guard inteligente: rotas de painel bypassam o role-check blanket e usam _painelGuard.
+// Guard inteligente: rotas de painel bypassam o role-check blanket.
 router.use(authMiddleware, (req, res, next) => {
-  if (/^\/\d+\/painel(\/|$)/.test(req.path)) return _painelGuard(req, res, next);
+  if (/^\/\d+\/painel(\/|$)/.test(req.path)) return _painelGuardFromPath(req, res, next);
   return requireAnyRole(['admin', 'recepcao'])(req, res, next);
 });
 
