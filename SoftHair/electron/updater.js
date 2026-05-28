@@ -12,6 +12,9 @@ const log = require('electron-log');
 const { dialog } = require('electron');
 
 log.transports.file.level = 'info';
+// Transport console escreve via console.log → process.stdout. No AppImage sem
+// terminal isso dá "write EIO" e crasha o main process. Log vai só pro arquivo.
+log.transports.console.level = false;
 autoUpdater.logger = log;
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;

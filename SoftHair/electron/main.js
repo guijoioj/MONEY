@@ -11,6 +11,24 @@
  *   - frontend é servido pelo Vite em http://localhost:3000
  */
 
+// AppImage/desktop launcher rodam SEM terminal anexado. stdout/stderr ficam
+// ligados a um pipe quebrado → qualquer console.log dispara "write EIO" e mata
+// o main process com "Uncaught Exception". Engolir EIO/EPIPE nesses streams
+// torna o log best-effort em vez de fatal. DEVE vir antes de qualquer log.
+for (const stream of [process.stdout, process.stderr]) {
+  stream?.on?.('error', (err) => {
+    if (err && (err.code === 'EIO' || err.code === 'EPIPE')) return;
+  });
+}
+
+// Rede de segurança: registrar um handler de uncaughtException já suprime o
+// dialog padrão do Electron. EIO/EPIPE (stdout quebrado) são engolidos em
+// silêncio; qualquer outro erro é logado em arquivo (best-effort) sem matar o app.
+process.on('uncaughtException', (err) => {
+  if (err && (err.code === 'EIO' || err.code === 'EPIPE')) return;
+  try { require('electron-log').error('[uncaughtException]', err); } catch {}
+});
+
 const { app, BrowserWindow, shell, Menu, dialog, ipcMain } = require('electron');
 const path = require('path');
 const { fork } = require('child_process');
