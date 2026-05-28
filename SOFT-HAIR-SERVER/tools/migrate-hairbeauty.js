@@ -193,11 +193,23 @@ async function migrarServicos(client) {
   const servicos = await readCSV('SERVICOS');
   const precos = await readCSV('TB_PRECOS');
 
+  // Preço de venda real está em TB_PRECOS.PRECO_TABELA (BR: "54,0000").
+  // VLR_PRECO_LISTA NÃO existe em TB_PRECOS (é "0,00" em SERVICOS) — usar isso zera tudo.
   const precoMap = {};
   for (const p of precos) {
-    const val = parseDecimal(p.VLR_PRECO_LISTA || p.VLR_PRECO || '0');
-    if (!precoMap[p.COD_SERVICO] || val > 0) precoMap[p.COD_SERVICO] = val;
+    const val = parseDecimal(p.PRECO_TABELA);
+    if (val > 0 && (!precoMap[p.COD_SERVICO] || val > precoMap[p.COD_SERVICO])) precoMap[p.COD_SERVICO] = val;
   }
+
+  // Comissão por serviço (%) está em PERC_COMISSAO.PERC_COMISSAO.
+  const comissaoMap = {};
+  try {
+    const percComissao = await readCSV('PERC_COMISSAO');
+    for (const c of percComissao) {
+      const val = parseDecimal(c.PERC_COMISSAO);
+      if (val > 0 && (!comissaoMap[c.COD_SERVICO] || val > comissaoMap[c.COD_SERVICO])) comissaoMap[c.COD_SERVICO] = val;
+    }
+  } catch (e) { console.warn('  PERC_COMISSAO indisponível:', e.message); }
 
   const ativos = servicos.filter(s => parseBool(s.ATIVO));
   const idMap = {}; // COD_SERVICO → db id
@@ -209,7 +221,7 @@ async function migrarServicos(client) {
       descricao: null,
       preco: precoMap[s.COD_SERVICO] || 0,
       duracao_minutos: 30,
-      comissao_percentual: 0,
+      comissao_percentual: comissaoMap[s.COD_SERVICO] || 0,
       ativo: true,
       _cod: s.COD_SERVICO,
     }));
