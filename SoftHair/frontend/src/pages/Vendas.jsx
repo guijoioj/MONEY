@@ -152,16 +152,21 @@ export default function Vendas() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (itens.length === 0) { alert('Adicione pelo menos um item'); return; }
+    if (itens.length === 0) { alert('Adicione pelo menos um produto'); return; }
 
+    // Contrato do backend (snake_case): tipo obrigatório, cliente_id/profissional_id,
+    // itens [{produto_id, quantidade}]. Preço é derivado no servidor (não enviado).
     const payload = {
-      clienteId: formData.clienteId || null,
-      vendedorId: formData.vendedorId || null,
-      data: formData.data,
-      total,
-      formaPagamento: formData.formaPagamento,
-      observacoes: formData.observacoes,
-      itens,
+      tipo: 'produto',
+      cliente_id: formData.clienteId || null,
+      profissional_id: formData.vendedorId || null,
+      forma_pagamento: formData.formaPagamento || 'dinheiro',
+      observacoes: formData.observacoes || null,
+      desconto: 0,
+      itens: itens.map(i => ({
+        produto_id: i.itemId,
+        quantidade: Math.max(1, parseInt(i.quantidade, 10) || 1),
+      })),
     };
 
     if (editingId) {
