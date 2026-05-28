@@ -69,10 +69,17 @@ export default function Fechamento() {
     enabled: searchCliente.length >= 2,
   });
 
+  // Hoje em local (não UTC) — fechamento mostra só atendimentos/vendas do dia atual.
+  const hojeLocal = (() => {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  })();
+
   const { data: emAbertoData, isLoading } = useQuery({
-    queryKey: ['fechamentos-em-aberto', activeTab, searchCliente, selectedProfissional],
+    queryKey: ['fechamentos-em-aberto', activeTab, searchCliente, selectedProfissional, hojeLocal],
     queryFn: () => {
-      const params = {};
+      const params = { data: hojeLocal };
       if (activeTab === 'cliente' && searchCliente) {
         params.clienteNome = searchCliente;
       }

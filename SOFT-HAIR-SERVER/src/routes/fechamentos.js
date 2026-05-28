@@ -30,7 +30,7 @@ router.get('/', authMiddleware, adminOnly, async (req, res) => {
 router.get('/em-aberto', authMiddleware, adminOrRecepcao, async (req, res) => {
   try {
     const { pool } = require('../config/database');
-    const { profissionalId, clienteId, clienteNome } = req.query;
+    const { profissionalId, clienteId, clienteNome, data: dataFiltro } = req.query;
 
     // Predicado: atendimento finalizado/concluido sem fechamento ainda.
     // Considera fechado se está em fechamento.atendimento_ids (preferência), OU,
@@ -54,6 +54,8 @@ router.get('/em-aberto', authMiddleware, adminOrRecepcao, async (req, res) => {
     if (profissionalId) { aWhere += ` AND a.profissional_id = $${ap++}`; aParams.push(profissionalId); }
     if (clienteId)      { aWhere += ` AND a.cliente_id = $${ap++}`;      aParams.push(clienteId); }
     if (clienteNome)    { aWhere += ` AND c.nome ILIKE '%' || $${ap++} || '%'`; aParams.push(clienteNome); }
+    // Filtro por dia (data_atendimento, cai pra created_at). Fechamento só do dia atual.
+    if (dataFiltro)     { aWhere += ` AND DATE(COALESCE(a.data_atendimento, a.created_at)) = $${ap++}`; aParams.push(dataFiltro); }
 
     const atendQuery = pool.query(`
       SELECT a.id, a.cliente_id, a.profissional_id, a.valor AS total_geral,
@@ -88,6 +90,7 @@ router.get('/em-aberto', authMiddleware, adminOrRecepcao, async (req, res) => {
     if (profissionalId) { vWhere += ` AND v.profissional_id = $${vp++}`; vParams.push(profissionalId); }
     if (clienteId)      { vWhere += ` AND v.cliente_id = $${vp++}`;      vParams.push(clienteId); }
     if (clienteNome)    { vWhere += ` AND c.nome ILIKE '%' || $${vp++} || '%'`; vParams.push(clienteNome); }
+    if (dataFiltro)     { vWhere += ` AND DATE(COALESCE(v.data, v.created_at)) = $${vp++}`; vParams.push(dataFiltro); }
 
     const vendasQuery = pool.query(`
       SELECT v.id, v.cliente_id, v.profissional_id AS vendedor_id,

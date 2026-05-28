@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { vendasAPI, clientesAPI, produtosAPI, servicosAPI, profissionaisAPI } from '../services/api';
 import { Plus, X, ShoppingCart, Trash2, Eye, Pencil } from 'lucide-react';
+import ClienteSearchSelect from '../components/ClienteSearchSelect';
 
 const toArr = (val) => Array.isArray(val) ? val : (val?.data && Array.isArray(val.data) ? val.data : []);
 
@@ -28,6 +29,8 @@ export default function Vendas() {
     observacoes: '',
   });
   const [itens, setItens] = useState([]);
+  const [clienteSelecionado, setClienteSelecionado] = useState(null);
+  const [buscaProduto, setBuscaProduto] = useState('');
   const [filtroData, setFiltroData] = useState('');
   const [filtroDataInicio, setFiltroDataInicio] = useState('');
   const [filtroDataFim, setFiltroDataFim] = useState('');
@@ -80,6 +83,8 @@ export default function Vendas() {
     setEditingId(null);
     setFormData({ clienteId: '', vendedorId: '', data: new Date().toISOString().split('T')[0], formaPagamento: 'dinheiro', observacoes: '' });
     setItens([]);
+    setClienteSelecionado(null);
+    setBuscaProduto('');
     setIsModalOpen(true);
   };
 
@@ -88,6 +93,10 @@ export default function Vendas() {
       const res = await vendasAPI.getById(venda.id);
       const v = res.data.data;
       setEditingId(v.id);
+      const cliId = v.clienteId || null;
+      const cliNome = v.clienteNome || venda.clienteNome || null;
+      setClienteSelecionado(cliId ? { id: cliId, nome: cliNome || `Cliente #${cliId}`, telefone: v.clienteTelefone || '' } : null);
+      setBuscaProduto('');
       setFormData({
         clienteId: v.clienteId || '',
         vendedorId: v.vendedorId || '',
@@ -113,6 +122,8 @@ export default function Vendas() {
     setIsModalOpen(false);
     setEditingId(null);
     setItens([]);
+    setClienteSelecionado(null);
+    setBuscaProduto('');
   };
 
   const viewVendaDetails = async (venda) => {
@@ -268,11 +279,15 @@ export default function Vendas() {
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Cliente</label>
-                  <select value={formData.clienteId} onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Consumidor Final</option>
-                    {toArr(clientesData?.data?.data).map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
-                  </select>
+                  <ClienteSearchSelect
+                    value={formData.clienteId}
+                    selectedCliente={clienteSelecionado}
+                    onChange={(id, cliente) => {
+                      setFormData({ ...formData, clienteId: id || '' });
+                      setClienteSelecionado(cliente || null);
+                    }}
+                  />
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Vazio = Consumidor Final</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Vendedor</label>
@@ -295,31 +310,34 @@ export default function Vendas() {
               </div>
 
               <div className="mb-6">
-                <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3">Adicionar Itens</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Produtos</label>
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {produtosData?.data?.data?.filter(p => p.estoque > 0).map((produto) => (
-                        <button key={produto.id} type="button" onClick={() => addItem('produto', produto)}
-                          className="w-full text-left px-3 py-2 border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 text-sm">
-                          {produto.nome} — {formatCurrency(produto.precoVenda)}
-                        </button>
-                      ))}
-                    </div>
+                <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3">Adicionar Produtos</h3>
+                <input
+                  type="text"
+                  value={buscaProduto}
+                  onChange={(e) => setBuscaProduto(e.target.value)}
+                  placeholder="Buscar produto pelo nome..."
+                  className="w-full px-3 py-2 mb-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                />
+                {buscaProduto.trim() && (
+                  <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-2">
+                    {toArr(produtosData?.data?.data)
+                      .filter(p => p.ativo !== false && (p.nome || '').toLowerCase().includes(buscaProduto.toLowerCase()))
+                      .slice(0, 30)
+                      .map((produto) => {
+                        const preco = Number(produto.precoVenda ?? produto.preco_venda ?? 0);
+                        const estoque = produto.quantidadeEstoque ?? produto.quantidade_estoque ?? produto.estoque ?? 0;
+                        return (
+                          <button key={produto.id} type="button" onClick={() => { addItem('produto', produto); setBuscaProduto(''); }}
+                            className="w-full text-left px-3 py-2 border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 text-sm">
+                            {produto.nome} — {formatCurrency(preco)} <span className="text-gray-400 dark:text-gray-500">(estoque: {estoque})</span>
+                          </button>
+                        );
+                      })}
+                    {toArr(produtosData?.data?.data).filter(p => p.ativo !== false && (p.nome || '').toLowerCase().includes(buscaProduto.toLowerCase())).length === 0 && (
+                      <p className="text-center py-2 text-sm text-gray-400 dark:text-gray-500">Nenhum produto encontrado</p>
+                    )}
                   </div>
-                  <div>
-                    <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Serviços</label>
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {(Array.isArray(servicosData?.data?.data) ? servicosData.data.data : []).map((servico) => (
-                        <button key={servico.id} type="button" onClick={() => addItem('servico', servico)}
-                          className="w-full text-left px-3 py-2 border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 text-sm">
-                          {servico.nome} — {formatCurrency(servico.preco)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="mb-6">
