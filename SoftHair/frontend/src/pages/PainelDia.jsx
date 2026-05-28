@@ -164,7 +164,7 @@ function PainelDoDia({ profId, onAbrir }) {
         <StatCard icon={Calendar}    label="Agend. hoje"   value={agendamentos.length} accent="indigo" />
         <StatCard icon={Play}        label="Em atendimento" value={emAndamento.length}  accent="amber" />
         <StatCard icon={CheckCircle2} label="Concluídos"    value={concluidos.length}   accent="emerald" />
-        <StatCard icon={DollarSign}  label="Comissão hoje" value={fmtMoney(comissaoEstimada)} accent="rose" />
+        <StatCard icon={DollarSign}  label="Comissão paga hoje" value={fmtMoney(comissaoEstimada)} accent="rose" />
       </div>
 
       <Section title="Em atendimento" icon={Play} loading={lAt} empty={emAndamento.length === 0} emptyMsg="Nenhum atendimento em andamento.">

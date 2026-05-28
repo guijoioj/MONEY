@@ -3,20 +3,26 @@ const { logAction } = require('../utils/auditLog');
 // [V2] Trigger automático de comissões. Resiliente: erros não derrubam venda.
 const CommissionTriggers = require('./CommissionTriggers');
 
-// [P8-A1] State machine de status de venda — transições válidas:
-//   pendente   → concluida | finalizada | cancelada
-//   concluida  → cancelada (estorno)
-//   finalizada → cancelada (estorno)
-//   cancelada  → ∅ (terminal)
-// Qualquer outra transição é rejeitada.
+// Padronização canônica de status de venda:
+//   pendente  (aberta, aguardando pagamento)
+//   paga      (faturada, pagamento confirmado — substitui concluida/finalizada)
+//   cancelada (terminal)
+// Aliases legados: concluida → paga, finalizada → paga.
 const VENDA_STATUS_TRANSITIONS = {
-  pendente: ['concluida', 'finalizada', 'cancelada'],
-  concluida: ['cancelada'],
-  finalizada: ['cancelada'],
+  pendente: ['paga', 'concluida', 'finalizada', 'cancelada'],
+  paga: ['cancelada'],
+  concluida: ['cancelada', 'paga'],     // alias legado
+  finalizada: ['cancelada', 'paga'],    // alias legado
   cancelada: [],
 };
 
-const VENDA_STATUS_VALIDOS = ['pendente', 'concluida', 'finalizada', 'cancelada'];
+const VENDA_STATUS_VALIDOS = ['pendente', 'paga', 'concluida', 'finalizada', 'cancelada'];
+// Normaliza status legados pra valor canônico antes de gravar.
+function _normalizeStatus(s) {
+  const v = (s || '').toLowerCase();
+  if (v === 'concluida' || v === 'finalizada') return 'paga';
+  return v;
+}
 
 class VendaService {
   async listar(salaoId, filtros = {}) {
@@ -42,6 +48,14 @@ class VendaService {
       if (filtros.data_inicio && filtros.data_fim) {
         sql += ` AND DATE(v.created_at) BETWEEN $${paramCount++} AND $${paramCount++}`;
         params.push(filtros.data_inicio, filtros.data_fim);
+      }
+      if (filtros.cliente_id) {
+        sql += ` AND v.cliente_id = $${paramCount++}`;
+        params.push(filtros.cliente_id);
+      }
+      if (filtros.profissional_id) {
+        sql += ` AND v.profissional_id = $${paramCount++}`;
+        params.push(filtros.profissional_id);
       }
 
       // [P5-B9] LIMIT configurável via env
@@ -192,7 +206,8 @@ class VendaService {
       );
       if (!existing) return { success: false, error: 'Venda não encontrada' };
 
-      // [P8-A1] Validar status com state machine se foi enviado.
+      // Normaliza aliases (concluida/finalizada → paga) antes de validar a state machine.
+      if (data.status) data.status = _normalizeStatus(data.status);
       if (data.status && data.status !== existing.status) {
         if (!VENDA_STATUS_VALIDOS.includes(data.status)) {
           return { success: false, error: `Status inválido: ${data.status}` };

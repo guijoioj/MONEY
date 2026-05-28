@@ -69,8 +69,18 @@ router.get('/', authMiddleware, async (req, res) => {
       params.push(`%${safe}%`); idx++;
     }
 
+    // Projection por role: recepção NUNCA recebe senha_hash, push_token, app_ativo;
+    // admin recebe campos completos (sem hash de senha).
+    const isAdmin = req.user?.tipo === 'admin';
+    const adminFields = `id, salao_id, nome, telefone, email, cpf, especialidade,
+        comissao_percentual, comissao, foto_url, ativo, app_ativo,
+        data_admissao, data_nascimento, endereco, observacoes, created_at, updated_at`;
+    const safeFields = `id, salao_id, nome, telefone, email, especialidade,
+        foto_url, ativo`;
+    const fields = isAdmin ? adminFields : safeFields;
+
     const rows = await query(
-      `SELECT * FROM profissionais WHERE ${conditions.join(' AND ')} ORDER BY nome ASC`,
+      `SELECT ${fields} FROM profissionais WHERE ${conditions.join(' AND ')} ORDER BY nome ASC`,
       params
     );
     const data = rows.rows || rows;
@@ -80,15 +90,22 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Buscar por ID
+// Buscar por ID — mesma projection segura por role.
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
-    const result = await service.buscarPorId(req.params.id, req.salaoId);
-    if (result.success) {
-      res.json({ success: true, data: result.data });
-    } else {
-      res.status(404).json({ success: false, error: result.error });
-    }
+    const isAdmin = req.user?.tipo === 'admin';
+    const { queryOne } = require('../config/database');
+    const fields = isAdmin
+      ? `id, salao_id, nome, telefone, email, cpf, especialidade,
+         comissao_percentual, comissao, foto_url, ativo, app_ativo,
+         data_admissao, data_nascimento, endereco, observacoes, created_at, updated_at`
+      : `id, salao_id, nome, telefone, email, especialidade, foto_url, ativo`;
+    const data = await queryOne(
+      `SELECT ${fields} FROM profissionais WHERE id = $1 AND salao_id = $2`,
+      [req.params.id, req.salaoId]
+    );
+    if (!data) return res.status(404).json({ success: false, error: 'Profissional não encontrado' });
+    res.json({ success: true, data });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }

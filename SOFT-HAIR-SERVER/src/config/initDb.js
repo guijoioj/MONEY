@@ -589,6 +589,9 @@ async function runMigrations() {
     -- Atendimentos: status do fluxo aberto.
     ALTER TABLE atendimentos ADD COLUMN IF NOT EXISTS observacoes TEXT;
     ALTER TABLE atendimentos ADD COLUMN IF NOT EXISTS finalizado_em TIMESTAMP;
+    -- Agendamentos: link com atendimento (após converter).
+    ALTER TABLE agendamentos ADD COLUMN IF NOT EXISTS atendimento_id INTEGER REFERENCES atendimentos(id) ON DELETE SET NULL;
+    CREATE INDEX IF NOT EXISTS idx_agendamentos_atendimento_id ON agendamentos(atendimento_id);
 
     -- Itens do atendimento em aberto: snapshot de nome/preço/comissão preservado.
     -- Schema legado SQLite (text IDs, camelCase) é detectado e descartado.

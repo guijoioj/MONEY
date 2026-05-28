@@ -60,26 +60,46 @@ router.get('/inadimplentes', authMiddleware, async (req, res) => {
   } catch(e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
-// Aniversariantes da semana (DEVE ficar antes de /:id)
+// Aniversariantes nos próximos N dias (default 7). FUNCIONA na virada de mês/ano:
+// normaliza a data_nascimento pro ano corrente (e ano seguinte) e compara como DATE.
 router.get('/aniversariantes', authMiddleware, async (req, res) => {
   try {
     const { query } = require('../config/database');
+    const dias = Math.min(Math.max(parseInt(req.query.dias) || 7, 1), 60);
     const r = await query(`
       SELECT id, nome, telefone, email, data_nascimento,
-        EXTRACT(DAY FROM data_nascimento) as dia,
-        EXTRACT(MONTH FROM data_nascimento) as mes
-      FROM clientes
-      WHERE salao_id = $1
-        AND data_nascimento IS NOT NULL
-        AND ativo = true
-        AND (
-          EXTRACT(MONTH FROM data_nascimento) = EXTRACT(MONTH FROM CURRENT_DATE)
-          AND EXTRACT(DAY FROM data_nascimento) BETWEEN
-            EXTRACT(DAY FROM CURRENT_DATE) AND
-            EXTRACT(DAY FROM CURRENT_DATE + INTERVAL '7 days')
-        )
-      ORDER BY EXTRACT(DAY FROM data_nascimento)
-    `, [req.salaoId]);
+             EXTRACT(DAY FROM data_nascimento)::int   AS dia,
+             EXTRACT(MONTH FROM data_nascimento)::int AS mes,
+             prox_aniv
+        FROM (
+          SELECT *,
+                 -- próximo aniversário: candidata neste ano; se já passou >7 dias, candidata pro próximo ano.
+                 CASE
+                   WHEN
+                     make_date(
+                       EXTRACT(YEAR FROM CURRENT_DATE)::int,
+                       EXTRACT(MONTH FROM data_nascimento)::int,
+                       LEAST(EXTRACT(DAY FROM data_nascimento)::int, 28)  -- evita 29/2 em ano não-bissexto
+                     ) >= CURRENT_DATE
+                   THEN make_date(
+                       EXTRACT(YEAR FROM CURRENT_DATE)::int,
+                       EXTRACT(MONTH FROM data_nascimento)::int,
+                       LEAST(EXTRACT(DAY FROM data_nascimento)::int, 28)
+                     )
+                   ELSE make_date(
+                       EXTRACT(YEAR FROM CURRENT_DATE)::int + 1,
+                       EXTRACT(MONTH FROM data_nascimento)::int,
+                       LEAST(EXTRACT(DAY FROM data_nascimento)::int, 28)
+                     )
+                 END AS prox_aniv
+            FROM clientes
+           WHERE salao_id = $1
+             AND data_nascimento IS NOT NULL
+             AND COALESCE(ativo, true) = true
+        ) c
+       WHERE prox_aniv BETWEEN CURRENT_DATE AND CURRENT_DATE + ($2::int || ' days')::interval
+       ORDER BY prox_aniv ASC
+    `, [req.salaoId, dias]);
     res.json({ success: true, data: r.rows });
   } catch(e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });

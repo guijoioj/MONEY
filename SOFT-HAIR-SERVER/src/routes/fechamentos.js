@@ -246,7 +246,7 @@ router.post('/', authMiddleware, async (req, res) => {
   return _postFechamentoPeriodo(req, res, b);
 });
 
-async function _postFechamentoCliente(req, res, b, clienteId, atendimentoIdsRaw, vendaIdsRaw) {
+async function _postFechamentoCliente(req, res, b, clienteIdRaw, atendimentoIdsRaw, vendaIdsRaw) {
   try {
     const { pool, withTransaction } = require('../config/database');
     const profissionalId = b.profissionalId ?? b.profissional_id ?? null;
@@ -258,17 +258,38 @@ async function _postFechamentoCliente(req, res, b, clienteId, atendimentoIdsRaw,
     const creditoUtilizadoSolicitado = Math.max(0, Number(b.creditoUtilizado ?? b.credito_utilizado ?? 0));
     const atIds = Array.isArray(atendimentoIdsRaw) ? [...new Set(atendimentoIdsRaw.map(Number).filter(Boolean))] : [];
     const vdIds = Array.isArray(vendaIdsRaw) ? [...new Set(vendaIdsRaw.map(Number).filter(Boolean))] : [];
+    let clienteId = clienteIdRaw;
 
     if (!clienteId && atIds.length === 0 && vdIds.length === 0) {
       return res.status(400).json({ success: false, error: 'clienteId ou atendimentos/vendas obrigatórios' });
     }
 
     const result = await withTransaction(async (client) => {
-      // 1) Tenancy do cliente
-      if (clienteId) {
-        const ok = await client.query('SELECT 1 FROM clientes WHERE id=$1 AND salao_id=$2', [clienteId, req.salaoId]);
-        if (!ok.rows.length) return { code: 400, body: { success: false, error: 'cliente não pertence ao salão' } };
+      // 0) Se clienteId NÃO foi informado, deriva dos IDs: deve haver UM ÚNICO cliente.
+      if (!clienteId) {
+        const params = []; let p = 1;
+        const parts = [];
+        if (atIds.length) {
+          parts.push(`SELECT cliente_id FROM atendimentos WHERE id = ANY($${p}::int[]) AND salao_id = $${p+1}`);
+          params.push(atIds, req.salaoId); p += 2;
+        }
+        if (vdIds.length) {
+          parts.push(`SELECT cliente_id FROM vendas WHERE id = ANY($${p}::int[]) AND salao_id = $${p+1}`);
+          params.push(vdIds, req.salaoId); p += 2;
+        }
+        const r = await client.query(`SELECT DISTINCT cliente_id FROM (${parts.join(' UNION ALL ')}) t WHERE cliente_id IS NOT NULL`, params);
+        if (r.rows.length === 0) {
+          return { code: 400, body: { success: false, error: 'Nenhum cliente identificado nos itens informados.' } };
+        }
+        if (r.rows.length > 1) {
+          return { code: 400, body: { success: false, error: 'Os itens pertencem a mais de um cliente — feche separadamente.' } };
+        }
+        clienteId = r.rows[0].cliente_id;
       }
+
+      // 1) Tenancy do cliente (sempre — derivado ou explícito)
+      const ok = await client.query('SELECT 1 FROM clientes WHERE id=$1 AND salao_id=$2', [clienteId, req.salaoId]);
+      if (!ok.rows.length) return { code: 400, body: { success: false, error: 'cliente não pertence ao salão' } };
 
       // 2) Carrega + valida atendimentos. Backend RECALCULA total — nada vem do frontend.
       let totalAtend = 0;

@@ -11,17 +11,48 @@ const service = new VendaService();
 // DELETE permanece admin-only via requireAdmin individual.
 router.use(authMiddleware, requireAnyRole(['admin', 'recepcao']));
 
-// Listar vendas
+// Listar vendas — agora aceita clienteId / cliente_id e profissionalId / profissional_id.
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const { status, tipo, data_inicio, data_fim } = req.query;
+    const clienteId = req.query.clienteId ?? req.query.cliente_id;
+    const profissionalId = req.query.profissionalId ?? req.query.profissional_id;
     const filtros = {};
     if (status) filtros.status = status;
     if (tipo) filtros.tipo = tipo;
     if (data_inicio && data_fim) { filtros.data_inicio = data_inicio; filtros.data_fim = data_fim; }
+    if (clienteId) filtros.cliente_id = Number(clienteId);
+    if (profissionalId) filtros.profissional_id = Number(profissionalId);
 
     const result = await service.listar(req.salaoId, filtros);
     res.json({ success: result.success, data: result.data || [], error: result.error });
+  } catch (error) {
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
+  }
+});
+
+// Estatísticas — agregado para dashboards. Registrada ANTES de /:id pra não
+// cair no router como `id="estatisticas"`.
+router.get('/estatisticas', authMiddleware, async (req, res) => {
+  try {
+    const { pool } = require('../config/database');
+    const { data_inicio, data_fim } = req.query;
+    const params = [req.salaoId];
+    let where = 'v.salao_id = $1 AND COALESCE(v.status, \'pendente\') != \'cancelada\'';
+    let p = 2;
+    if (data_inicio) { where += ` AND v.created_at::date >= $${p++}`; params.push(data_inicio); }
+    if (data_fim)    { where += ` AND v.created_at::date <= $${p++}`; params.push(data_fim); }
+    const { rows } = await pool.query(`
+      SELECT
+        COUNT(*)::int                              AS qtd_total,
+        COUNT(*) FILTER (WHERE COALESCE(v.status,'pendente') = 'paga')::int AS qtd_pagas,
+        COUNT(*) FILTER (WHERE COALESCE(v.status,'pendente') = 'pendente')::int AS qtd_pendentes,
+        COALESCE(SUM(v.valor_final), 0)::numeric    AS total_faturado,
+        COALESCE(AVG(v.valor_final), 0)::numeric    AS ticket_medio
+        FROM vendas v
+       WHERE ${where}
+    `, params);
+    res.json({ success: true, data: rows[0] });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
@@ -67,8 +98,9 @@ router.post('/', authMiddleware, [
 // Atualizar venda
 // [P8-A1] requireAdmin + validator isIn + state machine (service-level)
 router.put('/:id', authMiddleware, /* admin+recepcao via router.use no topo */ [
-  body('status').optional().isIn(['pendente', 'concluida', 'finalizada', 'cancelada'])
-    .withMessage('Status inválido (use: pendente, concluida, finalizada, cancelada)'),
+  // Padronizado: pendente | paga | cancelada. Aliases legados aceitos (concluida/finalizada => paga).
+  body('status').optional().isIn(['pendente', 'paga', 'concluida', 'finalizada', 'cancelada'])
+    .withMessage('Status inválido (use: pendente, paga, cancelada)'),
   body('forma_pagamento').optional().isString().isLength({ max: 50 }),
   body('observacoes').optional().isString().isLength({ max: 1000 }),
 ], async (req, res) => {
@@ -89,15 +121,34 @@ router.put('/:id', authMiddleware, /* admin+recepcao via router.use no topo */ [
   }
 });
 
-// Cancelar venda
+// Cancelar venda.
+//   Admin: cancela sem motivo obrigatório (auditoria via logAction).
+//   Recepção: exige motivo (mín 3 chars) pra criar rastro.
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    const result = await service.cancelar(req.params.id, req.salaoId);
-    if (result.success) {
-      res.json({ success: true, message: result.message || 'Venda cancelada' });
-    } else {
-      res.status(404).json({ success: false, error: result.error });
+    const role = req.user?.tipo;
+    if (!['admin', 'recepcao'].includes(role)) {
+      return res.status(403).json({ success: false, error: 'Acesso negado.' });
     }
+    const motivo = (req.body?.motivo || req.query?.motivo || '').toString().trim();
+    if (role === 'recepcao' && motivo.length < 3) {
+      return res.status(400).json({ success: false, error: 'motivo obrigatório (mín 3 chars) para cancelar venda.' });
+    }
+    const result = await service.cancelar(req.params.id, req.salaoId);
+    if (!result.success) return res.status(404).json({ success: false, error: result.error });
+    // Audit log
+    try {
+      require('../utils/auditLog').logAction({
+        req,
+        action: 'venda.cancelar',
+        entityType: 'venda',
+        entityId: Number(req.params.id),
+        before: null,
+        after: { motivo: motivo || null },
+        salaoId: req.salaoId,
+      });
+    } catch (_) { /* tolera log indisponível */ }
+    res.json({ success: true, message: result.message || 'Venda cancelada' });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
