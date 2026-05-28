@@ -27,12 +27,21 @@ function pickWhitelist(body, allowed) {
   return out;
 }
 
-// Listar produtos
+// Projection por role: recepção NÃO recebe preco_custo, preco_venda original etc.
+// Admin recebe tudo.
+const PRODUTO_FIELDS_ADMIN = `id, salao_id, nome, descricao, categoria, marca,
+  codigo_barras, preco_custo, preco_venda, quantidade_estoque, quantidade_minima,
+  foto_url, ativo, created_at, updated_at`;
+const PRODUTO_FIELDS_RECEP = `id, salao_id, nome, descricao, categoria, marca,
+  codigo_barras, preco_venda, quantidade_estoque, foto_url, ativo`;
+
+// Listar produtos — projection por role.
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const { ativo, search, categoria, limit = 200 } = req.query;
     const { query } = require('../config/database');
     const salaoId = req.salaoId;
+    const fields = req.user?.tipo === 'admin' ? PRODUTO_FIELDS_ADMIN : PRODUTO_FIELDS_RECEP;
 
     let conditions = ['salao_id = $1'];
     let params = [salaoId];
@@ -49,7 +58,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
     const lim = Math.min(parseInt(limit) || 200, 2000);
     const rows = await query(
-      `SELECT * FROM produtos WHERE ${conditions.join(' AND ')} ORDER BY nome ASC LIMIT $${idx}`,
+      `SELECT ${fields} FROM produtos WHERE ${conditions.join(' AND ')} ORDER BY nome ASC LIMIT $${idx}`,
       [...params, lim]
     );
     const total = await query(`SELECT COUNT(*) FROM produtos WHERE ${conditions.join(' AND ')}`, params);
@@ -71,21 +80,60 @@ router.get('/estoque-baixo', authMiddleware, async (req, res) => {
 });
 
 // Buscar por ID
+// Buscar por ID — projection por role.
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
-    const result = await service.buscarPorId(req.params.id, req.salaoId);
-    if (result.success) {
-      res.json({ success: true, data: result.data });
-    } else {
-      res.status(404).json({ success: false, error: result.error });
-    }
+    const { queryOne } = require('../config/database');
+    const fields = req.user?.tipo === 'admin' ? PRODUTO_FIELDS_ADMIN : PRODUTO_FIELDS_RECEP;
+    const data = await queryOne(
+      `SELECT ${fields} FROM produtos WHERE id = $1 AND salao_id = $2`,
+      [req.params.id, req.salaoId]
+    );
+    if (!data) return res.status(404).json({ success: false, error: 'Produto não encontrado' });
+    res.json({ success: true, data });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }
 });
 
-// Criar — admin + recepção
-router.post('/', authMiddleware, requireAdminOrRecepcao, [
+// PATCH /:id/estoque — recepção ajusta quantidade durante a venda.
+// Aceita delta (+/-) ou valor absoluto. Não toca preço/custo.
+router.patch('/:id/estoque', authMiddleware, [
+  body('delta').optional().isInt({ min: -100000, max: 100000 }),
+  body('absoluto').optional().isInt({ min: 0, max: 1000000 }),
+  body('motivo').optional().isString().isLength({ max: 200 }),
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+    const { delta, absoluto, motivo } = req.body;
+    if (delta == null && absoluto == null) {
+      return res.status(400).json({ success: false, error: 'Envie delta ou absoluto' });
+    }
+    const { queryOne } = require('../config/database');
+    const sql = absoluto != null
+      ? `UPDATE produtos SET quantidade_estoque = $1, updated_at = CURRENT_TIMESTAMP
+           WHERE id = $2 AND salao_id = $3 RETURNING id, quantidade_estoque`
+      : `UPDATE produtos SET quantidade_estoque = GREATEST(0, COALESCE(quantidade_estoque, 0) + $1),
+                              updated_at = CURRENT_TIMESTAMP
+           WHERE id = $2 AND salao_id = $3 RETURNING id, quantidade_estoque`;
+    const r = await queryOne(sql, [absoluto != null ? absoluto : delta, req.params.id, req.salaoId]);
+    if (!r) return res.status(404).json({ success: false, error: 'Produto não encontrado' });
+    try {
+      require('../utils/auditLog').logAction({
+        req, action: 'produto.ajuste_estoque', entityType: 'produto', entityId: Number(req.params.id),
+        before: null, after: { delta, absoluto, motivo: motivo || null, novo_estoque: r.quantidade_estoque },
+        salaoId: req.salaoId,
+      });
+    } catch (_) { /* tolera */ }
+    res.json({ success: true, data: r });
+  } catch (error) {
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
+  }
+});
+
+// Criar — ADMIN-ONLY (preço/custo, cadastro mestre).
+router.post('/', authMiddleware, requireAdmin, [
   body('nome').notEmpty().withMessage('Nome é obrigatório'),
   body('preco_venda').isFloat({ min: 0 }).withMessage('Preço de venda deve ser positivo'),
   body('quantidade_estoque').optional().isInt({ min: 0 }).withMessage('Estoque deve ser inteiro positivo'),
@@ -106,8 +154,8 @@ router.post('/', authMiddleware, requireAdminOrRecepcao, [
   }
 });
 
-// Atualizar — admin + recepção
-router.put('/:id', authMiddleware, requireAdminOrRecepcao, [
+// Atualizar — ADMIN-ONLY (preço/custo/categorização). Recepção usa PATCH /:id/estoque pra estoque.
+router.put('/:id', authMiddleware, requireAdmin, [
   body('nome').optional().isLength({ min: 2 }),
   body('preco_venda').optional().isFloat({ min: 0 }),
 ], async (req, res) => {

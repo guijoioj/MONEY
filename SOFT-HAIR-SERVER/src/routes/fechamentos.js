@@ -67,10 +67,11 @@ router.get('/em-aberto', authMiddleware, adminOrRecepcao, async (req, res) => {
        ORDER BY a.created_at DESC
     `, aParams);
 
-    // Vendas em aberto: status != cancelada/paga, sem fechamento que cubra.
+    // Vendas em aberto: status != cancelada/paga + aliases legados (concluida/finalizada
+     // são tratados como 'paga' até a migration UPDATE rodar em produção).
     const vParams = [req.salaoId];
     let vWhere = `v.salao_id = $1
-      AND COALESCE(v.status,'pendente') NOT IN ('cancelada', 'paga')
+      AND COALESCE(v.status,'pendente') NOT IN ('cancelada', 'paga', 'concluida', 'finalizada')
       AND NOT EXISTS (
         SELECT 1 FROM fechamentos f
          WHERE f.salao_id = v.salao_id

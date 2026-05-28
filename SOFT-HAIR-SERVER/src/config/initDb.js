@@ -628,6 +628,29 @@ async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_atend_servicos_salao ON atendimentos_servicos(salao_id);
     CREATE INDEX IF NOT EXISTS idx_atend_servicos_prof  ON atendimentos_servicos(profissional_id);
 
+    -- Audit logs: rastro persistido (cancelamentos, mudanças de papel, etc.).
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id           BIGSERIAL PRIMARY KEY,
+      salao_id     INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
+      usuario_id   INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+      action       VARCHAR(120) NOT NULL,
+      entity_type  VARCHAR(60),
+      entity_id    BIGINT,
+      before_data  JSONB,
+      after_data   JSONB,
+      ip           VARCHAR(64),
+      user_agent   TEXT,
+      created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_salao   ON audit_logs(salao_id);
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_action  ON audit_logs(action);
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_entity  ON audit_logs(entity_type, entity_id);
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at DESC);
+
+    -- Normaliza vendas legadas: 'concluida'/'finalizada' → 'paga' (idempotente).
+    -- Roda 1x por boot; após primeira execução nenhuma linha é tocada.
+    UPDATE vendas SET status = 'paga' WHERE status IN ('concluida', 'finalizada');
+
     -- Fechamento POR CLIENTE (caixa do cliente). data_inicio/data_fim já existem.
     ALTER TABLE fechamentos ALTER COLUMN data_inicio DROP NOT NULL;
     ALTER TABLE fechamentos ALTER COLUMN data_fim DROP NOT NULL;
