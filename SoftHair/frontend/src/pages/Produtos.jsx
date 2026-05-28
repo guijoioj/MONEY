@@ -14,7 +14,7 @@ export default function Produtos() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['produtos', search, categoria, estoqueBaixo],
-    queryFn: () => produtosAPI.getAll({ search, categoria, estoqueBaixo: estoqueBaixo || undefined }),
+    queryFn: () => produtosAPI.getAll({ search, categoria, estoqueBaixo: estoqueBaixo || undefined, limit: 2000 }),
   });
 
   const queryClient = useQueryClient();

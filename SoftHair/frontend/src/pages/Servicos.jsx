@@ -13,7 +13,7 @@ export default function Servicos() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['servicos', search, categoria],
-    queryFn: () => servicosAPI.getAll({ search, categoria }),
+    queryFn: () => servicosAPI.getAll({ search, categoria, limit: 2000 }),
   });
 
   const queryClient = useQueryClient();
