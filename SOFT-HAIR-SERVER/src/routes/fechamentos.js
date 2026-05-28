@@ -415,6 +415,28 @@ async function _postFechamentoCliente(req, res, b, clienteIdRaw, atendimentoIdsR
             WHERE id = ANY($1::int[]) AND salao_id = $2`,
           [atIds, req.salaoId]
         );
+
+        // 6b) Gera comissões dos atendimentos finalizados (idempotente — ON CONFLICT).
+        // Best-effort: falha de comissão NÃO derruba o fechamento (caixa não pode travar).
+        try {
+          const CommissionTriggers = require('../services/CommissionTriggers');
+          const atRows = await client.query(
+            `SELECT id, profissional_id,
+                    COALESCE(valor, 0)::numeric AS total_geral,
+                    COALESCE(desconto, 0)::numeric AS desconto
+               FROM atendimentos WHERE id = ANY($1::int[]) AND salao_id = $2`,
+            [atIds, req.salaoId]
+          );
+          for (const at of atRows.rows) {
+            try {
+              await CommissionTriggers.onAtendimentoFechado(at, client);
+            } catch (e) {
+              console.warn('[fechamento] comissão atendimento', at.id, 'falhou:', e.message);
+            }
+          }
+        } catch (e) {
+          console.warn('[fechamento] geração de comissões pulada:', e.message);
+        }
       }
       // 7) Marca vendas como pagas
       if (vdIds.length) {
