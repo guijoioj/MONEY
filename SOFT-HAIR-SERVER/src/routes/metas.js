@@ -38,7 +38,7 @@ router.get('/progresso', authMiddleware, async (req, res) => {
          COALESCE(m.meta_atendimentos, 0) as meta_atendimentos,
          m.id as meta_id,
          COALESCE((
-           SELECT SUM(v.total) FROM vendas v
+           SELECT SUM(v.valor_final) FROM vendas v
            WHERE v.profissional_id = p.id
              AND v.salao_id = $1
              AND EXTRACT(MONTH FROM v.created_at) = $2

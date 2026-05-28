@@ -12,14 +12,16 @@ router.get('/servicos-mais-vendidos', authMiddleware, async (req, res) => {
   const dias = parseInt(req.query.dias) || 30;
   try {
     const rows = await query(`
-      SELECT s.nome, COUNT(*) as total, SUM(ai.valor_unitario) as receita
-      FROM atendimento_itens ai
-      JOIN servicos s ON s.id = ai.servico_id
-      JOIN atendimentos a ON a.id = ai.atendimento_id
+      SELECT COALESCE(asv.nome_snapshot, s.nome) AS nome,
+             SUM(asv.quantidade)::int           AS total,
+             COALESCE(SUM(asv.subtotal), 0)::numeric AS receita
+      FROM atendimentos_servicos asv
+      LEFT JOIN servicos s ON s.id = asv.servico_id
+      JOIN atendimentos a ON a.id = asv.atendimento_id
       WHERE a.salao_id = $1 AND a.created_at >= NOW() - INTERVAL '${dias} days'
-      GROUP BY s.id, s.nome ORDER BY total DESC LIMIT 10
+      GROUP BY COALESCE(asv.nome_snapshot, s.nome) ORDER BY total DESC LIMIT 10
     `, [req.salaoId]);
-    res.json({ success: true, data: rows });
+    res.json({ success: true, data: rows.rows || rows });
   } catch (e) { require("../utils/sendError").sendError(res, 500, "Erro interno", e); }
 });
 
