@@ -136,7 +136,7 @@ export default function Layout() {
     { to: '/vendas',               icon: ShoppingCart,    label: 'Vendas',              roles: ['admin', 'recepcao'] },
     { to: '/comissoes-v2',         icon: DollarSign,      label: 'Comissões',           roles: ['admin'] },
     { to: '/minhas-comissoes',     icon: DollarSign,      label: 'Minhas comissões',    roles: ['profissional'] },
-    { to: '/fechamento',           icon: ClipboardCheck,  label: 'Fechamento',          roles: ['admin'] },
+    { to: '/fechamento',           icon: ClipboardCheck,  label: 'Fechamento',          roles: ['admin', 'recepcao'] },
     { to: '/financeiro',           icon: BarChart3,       label: 'Financeiro',          roles: ['admin'] },
     { to: '/despesas',             icon: DollarSign,      label: 'Despesas',            roles: ['admin'] },
     { to: '/caixa',                icon: DollarSign,      label: 'Caixa',               roles: ['admin'] },
@@ -395,7 +395,7 @@ export default function Layout() {
           </nav>
         </aside>
 
-        <main className="flex-1 p-6 md:ml-20 pt-20"><Outlet /></main>
+        <main className="flex-1 px-6 pb-6 md:ml-20 pt-24"><Outlet /></main>
       </div>
     </div>
   );

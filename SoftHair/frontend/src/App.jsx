@@ -119,7 +119,7 @@ export default function App() {
         <Route path="comissoes/regras"    element={onlyAdmin(lazyEl(RegrasComissao))} />
         <Route path="comissoes/extrato/:id" element={onlyAdmin(lazyEl(ExtratoProfissional))} />
         <Route path="comissoes/pagamento" element={onlyAdmin(lazyEl(PagamentoComissao))} />
-        <Route path="fechamento"          element={onlyAdmin(lazyEl(Fechamento))} />
+        <Route path="fechamento"          element={adminOrRecepcao(lazyEl(Fechamento))} />
         <Route path="financeiro"          element={onlyAdmin(lazyEl(Financeiro))} />
         <Route path="despesas"            element={onlyAdmin(lazyEl(Despesas))} />
         <Route path="caixa"               element={onlyAdmin(lazyEl(Caixa))} />
