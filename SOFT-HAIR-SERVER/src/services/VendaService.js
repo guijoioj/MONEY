@@ -147,8 +147,30 @@ class VendaService {
         }
 
         const desconto = Number(data.desconto) > 0 ? Number(data.desconto) : 0;
-        // [P3-C2] Server-side authoritative pricing
-        const valorTotal = valorTotalCalculado || Number(data.valor_total) || 0;
+
+        // Regra explícita pra valor_total:
+        //   1) Se há itens validados → SEMPRE usa o calculado (servidor é fonte de verdade).
+        //   2) Sem itens (venda manual avulsa) → aceita valor_total do payload, mas exige:
+        //      - observacao não-vazia (rastro do motivo da cobrança avulsa)
+        //      - valor_total > 0 e <= 100k (sanidade)
+        //   3) Sem itens e sem valor_total → 400.
+        let valorTotal;
+        if (valorTotalCalculado > 0) {
+          valorTotal = valorTotalCalculado;
+        } else {
+          const manual = Number(data.valor_total);
+          if (!Number.isFinite(manual) || manual <= 0) {
+            return { success: false, error: 'Venda sem itens precisa de valor_total > 0.' };
+          }
+          if (manual > 100000) {
+            return { success: false, error: 'Venda manual excede limite de R$ 100.000.' };
+          }
+          const obs = (data.observacoes || '').toString().trim();
+          if (obs.length < 3) {
+            return { success: false, error: 'Venda manual (sem itens) exige observação descritiva (mín 3 chars).' };
+          }
+          valorTotal = manual;
+        }
         const valorFinal = Math.max(valorTotal - desconto, 0);
 
         // Criar venda

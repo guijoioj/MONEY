@@ -222,67 +222,67 @@ router.put('/:id', authMiddleware, writeGuard, [
   }
 });
 
-// POST /converter/:id — cria atendimento a partir do agendamento, marca como concluído.
-//   Admin + recepção. Usa transação. Idempotente: se agendamento já tiver atendimento_id, retorna o existente.
+// Lógica reutilizável (sem HTTP) — chama dentro da MESMA transação do client passado.
+// Retorna { ok, code, body } pra POST /converter/:id e POST /converter-todos compartilharem.
+async function _converterUmAgendamento(client, id, salaoId) {
+  const ag = await client.query(
+    `SELECT id, cliente_id, profissional_id, servico_id, valor, data_hora, status, atendimento_id
+       FROM agendamentos WHERE id = $1 AND salao_id = $2`,
+    [id, salaoId]
+  );
+  if (!ag.rows.length) return { ok: false, code: 404, body: { success: false, error: 'Agendamento não encontrado', agendamento_id: id } };
+  const a = ag.rows[0];
+  if (a.atendimento_id) {
+    return { ok: true, code: 200, body: { success: true, data: { agendamento_id: id, atendimento_id: a.atendimento_id, ja_convertido: true } } };
+  }
+  if ((a.status || '').toLowerCase() === 'cancelado') {
+    return { ok: false, code: 400, body: { success: false, error: 'Agendamento cancelado não pode ser convertido', agendamento_id: id } };
+  }
+  // Cria atendimento em em_andamento.
+  const ins = await client.query(
+    `INSERT INTO atendimentos (salao_id, agendamento_id, cliente_id, profissional_id, servico_id,
+                                data_atendimento, status, valor)
+     VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, 'em_andamento', $6)
+     RETURNING id`,
+    [salaoId, id, a.cliente_id, a.profissional_id, a.servico_id, a.valor || 0]
+  );
+  const atendimentoId = ins.rows[0].id;
+  // Liga agendamento ao atendimento. Tolerante a DB sem a coluna.
+  try {
+    await client.query(
+      `UPDATE agendamentos
+          SET atendimento_id = $1, status = 'em_andamento', updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2 AND salao_id = $3`,
+      [atendimentoId, id, salaoId]
+    );
+  } catch (_) {
+    await client.query(
+      `UPDATE agendamentos SET status = 'em_andamento', updated_at = CURRENT_TIMESTAMP
+        WHERE id = $1 AND salao_id = $2`,
+      [id, salaoId]
+    );
+  }
+  return { ok: true, code: 201, body: { success: true, data: { agendamento_id: id, atendimento_id: atendimentoId } } };
+}
+
+// POST /converter/:id — wrapper transacional.
 router.post('/converter/:id', authMiddleware, writeGuard, async (req, res) => {
   try {
-    const { withTransaction, queryOne } = require('../config/database');
+    const { withTransaction } = require('../config/database');
     const id = Number(req.params.id);
     if (!id) return res.status(400).json({ success: false, error: 'ID inválido' });
-
-    const result = await withTransaction(async (client) => {
-      const ag = await client.query(
-        `SELECT id, cliente_id, profissional_id, servico_id, valor, data_hora, status, atendimento_id
-           FROM agendamentos WHERE id = $1 AND salao_id = $2`,
-        [id, req.salaoId]
-      );
-      if (!ag.rows.length) return { code: 404, body: { success: false, error: 'Agendamento não encontrado' } };
-      const a = ag.rows[0];
-      if (a.atendimento_id) {
-        return { code: 200, body: { success: true, data: { atendimento_id: a.atendimento_id, ja_convertido: true } } };
-      }
-      if ((a.status || '').toLowerCase() === 'cancelado') {
-        return { code: 400, body: { success: false, error: 'Agendamento cancelado não pode ser convertido' } };
-      }
-
-      // Cria atendimento em em_andamento (recepção/profissional pode adicionar serviços extras depois)
-      const ins = await client.query(
-        `INSERT INTO atendimentos (salao_id, agendamento_id, cliente_id, profissional_id, servico_id,
-                                    data_atendimento, status, valor)
-         VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, 'em_andamento', $6)
-         RETURNING id`,
-        [req.salaoId, id, a.cliente_id, a.profissional_id, a.servico_id, a.valor || 0]
-      );
-      const atendimentoId = ins.rows[0].id;
-
-      // Liga agendamento ao atendimento + marca como concluido (state machine permite agendado/confirmado/em_andamento → ...)
-      await client.query(
-        `UPDATE agendamentos
-            SET atendimento_id = $1, status = 'em_andamento', updated_at = CURRENT_TIMESTAMP
-          WHERE id = $2 AND salao_id = $3`,
-        [atendimentoId, id, req.salaoId]
-      ).catch(async () => {
-        // Coluna atendimento_id pode não existir em DB legado — tenta sem ela
-        await client.query(
-          `UPDATE agendamentos SET status = 'em_andamento', updated_at = CURRENT_TIMESTAMP
-            WHERE id = $1 AND salao_id = $2`,
-          [id, req.salaoId]
-        );
-      });
-
-      return { code: 201, body: { success: true, data: { agendamento_id: id, atendimento_id: atendimentoId } } };
-    });
+    const result = await withTransaction((client) => _converterUmAgendamento(client, id, req.salaoId));
     return res.status(result.code).json(result.body);
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro ao converter agendamento", error);
   }
 });
 
-// POST /converter-todos — converte todos os agendamentos confirmados/agendados de HOJE em atendimentos.
-//   Admin + recepção. Pula os já convertidos. Retorna contagem.
+// POST /converter-todos — chama a função interna em loop, sem HTTP loopback.
+// Cada item roda em sua própria transação (isolamento por item; um falhar não derruba os outros).
 router.post('/converter-todos', authMiddleware, writeGuard, async (req, res) => {
   try {
-    const { pool } = require('../config/database');
+    const { pool, withTransaction } = require('../config/database');
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     const amanha = new Date(hoje); amanha.setDate(amanha.getDate() + 1);
     const { rows } = await pool.query(
@@ -293,17 +293,24 @@ router.post('/converter-todos', authMiddleware, writeGuard, async (req, res) => 
           AND COALESCE(atendimento_id, 0) = 0`,
       [req.salaoId, hoje.toISOString(), amanha.toISOString()]
     );
-    let convertidos = 0, falhas = 0;
+    const detalhes = [];
+    let convertidos = 0, ja_convertidos = 0, falhas = 0;
     for (const r of rows) {
       try {
-        await fetch(`http://localhost:${process.env.PORT || 3001}/api/agendamentos/converter/${r.id}`, {
-          method: 'POST',
-          headers: { Authorization: req.headers.authorization },
-        });
-        convertidos++;
-      } catch (_) { falhas++; }
+        const ret = await withTransaction((client) => _converterUmAgendamento(client, r.id, req.salaoId));
+        if (ret.ok) {
+          if (ret.body?.data?.ja_convertido) ja_convertidos++;
+          else convertidos++;
+        } else {
+          falhas++;
+        }
+        detalhes.push({ id: r.id, code: ret.code, ok: ret.ok });
+      } catch (e) {
+        falhas++;
+        detalhes.push({ id: r.id, code: 500, ok: false, error: e.message });
+      }
     }
-    res.json({ success: true, data: { total: rows.length, convertidos, falhas } });
+    res.json({ success: true, data: { total: rows.length, convertidos, ja_convertidos, falhas, detalhes } });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro ao converter todos", error);
   }

@@ -108,6 +108,28 @@ router.put('/:id', authMiddleware, /* admin+recepcao via router.use no topo */ [
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
+    // Cancelamento por PUT precisa do MESMO rastro do DELETE.
+    // Recepção: exige motivo. Admin: motivo opcional mas registra audit log.
+    const wantsCancel = (req.body.status || '').toLowerCase() === 'cancelada';
+    if (wantsCancel) {
+      const role = req.user?.tipo;
+      const motivo = (req.body?.motivo || '').toString().trim();
+      if (role === 'recepcao' && motivo.length < 3) {
+        return res.status(400).json({ success: false, error: 'motivo obrigatório (mín 3 chars) para cancelar venda.' });
+      }
+      try {
+        require('../utils/auditLog').logAction({
+          req,
+          action: 'venda.cancelar_via_put',
+          entityType: 'venda',
+          entityId: Number(req.params.id),
+          before: null,
+          after: { motivo: motivo || null, status_anterior: null },
+          salaoId: req.salaoId,
+        });
+      } catch (_) { /* tolera log indisponível */ }
+    }
+
     const result = await service.atualizar(req.params.id, req.body, req.salaoId, { req });
     if (result.success) {
       res.json({ success: true, data: result.data });
