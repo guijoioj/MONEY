@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { vendasAPI, clientesAPI, produtosAPI, servicosAPI, profissionaisAPI } from '../services/api';
 import { Plus, X, ShoppingCart, Trash2, Eye, Pencil } from 'lucide-react';
 
+const toArr = (val) => Array.isArray(val) ? val : (val?.data && Array.isArray(val.data) ? val.data : []);
+
 const FORMA_PAGAMENTO_LABEL = {
   pix: 'PIX',
   cartao_credito: 'Cartão de Crédito',
@@ -89,7 +91,7 @@ export default function Vendas() {
       setFormData({
         clienteId: v.clienteId || '',
         vendedorId: v.vendedorId || '',
-        data: v.data,
+        data: (v.createdAt || v.data || '').slice(0, 10) || new Date().toISOString().split('T')[0],
         formaPagamento: v.formaPagamento || 'dinheiro',
         observacoes: v.observacoes || '',
       });
@@ -166,7 +168,7 @@ export default function Vendas() {
     return d.toLocaleDateString('pt-BR');
   };
 
-  const profissionais = profissionaisData?.data?.data || [];
+  const profissionais = toArr(profissionaisData?.data?.data);
 
   return (
     <div>
@@ -223,11 +225,11 @@ export default function Vendas() {
               ) : (
                 (Array.isArray(vendas?.data?.data) ? vendas.data.data : []).map((venda) => (
                   <tr key={venda.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
-                    <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{formatDate(venda.data)}</td>
+                    <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{formatDate(venda.createdAt || venda.data)}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{venda.clienteNome || 'Consumidor Final'}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{venda.vendedorNome || '-'}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{venda.profissionalNome || venda.vendedorNome || '-'}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{FORMA_PAGAMENTO_LABEL[venda.formaPagamento] || '-'}</td>
-                    <td className="px-6 py-4 font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(venda.total)}</td>
+                    <td className="px-6 py-4 font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(venda.valorFinal || venda.total || 0)}</td>
                     <td className="px-6 py-4 flex items-center gap-1">
                       <button onClick={() => viewVendaDetails(venda)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:bg-blue-900/30 rounded" title="Ver detalhes">
                         <Eye size={18} />
@@ -265,7 +267,7 @@ export default function Vendas() {
                   <select value={formData.clienteId} onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500">
                     <option value="">Consumidor Final</option>
-                    {(Array.isArray(clientesData?.data?.data) ? clientesData.data.data : []).map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                    {toArr(clientesData?.data?.data).map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
                   </select>
                 </div>
                 <div>
@@ -376,11 +378,11 @@ export default function Vendas() {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Data</p><p className="font-medium">{formatDate(viewVenda.data)}</p></div>
+                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Data</p><p className="font-medium">{formatDate(viewVenda.createdAt || viewVenda.data)}</p></div>
                 <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Cliente</p><p className="font-medium">{viewVenda.clienteNome || 'Consumidor Final'}</p></div>
-                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Vendedor</p><p className="font-medium">{viewVenda.vendedorNome || '—'}</p></div>
+                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Vendedor</p><p className="font-medium">{viewVenda.profissionalNome || viewVenda.vendedorNome || '—'}</p></div>
                 <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Forma de Pagamento</p><p className="font-medium">{FORMA_PAGAMENTO_LABEL[viewVenda.formaPagamento] || '—'}</p></div>
-                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total</p><p className="font-bold text-xl text-indigo-600 dark:text-indigo-400">{formatCurrency(viewVenda.total)}</p></div>
+                <div><p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total</p><p className="font-bold text-xl text-indigo-600 dark:text-indigo-400">{formatCurrency(viewVenda.valorFinal || viewVenda.total || 0)}</p></div>
               </div>
               <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3">Itens</h3>
               <div className="border rounded-lg divide-y">
@@ -408,8 +410,8 @@ export default function Vendas() {
           <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md p-6">
             <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">Excluir Venda</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-1">
-              Venda de <span className="font-medium">{formatDate(deleteConfirm.data)}</span> —&nbsp;
-              <span className="font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(deleteConfirm.total)}</span>
+              Venda de <span className="font-medium">{formatDate(deleteConfirm.createdAt || deleteConfirm.data)}</span> —&nbsp;
+              <span className="font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(deleteConfirm.valorFinal || deleteConfirm.total || 0)}</span>
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-6">
               O estoque dos produtos será restaurado automaticamente. Esta ação não pode ser desfeita.

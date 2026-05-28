@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { atendimentosAPI, clientesAPI, produtosAPI, servicosAPI, profissionaisAPI } from '../services/api';
 import { Plus, X, Clock, Package, Scissors, Trash2, Eye, Edit2, Save, Calculator, User, AlertCircle, UserPlus } from 'lucide-react';
+import ClienteSearchSelect from '../components/ClienteSearchSelect';
 
 const FRACOES = [
   { label: '25ml', value: 0.025 },
@@ -15,6 +16,27 @@ const FRACOES = [
   { label: '500ml', value: 0.5 },
   { label: '1L', value: 1 },
 ];
+
+// Extrai "HH:mm" de ISO timestamp ("2024-01-15T09:30:00Z") ou "09:30:00" ou "09:30"
+const toTime = (v) => {
+  if (!v) return '';
+  const s = String(v);
+  if (s.includes('T')) return s.slice(11, 16);
+  if (s.length >= 5) return s.slice(0, 5);
+  return '';
+};
+
+// Extrai "YYYY-MM-DD" de ISO timestamp ou date string
+const toDateStr = (v) => {
+  if (!v) return '';
+  const s = String(v);
+  if (s.includes('T')) return s.slice(0, 10);
+  if (s.length >= 10) return s.slice(0, 10);
+  return s;
+};
+
+// Extrai array de resposta paginada { data: [...], total: N } ou array direto
+const toArr = (val) => Array.isArray(val) ? val : (val?.data && Array.isArray(val.data) ? val.data : []);
 
 export default function Atendimentos() {
   const [searchParams] = useSearchParams();
@@ -37,6 +59,7 @@ export default function Atendimentos() {
   
   const [produtosUsados, setProdutosUsados] = useState([]);
   const [servicosUsados, setServicosUsados] = useState([]);
+  const [clienteSelecionado, setClienteSelecionado] = useState(null);
 
   const { data: atendimentos, isLoading } = useQuery({
     queryKey: ['atendimentos', filtroData],
@@ -142,6 +165,7 @@ export default function Atendimentos() {
       });
       setProdutosUsados([]);
       setServicosUsados([]);
+      setClienteSelecionado(null);
       setIsModalOpen(true);
     }
   };
@@ -155,15 +179,19 @@ export default function Atendimentos() {
       console.log('loadAtendimentoForEdit - atendimento.id:', atendimento?.id);
 
       setEditingAtendimento(atendimento);
+      // Cliente selecionado para exibir no campo de busca
+      const cliId = atendimento.cliente_id ?? atendimento.clienteId ?? null;
+      const cliNome = atendimento.cliente_nome ?? atendimento.clienteNome ?? null;
+      setClienteSelecionado(cliId ? { id: cliId, nome: cliNome || `Cliente #${cliId}`, telefone: atendimento.cliente_telefone ?? atendimento.clienteTelefone ?? '' } : null);
       // Backend retorna snake_case (cliente_id, profissional_id, data_atendimento).
       // Suporta ambos para compatibilidade com local (SoftHair/backend) e Render (SOFT-HAIR-SERVER).
       setFormData({
         clienteId: atendimento.cliente_id ?? atendimento.clienteId ?? '',
         profissionalId: atendimento.profissional_id ?? atendimento.profissionalId ?? '',
         auxiliarId: atendimento.auxiliar_id ?? atendimento.auxiliarId ?? '',
-        data: atendimento.data_atendimento ?? atendimento.data ?? new Date().toISOString().split('T')[0],
-        horaInicio: atendimento.hora_inicio ?? atendimento.horaInicio ?? '',
-        horaFim: atendimento.hora_fim ?? atendimento.horaFim ?? '',
+        data: toDateStr(atendimento.data_atendimento ?? atendimento.data) || new Date().toISOString().split('T')[0],
+        horaInicio: toTime(atendimento.hora_inicio ?? atendimento.horaInicio),
+        horaFim: toTime(atendimento.hora_fim ?? atendimento.horaFim),
         desconto: atendimento.desconto || 0,
         observacoes: atendimento.observacoes || ''
       });
@@ -199,6 +227,7 @@ export default function Atendimentos() {
     setEditingAtendimento(null);
     setProdutosUsados([]);
     setServicosUsados([]);
+    setClienteSelecionado(null);
   };
 
   const viewDetails = async (atendimento) => {
@@ -465,7 +494,7 @@ export default function Atendimentos() {
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">Selecione</option>
-                    {(Array.isArray(profissionaisData?.data?.data) ? profissionaisData.data.data : []).map((profissional) => (
+                    {toArr(profissionaisData?.data?.data).map((profissional) => (
                       <option key={profissional.id} value={profissional.id}>{profissional.nome}</option>
                     ))}
                   </select>
@@ -481,8 +510,8 @@ export default function Atendimentos() {
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">Nenhum</option>
-                    {profissionaisData?.data?.data
-                      ?.filter(p => {
+                    {toArr(profissionaisData?.data?.data)
+                      .filter(p => {
                         if (p.id === formData.profissionalId) return false;
                         const especialidade = (p.especialidade || '').toLowerCase();
                         return especialidade.includes('auxiliar') || especialidade.includes('assistente');
@@ -495,16 +524,14 @@ export default function Atendimentos() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Cliente</label>
-                  <select
+                  <ClienteSearchSelect
                     value={formData.clienteId}
-                    onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="">Selecione um cliente</option>
-                    {(Array.isArray(clientesData?.data?.data) ? clientesData.data.data : []).map((cliente) => (
-                      <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>
-                    ))}
-                  </select>
+                    selectedCliente={clienteSelecionado}
+                    onChange={(id, cliente) => {
+                      setFormData({ ...formData, clienteId: id });
+                      setClienteSelecionado(cliente || null);
+                    }}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data</label>
@@ -546,7 +573,7 @@ export default function Atendimentos() {
                   <div className="col-span-2">
                     <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Selecionar Produto</label>
                     <div className="max-h-32 overflow-y-auto border rounded-lg p-2">
-                      {produtosData?.data?.data?.filter(p => p.ativo && p.estoque > 0).map((produto) => (
+                      {toArr(produtosData?.data?.data).filter(p => p.ativo && p.estoque > 0).map((produto) => (
                         <button
                           key={produto.id}
                           type="button"
@@ -611,7 +638,7 @@ export default function Atendimentos() {
                   <div className="col-span-2">
                     <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Selecionar Serviço</label>
                     <div className="max-h-32 overflow-y-auto border rounded-lg p-2">
-                      {servicosData?.data?.data?.filter(s => s.ativo).map((servico) => (
+                      {toArr(servicosData?.data?.data).filter(s => s.ativo).map((servico) => (
                         <button
                           key={servico.id}
                           type="button"

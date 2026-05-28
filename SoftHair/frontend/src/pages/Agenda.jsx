@@ -356,6 +356,7 @@ export default function Agenda() {
   const gridRef = useRef(null);
   const autoConvertRef = useRef(false);
   const allAgendamentosRef = useRef([]);
+  const convertingRef = useRef(new Set());
   
   const COL_WIDTH = 96;
   const TIME_COL_WIDTH = 56;
@@ -457,24 +458,7 @@ export default function Agenda() {
 
   const converterUmMutation = useMutation({
     mutationFn: async ({ id }) => {
-      // Busca o agendamento para pegar dados
-      const ag = await agendamentosAPI.getById(id);
-      const data = ag?.data?.data;
-      if (!data) throw new Error('Agendamento não encontrado');
-
-      // Cria atendimento a partir do agendamento
-      const atend = await atendimentosAPI.create({
-        cliente_id: data.clienteId || data.cliente_id,
-        profissional_id: data.profissionalId || data.profissional_id,
-        servico_id: data.servicoId || data.servico_id,
-        agendamento_id: id,
-        valor: data.valor || 0,
-        status: 'em_andamento',
-      });
-
-      // Atualiza status do agendamento
-      await agendamentosAPI.update(id, { status: 'em_andamento' });
-      return atend;
+      return agendamentosAPI.converter(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['agendamentos']);
@@ -535,23 +519,29 @@ export default function Agenda() {
   const allAgendamentos = (Array.isArray(agendamentosData?.data?.data) ? agendamentosData.data.data : []).map(mapAgendamento);
 
   // Mantém refs atualizados para uso no intervalo sem re-criar o efeito
-  autoConvertRef.current = configData?.data?.conversao_automatica === 'true';
   allAgendamentosRef.current = allAgendamentos;
 
+  // Auto-conversão: quando o horário do agendamento chega (hora <= agora),
+  // converte automaticamente em atendimento. Cancelados/concluídos/já em andamento
+  // são ignorados. Sempre ativo (sem depender de config).
   useEffect(() => {
     const check = () => {
-      if (!autoConvertRef.current) return;
       const now = new Date();
-      const em5min = new Date(now.getTime() + 5 * 60 * 1000);
       allAgendamentosRef.current.forEach(a => {
-        if (a.status !== 'agendado') return;
+        const status = a.status;
+        if (status !== 'agendado' && status !== 'confirmado') return;
         const hora = new Date(a.dataHora);
-        if (hora >= now && hora <= em5min) {
-          converterUmMutation.mutate({ id: a.id, navigateAfter: false });
+        if (Number.isNaN(hora.getTime())) return;
+        if (hora <= now && !convertingRef.current.has(a.id)) {
+          convertingRef.current.add(a.id);
+          converterUmMutation.mutate({ id: a.id }, {
+            onSettled: () => convertingRef.current.delete(a.id),
+          });
         }
       });
     };
-    const interval = setInterval(check, 60000);
+    check(); // roda imediatamente ao montar
+    const interval = setInterval(check, 30000);
     return () => clearInterval(interval);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
