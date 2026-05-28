@@ -46,7 +46,19 @@ export default function Produtos() {
   const openModal = (produto = null) => {
     if (produto) {
       setEditingProduto(produto);
-      setFormData(produto);
+      // Backend manda camelCase (camelize): quantidadeEstoque, quantidadeMinima, precoVenda.
+      setFormData({
+        nome: produto.nome || '',
+        descricao: produto.descricao || '',
+        marca: produto.marca || '',
+        categoria: produto.categoria || '',
+        precoCusto: produto.precoCusto ?? produto.preco_custo ?? '',
+        precoVenda: produto.precoVenda ?? produto.preco_venda ?? '',
+        estoque: produto.quantidadeEstoque ?? produto.quantidade_estoque ?? produto.estoque ?? 0,
+        estoqueMinimo: produto.quantidadeMinima ?? produto.quantidade_minima ?? produto.estoqueMinimo ?? 0,
+        unidade: produto.unidade || 'un',
+        ativo: produto.ativo !== false,
+      });
     } else {
       setEditingProduto(null);
       setFormData({ nome: '', descricao: '', marca: '', categoria: '', precoCusto: '', precoVenda: '', estoque: 0, estoqueMinimo: 0, unidade: 'un', ativo: true });
@@ -61,10 +73,23 @@ export default function Produtos() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Mapeia form → contrato do backend (snake_case).
+    const payload = {
+      nome: formData.nome,
+      descricao: formData.descricao || null,
+      marca: formData.marca || null,
+      categoria: formData.categoria || null,
+      preco_custo: Number(formData.precoCusto) || 0,
+      preco_venda: Number(formData.precoVenda) || 0,
+      quantidade_estoque: Number(formData.estoque) || 0,
+      quantidade_minima: Number(formData.estoqueMinimo) || 0,
+      unidade: formData.unidade || 'un',
+      ativo: formData.ativo !== false,
+    };
     if (editingProduto) {
-      updateMutation.mutate({ id: editingProduto.id, data: formData });
+      updateMutation.mutate({ id: editingProduto.id, data: payload });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(payload);
     }
   };
 
@@ -166,10 +191,17 @@ export default function Produtos() {
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{formatCurrency(produto.precoCusto)}</td>
                     <td className="px-6 py-4 font-medium text-indigo-600 dark:text-indigo-400">{formatCurrency(produto.precoVenda)}</td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded ${produto.estoque <= produto.estoqueMinimo ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                        {produto.estoque <= produto.estoqueMinimo && <AlertTriangle size={14} />}
-                        {produto.estoque} / {produto.estoqueMinimo}
+                      {(() => {
+                        const est = produto.quantidadeEstoque ?? produto.quantidade_estoque ?? produto.estoque ?? 0;
+                        const min = produto.quantidadeMinima ?? produto.quantidade_minima ?? produto.estoqueMinimo ?? 0;
+                        const baixo = Number(est) <= Number(min);
+                        return (
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded ${baixo ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                        {baixo && <AlertTriangle size={14} />}
+                        {est} / {min}
                       </span>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
