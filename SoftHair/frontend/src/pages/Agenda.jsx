@@ -29,6 +29,22 @@ for (let h = 8; h <= 23; h++) {
 
 const SLOT_HEIGHT = 28; // px por slot de 15 minutos
 
+// dataHora vem como ISO UTC do backend. Display/posicionamento usa LOCAL.
+function getLocalHHMM(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const p = (n) => String(n).padStart(2, '0');
+  return `${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function getLocalDateStr(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 const ROLE_COLORS = {
   'Cabeleireiro': { bg: '#4F46E5', text: '#fff' },
   'Barbeiro': { bg: '#7C3AED', text: '#fff' },
@@ -583,7 +599,7 @@ export default function Agenda() {
     const dateStr = localDateStr(date);
     return allAgendamentos.filter(a => {
       if (!a.dataHora) return false;
-      const agendDate = a.dataHora.substring(0, 10);
+      const agendDate = getLocalDateStr(a.dataHora);
       if (agendDate !== dateStr) return false;
       if (profissionalId && a.profissionalId !== profissionalId) return false;
       if (a.status === 'convertido') return false;
@@ -602,7 +618,7 @@ export default function Agenda() {
   const getAgendamentosNaHora = (date, profissionalId, hora) => {
     return getAgendamentosDoDia(date, profissionalId).filter(a => {
       if (!a.dataHora) return false;
-      const horaAgend = a.dataHora.split('T')[1]?.substring(0, 5);
+      const horaAgend = getLocalHHMM(a.dataHora);
       if (!horaAgend) return false;
       return horaAgend === hora;
     });
@@ -652,7 +668,7 @@ export default function Agenda() {
       if (excludeId && a.id === excludeId) return false;
       if (a.status === 'convertido' || a.status === 'cancelado') return false;
 
-      const agendDataStr = a.dataHora.split('T')[0];
+      const agendDataStr = getLocalDateStr(a.dataHora);
       if (agendDataStr !== dataStr) return false;
 
       const agendServico = servicos.find(s => s.id === a.servicoId);
@@ -840,7 +856,7 @@ export default function Agenda() {
         if (a.profissionalId !== formData.profissionalId) return false;
         if (editingAgendamento && a.id === editingAgendamento.id) return false;
         if (a.status === 'cancelado') return false;
-        const aDate = a.dataHora.split('T')[0];
+        const aDate = getLocalDateStr(a.dataHora);
         if (aDate !== dataStr) return false;
         const aServico = servicos.find(s => s.id === a.servicoId);
         const aDuracao = aServico?.duracao || 30;
@@ -859,7 +875,7 @@ export default function Agenda() {
         if (a.auxiliarId !== formData.auxiliarId) return false;
         if (editingAgendamento && a.id === editingAgendamento.id) return false;
         if (a.status === 'cancelado') return false;
-        const aDate = a.dataHora.split('T')[0];
+        const aDate = getLocalDateStr(a.dataHora);
         if (aDate !== dataStr) return false;
         const aServico = servicos.find(s => s.id === a.servicoId);
         const aDuracao = aServico?.duracao || 30;
@@ -1242,7 +1258,7 @@ export default function Agenda() {
                   const convertedProfTimes = new Set();
                   agendamentosDoProf.forEach(a => {
                     if (a.status === 'convertido' && a.dataHora) {
-                      const hora = a.dataHora.split('T')[1]?.substring(0, 5);
+                      const hora = getLocalHHMM(a.dataHora);
                       if (hora) convertedProfTimes.add(hora);
                     }
                   });
@@ -1251,8 +1267,8 @@ export default function Agenda() {
                   const convertedAuxTimes = new Set();
                   const dateStr = localDateStr(selectedDate);
                   allAgendamentos.forEach(a => {
-                    if (a.status === 'convertido' && a.auxiliarId === profissional.id && a.dataHora && a.dataHora.substring(0,10) === dateStr) {
-                      const hora = a.dataHora.split('T')[1]?.substring(0, 5);
+                    if (a.status === 'convertido' && a.auxiliarId === profissional.id && a.dataHora && getLocalDateStr(a.dataHora) === dateStr) {
+                      const hora = getLocalHHMM(a.dataHora);
                       if (hora) convertedAuxTimes.add(hora);
                     }
                   });
@@ -1262,7 +1278,7 @@ export default function Agenda() {
                       {agendamentosDoProf.map((agend) => {
                         if (!agend.dataHora) return null;
                         if (agend.status === 'convertido') return null;
-                        const horaAgend = agend.dataHora.split('T')[1]?.substring(0, 5);
+                        const horaAgend = getLocalHHMM(agend.dataHora);
                         if (!horaAgend) return null;
                         const [hh, mm] = horaAgend.split(':').map(Number);
                         const snappedHora = `${String(hh).padStart(2,'0')}:${String(Math.floor(mm/15)*15).padStart(2,'0')}`;
@@ -1350,9 +1366,9 @@ export default function Agenda() {
                       const dateStr = localDateStr(selectedDate);
                       if (a.status === 'cancelado') return false;
                       if (a.status === 'convertido') return false;
-                      return a.dataHora.substring(0,10) === dateStr;
+                      return getLocalDateStr(a.dataHora) === dateStr;
                     }).map(agend => {
-                      const horaAgend = agend.dataHora.split('T')[1]?.substring(0, 5);
+                      const horaAgend = getLocalHHMM(agend.dataHora);
                       if (!horaAgend) return null;
                       const [hh2, mm2] = horaAgend.split(':').map(Number);
                       const snappedHora2 = `${String(hh2).padStart(2,'0')}:${String(Math.floor(mm2/15)*15).padStart(2,'0')}`;
