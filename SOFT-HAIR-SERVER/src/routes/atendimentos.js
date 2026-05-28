@@ -16,7 +16,7 @@ const writeGuard = requireAnyRole(['admin', 'recepcao']);
 // Listar
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { status, data_inicio, data_fim, limit } = req.query;
+    const { status, data, data_inicio, data_fim, limit } = req.query;
     // Scoping: profissional só vê os próprios.
     let profissional_id = req.query.profissional_id;
     if (isProfissionalScope(req)) {
@@ -25,7 +25,7 @@ router.get('/', authMiddleware, async (req, res) => {
       }
       profissional_id = req.user.profissionalId;
     }
-    const result = await service.listar(req.salaoId, { status, profissional_id, data_inicio, data_fim, limit });
+    const result = await service.listar(req.salaoId, { status, profissional_id, data, data_inicio, data_fim, limit });
     res.json({ success: result.success, data: result.data || [], error: result.error });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);

@@ -43,6 +43,11 @@ class AtendimentoService {
         sql += ` AND a.profissional_id = $${paramCount++}`;
         params.push(filtros.profissional_id);
       }
+      if (filtros.data) {
+        // Dia único: usa data_atendimento (cai pra created_at se nula).
+        sql += ` AND DATE(COALESCE(a.data_atendimento, a.created_at)) = $${paramCount++}`;
+        params.push(filtros.data);
+      }
       if (filtros.data_inicio && filtros.data_fim) {
         sql += ` AND DATE(a.created_at) BETWEEN $${paramCount++} AND $${paramCount++}`;
         params.push(filtros.data_inicio, filtros.data_fim);

@@ -38,19 +38,27 @@ const toDateStr = (v) => {
 // Extrai array de resposta paginada { data: [...], total: N } ou array direto
 const toArr = (val) => Array.isArray(val) ? val : (val?.data && Array.isArray(val.data) ? val.data : []);
 
+// Data de HOJE em local (YYYY-MM-DD). NÃO usar toISOString (dá data UTC, que à
+// noite no BRT já virou o dia seguinte).
+const hojeLocal = () => {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+};
+
 export default function Atendimentos() {
   const [searchParams] = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewAtendimento, setViewAtendimento] = useState(null);
   const [editingAtendimento, setEditingAtendimento] = useState(null);
-  const [filtroData, setFiltroData] = useState('');
+  const [filtroData, setFiltroData] = useState(hojeLocal());
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   
   const [formData, setFormData] = useState({
     clienteId: '',
     profissionalId: '',
     auxiliarId: '',
-    data: new Date().toISOString().split('T')[0],
+    data: hojeLocal(),
     horaInicio: '',
     horaFim: '',
     desconto: 0,
@@ -205,7 +213,7 @@ export default function Atendimentos() {
         clienteId: '',
         profissionalId: '',
         auxiliarId: '',
-        data: new Date().toISOString().split('T')[0],
+        data: hojeLocal(),
         horaInicio: '',
         horaFim: '',
         desconto: 0,
@@ -237,7 +245,7 @@ export default function Atendimentos() {
         clienteId: atendimento.clienteId ?? atendimento.cliente_id ?? '',
         profissionalId: atendimento.profissionalId ?? atendimento.profissional_id ?? '',
         auxiliarId: atendimento.auxiliarId ?? atendimento.auxiliar_id ?? '',
-        data: toDateStr(atendimento.dataAtendimento ?? atendimento.data_atendimento ?? atendimento.data) || new Date().toISOString().split('T')[0],
+        data: toDateStr(atendimento.dataAtendimento ?? atendimento.data_atendimento ?? atendimento.data) || hojeLocal(),
         horaInicio: toTime(atendimento.horaInicio ?? atendimento.hora_inicio),
         horaFim: toTime(atendimento.horaFim ?? atendimento.hora_fim),
         desconto: atendimento.desconto || 0,
@@ -416,7 +424,12 @@ export default function Atendimentos() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
-    const d = new Date(dateStr);
+    const s = String(dateStr);
+    // DATE vem como meia-noite-UTC ("2026-05-28T00:00:00Z"); pegar Y-M-D direto
+    // evita o shift de -1 dia que toLocaleDateString causa em BRT.
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+    const d = new Date(s);
     if (Number.isNaN(d.getTime())) return '—';
     return d.toLocaleDateString('pt-BR');
   };

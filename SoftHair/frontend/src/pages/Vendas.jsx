@@ -163,7 +163,11 @@ export default function Vendas() {
   const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
-    const d = new Date(dateStr);
+    const s = String(dateStr);
+    // DATE vem meia-noite-UTC; pegar Y-M-D direto evita shift de -1 dia em BRT.
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+    const d = new Date(s);
     if (Number.isNaN(d.getTime())) return '—';
     return d.toLocaleDateString('pt-BR');
   };
