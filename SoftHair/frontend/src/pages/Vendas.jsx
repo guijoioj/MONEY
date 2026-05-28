@@ -159,7 +159,12 @@ export default function Vendas() {
   };
 
   const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
-  const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('pt-BR');
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('pt-BR');
+  };
 
   const profissionais = profissionaisData?.data?.data || [];
 

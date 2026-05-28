@@ -155,13 +155,15 @@ export default function Atendimentos() {
       console.log('loadAtendimentoForEdit - atendimento.id:', atendimento?.id);
 
       setEditingAtendimento(atendimento);
+      // Backend retorna snake_case (cliente_id, profissional_id, data_atendimento).
+      // Suporta ambos para compatibilidade com local (SoftHair/backend) e Render (SOFT-HAIR-SERVER).
       setFormData({
-        clienteId: atendimento.clienteId || '',
-        profissionalId: atendimento.profissionalId || '',
-        auxiliarId: atendimento.auxiliarId || '',
-        data: atendimento.data,
-        horaInicio: atendimento.horaInicio || '',
-        horaFim: atendimento.horaFim || '',
+        clienteId: atendimento.cliente_id ?? atendimento.clienteId ?? '',
+        profissionalId: atendimento.profissional_id ?? atendimento.profissionalId ?? '',
+        auxiliarId: atendimento.auxiliar_id ?? atendimento.auxiliarId ?? '',
+        data: atendimento.data_atendimento ?? atendimento.data ?? new Date().toISOString().split('T')[0],
+        horaInicio: atendimento.hora_inicio ?? atendimento.horaInicio ?? '',
+        horaFim: atendimento.hora_fim ?? atendimento.horaFim ?? '',
         desconto: atendimento.desconto || 0,
         observacoes: atendimento.observacoes || ''
       });
@@ -351,7 +353,10 @@ export default function Atendimentos() {
   };
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('pt-BR');
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('pt-BR');
   };
 
   const formatTime = (timeStr) => {
