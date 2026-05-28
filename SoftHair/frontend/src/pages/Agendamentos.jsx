@@ -132,7 +132,7 @@ export default function Agendamentos() {
               Nenhum agendamento para esta data
             </div>
           ) : (
-            agendamentos?.data?.data?.map((agendamento) => (
+            (Array.isArray(agendamentos?.data?.data) ? agendamentos.data.data : []).map((agendamento) => (
               <div key={agendamento.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-5">
                 <div className="flex flex-col sm:flex-row justify-between gap-4">
                   <div className="flex-1">
@@ -195,7 +195,7 @@ export default function Agendamentos() {
                   required
                 >
                   <option value="">Selecione um cliente</option>
-                  {clientesData?.data?.data?.map((cliente) => (
+                  {(Array.isArray(clientesData?.data?.data) ? clientesData.data.data : []).map((cliente) => (
                     <option key={cliente.id} value={cliente.id}>{cliente.nome} - {cliente.telefone}</option>
                   ))}
                 </select>
@@ -209,7 +209,7 @@ export default function Agendamentos() {
                   required
                 >
                   <option value="">Selecione um serviço</option>
-                  {servicosData?.data?.data?.map((servico) => (
+                  {(Array.isArray(servicosData?.data?.data) ? servicosData.data.data : []).map((servico) => (
                     <option key={servico.id} value={servico.id}>{servico.nome} - R$ {servico.preco.toFixed(2)}</option>
                   ))}
                 </select>

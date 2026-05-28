@@ -132,7 +132,7 @@ export default function Servicos() {
               Nenhum serviço encontrado
             </div>
           ) : (
-            data?.data?.data?.map((servico) => (
+            (Array.isArray(data?.data?.data) ? data.data.data : []).map((servico) => (
               <div key={servico.id} className={`bg-white dark:bg-gray-800 rounded-lg shadow p-5 ${!servico.ativo ? 'opacity-60' : ''}`}>
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">{servico.nome}</h3>

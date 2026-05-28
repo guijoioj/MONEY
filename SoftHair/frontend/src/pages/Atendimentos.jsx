@@ -407,7 +407,7 @@ export default function Atendimentos() {
                   </td>
                 </tr>
               ) : (
-                atendimentos?.data?.data?.map((atendimento) => (
+                (Array.isArray(atendimentos?.data?.data) ? atendimentos.data.data : []).map((atendimento) => (
                   <tr key={atendimento.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                     <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{formatDate(atendimento.data)}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{atendimento.profissionalNome || '-'}</td>
@@ -460,7 +460,7 @@ export default function Atendimentos() {
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">Selecione</option>
-                    {profissionaisData?.data?.data?.map((profissional) => (
+                    {(Array.isArray(profissionaisData?.data?.data) ? profissionaisData.data.data : []).map((profissional) => (
                       <option key={profissional.id} value={profissional.id}>{profissional.nome}</option>
                     ))}
                   </select>
@@ -496,7 +496,7 @@ export default function Atendimentos() {
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">Selecione um cliente</option>
-                    {clientesData?.data?.data?.map((cliente) => (
+                    {(Array.isArray(clientesData?.data?.data) ? clientesData.data.data : []).map((cliente) => (
                       <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>
                     ))}
                   </select>

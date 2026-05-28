@@ -292,7 +292,7 @@ export default function Fechamento() {
               className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="">Selecione um profissional</option>
-              {profissionaisData?.data?.data?.map(p => (
+              {(Array.isArray(profissionaisData?.data?.data) ? profissionaisData.data.data : []).map(p => (
                 <option key={p.id} value={p.id}>{p.nome}</option>
               ))}
             </select>

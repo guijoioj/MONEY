@@ -148,7 +148,7 @@ export default function Produtos() {
                   </td>
                 </tr>
               ) : (
-                data?.data?.data?.map((produto) => (
+                (Array.isArray(data?.data?.data) ? data.data.data : []).map((produto) => (
                   <tr key={produto.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 ${!produto.ativo ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">

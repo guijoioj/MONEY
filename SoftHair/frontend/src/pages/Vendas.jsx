@@ -216,7 +216,7 @@ export default function Vendas() {
                   <td colSpan="6" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">Nenhuma venda encontrada</td>
                 </tr>
               ) : (
-                vendas?.data?.data?.map((venda) => (
+                (Array.isArray(vendas?.data?.data) ? vendas.data.data : []).map((venda) => (
                   <tr key={venda.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
                     <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{formatDate(venda.data)}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{venda.clienteNome || 'Consumidor Final'}</td>
@@ -260,7 +260,7 @@ export default function Vendas() {
                   <select value={formData.clienteId} onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500">
                     <option value="">Consumidor Final</option>
-                    {clientesData?.data?.data?.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                    {(Array.isArray(clientesData?.data?.data) ? clientesData.data.data : []).map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
                   </select>
                 </div>
                 <div>
@@ -300,7 +300,7 @@ export default function Vendas() {
                   <div>
                     <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Serviços</label>
                     <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {servicosData?.data?.data?.map((servico) => (
+                      {(Array.isArray(servicosData?.data?.data) ? servicosData.data.data : []).map((servico) => (
                         <button key={servico.id} type="button" onClick={() => addItem('servico', servico)}
                           className="w-full text-left px-3 py-2 border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 text-sm">
                           {servico.nome} — {formatCurrency(servico.preco)}
