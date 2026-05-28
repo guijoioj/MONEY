@@ -16,11 +16,14 @@ const api = axios.create({
 
 // No Electron, lê config persistida ANTES das requests começarem.
 // IPC bridge expõe window.electron.serverConfig.get().
+// Exporta baseURL ativa em window pra hooks (ex: useWebSocket) descobrirem o host real.
+if (typeof window !== 'undefined') window.__SH_API_BASE__ = apiBaseURL;
 if (typeof window !== 'undefined' && window.electron?.serverConfig?.get) {
   window.electron.serverConfig.get().then((cfg) => {
     if (cfg?.url) {
       const baseUrl = cfg.url.endsWith('/api') ? cfg.url : `${cfg.url}/api`;
       api.defaults.baseURL = baseUrl;
+      window.__SH_API_BASE__ = baseUrl;
       console.log('[api] baseURL ajustada pra:', baseUrl);
     }
   }).catch(() => { /* mantém fallback */ });

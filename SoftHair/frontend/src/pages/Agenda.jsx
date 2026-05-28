@@ -731,12 +731,21 @@ export default function Agenda() {
   const openModal = (agendamento = null, date = null, hora = null, profissional = null) => {
     if (agendamento) {
       setEditingAgendamento(agendamento);
+      // Backend retorna UTC. Input datetime-local espera horário LOCAL — converter.
+      let dataHoraLocal = '';
+      if (agendamento.dataHora) {
+        const d = new Date(agendamento.dataHora);
+        if (!Number.isNaN(d.getTime())) {
+          const p = (n) => String(n).padStart(2, '0');
+          dataHoraLocal = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+        }
+      }
       setFormData({
         clienteId: agendamento.clienteId || '',
         servicoId: agendamento.servicoId || '',
         profissionalId: agendamento.profissionalId || '',
         auxiliarId: agendamento.auxiliarId || '',
-        dataHora: agendamento.dataHora?.slice(0, 16) || '',
+        dataHora: dataHoraLocal,
         observacoes: agendamento.observacoes || '',
         status: agendamento.status || 'agendado',
       });
