@@ -117,17 +117,21 @@ router.put('/:id', authMiddleware, /* admin+recepcao via router.use no topo */ [
       if (role === 'recepcao' && motivo.length < 3) {
         return res.status(400).json({ success: false, error: 'motivo obrigatório (mín 3 chars) para cancelar venda.' });
       }
+      // STRICT: se audit log falhar, ABORTA o cancelamento.
       try {
-        require('../utils/auditLog').logAction({
+        await require('../utils/auditLog').logActionStrict({
           req,
           action: 'venda.cancelar_via_put',
           entityType: 'venda',
           entityId: Number(req.params.id),
           before: null,
-          after: { motivo: motivo || null, status_anterior: null },
+          after: { motivo, status_anterior: null },
           salaoId: req.salaoId,
         });
-      } catch (_) { /* tolera log indisponível */ }
+      } catch (e) {
+        console.error('[venda.cancelar_via_put] audit log falhou:', e.message);
+        return res.status(503).json({ success: false, error: 'Não foi possível registrar a auditoria — cancelamento abortado.' });
+      }
     }
 
     const result = await service.atualizar(req.params.id, req.body, req.salaoId, { req });
@@ -156,20 +160,23 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     if (role === 'recepcao' && motivo.length < 3) {
       return res.status(400).json({ success: false, error: 'motivo obrigatório (mín 3 chars) para cancelar venda.' });
     }
-    const result = await service.cancelar(req.params.id, req.salaoId);
-    if (!result.success) return res.status(404).json({ success: false, error: result.error });
-    // Audit log
+    // STRICT: audit log ANTES de cancelar — se logar falhar, não cancela.
     try {
-      require('../utils/auditLog').logAction({
+      await require('../utils/auditLog').logActionStrict({
         req,
         action: 'venda.cancelar',
         entityType: 'venda',
         entityId: Number(req.params.id),
         before: null,
-        after: { motivo: motivo || null },
+        after: { motivo },
         salaoId: req.salaoId,
       });
-    } catch (_) { /* tolera log indisponível */ }
+    } catch (e) {
+      console.error('[venda.cancelar] audit log falhou:', e.message);
+      return res.status(503).json({ success: false, error: 'Não foi possível registrar a auditoria — cancelamento abortado.' });
+    }
+    const result = await service.cancelar(req.params.id, req.salaoId);
+    if (!result.success) return res.status(404).json({ success: false, error: result.error });
     res.json({ success: true, message: result.message || 'Venda cancelada' });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);

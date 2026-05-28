@@ -628,24 +628,12 @@ async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_atend_servicos_salao ON atendimentos_servicos(salao_id);
     CREATE INDEX IF NOT EXISTS idx_atend_servicos_prof  ON atendimentos_servicos(profissional_id);
 
-    -- Audit logs: rastro persistido (cancelamentos, mudanças de papel, etc.).
-    CREATE TABLE IF NOT EXISTS audit_logs (
-      id           BIGSERIAL PRIMARY KEY,
-      salao_id     INTEGER REFERENCES saloes(id) ON DELETE CASCADE,
-      usuario_id   INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
-      action       VARCHAR(120) NOT NULL,
-      entity_type  VARCHAR(60),
-      entity_id    BIGINT,
-      before_data  JSONB,
-      after_data   JSONB,
-      ip           VARCHAR(64),
-      user_agent   TEXT,
-      created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE INDEX IF NOT EXISTS idx_audit_logs_salao   ON audit_logs(salao_id);
-    CREATE INDEX IF NOT EXISTS idx_audit_logs_action  ON audit_logs(action);
-    CREATE INDEX IF NOT EXISTS idx_audit_logs_entity  ON audit_logs(entity_type, entity_id);
-    CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at DESC);
+    -- Audit log: usa a tabela audit_log singular que ja existe (schema com hash chain).
+    -- utils/auditLog.js insere em audit_log. Removida criacao duplicada de audit_logs.
+    CREATE INDEX IF NOT EXISTS idx_audit_log_salao_created
+      ON audit_log(salao_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_audit_log_entity
+      ON audit_log(entity_type, entity_id);
 
     -- Normaliza vendas legadas: 'concluida'/'finalizada' → 'paga' (idempotente).
     -- Roda 1x por boot; após primeira execução nenhuma linha é tocada.

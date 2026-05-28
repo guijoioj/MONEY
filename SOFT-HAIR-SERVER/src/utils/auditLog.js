@@ -86,9 +86,63 @@ async function logAction({ req, action, entityType = null, entityId = null, befo
       ]
     );
   } catch (err) {
-    // Falha em audit log NUNCA derruba a operação. Loga e segue.
+    // Falha em audit log NUNCA derruba a operação (uso geral). Loga e segue.
     console.error('[AUDIT_LOG] falha ao persistir:', err.message);
   }
 }
 
-module.exports = { logAction };
+/**
+ * Versão STRICT pra ações sensíveis (cancelamento, ajuste estoque, edição financeiro).
+ * Se o log falhar, LANÇA erro. Uso: ação não executa sem rastro persistido.
+ *
+ * Padrão de uso:
+ *   await logActionStrict({ req, action: 'venda.cancelar', ... });
+ *   // só executa o UPDATE depois desta linha — se rastro falhou, função throws.
+ */
+async function logActionStrict(opts) {
+  if (!opts || !opts.action) throw new Error('logActionStrict: action obrigatória');
+  const { req, action, entityType = null, entityId = null, before = null, after = null, actorType, actorId, salaoId } = opts;
+
+  let _actorId = actorId;
+  let _actorType = actorType;
+  let _salaoId = salaoId;
+  let ip = null;
+  let ua = null;
+
+  if (req) {
+    ip = (req.ip || req.connection?.remoteAddress || null);
+    ua = (req.headers?.['user-agent'] || null);
+    if (_salaoId == null) _salaoId = req.salaoId || req.salonId || null;
+    if (_actorId == null) {
+      _actorId = req.user?.userId || req.user?.id || req.profissionalId || req.clienteId || null;
+    }
+    if (!_actorType) {
+      if (req.user?.tipo === 'admin') _actorType = 'admin';
+      else if (req.user?.tipo === 'recepcao') _actorType = 'recepcao';
+      else if (req.user?.tipo === 'profissional') _actorType = 'profissional';
+      else if (req.apiKey) _actorType = 'apikey';
+      else _actorType = 'unknown';
+    }
+  }
+
+  // Sem try/catch interno: se DB falhar, throw propaga.
+  await pool.query(
+    `INSERT INTO audit_log
+      (salao_id, actor_id, actor_type, action, entity_type, entity_id, before_data, after_data, ip, user_agent)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    [
+      _salaoId || null,
+      _actorId || null,
+      _actorType ? String(_actorType).slice(0, 20) : null,
+      String(action).slice(0, 100),
+      entityType ? String(entityType).slice(0, 50) : null,
+      entityId || null,
+      before ? JSON.stringify(redactSensitive(before)) : null,
+      after ? JSON.stringify(redactSensitive(after)) : null,
+      ip ? String(ip).slice(0, 45) : null,
+      ua ? String(ua).slice(0, 500) : null,
+    ]
+  );
+}
+
+module.exports = { logAction, logActionStrict };

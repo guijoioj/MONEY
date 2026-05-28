@@ -110,25 +110,43 @@ router.patch('/:id/estoque', authMiddleware, [
     if (delta == null && absoluto == null) {
       return res.status(400).json({ success: false, error: 'Envie delta ou absoluto' });
     }
-    const { queryOne } = require('../config/database');
-    const sql = absoluto != null
-      ? `UPDATE produtos SET quantidade_estoque = $1, updated_at = CURRENT_TIMESTAMP
-           WHERE id = $2 AND salao_id = $3 RETURNING id, quantidade_estoque`
-      : `UPDATE produtos SET quantidade_estoque = GREATEST(0, COALESCE(quantidade_estoque, 0) + $1),
-                              updated_at = CURRENT_TIMESTAMP
-           WHERE id = $2 AND salao_id = $3 RETURNING id, quantidade_estoque`;
-    const r = await queryOne(sql, [absoluto != null ? absoluto : delta, req.params.id, req.salaoId]);
-    if (!r) return res.status(404).json({ success: false, error: 'Produto não encontrado' });
-    try {
-      require('../utils/auditLog').logAction({
-        req, action: 'produto.ajuste_estoque', entityType: 'produto', entityId: Number(req.params.id),
-        before: null, after: { delta, absoluto, motivo: motivo || null, novo_estoque: r.quantidade_estoque },
-        salaoId: req.salaoId,
-      });
-    } catch (_) { /* tolera */ }
-    res.json({ success: true, data: r });
+    const { queryOne, withTransaction } = require('../config/database');
+
+    // STRICT: ajuste de estoque + audit log na MESMA transação.
+    // Se o log falhar, rollback do UPDATE → estoque NÃO muda sem rastro.
+    const result = await withTransaction(async (client) => {
+      const sql = absoluto != null
+        ? `UPDATE produtos SET quantidade_estoque = $1, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $2 AND salao_id = $3 RETURNING id, quantidade_estoque`
+        : `UPDATE produtos SET quantidade_estoque = GREATEST(0, COALESCE(quantidade_estoque, 0) + $1),
+                                updated_at = CURRENT_TIMESTAMP
+             WHERE id = $2 AND salao_id = $3 RETURNING id, quantidade_estoque`;
+      const upd = await client.query(sql, [absoluto != null ? absoluto : delta, req.params.id, req.salaoId]);
+      if (!upd.rows.length) return { code: 404, body: { success: false, error: 'Produto não encontrado' } };
+      const r = upd.rows[0];
+
+      // Audit log na MESMA conexão (mesma transação). Se falhar, transação aborta.
+      await client.query(
+        `INSERT INTO audit_log
+          (salao_id, actor_id, actor_type, action, entity_type, entity_id, after_data, ip, user_agent)
+         VALUES ($1, $2, $3, 'produto.ajuste_estoque', 'produto', $4, $5, $6, $7)`,
+        [
+          req.salaoId,
+          req.user?.userId || req.user?.id || null,
+          req.user?.tipo || 'unknown',
+          Number(req.params.id),
+          JSON.stringify({ delta, absoluto, motivo: motivo || null, novo_estoque: r.quantidade_estoque }),
+          (req.ip || req.connection?.remoteAddress || '').slice(0, 45) || null,
+          (req.headers?.['user-agent'] || '').slice(0, 500) || null,
+        ]
+      );
+      return { code: 200, body: { success: true, data: r } };
+    });
+
+    return res.status(result.code).json(result.body);
   } catch (error) {
-    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
+    // Qualquer falha (UPDATE ou audit log) cai aqui — transação fez rollback automático.
+    require("../utils/sendError").sendError(res, 500, "Erro interno (operação revertida)", error);
   }
 });
 
