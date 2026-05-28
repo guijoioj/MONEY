@@ -125,6 +125,7 @@ export default function Layout() {
     { to: '/dashboard',            icon: LayoutDashboard, label: 'Dashboard',           roles: ['admin'] },
     { to: '/administrativo',       icon: BarChart3,       label: 'Administrativo',      roles: ['admin'] },
     { to: '/agenda',               icon: Calendar,        label: 'Agenda',              roles: ['admin', 'recepcao'] },
+    { to: '/painel-dia',           icon: User,            label: 'Visão profissional',  roles: ['admin', 'recepcao'] },
     { to: '/minha-agenda',         icon: Calendar,        label: 'Minha agenda',        roles: ['profissional'] },
     { to: '/solicitacoes',         icon: Inbox,           label: 'Solicitações',        roles: ['admin', 'recepcao'], badge: solicitacoesCount },
     { to: '/clientes',             icon: Users,           label: 'Clientes',            roles: ['admin', 'recepcao'] },

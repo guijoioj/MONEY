@@ -160,6 +160,10 @@ export const atendimentosAPI = {
   },
   delete: (id) => api.delete(`/atendimentos/${id}`),
   fechamento: (data) => api.post('/atendimentos/fechamento', data),
+  // Fluxo atendimento aberto: gerenciar serviços do atendimento.
+  listarServicos: (id) => api.get(`/atendimentos/${id}/servicos`),
+  adicionarServico: (id, data) => api.post(`/atendimentos/${id}/servicos`, data),
+  removerServico: (id, itemId) => api.delete(`/atendimentos/${id}/servicos/${itemId}`),
 };
 
 export const fechamentosAPI = {

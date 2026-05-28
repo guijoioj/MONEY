@@ -34,6 +34,7 @@ const Usuarios = lazy(() => import('./pages/Usuarios'));
 const MinhaAgenda = lazy(() => import('./pages/MinhaAgenda'));
 const MeusAtendimentos = lazy(() => import('./pages/MeusAtendimentos'));
 const MinhasComissoes = lazy(() => import('./pages/MinhasComissoes'));
+const PainelDia = lazy(() => import('./pages/PainelDia'));
 // V2: Comissões reescritas
 const ComissoesV2 = lazy(() => import('./pages/ComissoesV2'));
 const RegrasComissao = lazy(() => import('./pages/RegrasComissao'));
@@ -138,6 +139,7 @@ export default function App() {
         <Route path="profissionais"       element={adminOrRecepcao(lazyEl(Profissionais))} />
         <Route path="atendimentos"        element={adminOrRecepcao(lazyEl(Atendimentos))} />
         <Route path="vendas"              element={adminOrRecepcao(lazyEl(Vendas))} />
+        <Route path="painel-dia"          element={adminOrRecepcao(lazyEl(PainelDia))} />
 
         {/* Profissional */}
         <Route path="minha-agenda"        element={onlyProfissional(lazyEl(MinhaAgenda))} />
