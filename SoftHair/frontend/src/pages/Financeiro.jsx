@@ -5,8 +5,9 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, ReferenceDot, Legend
 } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, BarChart2, Link } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, BarChart2, Link, Printer, FileDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { imprimirDRE, baixarPdfDRE } from '../utils/relatorioFinanceiro';
 
 const fmt = (v) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
@@ -44,14 +45,30 @@ function AbaDRE({ mes, ano, setMes, setAno }) {
 
   return (
     <div className="space-y-6">
-      {/* Filtro */}
-      <div className="flex gap-3">
+      {/* Filtro + gerar documento */}
+      <div className="flex flex-wrap gap-3 items-center">
         <select className="border rounded-lg px-3 py-2 text-sm" value={mes} onChange={e => setMes(+e.target.value)}>
           {meses.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
         </select>
         <select className="border rounded-lg px-3 py-2 text-sm" value={ano} onChange={e => setAno(+e.target.value)}>
           {[ano-1, ano, ano+1].map(y => <option key={y}>{y}</option>)}
         </select>
+        <div className="flex gap-2 ml-auto">
+          <button
+            onClick={() => imprimirDRE(data, mes, ano)}
+            disabled={!data}
+            className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+          >
+            <Printer size={16} /> Imprimir
+          </button>
+          <button
+            onClick={() => baixarPdfDRE(data, mes, ano)}
+            disabled={!data}
+            className="flex items-center gap-2 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+          >
+            <FileDown size={16} /> Baixar PDF
+          </button>
+        </div>
       </div>
 
       {/* Extrato DRE */}

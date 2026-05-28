@@ -1,6 +1,6 @@
 {
   "name": "softhair",
-  "version": "3.4.17",
+  "version": "3.4.18",
   "description": "SoftHair - Sistema de gestão para salões de beleza (Electron + SQLite + sync opcional)",
   "main": "electron/main.js",
   "scripts": {
