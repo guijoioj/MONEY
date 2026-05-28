@@ -338,6 +338,17 @@ router.get('/:id/painel/clientes/:clienteId/favoritos', authMiddleware, async (r
     if (!checks[0].rows.length) return res.status(404).json({ success: false, error: 'Profissional não encontrado' });
     if (!checks[1].rows.length) return res.status(404).json({ success: false, error: 'Cliente não encontrado' });
 
+    // Profissional só vê favoritos de cliente que ele já atendeu.
+    if (req.user?.tipo === 'profissional') {
+      const r = await pool.query(
+        'SELECT 1 FROM atendimentos WHERE profissional_id=$1 AND cliente_id=$2 AND salao_id=$3 LIMIT 1',
+        [profId, clienteId, req.salaoId]
+      );
+      if (!r.rows.length) {
+        return res.status(403).json({ success: false, error: 'Acesso permitido somente a clientes que você já atendeu.' });
+      }
+    }
+
     // Profissional selecionado (pra incluir no payload)
     const profSelRow = await pool.query(
       'SELECT id, nome, especialidade FROM profissionais WHERE id=$1 AND salao_id=$2',

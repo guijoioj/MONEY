@@ -197,12 +197,19 @@ router.get('/em-aberto', authMiddleware, adminOrRecepcao, async (req, res) => {
   }
 });
 
-// GET /:id — detalhe de fechamento. Admin OU recepção (recepção pode rever fechamento que ela mesma fez).
+// GET /:id — detalhe de fechamento.
+//   Admin: vê qualquer um.
+//   Recepção: só vê tipo='cliente' (caixa do cliente). Período/financeiro → 403.
 router.get('/:id', authMiddleware, adminOrRecepcao, async (req, res) => {
   try {
     const result = await service.buscarPorId(req.params.id, req.salaoId);
-    if (result.success) res.json({ success: true, data: result.data });
-    else res.status(404).json({ success: false, error: result.error });
+    if (!result.success) return res.status(404).json({ success: false, error: result.error });
+
+    const tipoFech = (result.data?.tipo || '').toLowerCase();
+    if (req.user?.tipo === 'recepcao' && tipoFech !== 'cliente') {
+      return res.status(403).json({ success: false, error: 'Detalhe de fechamento financeiro do salão é admin-only.' });
+    }
+    res.json({ success: true, data: result.data });
   } catch (error) {
     require("../utils/sendError").sendError(res, 500, "Erro interno", error);
   }

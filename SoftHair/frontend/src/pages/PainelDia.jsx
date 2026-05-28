@@ -21,7 +21,22 @@ import {
 
 const LS_KEY = 'painel_dia_profissional_id';
 const fmtMoney = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
-const todayStr = () => new Date().toISOString().slice(0, 10);
+// Data LOCAL (não UTC) — evita virar dia seguinte à noite no Brasil.
+const todayStr = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+};
+// Comissão padronizada: aceita valor_comissao | valor_comissao_cents/100 | valor (legado).
+const comissaoValor = (c) => {
+  if (c == null) return 0;
+  if (c.valor_comissao_cents != null) return Number(c.valor_comissao_cents) / 100;
+  if (c.valor_comissao != null) return Number(c.valor_comissao);
+  if (c.valor != null) return Number(c.valor);
+  return 0;
+};
 
 export default function PainelDia() {
   const [profId, setProfId] = useState(() => {
@@ -140,7 +155,7 @@ function PainelDoDia({ profId, onAbrir }) {
   const concluidos = atendimentos.filter((a) => ['finalizado', 'concluido', 'concluida'].includes((a.status || '').toLowerCase()));
 
   const comissaoEstimada = useMemo(() => {
-    return comissoesHoje.reduce((sum, c) => sum + Number(c.valor || c.valor_total || 0), 0);
+    return comissoesHoje.reduce((sum, c) => sum + comissaoValor(c), 0);
   }, [comissoesHoje]);
 
   return (
