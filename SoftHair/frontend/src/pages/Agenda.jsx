@@ -392,7 +392,7 @@ export default function Agenda() {
 
   const { data: servicosData } = useQuery({
     queryKey: ['servicos-dropdown'],
-    queryFn: () => servicosAPI.getAll({}),
+    queryFn: () => servicosAPI.getAll({ limit: 2000 }),
   });
 
   const { data: profissionaisData } = useQuery({

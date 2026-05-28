@@ -40,8 +40,8 @@ export default function Vendas() {
   });
 
   const { data: clientesData } = useQuery({ queryKey: ['clientes-dropdown'], queryFn: () => clientesAPI.getAll({ limit: 1000 }) });
-  const { data: produtosData } = useQuery({ queryKey: ['produtos-dropdown'], queryFn: () => produtosAPI.getAll({ ativo: true }) });
-  const { data: servicosData } = useQuery({ queryKey: ['servicos-dropdown'], queryFn: () => servicosAPI.getAll({ ativo: true }) });
+  const { data: produtosData } = useQuery({ queryKey: ['produtos-dropdown'], queryFn: () => produtosAPI.getAll({ ativo: true, limit: 2000 }) });
+  const { data: servicosData } = useQuery({ queryKey: ['servicos-dropdown'], queryFn: () => servicosAPI.getAll({ ativo: true, limit: 2000 }) });
   const { data: profissionaisData } = useQuery({ queryKey: ['profissionais-dropdown'], queryFn: () => profissionaisAPI.getAll({ ativo: true }) });
 
   const createMutation = useMutation({
