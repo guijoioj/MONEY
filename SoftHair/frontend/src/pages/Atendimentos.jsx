@@ -59,6 +59,8 @@ export default function Atendimentos() {
   
   const [produtosUsados, setProdutosUsados] = useState([]);
   const [servicosUsados, setServicosUsados] = useState([]);
+  const [buscaProduto, setBuscaProduto] = useState('');
+  const [buscaServico, setBuscaServico] = useState('');
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
 
   const { data: atendimentos, isLoading } = useQuery({
@@ -119,6 +121,10 @@ export default function Atendimentos() {
         profissional_id: payload.profissionalId,
         status: 'em_andamento',
         observacoes: payload.observacoes || null,
+        data_atendimento: payload.data || null,
+        hora_inicio: payload.horaInicio || null,
+        hora_fim: payload.horaFim || null,
+        desconto: payload.desconto || 0,
       });
       const id = res?.data?.data?.id;
       if (!id) throw new Error('Falha ao criar atendimento (sem id)');
@@ -138,9 +144,14 @@ export default function Atendimentos() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      // Só faz PUT se houver observação (backend rejeita observacoes=null no validator).
-      const obs = (data.observacoes ?? '').trim();
-      if (obs) await atendimentosAPI.update(id, { observacoes: obs });
+      // Atualiza data/hora/desconto/observação (backend usa COALESCE — null mantém atual).
+      await atendimentosAPI.update(id, {
+        observacoes: (data.observacoes ?? '').trim() || null,
+        data_atendimento: data.data || null,
+        hora_inicio: data.horaInicio || null,
+        hora_fim: data.horaFim || null,
+        desconto: data.desconto || 0,
+      });
       await persistItens(id, data.servicos, data.produtos);
       return { id };
     },
@@ -223,12 +234,12 @@ export default function Atendimentos() {
       // Backend retorna snake_case (cliente_id, profissional_id, data_atendimento).
       // Suporta ambos para compatibilidade com local (SoftHair/backend) e Render (SOFT-HAIR-SERVER).
       setFormData({
-        clienteId: atendimento.cliente_id ?? atendimento.clienteId ?? '',
-        profissionalId: atendimento.profissional_id ?? atendimento.profissionalId ?? '',
-        auxiliarId: atendimento.auxiliar_id ?? atendimento.auxiliarId ?? '',
-        data: toDateStr(atendimento.data_atendimento ?? atendimento.data) || new Date().toISOString().split('T')[0],
-        horaInicio: toTime(atendimento.hora_inicio ?? atendimento.horaInicio),
-        horaFim: toTime(atendimento.hora_fim ?? atendimento.horaFim),
+        clienteId: atendimento.clienteId ?? atendimento.cliente_id ?? '',
+        profissionalId: atendimento.profissionalId ?? atendimento.profissional_id ?? '',
+        auxiliarId: atendimento.auxiliarId ?? atendimento.auxiliar_id ?? '',
+        data: toDateStr(atendimento.dataAtendimento ?? atendimento.data_atendimento ?? atendimento.data) || new Date().toISOString().split('T')[0],
+        horaInicio: toTime(atendimento.horaInicio ?? atendimento.hora_inicio),
+        horaFim: toTime(atendimento.horaFim ?? atendimento.hora_fim),
         desconto: atendimento.desconto || 0,
         observacoes: atendimento.observacoes || ''
       });
@@ -277,6 +288,8 @@ export default function Atendimentos() {
     setProdutosUsados([]);
     setServicosUsados([]);
     setClienteSelecionado(null);
+    setBuscaProduto('');
+    setBuscaServico('');
   };
 
   const viewDetails = async (atendimento) => {
@@ -316,7 +329,7 @@ export default function Atendimentos() {
 
   const addServico = (servico) => {
     const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    const duracao = Number(servico.duracao_minutos ?? servico.duracao ?? 0);
+    const duracao = Number(servico.duracaoMinutos ?? servico.duracao_minutos ?? servico.duracao ?? 0);
     const horaFimCalculada = calcularHoraFim(horaAtual, duracao);
 
     const newItem = {
@@ -378,6 +391,10 @@ export default function Atendimentos() {
       clienteId: formData.clienteId,
       profissionalId: formData.profissionalId,
       observacoes: formData.observacoes,
+      data: formData.data,
+      horaInicio: formData.horaInicio,
+      horaFim: formData.horaFim,
+      desconto: parseFloat(formData.desconto) || 0,
       servicos: servicosUsados,
       produtos: produtosUsados,
     };
@@ -459,7 +476,10 @@ export default function Atendimentos() {
               ) : (
                 (Array.isArray(atendimentos?.data?.data) ? atendimentos.data.data : []).map((atendimento) => (
                   <tr key={atendimento.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900">
-                    <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{formatDate(atendimento.data)}</td>
+                    <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                      {formatDate(atendimento.dataAtendimento ?? atendimento.data)}
+                      {toTime(atendimento.horaInicio) ? <span className="block text-xs text-gray-500 dark:text-gray-400">{toTime(atendimento.horaInicio)}</span> : null}
+                    </td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{atendimento.profissionalNome || '-'}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{atendimento.clienteNome || 'Sem cliente'}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{formatCurrency(atendimento.totalProdutos)}</td>
@@ -586,24 +606,39 @@ export default function Atendimentos() {
                   Produtos Utilizados
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-3">
-                  <div className="col-span-2">
+                  <div className="col-span-3">
                     <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Selecionar Produto</label>
-                    <div className="max-h-32 overflow-y-auto border rounded-lg p-2">
-                      {toArr(produtosData?.data?.data).filter(p => p.ativo !== false).map((produto) => {
-                        const estoque = produto.quantidade_estoque ?? produto.estoque ?? 0;
-                        const precoVenda = Number(produto.preco_venda ?? produto.precoVenda ?? 0);
-                        return (
-                          <button
-                            key={produto.id}
-                            type="button"
-                            onClick={() => addProduto(produto)}
-                            className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 rounded text-sm border-b last:border-b-0"
-                          >
-                            {produto.nome} - Estoque: {estoque} {produto.unidade || 'un'} - {formatCurrency(precoVenda)}/un
-                          </button>
-                        );
-                      })}
-                    </div>
+                    <input
+                      type="text"
+                      value={buscaProduto}
+                      onChange={(e) => setBuscaProduto(e.target.value)}
+                      placeholder="Buscar produto pelo nome..."
+                      className="w-full px-3 py-2 mb-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    />
+                    {buscaProduto.trim() && (
+                      <div className="max-h-40 overflow-y-auto border rounded-lg p-2">
+                        {toArr(produtosData?.data?.data)
+                          .filter(p => p.ativo !== false && (p.nome || '').toLowerCase().includes(buscaProduto.toLowerCase()))
+                          .slice(0, 30)
+                          .map((produto) => {
+                            const estoque = produto.quantidadeEstoque ?? produto.quantidade_estoque ?? produto.estoque ?? 0;
+                            const precoVenda = Number(produto.precoVenda ?? produto.preco_venda ?? 0);
+                            return (
+                              <button
+                                key={produto.id}
+                                type="button"
+                                onClick={() => { addProduto(produto); setBuscaProduto(''); }}
+                                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 rounded text-sm border-b last:border-b-0"
+                              >
+                                {produto.nome} - Estoque: {estoque} {produto.unidade || 'un'} - {formatCurrency(precoVenda)}/un
+                              </button>
+                            );
+                          })}
+                        {toArr(produtosData?.data?.data).filter(p => p.ativo !== false && (p.nome || '').toLowerCase().includes(buscaProduto.toLowerCase())).length === 0 && (
+                          <p className="text-center py-2 text-sm text-gray-400 dark:text-gray-500">Nenhum produto encontrado</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -655,20 +690,35 @@ export default function Atendimentos() {
                   Serviços Realizados
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-3">
-                  <div className="col-span-2">
+                  <div className="col-span-3">
                     <label className="block text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">Selecionar Serviço</label>
-                    <div className="max-h-32 overflow-y-auto border rounded-lg p-2">
-                      {toArr(servicosData?.data?.data).filter(s => s.ativo !== false).map((servico) => (
-                        <button
-                          key={servico.id}
-                          type="button"
-                          onClick={() => addServico(servico)}
-                          className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 rounded text-sm border-b last:border-b-0"
-                        >
-                          {servico.nome} - {formatCurrency(Number(servico.preco ?? 0))} - {servico.duracao_minutos ?? servico.duracao ?? 0}min
-                        </button>
-                      ))}
-                    </div>
+                    <input
+                      type="text"
+                      value={buscaServico}
+                      onChange={(e) => setBuscaServico(e.target.value)}
+                      placeholder="Buscar serviço pelo nome..."
+                      className="w-full px-3 py-2 mb-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    />
+                    {buscaServico.trim() && (
+                      <div className="max-h-40 overflow-y-auto border rounded-lg p-2">
+                        {toArr(servicosData?.data?.data)
+                          .filter(s => s.ativo !== false && (s.nome || '').toLowerCase().includes(buscaServico.toLowerCase()))
+                          .slice(0, 30)
+                          .map((servico) => (
+                            <button
+                              key={servico.id}
+                              type="button"
+                              onClick={() => { addServico(servico); setBuscaServico(''); }}
+                              className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 rounded text-sm border-b last:border-b-0"
+                            >
+                              {servico.nome} - {formatCurrency(Number(servico.preco ?? 0))} - {servico.duracaoMinutos ?? servico.duracao_minutos ?? servico.duracao ?? 0}min
+                            </button>
+                          ))}
+                        {toArr(servicosData?.data?.data).filter(s => s.ativo !== false && (s.nome || '').toLowerCase().includes(buscaServico.toLowerCase())).length === 0 && (
+                          <p className="text-center py-2 text-sm text-gray-400 dark:text-gray-500">Nenhum serviço encontrado</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -20,11 +20,16 @@ class AtendimentoService {
   async listar(salaoId, filtros = {}) {
     try {
       let sql = `
-        SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome, s.nome as servico_nome
+        SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome, s.nome as servico_nome,
+               COALESCE(sv.total_servicos, 0) AS total_servicos,
+               COALESCE(pr.total_produtos, 0) AS total_produtos,
+               (COALESCE(sv.total_servicos,0) + COALESCE(pr.total_produtos,0) - COALESCE(a.desconto,0)) AS total_geral
         FROM atendimentos a
         LEFT JOIN clientes c ON c.id = a.cliente_id
         LEFT JOIN profissionais p ON p.id = a.profissional_id
         LEFT JOIN servicos s ON s.id = a.servico_id
+        LEFT JOIN (SELECT atendimento_id, SUM(subtotal) AS total_servicos FROM atendimentos_servicos GROUP BY atendimento_id) sv ON sv.atendimento_id = a.id
+        LEFT JOIN (SELECT atendimento_id, SUM(subtotal) AS total_produtos FROM atendimentos_produtos GROUP BY atendimento_id) pr ON pr.atendimento_id = a.id
         WHERE a.salao_id = $1
       `;
       const params = [salaoId];
@@ -61,11 +66,16 @@ class AtendimentoService {
   async buscarPorId(id, salaoId) {
     try {
       const data = await queryOne(`
-        SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome, s.nome as servico_nome
+        SELECT a.*, c.nome as cliente_nome, p.nome as profissional_nome, s.nome as servico_nome,
+               COALESCE(sv.total_servicos, 0) AS total_servicos,
+               COALESCE(pr.total_produtos, 0) AS total_produtos,
+               (COALESCE(sv.total_servicos,0) + COALESCE(pr.total_produtos,0) - COALESCE(a.desconto,0)) AS total_geral
         FROM atendimentos a
         LEFT JOIN clientes c ON c.id = a.cliente_id
         LEFT JOIN profissionais p ON p.id = a.profissional_id
         LEFT JOIN servicos s ON s.id = a.servico_id
+        LEFT JOIN (SELECT atendimento_id, SUM(subtotal) AS total_servicos FROM atendimentos_servicos GROUP BY atendimento_id) sv ON sv.atendimento_id = a.id
+        LEFT JOIN (SELECT atendimento_id, SUM(subtotal) AS total_produtos FROM atendimentos_produtos GROUP BY atendimento_id) pr ON pr.atendimento_id = a.id
         WHERE a.id = $1 AND a.salao_id = $2
       `, [id, salaoId]);
 
@@ -103,10 +113,12 @@ class AtendimentoService {
       }
 
       const result = await queryOne(`
-        INSERT INTO atendimentos (cliente_id, profissional_id, servico_id, agendamento_id, valor, status, observacoes, salao_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
+        INSERT INTO atendimentos (cliente_id, profissional_id, servico_id, agendamento_id, valor, status, observacoes, salao_id,
+                                  data_atendimento, hora_inicio, hora_fim, desconto)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, COALESCE($9::date, CURRENT_DATE), $10, $11, COALESCE($12, 0)) RETURNING *
       `, [data.cliente_id, data.profissional_id, data.servico_id, data.agendamento_id || null,
-          valorAutoritativo, data.status || 'em_andamento', data.observacoes || null, salaoId]);
+          valorAutoritativo, data.status || 'em_andamento', data.observacoes || null, salaoId,
+          data.data_atendimento || null, data.hora_inicio || null, data.hora_fim || null, data.desconto || 0]);
       return { success: true, data: result };
     } catch (error) {
       return { success: false, error: error.message };
@@ -154,9 +166,15 @@ class AtendimentoService {
         UPDATE atendimentos SET
           status = COALESCE($1, status),
           observacoes = COALESCE($2, observacoes),
+          data_atendimento = COALESCE($5::date, data_atendimento),
+          hora_inicio = COALESCE($6::time, hora_inicio),
+          hora_fim = COALESCE($7::time, hora_fim),
+          desconto = COALESCE($8, desconto),
           updated_at = CURRENT_TIMESTAMP
         WHERE id = $3 AND salao_id = $4 RETURNING *
-      `, [data.status, data.observacoes, id, salaoId]);
+      `, [data.status, data.observacoes, id, salaoId,
+          data.data_atendimento || null, data.hora_inicio || null, data.hora_fim || null,
+          data.desconto != null ? data.desconto : null]);
 
       // [P8-A2] Audit log se status mudou
       if (data.status && data.status !== existing.status) {

@@ -238,11 +238,11 @@ async function _converterUmAgendamento(client, id, salaoId) {
   if ((a.status || '').toLowerCase() === 'cancelado') {
     return { ok: false, code: 400, body: { success: false, error: 'Agendamento cancelado não pode ser convertido', agendamento_id: id } };
   }
-  // Cria atendimento em em_andamento com a data do agendamento (não hoje).
+  // Cria atendimento em em_andamento com a data E hora do agendamento (não hoje).
   const ins = await client.query(
     `INSERT INTO atendimentos (salao_id, agendamento_id, cliente_id, profissional_id, servico_id,
-                                data_atendimento, status, valor)
-     VALUES ($1, $2, $3, $4, $5, $6::date, 'em_andamento', $7)
+                                data_atendimento, hora_inicio, status, valor)
+     VALUES ($1, $2, $3, $4, $5, $6::date, $6::time, 'em_andamento', $7)
      RETURNING id`,
     [salaoId, id, a.cliente_id, a.profissional_id, a.servico_id, a.data_hora, a.valor || 0]
   );

@@ -656,6 +656,11 @@ async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_atend_produtos_atend ON atendimentos_produtos(atendimento_id);
     CREATE INDEX IF NOT EXISTS idx_atend_produtos_salao ON atendimentos_produtos(salao_id);
 
+    -- Atendimento: hora de início/fim (TIME) e desconto. data_atendimento já existe.
+    ALTER TABLE atendimentos ADD COLUMN IF NOT EXISTS hora_inicio TIME;
+    ALTER TABLE atendimentos ADD COLUMN IF NOT EXISTS hora_fim TIME;
+    ALTER TABLE atendimentos ADD COLUMN IF NOT EXISTS desconto DECIMAL(10,2) DEFAULT 0;
+
     -- Audit log: usa a tabela audit_log singular que ja existe (schema com hash chain).
     -- utils/auditLog.js insere em audit_log. Removida criacao duplicada de audit_logs.
     CREATE INDEX IF NOT EXISTS idx_audit_log_salao_created
