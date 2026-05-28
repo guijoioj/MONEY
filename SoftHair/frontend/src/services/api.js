@@ -98,7 +98,9 @@ export const produtosAPI = {
   create: (data) => api.post('/produtos', data),
   update: (id, data) => api.put(`/produtos/${id}`, data),
   delete: (id) => api.delete(`/produtos/${id}`),
-  updateEstoque: (id, quantidade) => api.patch(`/produtos/${id}/estoque`, { quantidade }),
+  // Define estoque absoluto (admin) ou aplica delta (recepção pode -100..+100 com motivo).
+  updateEstoque: (id, quantidade) => api.patch(`/produtos/${id}/estoque`, { absoluto: quantidade }),
+  ajustarEstoque: (id, delta, motivo) => api.patch(`/produtos/${id}/estoque`, { delta, motivo }),
   getCategorias: () => api.get('/produtos/categorias'),
   getEstoqueBaixo: () => api.get('/produtos/estoque-baixo'),
 };

@@ -7,8 +7,9 @@ const { VendaService } = require('../services');
 
 const service = new VendaService();
 
-// Vendas: admin + recepção. Profissional não vê vendas (sem necessidade operacional).
-// DELETE permanece admin-only via requireAdmin individual.
+// Vendas: admin + recepção. Profissional não vê vendas.
+// DELETE: admin OU recepção COM motivo obrigatório (>=3 chars) + audit_log strict.
+// PUT status=cancelada: mesma regra (recepção precisa motivo + audit log).
 router.use(authMiddleware, requireAnyRole(['admin', 'recepcao']));
 
 // Listar vendas — agora aceita clienteId / cliente_id e profissionalId / profissional_id.

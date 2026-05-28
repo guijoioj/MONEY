@@ -79,7 +79,22 @@ router.get('/estoque-baixo', authMiddleware, async (req, res) => {
   }
 });
 
-// Buscar por ID
+// Lista distintas categorias usadas (pra dropdowns). DEVE ficar antes de /:id.
+router.get('/categorias', authMiddleware, async (req, res) => {
+  try {
+    const { query } = require('../config/database');
+    const r = await query(
+      `SELECT DISTINCT categoria FROM produtos
+        WHERE salao_id = $1 AND categoria IS NOT NULL AND TRIM(categoria) <> ''
+        ORDER BY categoria`,
+      [req.salaoId]
+    );
+    res.json({ success: true, data: (r.rows || r).map((row) => row.categoria) });
+  } catch (error) {
+    require("../utils/sendError").sendError(res, 500, "Erro interno", error);
+  }
+});
+
 // Buscar por ID — projection por role.
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
@@ -96,8 +111,10 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// PATCH /:id/estoque — recepção ajusta quantidade durante a venda.
-// Aceita delta (+/-) ou valor absoluto. Não toca preço/custo.
+// PATCH /:id/estoque — ajuste de estoque por role.
+//   Admin: pode usar `absoluto` (zerar/definir estoque) OU `delta` qualquer.
+//   Recepção: SOMENTE `delta` entre -100 e +100, MOTIVO obrigatório (mín 3 chars).
+//   Ambos: audit log strict — UPDATE + INSERT em audit_log na mesma transação.
 router.patch('/:id/estoque', authMiddleware, [
   body('delta').optional().isInt({ min: -100000, max: 100000 }),
   body('absoluto').optional().isInt({ min: 0, max: 1000000 }),
@@ -107,8 +124,21 @@ router.patch('/:id/estoque', authMiddleware, [
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
     const { delta, absoluto, motivo } = req.body;
+    const role = req.user?.tipo;
     if (delta == null && absoluto == null) {
       return res.status(400).json({ success: false, error: 'Envie delta ou absoluto' });
+    }
+    // Limites operacionais para recepção
+    if (role === 'recepcao') {
+      if (absoluto != null) {
+        return res.status(403).json({ success: false, error: 'Recepção não pode definir estoque absoluto. Use delta.' });
+      }
+      if (typeof delta !== 'number' || delta < -100 || delta > 100) {
+        return res.status(400).json({ success: false, error: 'Recepção só pode ajustar delta entre -100 e +100.' });
+      }
+      if (!motivo || motivo.trim().length < 3) {
+        return res.status(400).json({ success: false, error: 'Motivo obrigatório (mín 3 chars) para ajuste de estoque.' });
+      }
     }
     const { queryOne, withTransaction } = require('../config/database');
 
