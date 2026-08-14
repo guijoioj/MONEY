@@ -11,8 +11,6 @@ O **SoftHair** é uma aplicação completa (SaaS) desenvolvida para digitalizar 
 
 O objetivo arquitetural do projeto foi criar uma solução de alta disponibilidade na nuvem que resolvesse um problema real de logística de atendimento, substituindo o controle manual por um sistema relacional robusto.
 
-> **[COLOQUE AQUI UM PRINT DA TELA INICIAL OU DO CALENDÁRIO DO SISTEMA]**
-
 ## 🚀 Principais Funcionalidades
 * **Agendamento Inteligente:** Controle de horários para evitar conflitos na agenda das profissionais.
 * **Gestão de Clientes:** Cadastro e acompanhamento do histórico de serviços realizados.
